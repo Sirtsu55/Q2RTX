@@ -1576,6 +1576,7 @@ static const cmdreg_t c_server[] = {
     { "addfiltercmd", SV_AddFilterCmd_f, SV_AddFilterCmd_c },
     { "delfiltercmd", SV_DelFilterCmd_f, SV_DelFilterCmd_c },
     { "listfiltercmds", SV_ListFilterCmds_f },
+    { "autosave", SV_AutoSave_f },
 #if USE_MVD_CLIENT || USE_MVD_SERVER
     { "mvdrecord", SV_Record_f, SV_Record_c },
     { "mvdstop", SV_Stop_f },

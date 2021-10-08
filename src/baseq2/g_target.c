@@ -497,6 +497,12 @@ void target_laser_think(edict_t *self)
     else
         count = 4;
 
+    // Paril - origin follow
+    if (self->oldenemy) {
+        VectorMA(self->oldenemy->absmin, 0.5, self->oldenemy->size, self->s.origin);
+        gi.linkentity(self);
+    }
+
     if (self->enemy) {
         VectorCopy(self->movedir, last_movedir);
         VectorMA(self->enemy->absmin, 0.5, self->enemy->size, point);
@@ -578,13 +584,20 @@ void target_laser_start(edict_t *self)
     self->s.modelindex = 1;         // must be non-zero
 
     // set the beam diameter
-    if (self->spawnflags & 64)
+    // Paril: multi-size fatness
+    if (self->health) {
+        self->s.frame = self->health;
+    }
+    else if (self->spawnflags & 64)
         self->s.frame = 16;
     else
         self->s.frame = 4;
 
     // set the color
-    if (self->spawnflags & 2)
+    // Paril: custom color
+    if (self->count || self->style)
+        self->s.skinnum = self->count | (self->style << 16);
+    else if (self->spawnflags & 2)
         self->s.skinnum = 0xf2f2f0f0;
     else if (self->spawnflags & 4)
         self->s.skinnum = 0xd0d1d2d3;
@@ -594,6 +607,15 @@ void target_laser_start(edict_t *self)
         self->s.skinnum = 0xdcdddedf;
     else if (self->spawnflags & 32)
         self->s.skinnum = 0xe0e1e2e3;
+
+    // Paril - origin follow
+    if (self->combattarget) {
+        self->oldenemy = G_Find(NULL, FOFS(targetname), self->combattarget);
+
+        if (self->oldenemy) {
+            VectorMA(self->oldenemy->absmin, 0.5, self->oldenemy->size, self->s.origin);
+        }
+    }
 
     if (!self->enemy) {
         if (self->target) {

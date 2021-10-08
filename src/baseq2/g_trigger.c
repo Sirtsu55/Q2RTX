@@ -175,6 +175,19 @@ This fixed size trigger cannot be touched, it can only be fired by other events.
 */
 void trigger_relay_use(edict_t *self, edict_t *other, edict_t *activator)
 {
+    // Paril - kill after X many "count"s
+    if (self->count) {
+        if (self->count < 0) {
+            return;
+        }
+
+        if (!--self->count) {
+            self->count = -1;
+            self->think = G_FreeEdict;
+            self->nextthink = level.time + FRAMETIME;
+        }
+    }
+
     G_UseTargets(self, activator);
 }
 

@@ -234,6 +234,25 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
             }
         }
     }
+
+    // Paril - entity animation
+    if (ent->anim.target) {
+        t = NULL;
+        while ((t = G_Find(t, FOFS(targetname), ent->anim.target))) {
+            if (t->anim.count && !t->anim.count_left) {
+                continue;
+            }
+
+            t->activator = activator;
+            t->anim.animating = !t->anim.animating;
+
+            if (t->anim.reset_on_trigger) {
+                t->s.frame = t->anim.start;
+            }
+
+            t->anim.next_frame++;
+        }
+    }
 }
 
 

@@ -949,7 +949,6 @@ struct gclient_s {
     qboolean    update_chase;       // need to update chase info?
 };
 
-
 struct edict_s {
     entity_state_t  s;
     struct gclient_s    *client;    // NULL if not a player
@@ -1096,5 +1095,23 @@ struct edict_s {
     // common data blocks
     moveinfo_t      moveinfo;
     monsterinfo_t   monsterinfo;
+
+    // Paril - animated entity stuff
+    struct {
+        // entity keys
+        int start, end;
+        int frame_delay;
+        qboolean animating, reset_on_trigger;
+        char *target, *finished_target;
+        int count;
+
+        // state only
+        qboolean is_active;
+        int next_frame;
+        int count_left;
+    } anim;
 };
 
+// Paril - animated entity stuff
+#define SPAWNFLAG_USE_ANIMATION (1 << 23)
+void G_InitAnimation(edict_t *ent);

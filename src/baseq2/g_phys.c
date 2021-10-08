@@ -895,6 +895,51 @@ void SV_Physics_Step(edict_t *ent)
     SV_RunThink(ent);
 }
 
+// Paril - generic entity animation
+static void G_RunAnimation(edict_t *ent)
+{
+    if (!ent->anim.animating)
+        return;
+
+    // time to move to next frame
+    if (!ent->anim.next_frame) {
+        if (ent->s.frame + 1 > ent->anim.end) {
+            ent->s.frame = ent->anim.start;
+
+            if (ent->anim.count) {
+                if (!--ent->anim.count_left) {
+                    ent->anim.animating = qfalse;
+                    char *old_target = ent->target;
+                    ent->target = ent->anim.finished_target;
+                    G_UseTargets(ent, ent->activator);
+                    ent->target = old_target;
+                    return;
+                }
+            } else {
+                char *old_target = ent->target;
+                ent->target = ent->anim.finished_target;
+                G_UseTargets(ent, ent->activator);
+                ent->target = old_target;
+            }
+        }
+        else
+            ent->s.frame++;
+
+        ent->anim.next_frame = ent->anim.frame_delay;
+    } else {
+        ent->anim.next_frame--;
+    }
+}
+
+// Paril - call to "enable" animations on entity
+void G_InitAnimation(edict_t *ent)
+{
+    ent->anim.is_active = qtrue;
+    ent->s.frame = ent->anim.start;
+    ent->anim.next_frame = ent->anim.frame_delay;
+    ent->anim.count_left = ent->anim.count;
+}
+
 //============================================================================
 /*
 ================
@@ -929,5 +974,10 @@ void G_RunEntity(edict_t *ent)
         break;
     default:
         gi.error("SV_Physics: bad movetype %i", (int)ent->movetype);
+    }
+
+    // Paril - generic entity animation
+    if (ent->anim.is_active) {
+        G_RunAnimation(ent);
     }
 }

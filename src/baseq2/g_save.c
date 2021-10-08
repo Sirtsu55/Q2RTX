@@ -242,6 +242,18 @@ static const save_field_t entityfields[] = {
     I(monsterinfo.power_armor_type),
     I(monsterinfo.power_armor_power),
 
+    // Paril - entity animation stuff
+    S(anim.target),
+    I(anim.start),
+    I(anim.end),
+    I(anim.frame_delay),
+    I(anim.animating),
+    I(anim.reset_on_trigger),
+    I(anim.is_active),
+    I(anim.next_frame),
+    I(anim.count),
+    I(anim.count_left),
+
     {0}
 #undef _OFS
 };

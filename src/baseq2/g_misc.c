@@ -1791,3 +1791,13 @@ void SP_misc_teleporter_dest(edict_t *ent)
     gi.linkentity(ent);
 }
 
+
+// Paril
+void SP_model_spawn(edict_t *ent)
+{
+    gi.setmodel(ent, ent->model);
+
+    ent->movetype = MOVETYPE_NOCLIP;
+
+    gi.linkentity(ent);
+}
