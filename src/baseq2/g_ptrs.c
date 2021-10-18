@@ -616,6 +616,9 @@ extern void door_secret_move5(void);
 extern void door_secret_done(void);
 extern void flare_think(void); // Q2RTX
 extern void flare_touch(void); // Q2RTX
+
+extern void trigger_push_use(void);
+extern void target_gravity_use(void);
 const save_ptr_t save_ptrs[] = {
 { P_blocked, door_blocked },
 { P_blocked, door_secret_blocked },
@@ -1233,5 +1236,9 @@ const save_ptr_t save_ptrs[] = {
 { P_moveinfo_endfunc, door_secret_move3 },
 { P_moveinfo_endfunc, door_secret_move5 },
 { P_moveinfo_endfunc, door_secret_done },
+
+// Paril
+{ P_use, trigger_push_use },
+{ P_use, target_gravity_use }
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);

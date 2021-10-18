@@ -1114,6 +1114,9 @@ struct edict_s {
         int next_frame;
         int count_left;
     } anim;
+
+    // Paril: switchable light style
+    char        *style2;
 };
 
 // Paril - animated entity stuff

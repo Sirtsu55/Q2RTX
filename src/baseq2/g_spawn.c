@@ -332,6 +332,9 @@ static const spawn_field_t spawn_fields[] = {
     {"effects", FOFS(s.effects), F_INT},
     {"renderfx", FOFS(s.renderfx), F_INT},
 
+    // Paril: switchable light style support
+    {"style2", FOFS(style2), F_LSTRING},
+
     {NULL}
 };
 

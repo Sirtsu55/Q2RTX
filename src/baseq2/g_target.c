@@ -799,7 +799,7 @@ void SP_target_earthquake(edict_t *self)
 }
 
 // Paril: gravity change support
-static void target_gravity_use(edict_t *self, edict_t *other, edict_t *activator)
+void target_gravity_use(edict_t *self, edict_t *other, edict_t *activator)
 {
     level.gravity = self->dmg;
 }
