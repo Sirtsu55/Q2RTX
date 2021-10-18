@@ -1794,11 +1794,17 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	memset(wm->models, 0, bsp->nummodels * sizeof(bsp_model_t));
 
     wm->num_models = bsp->nummodels;
+
+	if (!bsp->vis)
+	{
+		Com_Error(ERR_DROP, "The BSP model is not vis'd");
+	}
+
 	wm->num_clusters = bsp->vis->numclusters;
 
 	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS)
 	{
-		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
+		Com_Error(ERR_DROP, "The BSP model has too many clusters (%d)", wm->num_clusters);
 	}
 
     wm->num_vertices = 0;
@@ -1878,7 +1884,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	compute_world_tangents(wm);
 	
     if (wm->num_vertices >= MAX_VERT_BSP) {
-		Com_Error(ERR_FATAL, "The BSP model has too many vertices (%d)", wm->num_vertices);
+		Com_Error(ERR_DROP, "The BSP model has too many vertices (%d)", wm->num_vertices);
 	}
 
 	for(int i = 0; i < wm->num_models; i++) 

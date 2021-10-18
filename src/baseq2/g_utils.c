@@ -27,6 +27,8 @@ void G_ProjectSource(const vec3_t point, const vec3_t distance, const vec3_t for
     result[2] = point[2] + forward[2] * distance[0] + right[2] * distance[1] + distance[2];
 }
 
+// Paril: multi-target support
+#define MULTI_TARGET_CHAR   ','
 
 /*
 =============
@@ -49,13 +51,25 @@ edict_t *G_Find(edict_t *from, int fieldofs, char *match)
     else
         from++;
 
+    // Paril: multi-target support
+    qboolean is_multi_target = !!strchr(match, MULTI_TARGET_CHAR);
+
     for (; from < &g_edicts[globals.num_edicts] ; from++) {
         if (!from->inuse)
             continue;
         s = *(char **)((byte *)from + fieldofs);
         if (!s)
             continue;
-        if (!Q_stricmp(s, match))
+        // Paril: multi-target support
+        if (is_multi_target)
+        {
+            for (const char *start = match, *end = strchr(match, MULTI_TARGET_CHAR); *start; start = (*end ? end + 1 : end), end = strchr(start, MULTI_TARGET_CHAR))
+            {
+                if (!Q_strncasecmp(s, start, end - start))
+                    return from;
+            }
+        }
+        else if (!Q_stricmp(s, match))
             return from;
     }
 
@@ -182,6 +196,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
         t->message = ent->message;
         t->target = ent->target;
         t->killtarget = ent->killtarget;
+        t->anim.target = ent->anim.target;
         return;
     }
 
