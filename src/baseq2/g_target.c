@@ -797,3 +797,19 @@ void SP_target_earthquake(edict_t *self)
 
     self->noise_index = gi.soundindex("world/quake.wav");
 }
+
+// Paril: gravity change support
+static void target_gravity_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+    level.gravity = self->dmg;
+}
+
+void SP_target_gravity(edict_t *self)
+{
+    if (!st.gravity || !*st.gravity)
+        self->dmg = 800;
+    else
+        self->dmg = atof(st.gravity);
+
+    self->use = target_gravity_use;
+}

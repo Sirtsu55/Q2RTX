@@ -82,7 +82,6 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo);
 void ClientDisconnect(edict_t *ent);
 void ClientBegin(edict_t *ent);
 void ClientCommand(edict_t *ent);
-void RunEntity(edict_t *ent);
 void WriteGame(const char *filename, qboolean autosave);
 void ReadGame(const char *filename);
 void WriteLevel(const char *filename);
@@ -124,6 +123,7 @@ void InitGame(void)
     sv_rollangle = gi.cvar("sv_rollangle", "2", 0);
     sv_maxvelocity = gi.cvar("sv_maxvelocity", "2000", 0);
     sv_gravity = gi.cvar("sv_gravity", "800", 0);
+    sv_gravity->modified = qfalse;
 
     // noset vars
     dedicated = gi.cvar("dedicated", "0", CVAR_NOSET);
@@ -487,6 +487,16 @@ void G_RunFrame(void)
     if (level.exitintermission) {
         ExitLevel();
         return;
+    }
+
+    // Paril: gravity change support.
+    // this is just so you can change it via console still
+    // for shenanigans. sv_gravity should be 800 at all
+    // times normally though.
+    if (sv_gravity->modified)
+    {
+        sv_gravity->modified = qfalse;
+        level.gravity = sv_gravity->value;
     }
 
     //

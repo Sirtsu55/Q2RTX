@@ -63,7 +63,7 @@ edict_t *G_Find(edict_t *from, int fieldofs, char *match)
         // Paril: multi-target support
         if (is_multi_target)
         {
-            for (const char *start = match, *end = strchr(match, MULTI_TARGET_CHAR); *start; start = (*end ? end + 1 : end), end = strchr(start, MULTI_TARGET_CHAR))
+            for (const char *start = match, *end = strchr(match, MULTI_TARGET_CHAR); start && *start && end; start = ((end && *end) ? end + 1 : end), end = start ? strchr(start, MULTI_TARGET_CHAR) : NULL)
             {
                 if (!Q_strncasecmp(s, start, end - start))
                     return from;

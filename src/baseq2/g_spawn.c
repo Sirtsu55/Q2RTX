@@ -88,6 +88,9 @@ void SP_target_earthquake(edict_t *ent);
 void SP_target_character(edict_t *ent);
 void SP_target_string(edict_t *ent);
 
+// Paril: gravity change support
+void SP_target_gravity(edict_t *ent);
+
 void SP_worldspawn(edict_t *ent);
 void SP_viewthing(edict_t *ent);
 
@@ -208,6 +211,9 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_earthquake", SP_target_earthquake},
     {"target_character", SP_target_character},
     {"target_string", SP_target_string},
+
+    // Paril: gravity change support
+    {"target_gravity", SP_target_gravity},
 
     {"worldspawn", SP_worldspawn},
     {"viewthing", SP_viewthing},
@@ -925,6 +931,10 @@ void SP_worldspawn(edict_t *ent)
         gi.cvar_set("sv_gravity", "800");
     else
         gi.cvar_set("sv_gravity", st.gravity);
+
+    // Level gravity change support
+    sv_gravity->modified = qfalse;
+    level.gravity = sv_gravity->value;
 
     snd_fry = gi.soundindex("player/fry.wav");  // standing in lava / slime
 

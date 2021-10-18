@@ -297,6 +297,8 @@ static const save_field_t levelfields[] = {
 
     I(power_cubes),
 
+    F(gravity),
+
     {0}
 #undef _OFS
 };

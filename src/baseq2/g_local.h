@@ -333,6 +333,10 @@ typedef struct {
     int         body_que;           // dead bodies
 
     int         power_cubes;        // ugly necessity for coop
+
+    // Paril: level gravity change support.
+    // we have to do this here for save/load support.
+    float       gravity;
 } level_locals_t;
 
 

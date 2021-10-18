@@ -1572,7 +1572,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         else
             client->ps.pmove.pm_type = PM_NORMAL;
 
-        client->ps.pmove.gravity = sv_gravity->value;
+        client->ps.pmove.gravity = level.gravity;
         pm.s = client->ps.pmove;
 
         for (i = 0 ; i < 3 ; i++) {
