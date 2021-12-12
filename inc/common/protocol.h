@@ -42,7 +42,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335
 #define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364
 #define PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN      1017    // r1037-8
-#define PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES     1018    // r1037-44
 #define PROTOCOL_VERSION_Q2PRO_SERVER_STATE     1019    // r1302
 #define PROTOCOL_VERSION_Q2PRO_EXTENDED_LAYOUT  1020    // r1354
 #define PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS   1021    // r1358
@@ -243,25 +242,24 @@ typedef enum {
 #define U_ANGLE1    (1<<10)
 #define U_MODEL     (1<<11)
 #define U_RENDERFX8 (1<<12)        // fullbright, etc
-#define U_ANGLE16   (1<<13)
-#define U_EFFECTS8  (1<<14)        // autorotate, trails, etc
+#define U_EFFECTS8  (1<<13)        // autorotate, trails, etc
+#define U_SKIN8     (1<<14)
 #define U_MOREBITS2 (1<<15)        // read one additional byte
 
 // third byte
-#define U_SKIN8         (1<<16)
-#define U_FRAME16       (1<<17)     // frame is a short
-#define U_RENDERFX16    (1<<18)     // 8 + 16 = 32
-#define U_EFFECTS16     (1<<19)     // 8 + 16 = 32
-#define U_MODEL2        (1<<20)     // weapons, flags, etc
-#define U_MODEL3        (1<<21)
-#define U_MODEL4        (1<<22)
+#define U_FRAME16       (1<<16)     // frame is a short
+#define U_RENDERFX16    (1<<17)     // 8 + 16 = 32
+#define U_EFFECTS16     (1<<18)     // 8 + 16 = 32
+#define U_MODEL2        (1<<19)     // weapons, flags, etc
+#define U_MODEL3        (1<<20)
+#define U_MODEL4        (1<<21)
+#define U_OLDORIGIN     (1<<22)     // FIXME: get rid of this
 #define U_MOREBITS3     (1<<23)     // read one additional byte
 
 // fourth byte
-#define U_OLDORIGIN     (1<<24)     // FIXME: get rid of this
-#define U_SKIN16        (1<<25)
-#define U_SOUND         (1<<26)
-#define U_SOLID         (1<<27)
+#define U_SKIN16        (1<<24)
+#define U_SOUND         (1<<25)
+#define U_SOLID         (1<<26)
 
 // ==============================================================
 

@@ -165,13 +165,6 @@ typedef struct {
 
 #define MAX_TOTAL_ENT_LEAFS        128
 
-// hack for smooth BSP model rotation
-#define Q2PRO_SHORTANGLES(c, e) \
-    ((c)->protocol == PROTOCOL_VERSION_Q2PRO && \
-     (c)->version >= PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES && \
-     sv.state == ss_game && \
-     EDICT_POOL(e)->solid == SOLID_BSP)
-
 typedef enum {
     cs_free,        // can be reused for a new connection
     cs_zombie,      // client has been disconnected, but don't reuse

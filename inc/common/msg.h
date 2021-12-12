@@ -75,8 +75,7 @@ typedef enum {
     MSG_ES_LONGSOLID    = (1 << 3),
     MSG_ES_UMASK        = (1 << 4),
     MSG_ES_BEAMORIGIN   = (1 << 5),
-    MSG_ES_SHORTANGLES  = (1 << 6),
-    MSG_ES_REMOVE       = (1 << 7)
+    MSG_ES_REMOVE       = (1 << 6)
 } msgEsFlags_t;
 
 extern sizebuf_t    msg_write;
@@ -105,7 +104,7 @@ int     MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd, int v
 int     MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from, const usercmd_t *cmd, int version);
 #endif
 void    MSG_WriteDir(const vec3_t vector);
-void    MSG_PackEntity(entity_packed_t *out, const entity_state_t *in, bool short_angles);
+void    MSG_PackEntity(entity_packed_t *out, const entity_state_t *in);
 void    MSG_WriteDeltaEntity(const entity_packed_t *from, const entity_packed_t *to, msgEsFlags_t flags);
 void    MSG_PackPlayer(player_packed_t *out, const player_state_t *in);
 void    MSG_WriteDeltaPlayerstate_Default(const player_packed_t *from, const player_packed_t *to);

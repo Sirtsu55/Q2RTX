@@ -1603,7 +1603,7 @@ void SV_ErrorEvent(netadr_t *from, int ee_errno, int ee_info)
 SV_CheckTimeouts
 
 If a packet has not been received from a client for timeout->value
-seconds, drop the conneciton.
+seconds, drop the connection.
 
 When a client is normally dropped, the client_t goes into a zombie state
 for a few seconds to make sure any final reliable message gets resent
