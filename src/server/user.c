@@ -323,7 +323,6 @@ void SV_New_f(void)
         break;
     case PROTOCOL_VERSION_Q2PRO:
         MSG_WriteShort(sv_client->version);
-        MSG_WriteByte(sv.state);
         MSG_WriteByte(sv_client->pmp.strafehack);
         MSG_WriteByte(sv_client->pmp.qwmode);
         if (sv_client->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {

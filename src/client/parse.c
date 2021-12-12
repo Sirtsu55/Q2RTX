@@ -542,9 +542,6 @@ static void CL_ParseServerData(void)
     cl.framediv = 1;
 #endif
 
-    // setup default server state
-    cl.serverstate = ss_game;
-
     if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2) {
         i = MSG_ReadByte();
         if (i) {
@@ -583,11 +580,6 @@ static void CL_ParseServerData(void)
         }
         Com_DPrintf("Using minor Q2PRO protocol version %d\n", i);
         cls.protocolVersion = i;
-        i = MSG_ReadByte();
-        if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_SERVER_STATE) {
-            Com_DPrintf("Q2PRO server state %d\n", i);
-            cl.serverstate = i;
-        }
         i = MSG_ReadByte();
         if (i) {
             Com_DPrintf("Q2PRO strafejump hack enabled\n");
