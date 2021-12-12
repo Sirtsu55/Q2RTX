@@ -1391,7 +1391,6 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
 {
     centity_t   *ent;
     mmodel_t    *cm;
-    vec3_t      mid;
 
     if (entnum < 0 || entnum >= MAX_EDICTS) {
         Com_Error(ERR_DROP, "%s: bad entnum: %d", __func__, entnum);
@@ -1404,16 +1403,40 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
     }
 
     // interpolate origin
-    // FIXME: what should be the sound origin point for RF_BEAM entities?
     ent = &cl_entities[entnum];
+
     LerpVector(ent->prev.origin, ent->current.origin, cl.lerpfrac, org);
 
-    // offset the origin for BSP models
-    if (ent->current.solid == PACKED_BSP) {
-        cm = cl.model_clip[ent->current.modelindex];
-        if (cm) {
-            VectorAvg(cm->mins, cm->maxs, mid);
-            VectorAdd(org, mid, org);
+    if (ent->current.renderfx & RF_BEAM) {
+        // beam entities use closest point on line
+        vec3_t vec, oldOrg, p;
+
+        LerpVector(ent->prev.old_origin, ent->current.old_origin, cl.lerpfrac, oldOrg);
+
+        VectorSubtract(oldOrg, org, vec);
+
+        VectorSubtract(cl.playerEntityOrigin, org, p);
+    
+        float t = DotProduct(p, vec) / DotProduct(vec, vec);
+
+        clamp(t, 0.f, 1.f);
+
+        VectorMA(org, t, vec, org);
+    } else {
+
+        // calculate origin for BSP models to be closest point
+        // from listener to the bmodel's aabb
+        if (ent->current.solid == PACKED_BSP) {
+            cm = cl.model_clip[ent->current.modelindex];
+            if (cm) {
+                vec3_t absmin, absmax;
+                VectorAdd(org, cm->mins, absmin);
+                VectorAdd(org, cm->maxs, absmax);
+
+                for (int i = 0; i < 3; i++) {
+                    org[i] = (cl.playerEntityOrigin[i] < absmin[i]) ? absmin[i] : (cl.playerEntityOrigin[i] > absmax[i]) ? absmax[i] : cl.playerEntityOrigin[i];
+                }
+            }
         }
     }
 }

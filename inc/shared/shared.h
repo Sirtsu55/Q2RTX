@@ -1468,7 +1468,7 @@ typedef struct entity_state_s {
 
     vec3_t  origin;
     vec3_t  angles;
-    vec3_t  old_origin;     // for lerping
+    vec3_t  old_origin;     // for lerping. for RF_BEAM, termination point.
     int     modelindex;
     int     modelindex2, modelindex3, modelindex4;  // weapons, CTF flags, etc
     int     frame;
