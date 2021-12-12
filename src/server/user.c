@@ -76,10 +76,6 @@ static void SV_CreateBaselines(void)
 
         base = *chunk + (i & SV_BASELINES_MASK);
         MSG_PackEntity(base, &ent->s);
-
-        if (sv_client->esFlags & MSG_ES_LONGSOLID) {
-            base->solid = sv.entities[i].solid32;
-        }
     }
 }
 
@@ -325,9 +321,7 @@ void SV_New_f(void)
         MSG_WriteShort(sv_client->version);
         MSG_WriteByte(sv_client->pmp.strafehack);
         MSG_WriteByte(sv_client->pmp.qwmode);
-        if (sv_client->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
-            MSG_WriteByte(sv_client->pmp.waterhack);
-        }
+        MSG_WriteByte(sv_client->pmp.waterhack);
         break;
     }
 

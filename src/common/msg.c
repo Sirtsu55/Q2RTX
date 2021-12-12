@@ -713,12 +713,8 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
         MSG_WriteByte(to->sound);
     if (bits & U_EVENT)
         MSG_WriteByte(to->event);
-    if (bits & U_SOLID) {
-        if (flags & MSG_ES_LONGSOLID)
-            MSG_WriteLong(to->solid);
-        else
-            MSG_WriteShort(to->solid);
-    }
+    if (bits & U_SOLID)
+        MSG_WriteLong(to->solid);
 }
 
 static inline int OFFSET2CHAR(float x)
@@ -1708,11 +1704,7 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
     }
 
     if (bits & U_SOLID) {
-        if (flags & MSG_ES_LONGSOLID) {
-            to->solid = MSG_ReadLong();
-        } else {
-            to->solid = MSG_ReadWord();
-        }
+        to->solid = MSG_ReadLong();
     }
 }
 

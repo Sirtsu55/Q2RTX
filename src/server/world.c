@@ -264,19 +264,16 @@ void PF_LinkEdict(edict_t *ent)
     case SOLID_BBOX:
         if ((ent->svflags & SVF_DEADMONSTER) || VectorCompare(ent->mins, ent->maxs)) {
             ent->s.solid = 0;
-            sent->solid32 = 0;
         } else {
-            ent->s.solid = MSG_PackSolid16(ent->mins, ent->maxs);
-            sent->solid32 = MSG_PackSolid32(ent->mins, ent->maxs);
+            ent->s.solid = MSG_PackSolid32(ent->mins, ent->maxs);
         }
         break;
     case SOLID_BSP:
-        ent->s.solid = PACKED_BSP;      // a SOLID_BBOX will never create this value
-        sent->solid32 = PACKED_BSP;     // FIXME: use 255?
+        ent->s.solid = PACKED_BSP;  // a SOLID_BBOX will never create this value
+                                    // FIXME: use 255?
         break;
     default:
         ent->s.solid = 0;
-        sent->solid32 = 0;
         break;
     }
 

@@ -99,8 +99,6 @@ typedef struct {
 } client_frame_t;
 
 typedef struct {
-    int         solid32;
-
 #if USE_FPS
 
 // must be > MAX_FRAMEDIV
@@ -115,6 +113,7 @@ typedef struct {
     vec3_t      create_origin;
     int         create_framenum;
 #endif
+    bool dummy; // just to keep this struct alive, since I want to use it later
 } server_entity_t;
 
 // variable server FPS

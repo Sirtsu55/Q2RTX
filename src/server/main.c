@@ -783,9 +783,6 @@ static bool parse_enhanced_params(conn_params_t *p)
             clamp(p->version,
                   PROTOCOL_VERSION_Q2PRO_MINIMUM,
                   PROTOCOL_VERSION_Q2PRO_CURRENT);
-            if (p->version == PROTOCOL_VERSION_Q2PRO_RESERVED) {
-                p->version--; // never use this version
-            }
         } else {
             p->version = PROTOCOL_VERSION_Q2PRO_MINIMUM;
         }
@@ -969,13 +966,6 @@ static void init_pmove_and_es_flags(client_t *newcl)
     }
     newcl->pmp.strafehack = sv_strafejump_hack->integer >= force;
 
-    // r1q2 extensions
-    if (newcl->protocol == PROTOCOL_VERSION_R1Q2) {
-        if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
-            newcl->esFlags |= MSG_ES_LONGSOLID;
-        }
-    }
-
     // q2pro extensions
     force = 2;
     if (newcl->protocol == PROTOCOL_VERSION_Q2PRO) {
@@ -985,12 +975,7 @@ static void init_pmove_and_es_flags(client_t *newcl)
         newcl->pmp.flyhack = true;
         newcl->pmp.flyfriction = 4;
         newcl->esFlags |= MSG_ES_UMASK;
-        if (newcl->version >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
-            newcl->esFlags |= MSG_ES_LONGSOLID;
-        }
-        if (newcl->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
-            force = 1;
-        }
+        force = 1;
     }
     newcl->pmp.waterhack = sv_waterjump_hack->integer >= force;
 }

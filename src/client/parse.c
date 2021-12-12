@@ -566,9 +566,6 @@ static void CL_ParseServerData(void)
             Com_DPrintf("R1Q2 strafejump hack enabled\n");
             cl.pmp.strafehack = true;
         }
-        if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
-            cl.esFlags |= MSG_ES_LONGSOLID;
-        }
         cl.pmp.speedmult = 2;
     } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
         i = MSG_ReadShort();
@@ -590,15 +587,10 @@ static void CL_ParseServerData(void)
             PmoveEnableQW(&cl.pmp);
         }
         cl.esFlags |= MSG_ES_UMASK;
-        if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
-            cl.esFlags |= MSG_ES_LONGSOLID;
-        }
-        if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
-            i = MSG_ReadByte();
-            if (i) {
-                Com_DPrintf("Q2PRO waterjump hack enabled\n");
-                cl.pmp.waterhack = true;
-            }
+        i = MSG_ReadByte();
+        if (i) {
+            Com_DPrintf("Q2PRO waterjump hack enabled\n");
+            cl.pmp.waterhack = true;
         }
         cl.pmp.speedmult = 2;
         cl.pmp.flyhack = true; // fly hack is unconditionally enabled
