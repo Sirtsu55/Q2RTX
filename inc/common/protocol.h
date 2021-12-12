@@ -37,7 +37,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define PROTOCOL_VERSION_Q2PRO_MINIMUM          1011    // r161
 #define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179
-#define PROTOCOL_VERSION_Q2PRO_CLIENTNUM_FIX    1013    // r226
 #define PROTOCOL_VERSION_Q2PRO_LONG_SOLID       1014    // r243
 #define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335
 #define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364
