@@ -267,20 +267,10 @@ static bool start_udp_download(dlqueue_t *q)
         cls.download.position = ret;
         // give the server an offset to start the download
         Com_DPrintf("[UDP] Resuming %s\n", q->path);
-#if USE_ZLIB
-        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
-            CL_ClientCommand(va("download \"%s\" %d udp-zlib", q->path, (int)ret));
-        else
-#endif
-            CL_ClientCommand(va("download \"%s\" %d", q->path, (int)ret));
+        CL_ClientCommand(va("download \"%s\" %d", q->path, (int)ret));
     } else if (ret == Q_ERR_NOENT) {  // it doesn't exist
         Com_DPrintf("[UDP] Downloading %s\n", q->path);
-#if USE_ZLIB
-        if (cls.serverProtocol == PROTOCOL_VERSION_R1Q2)
-            CL_ClientCommand(va("download \"%s\" %d udp-zlib", q->path, 0));
-        else
-#endif
-            CL_ClientCommand(va("download \"%s\"", q->path));
+        CL_ClientCommand(va("download \"%s\"", q->path));
     } else { // error happened
         Com_EPrintf("[UDP] Couldn't open %s for appending: %s\n",
                     cls.download.temp, Q_ErrorString(ret));

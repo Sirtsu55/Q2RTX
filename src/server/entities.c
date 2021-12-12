@@ -29,7 +29,7 @@ Encode a client frame onto the network channel
 
 // some protocol optimizations are disabled when recording a demo
 #define Q2PRO_OPTIMIZE(c) \
-    ((c)->protocol == PROTOCOL_VERSION_Q2PRO && !(c)->settings[CLS_RECORDING])
+    (!(c)->settings[CLS_RECORDING])
 
 /*
 =============
@@ -161,54 +161,10 @@ static client_frame_t *get_last_frame(client_t *client)
 
 /*
 ==================
-SV_WriteFrameToClient_Default
+SV_WriteFrameToClient
 ==================
 */
-void SV_WriteFrameToClient_Default(client_t *client)
-{
-    client_frame_t  *frame, *oldframe;
-    player_packed_t *oldstate;
-    int             lastframe;
-
-    // this is the frame we are creating
-    frame = &client->frames[client->framenum & UPDATE_MASK];
-
-    // this is the frame we are delta'ing from
-    oldframe = get_last_frame(client);
-    if (oldframe) {
-        oldstate = &oldframe->ps;
-        lastframe = client->lastframe;
-    } else {
-        oldstate = NULL;
-        lastframe = -1;
-    }
-
-    MSG_WriteByte(svc_frame);
-    MSG_WriteLong(client->framenum);
-    MSG_WriteLong(lastframe);   // what we are delta'ing from
-    MSG_WriteByte(client->suppress_count);  // rate dropped packets
-    client->suppress_count = 0;
-    client->frameflags = 0;
-
-    // send over the areabits
-    MSG_WriteByte(frame->areabytes);
-    MSG_WriteData(frame->areabits, frame->areabytes);
-
-    // delta encode the playerstate
-    MSG_WriteByte(svc_playerinfo);
-    MSG_WriteDeltaPlayerstate_Default(oldstate, &frame->ps);
-
-    // delta encode the entities
-    MSG_WriteByte(svc_packetentities);
-    SV_EmitPacketEntities(client, oldframe, frame, 0);
-}
-
-/*
-==================
-SV_WriteFrameToClient_Enhanced
-==================
-*/
-void SV_WriteFrameToClient_Enhanced(client_t *client)
+void SV_WriteFrameToClient(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
     player_packed_t *oldstate;
@@ -266,28 +222,23 @@ void SV_WriteFrameToClient_Enhanced(client_t *client)
     }
 
     clientEntityNum = 0;
-    if (client->protocol == PROTOCOL_VERSION_Q2PRO) {
-        if (frame->ps.pmove.pm_type < PM_DEAD && !client->settings[CLS_RECORDING]) {
-            clientEntityNum = frame->clientNum + 1;
-        }
-        if (client->settings[CLS_NOPREDICT]) {
-            psFlags |= MSG_PS_IGNORE_PREDICTION;
-        }
-        suppressed = client->frameflags;
-    } else {
-        suppressed = client->suppress_count;
+
+    if (frame->ps.pmove.pm_type < PM_DEAD && !client->settings[CLS_RECORDING]) {
+        clientEntityNum = frame->clientNum + 1;
     }
+    if (client->settings[CLS_NOPREDICT]) {
+        psFlags |= MSG_PS_IGNORE_PREDICTION;
+    }
+    suppressed = client->frameflags;
 
     // delta encode the playerstate
-    extraflags = MSG_WriteDeltaPlayerstate_Enhanced(oldstate, &frame->ps, psFlags);
+    extraflags = MSG_WriteDeltaPlayerstate(oldstate, &frame->ps, psFlags);
 
-    if (client->protocol == PROTOCOL_VERSION_Q2PRO) {
-        // delta encode the clientNum
-        int clientNum = oldframe ? oldframe->clientNum : 0;
-        if (clientNum != frame->clientNum) {
-            extraflags |= EPS_CLIENTNUM;
-            MSG_WriteByte(frame->clientNum);
-        }
+    // delta encode the clientNum
+    int clientNum = oldframe ? oldframe->clientNum : 0;
+    if (clientNum != frame->clientNum) {
+        extraflags |= EPS_CLIENTNUM;
+        MSG_WriteByte(frame->clientNum);
     }
 
     // save 3 high bits of extraflags
@@ -404,10 +355,6 @@ void SV_BuildClientFrame(client_t *client)
 
     // calculate the visible areas
     frame->areabytes = CM_WriteAreaBits(&sv.cm, frame->areabits, clientarea);
-    if (!frame->areabytes && client->protocol != PROTOCOL_VERSION_Q2PRO) {
-        frame->areabits[0] = 255;
-        frame->areabytes = 1;
-    }
 
     // grab the current player_state_t
     MSG_PackPlayer(&frame->ps, ps);

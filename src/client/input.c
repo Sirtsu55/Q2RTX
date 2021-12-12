@@ -27,7 +27,6 @@ static cvar_t    *cl_fuzzhack;
 static cvar_t    *cl_showpackets;
 #endif
 static cvar_t    *cl_instantpacket;
-static cvar_t    *cl_batchcmds;
 
 static cvar_t    *m_filter;
        cvar_t    *m_accel;
@@ -713,7 +712,6 @@ void CL_RegisterInput(void)
     cl_showpackets = Cvar_Get("cl_showpackets", "0", 0);
 #endif
     cl_instantpacket = Cvar_Get("cl_instantpacket", "1", 0);
-    cl_batchcmds = Cvar_Get("cl_batchcmds", "1", 0);
 
     cl_upspeed = Cvar_Get("cl_upspeed", "200", 0);
     cl_forwardspeed = Cvar_Get("cl_forwardspeed", "200", 0);
@@ -864,104 +862,6 @@ static inline bool ready_to_send(void)
     return true;
 }
 
-static inline bool ready_to_send_hacked(void)
-{
-    if (!cl_fuzzhack->integer) {
-        return true; // packet drop hack disabled
-    }
-
-    if (cl.cmdNumber - cl.lastTransmitCmdNumberReal > 2) {
-        return true; // can't drop more than 2 cmds
-    }
-
-    return ready_to_send();
-}
-
-/*
-=================
-CL_SendDefaultCmd
-=================
-*/
-static void CL_SendDefaultCmd(void)
-{
-    size_t cursize q_unused, checksumIndex;
-    usercmd_t *cmd, *oldcmd;
-    client_history_t *history;
-
-    // archive this packet
-    history = &cl.history[cls.netchan->outgoing_sequence & CMD_MASK];
-    history->cmdNumber = cl.cmdNumber;
-    history->sent = cls.realtime;    // for ping calculation
-    history->rcvd = 0;
-
-    cl.lastTransmitCmdNumber = cl.cmdNumber;
-
-    // see if we are ready to send this packet
-    if (!ready_to_send_hacked()) {
-        cls.netchan->outgoing_sequence++; // just drop the packet
-        return;
-    }
-
-    cl.lastTransmitTime = cls.realtime;
-    cl.lastTransmitCmdNumberReal = cl.cmdNumber;
-
-    // begin a client move command
-    MSG_WriteByte(clc_move);
-
-    // save the position for a checksum byte
-    checksumIndex = 0;
-    if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-        checksumIndex = msg_write.cursize;
-        SZ_GetSpace(&msg_write, 1);
-    }
-
-    // let the server know what the last frame we
-    // got was, so the next message can be delta compressed
-    if (cl_nodelta->integer || !cl.frame.valid /*|| cls.demowaiting*/) {
-        MSG_WriteLong(-1);   // no compression
-    } else {
-        MSG_WriteLong(cl.frame.number);
-    }
-
-    // send this and the previous cmds in the message, so
-    // if the last packet was dropped, it can be recovered
-    cmd = &cl.cmds[(cl.cmdNumber - 2) & CMD_MASK];
-    MSG_WriteDeltaUsercmd(NULL, cmd, cls.protocolVersion);
-    MSG_WriteByte(cl.lightlevel);
-    oldcmd = cmd;
-
-    cmd = &cl.cmds[(cl.cmdNumber - 1) & CMD_MASK];
-    MSG_WriteDeltaUsercmd(oldcmd, cmd, cls.protocolVersion);
-    MSG_WriteByte(cl.lightlevel);
-    oldcmd = cmd;
-
-    cmd = &cl.cmds[cl.cmdNumber & CMD_MASK];
-    MSG_WriteDeltaUsercmd(oldcmd, cmd, cls.protocolVersion);
-    MSG_WriteByte(cl.lightlevel);
-
-    if (cls.serverProtocol <= PROTOCOL_VERSION_DEFAULT) {
-        // calculate a checksum over the move commands
-        msg_write.data[checksumIndex] = COM_BlockSequenceCRCByte(
-                                            msg_write.data + checksumIndex + 1,
-                                            msg_write.cursize - checksumIndex - 1,
-                                            cls.netchan->outgoing_sequence);
-    }
-
-    P_FRAMES++;
-
-    //
-    // deliver the message
-    //
-    cursize = cls.netchan->Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
-#ifdef _DEBUG
-    if (cl_showpackets->integer) {
-        Com_Printf("%zu ", cursize);
-    }
-#endif
-
-    SZ_Clear(&msg_write);
-}
-
 /*
 =================
 CL_SendBatchedCmd
@@ -1033,10 +933,10 @@ static void CL_SendBatchedCmd(void)
         for (j = oldest->cmdNumber + 1; j <= history->cmdNumber; j++) {
             cmd = &cl.cmds[j & CMD_MASK];
             totalMsec += cmd->msec;
-            bits = MSG_WriteDeltaUsercmd_Enhanced(oldcmd, cmd, cls.protocolVersion);
+            bits = MSG_WriteDeltaUsercmd(oldcmd, cmd);
 #ifdef _DEBUG
             if (cl_showpackets->integer == 3) {
-                MSG_ShowDeltaUsercmdBits_Enhanced(bits);
+                MSG_ShowDeltaUsercmdBits(bits);
             }
 #endif
             oldcmd = cmd;
@@ -1048,7 +948,7 @@ static void CL_SendBatchedCmd(void)
     //
     // deliver the message
     //
-    cursize = cls.netchan->Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
+    cursize = Netchan_Transmit(cls.netchan, msg_write.cursize, msg_write.data, 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer == 1) {
         Com_Printf("%zu(%i) ", cursize, totalCmds);
@@ -1077,7 +977,7 @@ static void CL_SendKeepAlive(void)
     cl.lastTransmitCmdNumber = cl.cmdNumber;
     cl.lastTransmitCmdNumberReal = cl.cmdNumber;
 
-    cursize = cls.netchan->Transmit(cls.netchan, 0, "", 1);
+    cursize = Netchan_Transmit(cls.netchan, 0, "", 1);
 #ifdef _DEBUG
     if (cl_showpackets->integer) {
         Com_Printf("%zu ", cursize);
@@ -1097,7 +997,7 @@ static void CL_SendUserinfo(void)
         MSG_WriteByte(clc_userinfo);
         MSG_WriteData(userinfo, len + 1);
         MSG_FlushTo(&cls.netchan->message);
-    } else if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO) {
+    } else {
         Com_DDPrintf("%s: %u: %d updates\n", __func__, com_framenum,
                      cls.userinfo_modified);
         for (i = 0; i < cls.userinfo_modified; i++) {
@@ -1112,9 +1012,6 @@ static void CL_SendUserinfo(void)
             }
         }
         MSG_FlushTo(&cls.netchan->message);
-    } else {
-        Com_WPrintf("%s: update count is %d, should never happen.\n",
-                    __func__, cls.userinfo_modified);
     }
 }
 
@@ -1148,7 +1045,7 @@ void CL_SendCmd(void)
         CL_SendReliable();
 
         // just keepalive or update reliable
-        if (cls.netchan->ShouldUpdate(cls.netchan)) {
+        if (Netchan_ShouldUpdate(cls.netchan)) {
             CL_SendKeepAlive();
         }
 
@@ -1164,11 +1061,7 @@ void CL_SendCmd(void)
     // send a userinfo update if needed
     CL_SendReliable();
 
-    if (cls.serverProtocol == PROTOCOL_VERSION_Q2PRO && cl_batchcmds->integer) {
-        CL_SendBatchedCmd();
-    } else {
-        CL_SendDefaultCmd();
-    }
+    CL_SendBatchedCmd();
 
     cl.sendPacketNow = false;
 }

@@ -112,8 +112,8 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
             // not changed at all. Note that players are always 'newentities',
             // this updates their old_origin always and prevents warping in case
             // of packet loss.
-            MSG_PackEntity(&oldpack, oldent, false);
-            MSG_PackEntity(&newpack, newent, false);
+            MSG_PackEntity(&oldpack, oldent);
+            MSG_PackEntity(&newpack, newent);
             MSG_WriteDeltaEntity(&oldpack, &newpack,
                                  newent->number <= cl.maxclients ? MSG_ES_NEWENTITY : 0);
             oldindex++;
@@ -123,8 +123,8 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            MSG_PackEntity(&oldpack, &cl.baselines[newnum], false);
-            MSG_PackEntity(&newpack, newent, false);
+            MSG_PackEntity(&oldpack, &cl.baselines[newnum]);
+            MSG_PackEntity(&newpack, newent);
             MSG_WriteDeltaEntity(&oldpack, &newpack, MSG_ES_FORCE | MSG_ES_NEWENTITY);
             newindex++;
             continue;
@@ -132,7 +132,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_PackEntity(&oldpack, oldent, false);
+            MSG_PackEntity(&oldpack, oldent);
             MSG_WriteDeltaEntity(&oldpack, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
@@ -147,27 +147,57 @@ static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
 {
     player_packed_t oldpack, newpack;
 
-    MSG_WriteByte(svc_frame);
-    MSG_WriteLong(tonum);
-    MSG_WriteLong(fromnum);   // what we are delta'ing from
-    MSG_WriteByte(0);   // rate dropped packets
+    uint32_t delta;
+    player_packed_t *oldstate;
+
+    if (from) {
+        oldstate = &oldpack;
+        MSG_PackPlayer(&oldpack, &from->ps);
+        delta = tonum - fromnum;
+    } else {
+        oldstate = NULL;
+        delta = 31;
+    }
+
+    MSG_PackPlayer(&newpack, &to->ps);
+
+    // first byte to be patched
+    byte *b1 = SZ_GetSpace(&msg_write, 1);
+
+    MSG_WriteLong((tonum & FRAMENUM_MASK) | (delta << FRAMENUM_BITS));
+
+    // second byte to be patched
+    byte *b2 = SZ_GetSpace(&msg_write, 1);
 
     // send over the areabits
     MSG_WriteByte(to->areabytes);
     MSG_WriteData(to->areabits, to->areabytes);
 
+    // ignore some parts of playerstate if not recording demo
+    msgPsFlags_t psFlags = 0;
+
+    int clientEntityNum = 0;
+
+    int suppressed = 0;
+
     // delta encode the playerstate
-    MSG_WriteByte(svc_playerinfo);
-    MSG_PackPlayer(&newpack, &to->ps);
-    if (from) {
-        MSG_PackPlayer(&oldpack, &from->ps);
-        MSG_WriteDeltaPlayerstate_Default(&oldpack, &newpack);
-    } else {
-        MSG_WriteDeltaPlayerstate_Default(NULL, &newpack);
+    uint32_t extraflags = MSG_WriteDeltaPlayerstate(oldstate, &newpack, psFlags);
+
+    // delta encode the clientNum
+    int clientNum = from ? from->clientNum : 0;
+    if (clientNum != to->clientNum) {
+        extraflags |= EPS_CLIENTNUM;
+        MSG_WriteByte(to->clientNum);
     }
 
+    // save 3 high bits of extraflags
+    *b1 = svc_frame | (((extraflags & 0x70) << 1));
+
+    // save 4 low bits of extraflags
+    *b2 = (suppressed & SUPPRESSCOUNT_MASK) |
+          ((extraflags & 0x0F) << SUPPRESSCOUNT_BITS);
+
     // delta encode the entities
-    MSG_WriteByte(svc_packetentities);
     emit_packet_entities(from, to);
 }
 
@@ -397,12 +427,16 @@ static void CL_Record_f(void)
 
     // send the serverdata
     MSG_WriteByte(svc_serverdata);
-    MSG_WriteLong(PROTOCOL_VERSION_DEFAULT);
+    MSG_WriteLong(PROTOCOL_VERSION_NAC);
     MSG_WriteLong(0x10000 + cl.servercount);
     MSG_WriteByte(1);      // demos are always attract loops
     MSG_WriteString(cl.gamedir);
     MSG_WriteShort(cl.clientNum);
     MSG_WriteString(cl.configstrings[CS_NAME]);
+    
+    MSG_WriteByte(cl.pmp.strafehack);
+    MSG_WriteByte(cl.pmp.qwmode);
+    MSG_WriteByte(cl.pmp.waterhack);
 
     // configstrings
     for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
@@ -437,7 +471,7 @@ static void CL_Record_f(void)
         }
 
         MSG_WriteByte(svc_spawnbaseline);
-        MSG_PackEntity(&pack, ent, false);
+        MSG_PackEntity(&pack, ent);
         MSG_WriteDeltaEntity(NULL, &pack, MSG_ES_FORCE);
     }
 
@@ -1061,7 +1095,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     if (MSG_ReadByte() != svc_serverdata) {
         goto fail;
     }
-    if (MSG_ReadLong() != PROTOCOL_VERSION_DEFAULT) {
+    if (MSG_ReadLong() != PROTOCOL_VERSION_NAC) {
         goto fail;
     }
     MSG_ReadLong();
@@ -1069,6 +1103,10 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     MSG_ReadString(NULL, 0);
     clientNum = MSG_ReadShort();
     MSG_ReadString(NULL, 0);
+    
+    MSG_ReadByte();
+    MSG_ReadByte();
+    MSG_ReadByte();
 
     while (1) {
         c = MSG_ReadByte();

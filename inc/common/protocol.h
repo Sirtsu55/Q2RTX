@@ -25,26 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAX_MSGLEN  0x8000  // max length of a message, 32k
 
-#define PROTOCOL_VERSION_OLD        26
-#define PROTOCOL_VERSION_DEFAULT    34
-#define PROTOCOL_VERSION_R1Q2       35
-#define PROTOCOL_VERSION_Q2PRO      36
-
-#define PROTOCOL_VERSION_R1Q2_MINIMUM           1903    // b6377
-#define PROTOCOL_VERSION_R1Q2_UCMD              1904    // b7387
-#define PROTOCOL_VERSION_R1Q2_LONG_SOLID        1905    // b7759
-#define PROTOCOL_VERSION_R1Q2_CURRENT           1905    // b7759
-
-#define PROTOCOL_VERSION_Q2PRO_MINIMUM          1011    // r161
-#define PROTOCOL_VERSION_Q2PRO_CURRENT          1021    // r1358
-
-#define R1Q2_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_R1Q2_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_R1Q2_CURRENT)
-
-#define Q2PRO_SUPPORTED(x) \
-    ((x) >= PROTOCOL_VERSION_Q2PRO_MINIMUM && \
-     (x) <= PROTOCOL_VERSION_Q2PRO_CURRENT)
+#define PROTOCOL_VERSION_NAC        667
 
 //=========================================
 
@@ -110,10 +91,9 @@ typedef enum {
     svc_deltapacketentities,    // [...]
     svc_frame,
 
-    // r1q2 specific operations
     svc_zpacket,
     svc_zdownload,
-    svc_gamestate, // q2pro specific, means svc_playerupdate in r1q2
+    svc_gamestate,
     svc_setting,
 
     svc_num_types
@@ -127,7 +107,6 @@ typedef enum {
 typedef enum {
     clc_bad,
     clc_nop,
-    clc_move,               // [usercmd_t]
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
 

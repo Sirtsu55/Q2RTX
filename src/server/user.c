@@ -79,77 +79,9 @@ static void SV_CreateBaselines(void)
     }
 }
 
-static bool need_flush_msg(size_t size)
-{
-    size += msg_write.cursize;
-#if USE_ZLIB
-    if (sv_client->has_zlib)
-        size = ZPACKET_HEADER + deflateBound(&svs.z, size);
-#endif
-    return size > sv_client->netchan->maxpacketlen;
-}
-
-static void write_configstrings(void)
-{
-    int     i;
-    char    *string;
-    size_t  length;
-
-    // write a packet full of data
-    string = (char *) sv.configstrings;
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++, string += MAX_QPATH) {
-        if (!string[0]) {
-            continue;
-        }
-        length = strlen(string);
-        if (length > MAX_QPATH) {
-            length = MAX_QPATH;
-        }
-        // check if this configstring will overflow
-        if (need_flush_msg(length + 4)) {
-            SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
-        }
-
-        MSG_WriteByte(svc_configstring);
-        MSG_WriteShort(i);
-        MSG_WriteData(string, length);
-        MSG_WriteByte(0);
-    }
-
-    SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
-}
-
 static void write_baseline(entity_packed_t *base)
 {
     MSG_WriteDeltaEntity(NULL, base, sv_client->esFlags | MSG_ES_FORCE);
-}
-
-static void write_baselines(void)
-{
-    int i, j;
-    entity_packed_t *base;
-
-    // write a packet full of data
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->baselines[i];
-        if (!base) {
-            continue;
-        }
-        for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
-            if (base->number) {
-                // check if this baseline will overflow
-                if (need_flush_msg(64)) {
-                    SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
-                }
-
-                MSG_WriteByte(svc_spawnbaseline);
-                write_baseline(base);
-            }
-            base++;
-        }
-    }
-
-    SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
 }
 
 static void write_gamestate(void)
@@ -307,23 +239,11 @@ void SV_New_f(void)
         MSG_WriteShort(-1);
     else
         MSG_WriteShort(sv_client->number);
-    MSG_WriteString((char *) &sv.configstrings[CS_NAME]);
+    MSG_WriteString(sv.configstrings[CS_NAME]);
 
-    // send protocol specific stuff
-    switch (sv_client->protocol) {
-    case PROTOCOL_VERSION_R1Q2:
-        MSG_WriteByte(0);   // not enhanced
-        MSG_WriteShort(sv_client->version);
-        MSG_WriteByte(0);   // no advanced deltas
-        MSG_WriteByte(sv_client->pmp.strafehack);
-        break;
-    case PROTOCOL_VERSION_Q2PRO:
-        MSG_WriteShort(sv_client->version);
-        MSG_WriteByte(sv_client->pmp.strafehack);
-        MSG_WriteByte(sv_client->pmp.qwmode);
-        MSG_WriteByte(sv_client->pmp.waterhack);
-        break;
-    }
+    MSG_WriteByte(sv_client->pmp.strafehack);
+    MSG_WriteByte(sv_client->pmp.qwmode);
+    MSG_WriteByte(sv_client->pmp.waterhack);
 
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 
@@ -356,12 +276,7 @@ void SV_New_f(void)
         return;
 
     // send gamestate
-    if (sv_client->netchan->type == NETCHAN_NEW) {
-        write_gamestate();
-    } else {
-        write_configstrings();
-        write_baselines();
-    }
+    write_gamestate();
 
     // send next command
     SV_ClientCommand(sv_client, "precache %i\n", sv.spawncount);
@@ -536,8 +451,7 @@ static void SV_BeginDownload_f(void)
 
 #if USE_ZLIB
     // prefer raw deflate stream from .pkz if supported
-    if (sv_client->protocol == PROTOCOL_VERSION_Q2PRO &&
-        sv_client->has_zlib && offset == 0) {
+    if (sv_client->has_zlib && offset == 0) {
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ | FS_FLAG_DEFLATE);
         if (f) {
             Com_DPrintf("Serving compressed download to %s\n", sv_client->name);
@@ -1034,78 +948,10 @@ static void SV_SetLastFrame(int lastframe)
 
 /*
 ==================
-SV_OldClientExecuteMove
-==================
-*/
-static void SV_OldClientExecuteMove(void)
-{
-    usercmd_t   oldest, oldcmd, newcmd;
-    int         lastframe;
-    int         net_drop;
-
-    if (moveIssued) {
-        SV_DropClient(sv_client, "multiple clc_move commands in packet");
-        return;     // someone is trying to cheat...
-    }
-
-    moveIssued = true;
-
-    if (sv_client->protocol == PROTOCOL_VERSION_DEFAULT) {
-        MSG_ReadByte();    // skip over checksum
-    }
-
-    lastframe = MSG_ReadLong();
-
-    // read all cmds
-    if (sv_client->protocol == PROTOCOL_VERSION_R1Q2 &&
-        sv_client->version >= PROTOCOL_VERSION_R1Q2_UCMD) {
-        MSG_ReadDeltaUsercmd_Hacked(NULL, &oldest);
-        MSG_ReadDeltaUsercmd_Hacked(&oldest, &oldcmd);
-        MSG_ReadDeltaUsercmd_Hacked(&oldcmd, &newcmd);
-    } else {
-        MSG_ReadDeltaUsercmd(NULL, &oldest);
-        MSG_ReadDeltaUsercmd(&oldest, &oldcmd);
-        MSG_ReadDeltaUsercmd(&oldcmd, &newcmd);
-    }
-
-    if (sv_client->state != cs_spawned) {
-        SV_SetLastFrame(-1);
-        return;
-    }
-
-    SV_SetLastFrame(lastframe);
-
-    net_drop = sv_client->netchan->dropped;
-    if (net_drop > 2) {
-        sv_client->frameflags |= FF_CLIENTPRED;
-    }
-
-    if (net_drop < 20) {
-        // run lastcmd multiple times if no backups available
-        while (net_drop > 2) {
-            SV_ClientThink(&sv_client->lastcmd);
-            net_drop--;
-        }
-
-        // run backup cmds
-        if (net_drop > 1)
-            SV_ClientThink(&oldest);
-        if (net_drop > 0)
-            SV_ClientThink(&oldcmd);
-    }
-
-    // run new cmd
-    SV_ClientThink(&newcmd);
-
-    sv_client->lastcmd = newcmd;
-}
-
-/*
-==================
 SV_NewClientExecuteMove
 ==================
 */
-static void SV_NewClientExecuteMove(int c)
+static void SV_ClientExecuteMove(int c)
 {
     usercmd_t   cmds[MAX_PACKET_FRAMES][MAX_PACKET_USERCMDS];
     usercmd_t   *lastcmd, *cmd;
@@ -1155,7 +1001,7 @@ static void SV_NewClientExecuteMove(int c)
                 return;
             }
             cmd = &cmds[i][j];
-            MSG_ReadDeltaUsercmd_Enhanced(lastcmd, cmd, sv_client->version);
+            MSG_ReadDeltaUsercmd(lastcmd, cmd);
             cmd->lightlevel = lightlevel;
             lastcmd = cmd;
         }
@@ -1418,7 +1264,7 @@ static void SV_ParseClientSetting(void)
     sv_client->settings[idx] = value;
 
 #if USE_FPS
-    if (idx == CLS_FPS && sv_client->protocol == PROTOCOL_VERSION_Q2PRO)
+    if (idx == CLS_FPS)
         set_client_fps(value);
 #endif
 }
@@ -1475,7 +1321,6 @@ void SV_ExecuteClientMessage(client_t *client)
 
         switch (c & SVCMD_MASK) {
         default:
-badbyte:
             SV_DropClient(client, "unknown command byte");
             break;
 
@@ -1486,33 +1331,20 @@ badbyte:
             SV_ParseFullUserinfo();
             break;
 
-        case clc_move:
-            SV_OldClientExecuteMove();
-            break;
-
         case clc_stringcmd:
             SV_ParseClientCommand();
             break;
 
         case clc_setting:
-            if (client->protocol < PROTOCOL_VERSION_R1Q2)
-                goto badbyte;
-
             SV_ParseClientSetting();
             break;
 
         case clc_move_nodelta:
         case clc_move_batched:
-            if (client->protocol != PROTOCOL_VERSION_Q2PRO)
-                goto badbyte;
-
-            SV_NewClientExecuteMove(c);
+            SV_ClientExecuteMove(c);
             break;
 
         case clc_userinfo_delta:
-            if (client->protocol != PROTOCOL_VERSION_Q2PRO)
-                goto badbyte;
-
             SV_ParseDeltaUserinfo();
             break;
         }

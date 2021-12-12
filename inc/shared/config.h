@@ -29,6 +29,7 @@
 #define DEFGAME ""
 
 #define USE_ICMP 1
+#define USE_PMTUDISC 1
 #define USE_ZLIB 1
 #define USE_SYSCON 1
 #define USE_DBGHELP 1

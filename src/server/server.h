@@ -303,7 +303,6 @@ typedef struct client_s {
     // protocol stuff
     int             challenge;  // challenge of this user, randomly generated
     int             protocol;   // major version
-    int             version;    // minor version
     int             settings[CLS_MAX];
 
     pmoveParams_t   pmp;        // spectator speed, etc
@@ -319,11 +318,6 @@ typedef struct client_s {
 
     // per-client baseline chunks
     entity_packed_t *baselines[SV_BASELINES_CHUNKS];
-
-    // netchan type dependent methods
-    void            (*AddMessage)(struct client_s *, byte *, size_t, bool);
-    void            (*WriteFrame)(struct client_s *);
-    void            (*WriteDatagram)(struct client_s *);
 
     // netchan
     netchan_t       *netchan;
@@ -607,8 +601,7 @@ void SV_PrintMiscInfo(void);
     ((s)->modelindex || (s)->effects || (s)->sound || (s)->event)
 
 void SV_BuildClientFrame(client_t *client);
-void SV_WriteFrameToClient_Default(client_t *client);
-void SV_WriteFrameToClient_Enhanced(client_t *client);
+void SV_WriteFrameToClient(client_t *client);
 
 //
 // sv_game.c

@@ -23,13 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/net/net.h"
 #include "common/sizebuf.h"
 
-typedef enum netchan_type_e {
-    NETCHAN_OLD,
-    NETCHAN_NEW
-} netchan_type_t;
-
 typedef struct netchan_s {
-    netchan_type_t  type;
     int         protocol;
     size_t      maxpacketlen;
 
@@ -59,46 +53,6 @@ typedef struct netchan_s {
     int         incoming_acknowledged;
     int         outgoing_sequence;
 
-    size_t      (*Transmit)(struct netchan_s *, size_t, const void *, int);
-    size_t      (*TransmitNextFragment)(struct netchan_s *);
-    bool        (*Process)(struct netchan_s *);
-    bool        (*ShouldUpdate)(struct netchan_s *);
-} netchan_t;
-
-extern cvar_t       *net_qport;
-extern cvar_t       *net_maxmsglen;
-extern cvar_t       *net_chantype;
-
-void Netchan_Init(void);
-void Netchan_OutOfBand(netsrc_t sock, const netadr_t *adr,
-                       const char *format, ...) q_printf(3, 4);
-netchan_t *Netchan_Setup(netsrc_t sock, netchan_type_t type,
-                         const netadr_t *adr, int qport, size_t maxpacketlen, int protocol);
-void Netchan_Close(netchan_t *netchan);
-
-#define OOB_PRINT(sock, addr, data) \
-    NET_SendPacket(sock, CONST_STR_LEN("\xff\xff\xff\xff" data), addr)
-
-//============================================================================
-
-typedef struct netchan_old_s {
-    netchan_t   pub;
-
-// sequencing variables
-    int         incoming_reliable_acknowledged; // single bit
-    int         incoming_reliable_sequence;     // single bit, maintained local
-    int         reliable_sequence;          // single bit
-    int         last_reliable_sequence;     // sequence number of last send
-
-    byte        *message_buf;       // leave space for header
-
-// message is copied to this buffer when it is first transfered
-    byte        *reliable_buf;  // unacked reliable message
-} netchan_old_t;
-
-typedef struct netchan_new_s {
-    netchan_t   pub;
-
 // sequencing variables
     int         incoming_reliable_acknowledged; // single bit
     int         incoming_reliable_sequence;     // single bit, maintained local
@@ -117,6 +71,23 @@ typedef struct netchan_new_s {
 
     sizebuf_t   fragment_out;
     byte        fragment_out_buf[MAX_MSGLEN];
-} netchan_new_t;
+} netchan_t;
+
+extern cvar_t       *net_qport;
+extern cvar_t       *net_maxmsglen;
+
+void Netchan_Init(void);
+void Netchan_OutOfBand(netsrc_t sock, const netadr_t *adr,
+                       const char *format, ...) q_printf(3, 4);
+size_t Netchan_TransmitNextFragment(netchan_t *netchan);
+size_t Netchan_Transmit(netchan_t *netchan, size_t length, const void *data, int numpackets);
+bool Netchan_Process(netchan_t *netchan);
+bool Netchan_ShouldUpdate(netchan_t *netchan);
+netchan_t *Netchan_Setup(netsrc_t sock, const netadr_t *adr,
+                         int qport, size_t maxpacketlen, int protocol);
+void Netchan_Close(netchan_t *netchan);
+
+#define OOB_PRINT(sock, addr, data) \
+    NET_SendPacket(sock, CONST_STR_LEN("\xff\xff\xff\xff" data), addr)
 
 #endif // NET_CHAN_H
