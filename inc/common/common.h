@@ -26,24 +26,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // common.h -- definitions common between client and server, but not game.dll
 //
 
-#define PRODUCT         "Quake II RTX"
+#define PRODUCT         "Nail & Crescent"
 
 #if USE_CLIENT
-#define APPLICATION     "q2rtx"
+#define APPLICATION     "nac"
 #else
-#define APPLICATION     "q2rtxded"
+#define APPLICATION     "nacded"
 #endif
 
 #define COM_DEFAULT_CFG     "default.cfg"
-#define COM_Q2RTX_CFG       "q2rtx.cfg"
-#define COM_AUTOEXEC_CFG    "autoexec.cfg"
-#define COM_POSTEXEC_CFG    "postexec.cfg"
-#define COM_POSTINIT_CFG    "postinit.cfg"
-#define COM_CONFIG_CFG      "q2config.cfg"
+#define COM_Q2RTX_CFG       APPLICATION ".cfg"
+#define COM_AUTOEXEC_CFG    APPLICATION "_autoexec.cfg"
+#define COM_POSTEXEC_CFG    APPLICATION "_postexec.cfg"
+#define COM_POSTINIT_CFG    APPLICATION "_postinit.cfg"
+#define COM_CONFIG_CFG      APPLICATION "_q2config.cfg"
 
 // FIXME: rename these
-#define COM_HISTORYFILE_NAME    ".conhistory"
-#define COM_DEMOCACHE_NAME      ".democache"
+#define COM_HISTORYFILE_NAME    "." APPLICATION ".conhistory"
+#define COM_DEMOCACHE_NAME      "." APPLICATION ".democache"
 
 #define MAXPRINTMSG     4096
 #define MAXERRORMSG     1024

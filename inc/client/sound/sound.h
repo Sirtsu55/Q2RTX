@@ -48,12 +48,7 @@ float S_GetLinearVolume(float perceptual);
 
 typedef enum {
     SS_NOT,
-#if USE_SNDDMA
-    SS_DMA,
-#endif
-#if USE_OPENAL
     SS_OAL
-#endif
 } sndstarted_t;
 
 extern sndstarted_t s_started;

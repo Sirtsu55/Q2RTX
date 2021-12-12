@@ -1116,7 +1116,9 @@ static image_t* get_fake_emissive_image(image_t* diffuse, int bright_threshold_i
 	case 0:
 		return diffuse;
 	case 1:
-		return vkpt_fake_emissive_texture(diffuse, bright_threshold_int);
+		if (diffuse)
+			return vkpt_fake_emissive_texture(diffuse, bright_threshold_int);
+		return NULL;
 	default:
 		return NULL;
 	}

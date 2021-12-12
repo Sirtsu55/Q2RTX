@@ -32,7 +32,6 @@ typedef struct
 
 typedef struct
 {
-    int     s_khz_original;
     int     s_rate;
     int     s_width;
     int     s_channels;
@@ -85,13 +84,6 @@ void SCR_StopCinematic(void)
     {
         Z_Free(cin.hnodes1);
         cin.hnodes1 = NULL;
-    }
-
-    // switch the sample rate back to its original value if necessary
-    if (cin.s_khz_original != 0)
-    {
-        Cvar_Set("s_khz", va("%d", cin.s_khz_original));
-        cin.s_khz_original = 0;
     }
 }
 
@@ -482,8 +474,6 @@ void SCR_PlayCinematic(const char *name)
     // make sure CD isn't playing music
     OGG_Stop();
 
-    cin.s_khz_original = 0;
-
     cin.frame_index = 0;
     cin.start_time = 0;
 
@@ -528,14 +518,6 @@ void SCR_PlayCinematic(const char *name)
         Huff1TableInit();
 
         cin.palette_active = false;
-
-        // switch to 22 khz sound if necessary
-        old_khz = Cvar_VariableValue("s_khz");
-        if (old_khz != cin.s_rate / 1000 && s_started == SS_DMA)
-        {
-            cin.s_khz_original = old_khz;
-            Cvar_Set("s_khz", va("%d", cin.s_rate / 1000));
-        }
 
         cin.frame_index = 0;
         cl.image_precache[0] = SCR_ReadNextFrame();

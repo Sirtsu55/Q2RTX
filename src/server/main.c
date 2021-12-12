@@ -100,8 +100,6 @@ cvar_t  *sv_auth_limit;
 cvar_t  *sv_rcon_limit;
 cvar_t  *sv_namechange_limit;
 
-cvar_t  *sv_restrict_rtx;
-
 cvar_t  *sv_allow_unconnected_cmds;
 
 cvar_t  *sv_lrcon_password;
@@ -807,15 +805,6 @@ static bool parse_userinfo(conn_params_t *params, char *userinfo)
         // anyone to access reserved slots at all
         params->reserved = sv_reserved_slots->integer;
     }
-
-	if (sv_restrict_rtx->integer)
-	{
-		s = Info_ValueForKey(info, "version");
-		if (strncmp(s, "q2rtx", 5) != 0)
-		{
-			return reject("This server is only available to Q2RTX clients.\n");
-		}
-	}
 
     // copy userinfo off
     Q_strlcpy(userinfo, info, MAX_INFO_STRING);
@@ -2076,8 +2065,6 @@ void SV_Init(void)
 
     sv_namechange_limit = Cvar_Get("sv_namechange_limit", "5/min", 0);
     sv_namechange_limit->changed = sv_namechange_limit_changed;
-
-	sv_restrict_rtx = Cvar_Get("sv_restrict_rtx", "1", 0);
 
     sv_allow_unconnected_cmds = Cvar_Get("sv_allow_unconnected_cmds", "0", 0);
 

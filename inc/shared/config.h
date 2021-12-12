@@ -25,7 +25,7 @@
 #define BUILDSTRING "Linux"
 #endif
 
-#define BASEGAME "baseq2"
+#define BASEGAME "basenac"
 #define DEFGAME ""
 
 #define USE_ICMP 1
@@ -47,9 +47,6 @@
 #define USE_TGA 1
 #define USE_MD3 1
 #define USE_DLIGHTS 1
-//#define USE_DSOUND 1
-#define USE_OPENAL 1
-#define USE_SNDDMA 1
 //#define USE_CURL 0
 #define USE_AUTOREPLY 1
 #endif

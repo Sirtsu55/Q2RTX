@@ -548,9 +548,6 @@ AL_RawSamples(int samples, int rate, int width, int channels,
 
 	/* Shove the data onto the streamSource */
 	qalSourceQueueBuffers(streamSource, 1, &buffer);
-
-	/* emulate behavior of S_RawSamples for s_rawend */
-	s_rawend += samples;
 }
 
 /*

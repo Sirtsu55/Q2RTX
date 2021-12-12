@@ -204,7 +204,7 @@ static const char *http_strerror(int response)
     return buffer;
 }
 
-// Use "baseq2" instead of empty gamedir consistently for all kinds of downloads.
+// Use base game dir instead of empty gamedir consistently for all kinds of downloads.
 static const char *http_gamedir(void)
 {
     if (*fs_game->string)

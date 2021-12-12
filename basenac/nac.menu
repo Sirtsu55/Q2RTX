@@ -217,7 +217,7 @@ begin sound
     values "ambient sounds" s_ambient "no" "yes" "only player's own"
     values "chat beep" cl_chat_sound "disabled" "default" "alternative"
     blank
-    values "sound engine" s_enable "no sound" "software" "OpenAL"
+    values "sound engine" s_enable "no sound" "OpenAL"
 end
 
 begin railtrail

@@ -42,6 +42,7 @@ SET(SRC_BASEQ2
 	baseq2/m_gladiator.c
 	baseq2/m_gunner.c
 	baseq2/m_hover.c
+	baseq2/m_hover.c
 	baseq2/m_infantry.c
 	baseq2/m_insane.c
 	baseq2/m_medic.c
@@ -116,11 +117,9 @@ SET(SRC_CLIENT
 	client/ui/script.c
 	client/ui/servers.c
 	client/ui/ui.c
-	client/sound/dma.c
 	client/sound/al.c
 	client/sound/main.c
 	client/sound/mem.c
-	client/sound/mix.c
 	client/sound/ogg.c
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
@@ -225,7 +224,6 @@ SET(SRC_LINUX
 )
 
 SET(SRC_LINUX_CLIENT
-	unix/sound.c
 	unix/video.c
 )
 
@@ -236,21 +234,10 @@ SET(SRC_WINDOWS
 )
 
 SET(SRC_WINDOWS_CLIENT
-	windows/wave.c
 	unix/video.c
 )
 
-	#windows/client.c
-	#windows/dinput.c
-	#windows/dsound.c
-	#windows/glimp.c
-	#windows/swimp.c
-	#windows/wgl.c
-	#unix/sdl2/sound.c
-
 SET(HEADERS_WINDOWS
-	windows/wgl.h
-	windows/glimp.h
 	windows/client.h
 	windows/threads/threads.h
 )
@@ -533,7 +520,7 @@ ENDIF()
 IF(TARGET client)
     SET_TARGET_PROPERTIES(client
         PROPERTIES
-        OUTPUT_NAME "q2rtx"
+        OUTPUT_NAME "nac"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}"
         RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}"
         RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}"
@@ -554,25 +541,25 @@ SET_TARGET_PROPERTIES(server
 )
 
 IF (IS_64_BIT)
-    SET_TARGET_PROPERTIES(server PROPERTIES OUTPUT_NAME "q2rtxded")
+    SET_TARGET_PROPERTIES(server PROPERTIES OUTPUT_NAME "nacded")
 ELSE()
-    SET_TARGET_PROPERTIES(server PROPERTIES OUTPUT_NAME "q2rtxded-x86")
+    SET_TARGET_PROPERTIES(server PROPERTIES OUTPUT_NAME "nacded-x86")
 ENDIF()
 
 # specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 
 SET_TARGET_PROPERTIES(baseq2
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/baseq2"
-    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/baseq2"
-    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/baseq2"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/basenac"
+    LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_SOURCE_DIR}/basenac"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_SOURCE_DIR}/basenac"
     PREFIX ""
     DEBUG_POSTFIX ""
 )
@@ -658,7 +645,7 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
         DESTINATION games/
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         COMPONENT shareware
-	RENAME q2rtx)
+	RENAME nac)
 
     # Install PAK file finder
     INSTALL(FILES
