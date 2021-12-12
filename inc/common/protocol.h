@@ -40,7 +40,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_VERSION_Q2PRO_LONG_SOLID       1014    // r243
 #define PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK   1015    // r335
 #define PROTOCOL_VERSION_Q2PRO_RESERVED         1016    // r364
-#define PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN      1017    // r1037-8
 #define PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS   1021    // r1358
 #define PROTOCOL_VERSION_Q2PRO_CURRENT          1021    // r1358
 

@@ -971,7 +971,6 @@ static void init_pmove_and_es_flags(client_t *newcl)
 
     // r1q2 extensions
     if (newcl->protocol == PROTOCOL_VERSION_R1Q2) {
-        newcl->esFlags |= MSG_ES_BEAMORIGIN;
         if (newcl->version >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
             newcl->esFlags |= MSG_ES_LONGSOLID;
         }
@@ -988,9 +987,6 @@ static void init_pmove_and_es_flags(client_t *newcl)
         newcl->esFlags |= MSG_ES_UMASK;
         if (newcl->version >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
             newcl->esFlags |= MSG_ES_LONGSOLID;
-        }
-        if (newcl->version >= PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN) {
-            newcl->esFlags |= MSG_ES_BEAMORIGIN;
         }
         if (newcl->version >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
             force = 1;

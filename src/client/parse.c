@@ -566,7 +566,6 @@ static void CL_ParseServerData(void)
             Com_DPrintf("R1Q2 strafejump hack enabled\n");
             cl.pmp.strafehack = true;
         }
-        cl.esFlags |= MSG_ES_BEAMORIGIN;
         if (cls.protocolVersion >= PROTOCOL_VERSION_R1Q2_LONG_SOLID) {
             cl.esFlags |= MSG_ES_LONGSOLID;
         }
@@ -593,9 +592,6 @@ static void CL_ParseServerData(void)
         cl.esFlags |= MSG_ES_UMASK;
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_LONG_SOLID) {
             cl.esFlags |= MSG_ES_LONGSOLID;
-        }
-        if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_BEAM_ORIGIN) {
-            cl.esFlags |= MSG_ES_BEAMORIGIN;
         }
         if (cls.protocolVersion >= PROTOCOL_VERSION_Q2PRO_WATERJUMP_HACK) {
             i = MSG_ReadByte();
