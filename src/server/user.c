@@ -537,7 +537,6 @@ static void SV_BeginDownload_f(void)
 #if USE_ZLIB
     // prefer raw deflate stream from .pkz if supported
     if (sv_client->protocol == PROTOCOL_VERSION_Q2PRO &&
-        sv_client->version >= PROTOCOL_VERSION_Q2PRO_ZLIB_DOWNLOADS &&
         sv_client->has_zlib && offset == 0) {
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ | FS_FLAG_DEFLATE);
         if (f) {
