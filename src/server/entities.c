@@ -80,7 +80,7 @@ static void SV_EmitPacketEntities(client_t         *client,
             // this updates their old_origin always and prevents warping in case
             // of packet loss.
             flags = client->esFlags;
-            if (newnum <= client->maxclients) {
+            if (newnum <= sv.maxclients) {
                 flags |= MSG_ES_NEWENTITY;
             }
             if (newnum == clientEntityNum) {
@@ -411,12 +411,12 @@ void SV_BuildClientFrame(client_t *client)
     ps = &clent->client->ps;
     VectorMA(ps->viewoffset, 0.125f, ps->pmove.origin, org);
 
-    leaf = CM_PointLeaf(client->cm, org);
+    leaf = CM_PointLeaf(&sv.cm, org);
     clientarea = leaf->area;
     clientcluster = leaf->cluster;
 
     // calculate the visible areas
-    frame->areabytes = CM_WriteAreaBits(client->cm, frame->areabits, clientarea);
+    frame->areabytes = CM_WriteAreaBits(&sv.cm, frame->areabits, clientarea);
     if (!frame->areabytes && client->protocol != PROTOCOL_VERSION_Q2PRO) {
         frame->areabits[0] = 255;
         frame->areabytes = 1;
@@ -434,22 +434,22 @@ void SV_BuildClientFrame(client_t *client)
 
 	if (clientcluster >= 0)
 	{
-		CM_FatPVS(client->cm, clientpvs, org, DVIS_PVS2);
+		CM_FatPVS(&sv.cm, clientpvs, org, DVIS_PVS2);
 		client->last_valid_cluster = clientcluster;
 	}
 	else
 	{
-		BSP_ClusterVis(client->cm->cache, clientpvs, client->last_valid_cluster, DVIS_PVS2);
+		BSP_ClusterVis(sv.cm.cache, clientpvs, client->last_valid_cluster, DVIS_PVS2);
 	}
 
-    BSP_ClusterVis(client->cm->cache, clientphs, clientcluster, DVIS_PHS);
+    BSP_ClusterVis(sv.cm.cache, clientphs, clientcluster, DVIS_PHS);
 
     // build up the list of visible entities
     frame->num_entities = 0;
     frame->first_entity = svs.next_entity;
 
-    for (e = 1; e < client->pool->num_edicts; e++) {
-        ent = EDICT_POOL(client, e);
+    for (e = 1; e < ge->num_edicts; e++) {
+        ent = EDICT_POOL(e);
 
         // ignore entities not in use
         if (!ent->inuse && (g_features->integer & GMF_PROPERINUSE)) {
@@ -479,10 +479,10 @@ void SV_BuildClientFrame(client_t *client)
         // ignore if not touching a PV leaf
         if (ent != clent) {
             // check area
-			if (clientcluster >= 0 && !CM_AreasConnected(client->cm, clientarea, ent->areanum)) {
+			if (clientcluster >= 0 && !CM_AreasConnected(&sv.cm, clientarea, ent->areanum)) {
                 // doors can legally straddle two areas, so
                 // we may need to check another one
-                if (!CM_AreasConnected(client->cm, clientarea, ent->areanum2)) {
+                if (!CM_AreasConnected(&sv.cm, clientarea, ent->areanum2)) {
                     ent_visible = false;        // blocked by a door
                 }
             }
@@ -498,7 +498,7 @@ void SV_BuildClientFrame(client_t *client)
                     if (cull_nonvisible_entities) {
                         if (ent->num_clusters == -1) {
                             // too many leafs for individual check, go by headnode
-                            if (!CM_HeadnodeVisible(CM_NodeNum(client->cm, ent->headnode), clientpvs))
+                            if (!CM_HeadnodeVisible(CM_NodeNum(&sv.cm, ent->headnode), clientpvs))
                                 ent_visible = false;
                         } else {
                             // check individual leafs
@@ -562,13 +562,6 @@ void SV_BuildClientFrame(client_t *client)
             state->modelindex = 0;
         }
 
-#if USE_MVD_CLIENT
-        if (sv.state == ss_broadcast) {
-            // spectators only need to know about inline BSP models
-            if (state->solid != PACKED_BSP)
-                state->solid = 0;
-        } else
-#endif
         if (ent->owner == clent) {
             // don't mark players missiles as solid
             state->solid = 0;

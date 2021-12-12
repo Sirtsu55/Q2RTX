@@ -96,7 +96,6 @@ SET(SRC_CLIENT
 	client/download.c
 	client/effects.c
 	client/entities.c
-	client/gtv.c
 	client/input.c
 	client/keys.c
 	client/locs.c
@@ -145,13 +144,9 @@ SET(SRC_SERVER
 	server/game.c
 	server/init.c
 	server/main.c
-	server/mvd.c
 	server/send.c
 	server/user.c
 	server/world.c
-	server/mvd/client.c
-	server/mvd/parse.c
-	server/mvd/game.c
 	server/save.c
 )
 
@@ -235,7 +230,6 @@ SET(SRC_LINUX_CLIENT
 )
 
 SET(SRC_WINDOWS
-	windows/ac.c
 	windows/debug.c
 	windows/hunk.c
 	windows/system.c
@@ -409,7 +403,6 @@ IF(WIN32)
         ${SRC_SHARED} 
         ${SRC_WINDOWS} ${HEADERS_WINDOWS}
         ${SRC_SERVER} ${HEADERS_SERVER}
-        server/ac.c
         client/null.c
         windows/res/q2rtxded.rc
     )
@@ -429,7 +422,6 @@ ELSE()
         ${SRC_SHARED} 
         ${SRC_LINUX}
         ${SRC_SERVER} ${HEADERS_SERVER}
-        server/ac.c
         client/null.c
     )
 ENDIF()

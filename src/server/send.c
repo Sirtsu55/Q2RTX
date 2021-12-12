@@ -115,7 +115,6 @@ EVENT MESSAGES
 SV_ClientPrintf
 
 Sends text across to be displayed if the level passes.
-NOT archived in MVD stream.
 =================
 */
 void SV_ClientPrintf(client_t *client, int level, const char *fmt, ...)
@@ -148,7 +147,6 @@ void SV_ClientPrintf(client_t *client, int level, const char *fmt, ...)
 SV_BroadcastPrintf
 
 Sends text to all active clients.
-NOT archived in MVD stream.
 =================
 */
 void SV_BroadcastPrintf(int level, const char *fmt, ...)
@@ -208,7 +206,6 @@ void SV_ClientCommand(client_t *client, const char *fmt, ...)
 SV_BroadcastCommand
 
 Sends command to all active clients.
-NOT archived in MVD stream.
 =================
 */
 void SV_BroadcastCommand(const char *fmt, ...)
@@ -244,8 +241,6 @@ SV_Multicast
 
 Sends the contents of the write buffer to a subset of the clients,
 then clears the write buffer.
-
-Archived in MVD stream.
 
 MULTICAST_ALL    same as broadcast (origin can be NULL)
 MULTICAST_PVS    send to clients potentially visible from org
@@ -312,9 +307,6 @@ void SV_Multicast(vec3_t origin, multicast_t to)
 
         SV_ClientAddMessage(client, flags);
     }
-
-    // add to MVD datagram
-    SV_MvdMulticast(leafnum, to);
 
     // clear the buffer
     SZ_Clear(&msg_write);

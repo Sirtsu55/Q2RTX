@@ -63,10 +63,6 @@ bool    Sys_IsFile(const char *path);
 
 void    Sys_DebugBreak(void);
 
-#if USE_AC_CLIENT
-bool Sys_GetAntiCheatAPI(void);
-#endif
-
 #if USE_CLIENT
 typedef struct asyncwork_s {
     void (*work_cb)(void *);

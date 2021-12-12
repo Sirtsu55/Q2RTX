@@ -527,9 +527,8 @@ static void CL_Suspend_f(void)
 static int read_first_message(qhandle_t f)
 {
     uint32_t    ul;
-    uint16_t    us;
     size_t      msglen;
-    int         read, type;
+    int         read;
 
     // read magic/msglen
     read = FS_Read(&ul, 4, f);
@@ -538,23 +537,10 @@ static int read_first_message(qhandle_t f)
     }
 
     // determine demo type
-    if (ul == MVD_MAGIC) {
-        read = FS_Read(&us, 2, f);
-        if (read != 2) {
-            return read < 0 ? read : Q_ERR_UNEXPECTED_EOF;
-        }
-        if (!us) {
-            return Q_ERR_UNEXPECTED_EOF;
-        }
-        msglen = LittleShort(us);
-        type = 1;
-    } else {
-        if (ul == (uint32_t)-1) {
-            return Q_ERR_UNEXPECTED_EOF;
-        }
-        msglen = LittleLong(ul);
-        type = 0;
+    if (ul == (uint32_t)-1) {
+        return Q_ERR_UNEXPECTED_EOF;
     }
+    msglen = LittleLong(ul);
 
     // if (msglen < 64 || msglen > sizeof(msg_read_buffer)) {
     if (msglen > sizeof(msg_read_buffer)) {
@@ -570,7 +556,7 @@ static int read_first_message(qhandle_t f)
         return read < 0 ? read : Q_ERR_UNEXPECTED_EOF;
     }
 
-    return type;
+    return 0;
 }
 
 static int read_next_message(qhandle_t f)
@@ -663,9 +649,6 @@ static int parse_next_message(int wait)
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
 
-    // if running GTV server, transmit to client
-    CL_GTV_Transmit();
-
     // save a snapshot once the full packet is parsed
     CL_EmitDemoSnapshot();
 
@@ -701,16 +684,6 @@ static void CL_PlayDemo_f(void)
         return;
     }
 
-    if (type == 1) {
-#if USE_MVD_CLIENT
-        Cbuf_InsertText(&cmd_buffer, va("mvdplay --replace @@ \"/%s\"\n", name));
-#else
-        Com_Printf("MVD support was not compiled in.\n");
-#endif
-        FS_FCloseFile(f);
-        return;
-    }
-
     // if running a local server, kill it and reissue
     SV_Shutdown("Server was killed.\n", ERR_DISCONNECT);
 
@@ -737,7 +710,7 @@ static void CL_PlayDemo_f(void)
 static void CL_Demo_c(genctx_t *ctx, int argnum)
 {
     if (argnum == 1) {
-        FS_File_g("demos", "*.dm2;*.dm2.gz;*.mvd2;*.mvd2.gz", FS_SEARCH_SAVEPATH | FS_SEARCH_BYFILTER, ctx);
+        FS_File_g("demos", "*.dm2;*.dm2.gz", FS_SEARCH_SAVEPATH | FS_SEARCH_BYFILTER, ctx);
     }
 }
 
@@ -897,13 +870,6 @@ static void CL_Seek_f(void)
         Com_Printf("Usage: %s [+-]<timespec>\n", Cmd_Argv(0));
         return;
     }
-
-#if USE_MVD_CLIENT
-    if (sv_running->integer == ss_broadcast) {
-        Cbuf_InsertText(&cmd_buffer, va("mvdseek \"%s\" @@\n", Cmd_Argv(1)));
-        return;
-    }
-#endif
 
     if (!cls.demo.playback) {
         Com_Printf("Not playing a demo.\n");
@@ -1092,64 +1058,35 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
         goto fail;
     }
 
-    if (type == 0) {
-        if (MSG_ReadByte() != svc_serverdata) {
-            goto fail;
-        }
-        if (MSG_ReadLong() != PROTOCOL_VERSION_DEFAULT) {
-            goto fail;
-        }
-        MSG_ReadLong();
-        MSG_ReadByte();
-        MSG_ReadString(NULL, 0);
-        clientNum = MSG_ReadShort();
-        MSG_ReadString(NULL, 0);
+    if (MSG_ReadByte() != svc_serverdata) {
+        goto fail;
+    }
+    if (MSG_ReadLong() != PROTOCOL_VERSION_DEFAULT) {
+        goto fail;
+    }
+    MSG_ReadLong();
+    MSG_ReadByte();
+    MSG_ReadString(NULL, 0);
+    clientNum = MSG_ReadShort();
+    MSG_ReadString(NULL, 0);
 
-        while (1) {
-            c = MSG_ReadByte();
-            if (c == -1) {
-                if (read_next_message(f) <= 0) {
-                    break;
-                }
-                continue; // parse new message
-            }
-            if (c != svc_configstring) {
+    while (1) {
+        c = MSG_ReadByte();
+        if (c == -1) {
+            if (read_next_message(f) <= 0) {
                 break;
             }
-            index = MSG_ReadShort();
-            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
-                goto fail;
-            }
-            MSG_ReadString(string, sizeof(string));
-            parse_info_string(info, clientNum, index, string);
+            continue; // parse new message
         }
-
-        info->mvd = false;
-    } else {
-        if ((MSG_ReadByte() & SVCMD_MASK) != mvd_serverdata) {
+        if (c != svc_configstring) {
+            break;
+        }
+        index = MSG_ReadShort();
+        if (index < 0 || index >= MAX_CONFIGSTRINGS) {
             goto fail;
         }
-        if (MSG_ReadLong() != PROTOCOL_VERSION_MVD) {
-            goto fail;
-        }
-        MSG_ReadShort();
-        MSG_ReadLong();
-        MSG_ReadString(NULL, 0);
-        clientNum = MSG_ReadShort();
-
-        while (1) {
-            index = MSG_ReadShort();
-            if (index == MAX_CONFIGSTRINGS) {
-                break;
-            }
-            if (index < 0 || index >= MAX_CONFIGSTRINGS) {
-                goto fail;
-            }
-            MSG_ReadString(string, sizeof(string));
-            parse_info_string(info, clientNum, index, string);
-        }
-
-        info->mvd = true;
+        MSG_ReadString(string, sizeof(string));
+        parse_info_string(info, clientNum, index, string);
     }
 
     FS_FCloseFile(f);

@@ -123,11 +123,10 @@ void SV_ClearWorld(void)
 ===============
 SV_LinkEdict
 
-General purpose routine shared between game DLL and MVD code.
 Links entity to PVS leafs.
 ===============
 */
-void SV_LinkEdict(cm_t *cm, edict_t *ent)
+static void SV_LinkEdict(cm_t *cm, edict_t *ent)
 {
     mleaf_t     *leafs[MAX_TOTAL_ENT_LEAFS];
     int         clusters[MAX_TOTAL_ENT_LEAFS];

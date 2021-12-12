@@ -235,14 +235,6 @@ void Sys_Sleep(int msec)
     nanosleep(&req, NULL);
 }
 
-#if USE_AC_CLIENT
-bool Sys_GetAntiCheatAPI(void)
-{
-    Sys_Sleep(1500);
-    return false;
-}
-#endif
-
 static void hup_handler(int signum)
 {
     flush_logs = true;

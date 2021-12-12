@@ -26,7 +26,6 @@ typedef enum {
     ss_loading,         // spawning level edicts
     ss_game,            // actively running
     ss_pic,             // showing static picture
-    ss_broadcast,       // running MVD client
     ss_cinematic,
 } server_state_t;
 
@@ -40,10 +39,6 @@ unsigned SV_Frame(unsigned msec);
 void SV_SetConsoleTitle(void);
 #endif
 //void SV_ConsoleOutput(const char *msg);
-
-#if USE_MVD_CLIENT && USE_CLIENT
-int MVD_GetDemoPercent(bool *paused, int *framenum);
-#endif
 
 #if USE_CLIENT
 char *SV_GetSaveInfo(const char *dir);

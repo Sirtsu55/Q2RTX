@@ -40,10 +40,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/server.h"
 #include "system/system.h"
 
-#if USE_MVD_CLIENT
-#include "server/mvd/client.h"
-#endif
-
 #if USE_ZLIB
 #include <zlib.h>
 #endif
@@ -85,16 +81,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // game features this server supports
-#define SV_FEATURES (GMF_CLIENTNUM | GMF_PROPERINUSE | GMF_MVDSPEC | \
+#define SV_FEATURES (GMF_CLIENTNUM | GMF_PROPERINUSE | \
                      GMF_WANT_ALL_DISCONNECTS | GMF_ENHANCED_SAVEGAMES | \
                      SV_GMF_VARIABLE_FPS | GMF_EXTRA_USERINFO | \
                      GMF_IPV6_ADDRESS_AWARE)
-
-// ugly hack for SV_Shutdown
-#define MVD_SPAWN_DISABLED  0
-#define MVD_SPAWN_ENABLED   0x40000000
-#define MVD_SPAWN_INTERNAL  0x80000000
-#define MVD_SPAWN_MASK      0xc0000000
 
 typedef struct {
     int         number;
@@ -164,9 +154,11 @@ typedef struct {
     char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
     server_entity_t entities[MAX_EDICTS];
+
+    int         maxclients;
 } server_t;
 
-#define EDICT_POOL(c, n) ((edict_t *)((byte *)(c)->pool->edicts + (c)->pool->edict_size*(n)))
+#define EDICT_POOL(n) ((edict_t *)((byte *)ge->edicts + ge->edict_size*(n)))
 
 #define EDICT_NUM(n) ((edict_t *)((byte *)ge->edicts + ge->edict_size*(n)))
 #define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->edict_size))
@@ -178,7 +170,7 @@ typedef struct {
     ((c)->protocol == PROTOCOL_VERSION_Q2PRO && \
      (c)->version >= PROTOCOL_VERSION_Q2PRO_SHORT_ANGLES && \
      sv.state == ss_game && \
-     EDICT_POOL(c, e)->solid == SOLID_BSP)
+     EDICT_POOL(e)->solid == SOLID_BSP)
 
 typedef enum {
     cs_free,        // can be reused for a new connection
@@ -189,22 +181,6 @@ typedef enum {
     cs_primed,      // sent serverdata, client is precaching
     cs_spawned      // client is fully in game
 } clstate_t;
-
-#if USE_AC_SERVER
-
-typedef enum {
-    AC_NORMAL,
-    AC_REQUIRED,
-    AC_EXEMPT
-} ac_required_t;
-
-typedef enum {
-    AC_QUERY_UNSENT,
-    AC_QUERY_SENT,
-    AC_QUERY_DONE
-} ac_query_t;
-
-#endif // USE_AC_SERVER
 
 #define MSG_POOLSIZE        1024
 #define MSG_TRESHOLD        (62 - sizeof(list_t))   // keep message_packet_t 64 bytes aligned
@@ -352,15 +328,6 @@ typedef struct client_s {
     // per-client baseline chunks
     entity_packed_t *baselines[SV_BASELINES_CHUNKS];
 
-    // server state pointers (hack for MVD channels implementation)
-    char            *configstrings;
-    char            *gamedir, *mapname;
-    edict_pool_t    *pool;
-    cm_t            *cm;
-    int             slot;
-    int             spawncount;
-    int             maxclients;
-
     // netchan type dependent methods
     void            (*AddMessage)(struct client_s *, byte *, size_t, bool);
     void            (*WriteFrame)(struct client_s *);
@@ -373,17 +340,6 @@ typedef struct client_s {
     // misc
     time_t          connect_time; // time of initial connect
 	int             last_valid_cluster;
-
-#if USE_AC_SERVER
-    bool            ac_valid;
-    ac_query_t      ac_query_sent;
-    ac_required_t   ac_required;
-    int             ac_file_failures;
-    unsigned        ac_query_time;
-    int             ac_client_type;
-    string_entry_t  *ac_bad_files;
-    char            *ac_token;
-#endif
 } client_t;
 
 // a client can leave the server in one of four ways:
@@ -598,7 +554,7 @@ void sv_min_timeout_changed(cvar_t *self);
 void SV_ClientReset(client_t *client);
 void SV_SpawnServer(mapcmd_t *cmd);
 bool SV_ParseMapCmd(mapcmd_t *cmd);
-void SV_InitGame(unsigned mvd_spawn);
+void SV_InitGame();
 
 //
 // sv_send.c
@@ -629,88 +585,6 @@ void SV_ShutdownClientSend(client_t *client);
 void SV_InitClientSend(client_t *newcl);
 
 //
-// sv_mvd.c
-//
-#if USE_MVD_SERVER
-void SV_MvdRegister(void);
-void SV_MvdInit(void);
-void SV_MvdShutdown(error_type_t type);
-void SV_MvdBeginFrame(void);
-void SV_MvdEndFrame(void);
-void SV_MvdRunClients(void);
-void SV_MvdStatus_f(void);
-void SV_MvdMapChanged(void);
-void SV_MvdClientDropped(client_t *client);
-
-void SV_MvdUnicast(edict_t *ent, int clientNum, bool reliable);
-void SV_MvdMulticast(int leafnum, multicast_t to);
-void SV_MvdConfigstring(int index, const char *string, size_t len);
-void SV_MvdBroadcastPrint(int level, const char *string);
-void SV_MvdStartSound(int entnum, int channel, int flags,
-                      int soundindex, int volume,
-                      int attenuation, int timeofs);
-
-void SV_MvdRecord_f(void);
-void SV_MvdStop_f(void);
-#else
-#define SV_MvdRegister()            (void)0
-#define SV_MvdInit()                (void)0
-#define SV_MvdShutdown(type)        (void)0
-#define SV_MvdBeginFrame()          (void)0
-#define SV_MvdEndFrame()            (void)0
-#define SV_MvdRunClients()          (void)0
-#define SV_MvdStatus_f()            (void)0
-#define SV_MvdMapChanged()          (void)0
-#define SV_MvdClientDropped(client) (void)0
-
-#define SV_MvdUnicast(ent, clientNum, reliable)     (void)0
-#define SV_MvdMulticast(leafnum, to)                (void)0
-#define SV_MvdConfigstring(index, string, len)      (void)0
-#define SV_MvdBroadcastPrint(level, string)         (void)0
-#define SV_MvdStartSound(entnum, channel, flags, \
-                         soundindex, volume, \
-                         attenuation, timeofs)      (void)0
-
-#define SV_MvdRecord_f()    (void)0
-#define SV_MvdStop_f()      (void)0
-#endif
-
-//
-// sv_ac.c
-//
-#if USE_AC_SERVER
-char *AC_ClientConnect(client_t *cl);
-void AC_ClientDisconnect(client_t *cl);
-bool AC_ClientBegin(client_t *cl);
-void AC_ClientAnnounce(client_t *cl);
-void AC_ClientToken(client_t *cl, const char *token);
-
-void AC_Register(void);
-void AC_Disconnect(void);
-void AC_Connect(unsigned mvd_spawn);
-void AC_Run(void);
-
-void AC_List_f(void);
-void AC_Info_f(void);
-#else
-#define AC_ClientConnect(cl)        ""
-#define AC_ClientDisconnect(cl)     (void)0
-#define AC_ClientBegin(cl)          true
-#define AC_ClientAnnounce(cl)       (void)0
-#define AC_ClientToken(cl, token)   (void)0
-
-#define AC_Register()               (void)0
-#define AC_Disconnect()             (void)0
-#define AC_Connect(mvd_spawn)       (void)0
-#define AC_Run()                    (void)0
-
-#define AC_List_f() \
-    Com_Printf("This server does not support anticheat.\n")
-#define AC_Info_f() \
-    Com_Printf("This server does not support anticheat.\n")
-#endif
-
-//
 // sv_user.c
 //
 void SV_New_f(void);
@@ -727,10 +601,6 @@ cvarban_t *SV_CheckInfoBans(const char *info, bool match_only);
 //
 // sv_ccmds.c
 //
-#if USE_MVD_CLIENT || USE_MVD_SERVER
-extern const cmd_option_t o_record[];
-#endif
-
 void SV_AddMatch_f(list_t *list);
 void SV_DelMatch_f(list_t *list);
 void SV_ListMatches_f(list_t *list);
@@ -781,7 +651,6 @@ void PF_UnlinkEdict(edict_t *ent);
 // call before removing an entity, and before trying to move one,
 // so it doesn't clip against itself
 
-void SV_LinkEdict(cm_t *cm, edict_t *ent);
 void PF_LinkEdict(edict_t *ent);
 // Needs to be called any time an entity changes origin, mins, maxs,
 // or solid.  Automatically unlinks if needed.

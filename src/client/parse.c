@@ -941,7 +941,7 @@ static void CL_ParsePrint(void)
 
     if (level != PRINT_CHAT) {
         Com_Printf("%s", s);
-        if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
+        if (!cls.demo.playback) {
             COM_strclr(s);
             Cmd_ExecTrigger(s);
         }
@@ -953,7 +953,7 @@ static void CL_ParsePrint(void)
     }
 
 #if USE_AUTOREPLY
-    if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
+    if (!cls.demo.playback) {
         CL_CheckForVersion(s);
     }
 #endif
@@ -979,10 +979,6 @@ static void CL_ParsePrint(void)
 
     SCR_AddToChatHUD(s);
 
-    // silence MVD spectator chat
-    if (cl.serverstate == ss_broadcast && !strncmp(s, "[MVD] ", 6))
-        return;
-
     // play sound
     if (cl_chat_sound->integer > 1)
         S_StartLocalSound_("misc/talk1.wav");
@@ -998,7 +994,7 @@ static void CL_ParseCenterPrint(void)
     SHOWNET(2, "    \"%s\"\n", s);
     SCR_CenterPrint(s);
 
-    if (!cls.demo.playback && cl.serverstate != ss_broadcast) {
+    if (!cls.demo.playback) {
         COM_strclr(s);
         Cmd_ExecTrigger(s);
     }
@@ -1329,10 +1325,6 @@ badbyte:
                 cls.demo.others_dropped++;
             }
         }
-
-        // if running GTV server, add current message
-        CL_GTV_WriteMessage(msg_read.data + readcount,
-                            msg_read.readcount - readcount);
     }
 }
 

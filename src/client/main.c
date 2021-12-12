@@ -279,12 +279,6 @@ void CL_UpdateRecordingSetting(void)
         rec = 0;
     }
 
-#if USE_CLIENT_GTV
-    if (cls.gtv.state == ca_active) {
-        rec |= 1;
-    }
-#endif
-
     MSG_WriteByte(clc_setting);
     MSG_WriteShort(CLS_RECORDING);
     MSG_WriteShort(rec);
@@ -360,13 +354,6 @@ CL_Pause_f
 */
 static void CL_Pause_f(void)
 {
-#if USE_MVD_CLIENT
-    if (sv_running->integer == ss_broadcast) {
-        Cbuf_InsertText(&cmd_buffer, "mvdpause @@\n");
-        return;
-    }
-#endif
-
     // activate manual pause
     if (cl_paused->integer == 2) {
         Cvar_Set("cl_paused", "0");
@@ -782,8 +769,6 @@ void CL_Disconnect(error_type_t type)
     CL_CleanupDownloads();
 
     CL_ClearState();
-
-    CL_GTV_Suspend();
 
     cls.state = ca_disconnected;
     cls.userinfo_modified = 0;
@@ -1394,7 +1379,6 @@ static void CL_ConnectionlessPacket(void)
     // server connection
     if (!strcmp(c, "client_connect")) {
         netchan_type_t type;
-        int anticheat = 0;
         char mapname[MAX_QPATH];
         bool got_server = false;
 
@@ -1423,12 +1407,7 @@ static void CL_ConnectionlessPacket(void)
         j = Cmd_Argc();
         for (i = 1; i < j; i++) {
             s = Cmd_Argv(i);
-            if (!strncmp(s, "ac=", 3)) {
-                s += 3;
-                if (*s) {
-                    anticheat = atoi(s);
-                }
-            } else if (!strncmp(s, "nc=", 3)) {
+            if (!strncmp(s, "nc=", 3)) {
                 s += 3;
                 if (*s) {
                     type = atoi(s);
@@ -1459,28 +1438,6 @@ static void CL_ConnectionlessPacket(void)
         }
         cls.netchan = Netchan_Setup(NS_CLIENT, type, &cls.serverAddress,
                                     cls.quakePort, 1024, cls.serverProtocol);
-
-#if USE_AC_CLIENT
-        if (anticheat) {
-            MSG_WriteByte(clc_nop);
-            MSG_FlushTo(&cls.netchan->message);
-            cls.netchan->Transmit(cls.netchan, 0, "", 3);
-            S_StopAllSounds();
-            cls.connect_count = -1;
-            Com_Printf("Loading anticheat, this may take a few moments...\n");
-            SCR_UpdateScreen();
-            if (!Sys_GetAntiCheatAPI()) {
-                Com_Printf("Trying to connect without anticheat.\n");
-            } else {
-                Com_LPrintf(PRINT_NOTICE, "Anticheat loaded successfully.\n");
-            }
-        }
-#else
-        if (anticheat >= 2) {
-            Com_Printf("Anticheat required by server, "
-                       "but no anticheat support linked in.\n");
-        }
-#endif
 
         CL_ClientCommand("new");
         cls.state = ca_connected;
@@ -1575,9 +1532,6 @@ static void CL_PacketEvent(void)
     if (cls.demo.recording && !cls.demo.paused && CL_FRAMESYNC) {
         CL_WriteDemoMessage(&cls.demo.buffer);
     }
-
-    // if running GTV server, transmit to client
-    CL_GTV_Transmit();
 
     if (!cls.netchan)
         return;     // might have disconnected
@@ -2240,10 +2194,7 @@ static size_t CL_DemoPos_m(char *buffer, size_t size)
     if (cls.demo.playback)
         framenum = cls.demo.frames_read;
     else
-#if USE_MVD_CLIENT
-        if (MVD_GetDemoPercent(NULL, &framenum) == -1)
-#endif
-            framenum = 0;
+        framenum = 0;
 
     sec = framenum / 10; framenum %= 10;
     min = sec / 60; sec %= 60;
@@ -2746,7 +2697,6 @@ static void CL_InitLocal(void)
     CL_InitEffects();
     CL_InitTEnts();
     CL_InitDownloads();
-    CL_GTV_Init();
 
     List_Init(&cl_ignore_text);
     List_Init(&cl_ignore_nick);
@@ -2917,12 +2867,6 @@ bool CL_CheatsOK(void)
     // single player can cheat
     if (cls.state > ca_connected && cl.maxclients == 1)
         return true;
-
-#if USE_MVD_CLIENT
-    // can cheat when playing MVD
-    if (MVD_GetDemoPercent(NULL, NULL) != -1)
-        return true;
-#endif
 
     return false;
 }
@@ -3388,8 +3332,6 @@ bool CL_ProcessEvents(void)
 
     HTTP_RunDownloads();
 
-    CL_GTV_Run();
-
     return cl.sendPacketNow;
 }
 
@@ -3470,8 +3412,6 @@ void CL_Shutdown(void)
     if (!cl_running || !cl_running->integer) {
         return;
     }
-
-    CL_GTV_Shutdown();
 
     CL_Disconnect(ERR_FATAL);
 

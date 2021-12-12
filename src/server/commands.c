@@ -273,7 +273,7 @@ static void SV_Map(bool restart)
 
     // any error will drop from this point
     if ((sv.state != ss_game && sv.state != ss_pic && sv.state != ss_cinematic) || restart)
-        SV_InitGame(MVD_SPAWN_DISABLED);    // the game is just starting
+        SV_InitGame();    // the game is just starting
 
     // clear pending CM
     Com_AbortFunc(NULL, NULL);
@@ -307,9 +307,6 @@ static void SV_DemoMap_f(void)
     Com_Printf("'%s' command is no longer supported.\n", Cmd_Argv(0));
 #if USE_CLIENT
     Com_Printf("To play a client demo, use 'demo' command instead.\n");
-#endif
-#if USE_MVD_CLIENT
-    Com_Printf("To play a MVD, use 'mvdplay' command.\n");
 #endif
 }
 
@@ -701,8 +698,6 @@ static void SV_Status_f(void)
         }
     }
     Com_Printf("\n");
-
-    SV_MvdStatus_f();
 }
 
 /*
@@ -1685,50 +1680,6 @@ static void SV_ListInfoBans_f(void)
     SV_ListCvarBans(&sv_infobanlist, "userinfo");
 }
 
-#if USE_MVD_CLIENT || USE_MVD_SERVER
-
-const cmd_option_t o_record[] = {
-    { "h", "help", "display this message" },
-    { "z", "compress", "compress file with gzip" },
-    { NULL }
-};
-
-static void SV_Record_c(genctx_t *ctx, int argnum)
-{
-#if USE_MVD_CLIENT
-    // TODO
-    if (argnum == 1) {
-        MVD_File_g(ctx);
-    }
-#endif
-}
-
-static void SV_Record_f(void)
-{
-#if USE_MVD_CLIENT
-    if (sv.state == ss_broadcast) {
-        MVD_StreamedRecord_f();
-        return;
-    }
-#endif
-
-    SV_MvdRecord_f();
-}
-
-static void SV_Stop_f(void)
-{
-#if USE_MVD_CLIENT
-    if (sv.state == ss_broadcast) {
-        MVD_StreamedStop_f();
-        return;
-    }
-#endif
-
-    SV_MvdStop_f();
-}
-
-#endif
-
 //===========================================================
 
 static const cmdreg_t c_server[] = {
@@ -1773,10 +1724,6 @@ static const cmdreg_t c_server[] = {
     { "adduserinfoban", SV_AddInfoBan_f },
     { "deluserinfoban", SV_DelInfoBan_f },
     { "listuserinfobans", SV_ListInfoBans_f },
-#if USE_MVD_CLIENT || USE_MVD_SERVER
-    { "mvdrecord", SV_Record_f, SV_Record_c },
-    { "mvdstop", SV_Stop_f },
-#endif
 
     { NULL }
 };
