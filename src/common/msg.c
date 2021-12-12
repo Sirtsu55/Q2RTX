@@ -425,11 +425,7 @@ int MSG_WriteDeltaUsercmd_Enhanced(const usercmd_t *from,
         MSG_WriteBits(cmd->angles[2], -16);
     }
 
-    if (version >= PROTOCOL_VERSION_Q2PRO_UCMD) {
-        count = -10;
-    } else {
-        count = -16;
-    }
+    count = -10;
 
     if (bits & CM_FORWARD) {
         MSG_WriteBits(cmd->forwardmove, count);
@@ -1534,11 +1530,7 @@ void MSG_ReadDeltaUsercmd_Enhanced(const usercmd_t *from,
     }
 
 // read movement
-    if (version >= PROTOCOL_VERSION_Q2PRO_UCMD) {
-        count = -10;
-    } else {
-        count = -16;
-    }
+    count = -10;
 
     if (bits & CM_FORWARD) {
         to->forwardmove = MSG_ReadBits(count);

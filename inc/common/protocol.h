@@ -36,7 +36,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PROTOCOL_VERSION_R1Q2_CURRENT           1905    // b7759
 
 #define PROTOCOL_VERSION_Q2PRO_MINIMUM          1011    // r161
-#define PROTOCOL_VERSION_Q2PRO_UCMD             1012    // r179
 #define PROTOCOL_VERSION_Q2PRO_CURRENT          1021    // r1358
 
 #define R1Q2_SUPPORTED(x) \
