@@ -123,6 +123,7 @@ SET(SRC_CLIENT
 	client/sound/ogg.c
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
+	client/video.c
 )
 
 SET(SRC_CLIENT_HTTP
@@ -223,18 +224,10 @@ SET(SRC_LINUX
 	unix/tty.c
 )
 
-SET(SRC_LINUX_CLIENT
-	unix/video.c
-)
-
 SET(SRC_WINDOWS
 	windows/debug.c
 	windows/hunk.c
 	windows/system.c
-)
-
-SET(SRC_WINDOWS_CLIENT
-	unix/video.c
 )
 
 SET(HEADERS_WINDOWS
@@ -380,7 +373,7 @@ IF(WIN32)
             ${SRC_COMMON} ${HEADERS_COMMON} 
             ${SRC_REFRESH} ${SRC_SHADERS} 
             ${SRC_SHARED} 
-            ${SRC_WINDOWS} ${SRC_WINDOWS_CLIENT} ${HEADERS_WINDOWS}
+            ${SRC_WINDOWS} ${HEADERS_WINDOWS}
             ${SRC_SERVER} ${HEADERS_SERVER}
             windows/res/q2rtx.rc
         )
@@ -400,7 +393,7 @@ ELSE()
             ${SRC_COMMON} ${HEADERS_COMMON} 
             ${SRC_REFRESH} ${SRC_SHADERS} 
             ${SRC_SHARED} 
-            ${SRC_LINUX} ${SRC_LINUX_CLIENT}
+            ${SRC_LINUX}
             ${SRC_SERVER} ${HEADERS_SERVER}
         )
     ENDIF()
