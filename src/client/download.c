@@ -64,7 +64,7 @@ int CL_QueueDownload(const char *path, dltype_t type)
         Com_Error(ERR_DROP, "%s: oversize quake path", __func__);
     }
 
-    q = Z_Malloc(sizeof(*q) + len);
+    q = Z_Malloc(sizeof(*q) + len + 1);
     memcpy(q->path, path, len + 1);
     q->type = type;
     q->state = DL_PENDING;
@@ -215,7 +215,7 @@ void CL_LoadDownloadIgnores(void)
         if (*data && *data != '#' && *data != '/') {
             len = strlen(data);
             if (len < MAX_QPATH) {
-                entry = Z_Malloc(sizeof(*entry) + len);
+                entry = Z_Malloc(sizeof(*entry) + len + 1);
                 memcpy(entry->string, data, len + 1);
                 entry->next = cls.download.ignores;
                 cls.download.ignores = entry;

@@ -144,7 +144,7 @@ typedef struct searchpath_s {
     struct searchpath_s *next;
     unsigned    mode;
     pack_t      *pack;        // only one of filename / pack will be used
-    char        filename[1];
+    char        filename[];
 } searchpath_t;
 
 typedef struct {
@@ -167,7 +167,7 @@ typedef struct {
     unsigned    targlen;
     unsigned    namelen;
     char        *target;
-    char        name[1];
+    char        name[];
 } symlink_t;
 
 // these point to user home directory
@@ -2506,7 +2506,7 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
             pack = load_pak_file(path);
         if (!pack)
             continue;
-        search = FS_Malloc(sizeof(searchpath_t));
+        search = FS_Malloc(sizeof(searchpath_t) + 1);
         search->mode = mode;
         search->filename[0] = 0;
         search->pack = pack_get(pack);
@@ -2520,7 +2520,7 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
 
 	// add the directory to the search path
 	// the directory has priority over the pak files
-	search = FS_Malloc(sizeof(searchpath_t) + len);
+	search = FS_Malloc(sizeof(searchpath_t) + len + 1);
 	search->mode = mode;
 	search->pack = NULL;
 	memcpy(search->filename, fs_gamedir, len + 1);
@@ -2543,7 +2543,7 @@ file_info_t *FS_CopyInfo(const char *name, int64_t size, time_t ctime, time_t mt
     }
 
     len = strlen(name);
-    out = FS_Mallocz(sizeof(*out) + len);
+    out = FS_Mallocz(sizeof(*out) + len + 1);
     out->size = size;
     out->ctime = ctime;
     out->mtime = mtime;
@@ -3373,7 +3373,7 @@ static void FS_Link_f(void)
     }
 
     // create new link
-    link = FS_Malloc(sizeof(*link) + namelen);
+    link = FS_Malloc(sizeof(*link) + namelen + 1);
     memcpy(link->name, name, namelen + 1);
     link->namelen = namelen;
     List_Append(list, &link->entry);

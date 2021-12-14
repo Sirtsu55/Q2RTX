@@ -286,8 +286,7 @@ typedef struct bsp_s {
 
     bool            extended;
 
-	// WARNING: the 'name' string is actually longer than this, and the bsp_t structure is allocated larger than sizeof(bsp_t) in BSP_Load
-    char            name[1];
+    char            name[];
 } bsp_t;
 
 int BSP_Load(const char *name, bsp_t **bsp_p);

@@ -43,7 +43,6 @@ typedef struct {
     uint32_t    ident;
     uint32_t    version;
     uint32_t    numframes;
-    // dsp2frame_t frames[1];              // variable sized
 } dsp2header_t;
 
 #endif // FORMAT_SP2_H

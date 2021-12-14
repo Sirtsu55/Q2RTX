@@ -31,7 +31,7 @@ typedef struct file_info_s {
     int64_t size;
     time_t  ctime;
     time_t  mtime;
-    char    name[1];
+    char    name[];
 } file_info_t;
 
 // bits 0 - 1, enum

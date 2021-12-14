@@ -40,7 +40,7 @@ typedef struct {
     uint16_t    bytes_per_line;
     uint16_t    palette_type;
     uint8_t     filler[58];
-    uint8_t     data[1];            // unbounded
+    uint8_t     data[];
 } dpcx_t;
 
 #endif // FORMAT_PCX_H

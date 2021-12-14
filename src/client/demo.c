@@ -753,7 +753,7 @@ typedef struct {
     int framenum;
     int64_t filepos;
     size_t msglen;
-    byte data[1];
+    byte data[];
 } demosnap_t;
 
 /*
@@ -828,7 +828,7 @@ void CL_EmitDemoSnapshot(void)
     MSG_WriteByte(svc_layout);
     MSG_WriteString(cl.layout);
 
-    snap = Z_Malloc(sizeof(*snap) + msg_write.cursize - 1);
+    snap = Z_Malloc(sizeof(*snap) + msg_write.cursize);
     snap->framenum = cls.demo.frames_read;
     snap->filepos = pos;
     snap->msglen = msg_write.cursize;

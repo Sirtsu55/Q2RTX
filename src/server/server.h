@@ -353,12 +353,12 @@ typedef struct {
     netadr_t    mask;
     unsigned    hits;
     time_t      time;   // time of the last hit
-    char        comment[1];
+    char        comment[];
 } addrmatch_t;
 
 typedef struct {
     list_t  entry;
-    char    string[1];
+    char    string[];
 } stuffcmd_t;
 
 typedef enum {
@@ -375,7 +375,7 @@ typedef struct {
     list_t          entry;
     filteraction_t  action;
     char            *comment;
-    char            string[1];
+    char            string[];
 } filtercmd_t;
 
 typedef struct {

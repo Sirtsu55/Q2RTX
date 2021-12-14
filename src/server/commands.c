@@ -478,7 +478,7 @@ static void SV_Kick_f(void)
     if (!strcmp(Cmd_Argv(0), "kickban")) {
         netadr_t *addr = &sv_client->netchan->remote_address;
         if (addr->type == NA_IP || addr->type == NA_IP6) {
-            addrmatch_t *match = Z_Malloc(sizeof(*match));
+            addrmatch_t *match = Z_Malloc(sizeof(*match) + 1);
             match->addr = *addr;
             make_mask(&match->mask, addr->type, addr->type == NA_IP6 ? 64 : 32);
             match->hits = 0;
@@ -1099,7 +1099,7 @@ void SV_AddMatch_f(list_t *list)
 
     s = Cmd_ArgsFrom(2);
     len = strlen(s);
-    match = Z_Malloc(sizeof(*match) + len);
+    match = Z_Malloc(sizeof(*match) + len + 1);
     match->addr = addr;
     match->mask = mask;
     match->hits = 0;
@@ -1234,7 +1234,7 @@ static void SV_AddStuffCmd(list_t *list, int arg, const char *what)
     }
 
     len = strlen(s);
-    stuff = Z_Malloc(sizeof(*stuff) + len);
+    stuff = Z_Malloc(sizeof(*stuff) + len + 1);
     memcpy(stuff->string, s, len + 1);
     List_Append(list, &stuff->entry);
 }
@@ -1427,7 +1427,7 @@ usage:
         comment = Z_CopyString(Cmd_ArgsFrom(3));
 
     len = strlen(s);
-    filter = Z_Malloc(sizeof(*filter) + len);
+    filter = Z_Malloc(sizeof(*filter) + len + 1);
     memcpy(filter->string, s, len + 1);
     filter->action = action;
     filter->comment = comment;

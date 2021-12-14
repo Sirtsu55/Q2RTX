@@ -1685,7 +1685,7 @@ static void CL_Precache_f(void)
 typedef struct {
     list_t entry;
     unsigned hits;
-    char match[1];
+    char match[];
 } ignore_t;
 
 static list_t   cl_ignore_text;
@@ -1736,7 +1736,7 @@ static void add_ignore(list_t *list, const char *match, size_t minlen)
         return;
     }
 
-    ignore = Z_Malloc(sizeof(*ignore) + matchlen);
+    ignore = Z_Malloc(sizeof(*ignore) + matchlen + 1);
     ignore->hits = 0;
     memcpy(ignore->match, match, matchlen + 1);
     List_Append(list, &ignore->entry);

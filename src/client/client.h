@@ -367,7 +367,7 @@ typedef struct {
     list_t      entry;
     dltype_t    type;
     dlstate_t   state;
-    char        path[1];
+    char        path[];
 } dlqueue_t;
 
 typedef struct client_static_s {

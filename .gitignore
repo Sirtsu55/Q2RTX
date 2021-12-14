@@ -2,6 +2,7 @@
 .q2pro/
 .q2proded/
 .baseq2/
+.basenac/
 q2rtx
 q2rtxded
 game*.so
@@ -42,5 +43,6 @@ music/
 q2config.cfg
 save
 */docs
-baseq2/**/*.txt
-!baseq2/*.txt
+basenac/**/*.txt
+!basenac/*.txt
+baseq2/

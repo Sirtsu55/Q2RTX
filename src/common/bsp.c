@@ -1640,7 +1640,7 @@ int BSP_Load(const char *name, bsp_t **bsp_p)
 
     // load into hunk
     len = strlen(name);
-    bsp = Z_Mallocz(sizeof(*bsp) + len);
+    bsp = Z_Mallocz(sizeof(*bsp) + len + 1);
     memcpy(bsp->name, name, len + 1);
     bsp->refcount = 1;
     bsp->extended = (lumps == qbsp_lumps);

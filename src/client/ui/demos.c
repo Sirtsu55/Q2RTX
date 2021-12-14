@@ -30,7 +30,7 @@ DEMOS MENU
 
 #define DEMO_EXTENSIONS ".dm2;.dm2.gz"
 
-#define DEMO_EXTRASIZE  q_offsetof(demoEntry_t, name)
+#define DEMO_EXTRASIZE  sizeof(demoEntry_t)
 
 #define DEMO_DIR_SIZE   "\x90\xc4\xc9\xd2\x91" // [DIR]
 
@@ -49,7 +49,7 @@ typedef struct {
     unsigned    type;
     int64_t     size;
     time_t      mtime;
-    char        name[1];
+    char        name[];
 } demoEntry_t;
 
 typedef struct m_demos_s {
@@ -235,7 +235,7 @@ static void CalcHash(void **list)
     mdfour_begin(&md);
     while (*list) {
         info = *list++;
-        len = sizeof(*info) + strlen(info->name) - 1;
+        len = sizeof(*info) + strlen(info->name);
         mdfour_update(&md, (uint8_t *)info, len);
     }
     mdfour_result(&md, m_demos.hash);

@@ -199,7 +199,7 @@ typedef struct cmdalias_s {
     list_t  hashEntry;
     list_t  listEntry;
     char    *value;
-    char    name[1];
+    char    name[];
 } cmdalias_t;
 
 static list_t   cmd_alias;
@@ -252,7 +252,7 @@ void Cmd_AliasSet(const char *name, const char *cmd)
     }
 
     len = strlen(name);
-    a = Cmd_Malloc(sizeof(cmdalias_t) + len);
+    a = Cmd_Malloc(sizeof(cmdalias_t) + len + 1);
     memcpy(a->name, name, len + 1);
     a->value = Cmd_CopyString(cmd);
 

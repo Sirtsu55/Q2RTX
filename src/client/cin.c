@@ -469,7 +469,6 @@ SCR_PlayCinematic
 void SCR_PlayCinematic(const char *name)
 {
     int		width, height;
-    int		old_khz;
 
     // make sure CD isn't playing music
     OGG_Stop();

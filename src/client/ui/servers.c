@@ -33,7 +33,7 @@ SERVERS MENU
 #define MAX_STATUS_RULES    64
 #define MAX_STATUS_SERVERS  1024
 
-#define SLOT_EXTRASIZE  q_offsetof(serverslot_t, name)
+#define SLOT_EXTRASIZE  sizeof(serverslot_t)
 
 #define COL_NAME    0
 #define COL_MOD     1
@@ -60,7 +60,7 @@ typedef struct {
     char        *players[MAX_STATUS_PLAYERS];
     unsigned    timestamp;
     uint32_t    color;
-    char        name[1];
+    char        name[];
 } serverslot_t;
 
 typedef struct {

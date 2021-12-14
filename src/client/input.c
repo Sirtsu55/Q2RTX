@@ -61,7 +61,6 @@ INPUT SUBSYSTEM
 
 typedef struct {
     bool        modified;
-    inputAPI_t  api;
     int         old_dx;
     int         old_dy;
 } in_state_t;
@@ -70,11 +69,6 @@ static in_state_t   input;
 
 static cvar_t    *in_enable;
 static cvar_t    *in_grab;
-
-const inputAPI_t* IN_GetAPI()
-{
-	return &input.api;
-}
 
 static bool IN_GetCurrentGrab(void)
 {
@@ -111,9 +105,7 @@ IN_Activate
 */
 void IN_Activate(void)
 {
-    if (input.api.Grab) {
-        input.api.Grab(IN_GetCurrentGrab());
-    }
+    IN_GrabMouse(IN_GetCurrentGrab());
 }
 
 /*
@@ -138,22 +130,6 @@ void IN_Frame(void)
         IN_Restart_f();
         return;
     }
-
-    if (input.api.GetEvents) {
-        input.api.GetEvents();
-    }
-}
-
-/*
-================
-IN_WarpMouse
-================
-*/
-void IN_WarpMouse(int x, int y)
-{
-    if (input.api.Warp) {
-        input.api.Warp(x, y);
-    }
 }
 
 /*
@@ -167,9 +143,7 @@ void IN_Shutdown(void)
         in_grab->changed = NULL;
     }
 
-    if (input.api.Shutdown) {
-        input.api.Shutdown();
-    }
+    IN_ShutdownMouse();
 
     memset(&input, 0, sizeof(input));
 }
@@ -191,8 +165,6 @@ IN_Init
 */
 void IN_Init(void)
 {
-    bool ret = false;
-
     in_enable = Cvar_Get("in_enable", "1", 0);
     in_enable->changed = in_changed_hard;
     if (!in_enable->integer) {
@@ -200,15 +172,11 @@ void IN_Init(void)
         return;
     }
 
-    if (!ret) {
-        VID_FillInputAPI(&input.api);
-        ret = input.api.Init();
-        if (!ret) {
-            Cvar_Set("in_enable", "0");
-            return;
-        }
+    if (!IN_InitMouse()) {
+        Cvar_Set("in_enable", "0");
+        return;
     }
-
+ 
     in_grab = Cvar_Get("in_grab", "1", 0);
     in_grab->changed = in_changed_soft;
 
@@ -466,13 +434,10 @@ static void CL_MouseMove(void)
     float mx, my;
     float speed;
 
-    if (!input.api.GetMotion) {
-        return;
-    }
     if (cls.key_dest & (KEY_MENU | KEY_CONSOLE)) {
         return;
     }
-    if (!input.api.GetMotion(&dx, &dy)) {
+    if (!IN_GetMouseMotion(&dx, &dy)) {
         return;
     }
 

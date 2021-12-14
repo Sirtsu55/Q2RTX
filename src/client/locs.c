@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct {
     list_t entry;
     vec3_t origin;
-    char name[1];
+    char name[];
 } location_t;
 
 static LIST_DECL(cl_locations);
@@ -45,7 +45,7 @@ static location_t *LOC_Alloc(const char *name)
     size_t len;
 
     len = strlen(name);
-    loc = Z_Malloc(sizeof(*loc) + len);
+    loc = Z_Malloc(sizeof(*loc) + len + 1);
     memcpy(loc->name, name, len + 1);
 
     return loc;

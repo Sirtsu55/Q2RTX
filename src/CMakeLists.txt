@@ -123,7 +123,7 @@ SET(SRC_CLIENT
 	client/sound/ogg.c
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
-	client/video.c
+	client/system.c
 )
 
 SET(SRC_CLIENT_HTTP

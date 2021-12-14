@@ -67,12 +67,7 @@ static void vkpt_freecam_mousemove()
 	float mx, my;
 	float speed;
 
-	const inputAPI_t* api = IN_GetAPI();
-
-	if (!api->GetMotion)
-		return;
-
-	if (!api->GetMotion(&dx, &dy))
+	if (!IN_GetMouseMotion(&dx, &dy))
 		return;
 
 	mx = dx;

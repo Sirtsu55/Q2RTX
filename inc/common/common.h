@@ -70,7 +70,7 @@ static inline const ucmd_t *Com_Find(const ucmd_t *u, const char *c)
 
 typedef struct string_entry_s {
     struct string_entry_s *next;
-    char string[1];
+    char string[];
 } string_entry_t;
 
 typedef void (*rdflush_t)(int target, char *buffer, size_t len);

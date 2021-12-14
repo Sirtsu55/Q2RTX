@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 //
-// video.c
+// system.c
 //
 
 #include "shared/shared.h"
@@ -672,7 +672,7 @@ MOUSE
 ===============================================================================
 */
 
-static bool GetMouseMotion(int *dx, int *dy)
+bool IN_GetMouseMotion(int *dx, int *dy)
 {
     if (!SDL_GetRelativeMouseMode()) {
         return false;
@@ -681,20 +681,20 @@ static bool GetMouseMotion(int *dx, int *dy)
     return true;
 }
 
-static void WarpMouse(int x, int y)
+void IN_WarpMouse(int x, int y)
 {
     SDL_WarpMouseInWindow(sdl_window, x, y);
     SDL_GetRelativeMouseState(NULL, NULL);
 }
 
-static void ShutdownMouse(void)
+void IN_ShutdownMouse(void)
 {
     SDL_SetWindowGrab(sdl_window, SDL_FALSE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
     SDL_ShowCursor(SDL_ENABLE);
 }
 
-static bool InitMouse(void)
+bool IN_InitMouse(void)
 {
     if (!SDL_WasInit(SDL_INIT_VIDEO)) {
         return false;
@@ -704,25 +704,10 @@ static bool InitMouse(void)
     return true;
 }
 
-static void GrabMouse(bool grab)
+void IN_GrabMouse(bool grab)
 {
     SDL_SetWindowGrab(sdl_window, grab);
     SDL_SetRelativeMouseMode(grab && !(Key_GetDest() & KEY_MENU));
     SDL_GetRelativeMouseState(NULL, NULL);
     SDL_ShowCursor(!(sdl_flags & QVF_FULLSCREEN));
-}
-
-/*
-============
-VID_FillInputAPI
-============
-*/
-void VID_FillInputAPI(inputAPI_t *api)
-{
-    api->Init = InitMouse;
-    api->Shutdown = ShutdownMouse;
-    api->Grab = GrabMouse;
-    api->Warp = WarpMouse;
-    api->GetEvents = NULL;
-    api->GetMotion = GetMouseMotion;
 }
