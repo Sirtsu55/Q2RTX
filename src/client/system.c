@@ -53,6 +53,115 @@ extern cvar_t* vid_displaylist;
 /*
 ===============================================================================
 
+ASYNC WORK QUEUE
+
+===============================================================================
+*/
+
+#if USE_CLIENT
+
+static bool work_initialized;
+static bool work_terminate;
+static SDL_mutex *work_lock;
+static SDL_cond *work_cond;
+static SDL_Thread *work_thread;
+static asyncwork_t *pend_head;
+static asyncwork_t *done_head;
+
+static void append_work(asyncwork_t **head, asyncwork_t *work)
+{
+    asyncwork_t *c, **p;
+    for (p = head, c = *head; c; p = &c->next, c = c->next);
+    work->next = NULL;
+    *p = work;
+}
+
+void Sys_CompleteAsyncQueue(void)
+{
+    asyncwork_t *work, *next;
+
+    if (!work_initialized)
+        return;
+    if (SDL_TryLockMutex(work_lock))
+        return;
+    if (q_unlikely(done_head)) {
+        for (work = done_head; work; work = next) {
+            next = work->next;
+            if (work->done_cb)
+                work->done_cb(work->cb_arg);
+            Z_Free(work);
+        }
+        done_head = NULL;
+    }
+    SDL_UnlockMutex(work_lock);
+}
+
+static int thread_func(void *arg)
+{
+    SDL_LockMutex(work_lock);
+    while (1) {
+        while (!pend_head && !work_terminate)
+            SDL_CondWait(work_cond, work_lock);
+
+        asyncwork_t *work = pend_head;
+        if (!work)
+            break;
+        pend_head = work->next;
+
+        SDL_UnlockMutex(work_lock);
+        work->work_cb(work->cb_arg);
+        SDL_LockMutex(work_lock);
+
+        append_work(&done_head, work);
+    }
+    SDL_UnlockMutex(work_lock);
+
+    return 0;
+}
+
+void Sys_ShutdownAsyncQueue(void)
+{
+    if (!work_initialized)
+        return;
+
+    SDL_LockMutex(work_lock);
+    work_terminate = true;
+    SDL_CondSignal(work_cond);
+    SDL_UnlockMutex(work_lock);
+
+    SDL_WaitThread(work_thread, NULL);
+    Sys_CompleteAsyncQueue();
+
+    SDL_DestroyMutex(work_lock);
+    SDL_DestroyCond(work_cond);
+
+    work_lock = NULL;
+    work_cond = NULL;
+    work_thread = NULL;
+    work_initialized = false;
+}
+
+void Sys_QueueAsyncWork(asyncwork_t *work)
+{
+    if (!work_initialized) {
+        work_lock = SDL_CreateMutex();
+        work_cond = SDL_CreateCond();
+        if (!(work_thread = SDL_CreateThread(thread_func, "async work queue", NULL)))
+            Sys_Error("Couldn't create async work thread");
+        work_initialized = true;
+    }
+
+    SDL_LockMutex(work_lock);
+    append_work(&pend_head, Z_CopyStruct(work));
+    SDL_CondSignal(work_cond);
+    SDL_UnlockMutex(work_lock);
+}
+
+#endif
+
+/*
+===============================================================================
+
 OPENGL STUFF
 
 ===============================================================================

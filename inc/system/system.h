@@ -72,6 +72,8 @@ typedef struct asyncwork_s {
 } asyncwork_t;
 
 void Sys_QueueAsyncWork(asyncwork_t *work);
+void Sys_ShutdownAsyncQueue(void);
+void Sys_CompleteAsyncQueue(void);
 #endif
 
 extern cvar_t   *sys_basedir;

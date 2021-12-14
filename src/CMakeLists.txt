@@ -232,7 +232,6 @@ SET(SRC_WINDOWS
 
 SET(HEADERS_WINDOWS
 	windows/client.h
-	windows/threads/threads.h
 )
 
 SET(SRC_VKPT
