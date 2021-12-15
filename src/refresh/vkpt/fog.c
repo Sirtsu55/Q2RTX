@@ -196,14 +196,15 @@ no_volume:
 	Com_WPrintf("volume not specified\n");
 }
 
+static const cmdreg_t cmds[] = {
+	{ "fog", &Fog_Cmd_f, &Fog_Cmd_c },
+	{ NULL, NULL, NULL }
+};
+
 void vkpt_fog_init(void)
 {
 	vkpt_fog_reset();
 	
-	cmdreg_t cmds[] = {
-		{ "fog", &Fog_Cmd_f, &Fog_Cmd_c },
-		{ NULL, NULL, NULL }
-	};
 	Cmd_Register(cmds);
 }
 
