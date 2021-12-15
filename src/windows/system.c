@@ -931,13 +931,6 @@ void Sys_DebugBreak(void)
     DebugBreak();
 }
 
-unsigned Sys_Milliseconds(void)
-{
-    LARGE_INTEGER tm;
-    QueryPerformanceCounter(&tm);
-    return tm.QuadPart * 1000ULL / timer_freq.QuadPart;
-}
-
 void Sys_AddDefaultConfig(void)
 {
 }

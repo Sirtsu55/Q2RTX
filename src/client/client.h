@@ -565,7 +565,6 @@ extern cvar_t    *info_uf;
 //
 
 void CL_Init(void);
-void CL_Quit_f(void);
 void CL_Disconnect(error_type_t type);
 void CL_UpdateRecordingSetting(void);
 void CL_Begin(void);
@@ -575,7 +574,6 @@ void CL_RestartFilesystem(bool total);
 void CL_RestartRefresh(bool total);
 void CL_ClientCommand(const char *string);
 void CL_SendRcon(const netadr_t *adr, const char *pass, const char *cmd);
-const char *CL_Server_g(const char *partial, int argnum, int state);
 void CL_CheckForPause(void);
 void CL_UpdateFrameTimes(void);
 bool CL_CheckForIgnore(const char *s);
@@ -811,7 +809,6 @@ void CL_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
 void CL_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
 cparticle_t *CL_AllocParticle(void);
-void CL_RunParticles(void);
 void CL_AddParticles(void);
 #if USE_DLIGHTS
 cdlight_t *CL_AllocDlight(int key);
@@ -875,7 +872,6 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info);
 void LOC_Init(void);
 void LOC_LoadLocations(void);
 void LOC_FreeLocations(void);
-void LOC_UpdateCvars(void);
 void LOC_AddLocationsToScene(void);
 
 
@@ -927,7 +923,6 @@ void    SCR_PlayCinematic(const char *name);
 void    SCR_RunCinematic();
 void    SCR_BeginLoadingPlaque(void);
 void    SCR_EndLoadingPlaque(void);
-void    SCR_TouchPics(void);
 void    SCR_RegisterMedia(void);
 void    SCR_ModeChanged(void);
 void    SCR_LagSample(void);

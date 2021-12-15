@@ -71,13 +71,6 @@ void Sys_DebugBreak(void)
     raise(SIGTRAP);
 }
 
-unsigned Sys_Milliseconds(void)
-{
-    struct timespec ts;
-    (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec * 1000UL + ts.tv_nsec / 1000000UL;
-}
-
 /*
 =================
 Sys_Quit

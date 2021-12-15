@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef KEYS_H
 #define KEYS_H
 
+#if USE_CLIENT
+
 //
 // these are the key numbers that should be passed to Key_Event
 //
@@ -122,8 +124,6 @@ typedef enum keydest_e {
 
 typedef bool (*keywaitcb_t)(void *arg, int key);
 
-void    Key_Init(void);
-
 void    Key_Event(unsigned key, bool down, unsigned time);
 void    Key_CharEvent(int key);
 
@@ -145,5 +145,9 @@ int     Key_EnumBindings(int key, const char *binding);
 void    Key_WriteBindings(qhandle_t f);
 
 void    Key_WaitKey(keywaitcb_t wait, void *arg);
+
+#endif
+
+void    Key_Init(void);
 
 #endif // KEYS_H

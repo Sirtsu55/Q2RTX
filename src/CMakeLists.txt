@@ -123,7 +123,6 @@ SET(SRC_CLIENT
 	client/sound/ogg.c
 #	client/sound/qal/fixed.c
 	client/sound/qal/dynamic.c
-	client/system.c
 )
 
 SET(SRC_CLIENT_HTTP
@@ -175,6 +174,7 @@ SET(SRC_COMMON
 	common/zone.c
 	common/net/chan.c
 	common/net/net.c
+	system/system.c
 )
 
 SET(HEADERS_COMMON
@@ -497,12 +497,12 @@ if (CONFIG_LINUX_STEAM_RUNTIME_SUPPORT)
     IF(TARGET client)
         TARGET_LINK_LIBRARIES(client SDL2main SDL2-static z)
     ENDIF()
-    TARGET_LINK_LIBRARIES(server z)
+    TARGET_LINK_LIBRARIES(server SDL2main SDL2-static z)
 else()
     IF(TARGET client)
         TARGET_LINK_LIBRARIES(client SDL2main SDL2-static zlibstatic)
     ENDIF()
-    TARGET_LINK_LIBRARIES(server zlibstatic)
+    TARGET_LINK_LIBRARIES(server SDL2main SDL2-static zlibstatic)
 endif()
 
 IF(UNIX)

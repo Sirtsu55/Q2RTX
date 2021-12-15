@@ -26,16 +26,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/files.h"
 #include "common/zone.h"
+#include "system/system.h"
+#include <SDL.h>
+
+#if USE_CLIENT
 #include "client/client.h"
 #include "client/input.h"
 #include "client/keys.h"
 #include "client/ui.h"
 #include "client/video.h"
 #include "refresh/refresh.h"
-#include "system/system.h"
 #include "res/q2pro.xbm"
-#include <SDL.h>
-
 #ifdef _WINDOWS
 #include <ShellScalingAPI.h>
 
@@ -49,6 +50,20 @@ static vidFlags_t       sdl_flags;
 
 extern cvar_t* vid_display;
 extern cvar_t* vid_displaylist;
+#endif
+
+/*
+===============================================================================
+
+GENERAL ROUTINES
+
+===============================================================================
+*/
+
+unsigned Sys_Milliseconds(void)
+{
+    return SDL_GetTicks();
+}
 
 /*
 ===============================================================================
@@ -166,6 +181,8 @@ OPENGL STUFF
 
 ===============================================================================
 */
+
+#if USE_CLIENT
 
 #if REF_GL
 
@@ -438,7 +455,7 @@ char *VID_GetDefaultModeList(void)
     size = 8 + num_modes * 32 + 1;
     buf = Z_Malloc(size);
 
-    len = Q_strlcpy(buf, "desktop ", size);
+    len = Q_strlcpy(buf, "desktop borderless ", size);
     for (i = 0; i < num_modes; i++) {
         if (SDL_GetDisplayMode(vid_display->integer, i, &mode) < 0)
             break;
@@ -820,3 +837,5 @@ void IN_GrabMouse(bool grab)
     SDL_GetRelativeMouseState(NULL, NULL);
     SDL_ShowCursor(!(sdl_flags & QVF_FULLSCREEN));
 }
+
+#endif

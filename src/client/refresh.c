@@ -84,7 +84,9 @@ bool VID_GetFullscreen(vrect_t *rc, int *freq_p, int *depth_p)
 
     mode = 1;
     while (1) {
-        if (!strncmp(s, "desktop", 7)) {
+        if (!strncmp(s, "borderless", 10)) {
+            return false;
+        } else if (!strncmp(s, "desktop", 7)) {
             s += 7;
             if (*s && !Q_isspace(*s)) {
                 Com_DPrintf("Mode %d is malformed\n", mode);

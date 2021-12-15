@@ -265,7 +265,7 @@ create_poly(
 		? num_vertices
 		: num_vertices - 2;
 
-	const float emissive_factor = (texinfo->c.flags & SURF_LIGHT) && texinfo->material->bsp_radiance
+	const float emissive_factor = (texinfo->c.flags & SURF_LIGHT) && texinfo->material && texinfo->material->bsp_radiance
 		? (float)texinfo->radiance * cvar_pt_bsp_radiance_scale->value
 		: 1.f;
 
@@ -1220,9 +1220,10 @@ collect_sky_and_lava_light_polys(bsp_mesh_t *wm, bsp_t* bsp)
 
 		if (belongs_to_model(bsp, surf))
 			continue;
+		if (!surf->texinfo)
+			continue;
 
-		int flags = surf->drawflags;
-		if (surf->texinfo) flags |= surf->texinfo->c.flags;
+		int flags = surf->drawflags | surf->texinfo->c.flags;
 
 		bool is_sky = !!(flags & SURF_SKY);
 		bool is_light = !!(flags & SURF_LIGHT);

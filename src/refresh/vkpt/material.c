@@ -1070,7 +1070,9 @@ static void material_command(void)
 			// Regenerate emissive image
 			MAT_SynthesizeEmissive(mat);
 			// Make sure it's loaded by CL_PrepRefresh()
-			IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
+			if (mat->image_emissive) {
+				IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
+			}
 			reload_flags |= RELOAD_MAP;
 		}
 	}
