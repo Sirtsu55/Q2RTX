@@ -1298,8 +1298,13 @@ void CL_CalcViewValues(void)
     cl.delta_angles[2] = LerpShort(ops->pmove.delta_angles[2], ps->pmove.delta_angles[2], lerp);
 #endif
 
-    // don't interpolate blend color
-    Vector4Copy(ps->blend, cl.refdef.blend);
+    // don't interpolate blend color if it was blank
+    // on the prior frame
+    if (!ops->blend[3]) {
+        Vector4Copy(ps->blend, cl.refdef.blend);
+    } else {
+        LerpVector4(ops->blend, ps->blend, lerp, cl.refdef.blend);
+    }
 
 #if USE_FPS
     ps = &cl.keyframe.ps;

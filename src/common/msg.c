@@ -517,9 +517,6 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
     if (!bits && !(flags & MSG_ES_FORCE))
         return;     // nothing to send!
 
-    if (flags & MSG_ES_REMOVE)
-        bits |= U_REMOVE;
-
     //----------
 
     if (to->number & 0xff00)
