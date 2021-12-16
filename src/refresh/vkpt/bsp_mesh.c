@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "vkpt.h"
 #include "shader/global_textures.h"
 #include "material.h"
+#include "cameras.h"
 
 #include <assert.h>
 #include <float.h>
