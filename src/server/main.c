@@ -81,8 +81,6 @@ cvar_t  *sv_max_rate;
 cvar_t  *sv_calcpings_method;
 cvar_t  *sv_changemapcmd;
 
-cvar_t  *sv_strafejump_hack;
-cvar_t  *sv_waterjump_hack;
 #if USE_PACKETDUP
 cvar_t  *sv_packetdup_hack;
 #endif
@@ -897,27 +895,19 @@ static client_t *find_client_slot(conn_params_t *params)
 
 static void init_pmove_and_es_flags(client_t *newcl)
 {
-    int force;
-
     // copy default pmove parameters
     newcl->pmp = sv_pmp;
     newcl->pmp.airaccelerate = sv_airaccelerate->integer;
 
     // common extensions
     newcl->pmp.speedmult = 2;
-    force = 1;
-    newcl->pmp.strafehack = sv_strafejump_hack->integer >= force;
 
     // q2pro extensions
-    force = 2;
-    if (sv_qwmod->integer) {
+    //if (sv_qwmod->integer) {
         PmoveEnableQW(&newcl->pmp);
-    }
+    //}
     newcl->pmp.flyhack = true;
     newcl->pmp.flyfriction = 4;
-    newcl->esFlags |= MSG_ES_UMASK;
-    force = 1;
-    newcl->pmp.waterhack = sv_waterjump_hack->integer >= force;
 }
 
 static void send_connect_packet(client_t *newcl)
@@ -2032,9 +2022,6 @@ void SV_Init(void)
     sv_max_rate->changed(sv_max_rate);
     sv_calcpings_method = Cvar_Get("sv_calcpings_method", "2", 0);
     sv_changemapcmd = Cvar_Get("sv_changemapcmd", "", 0);
-
-    sv_strafejump_hack = Cvar_Get("sv_strafejump_hack", "1", CVAR_LATCH);
-    sv_waterjump_hack = Cvar_Get("sv_waterjump_hack", "0", CVAR_LATCH);
 
 #if USE_PACKETDUP
     sv_packetdup_hack = Cvar_Get("sv_packetdup_hack", "0", 0);

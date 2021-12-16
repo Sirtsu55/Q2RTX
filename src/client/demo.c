@@ -434,9 +434,7 @@ static void CL_Record_f(void)
     MSG_WriteShort(cl.clientNum);
     MSG_WriteString(cl.configstrings[CS_NAME]);
     
-    MSG_WriteByte(cl.pmp.strafehack);
     MSG_WriteByte(cl.pmp.qwmode);
-    MSG_WriteByte(cl.pmp.waterhack);
 
     // configstrings
     for (i = 0; i < MAX_CONFIGSTRINGS; i++) {

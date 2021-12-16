@@ -398,7 +398,7 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
                           const entity_packed_t *to,
                           msgEsFlags_t          flags)
 {
-    uint32_t    bits, mask;
+    uint32_t    bits;
 
     if (!to) {
         if (!from)
@@ -451,13 +451,8 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
             bits |= U_OLDORIGIN;
     }
 
-    if (flags & MSG_ES_UMASK)
-        mask = 0xffff0000;
-    else
-        mask = 0xffff8000;  // don't confuse old clients
-
     if (to->skinnum != from->skinnum) {
-        if (to->skinnum & mask)
+        if (to->skinnum & 0xffff0000)
             bits |= U_SKIN8 | U_SKIN16;
         else if (to->skinnum & 0x0000ff00)
             bits |= U_SKIN16;
@@ -473,7 +468,7 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
     }
 
     if (to->effects != from->effects) {
-        if (to->effects & mask)
+        if (to->effects & 0xffff0000)
             bits |= U_EFFECTS8 | U_EFFECTS16;
         else if (to->effects & 0x0000ff00)
             bits |= U_EFFECTS16;
@@ -482,7 +477,7 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
     }
 
     if (to->renderfx != from->renderfx) {
-        if (to->renderfx & mask)
+        if (to->renderfx & 0xffff0000)
             bits |= U_RENDERFX8 | U_RENDERFX16;
         else if (to->renderfx & 0x0000ff00)
             bits |= U_RENDERFX16;

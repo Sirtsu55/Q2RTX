@@ -241,9 +241,7 @@ void SV_New_f(void)
         MSG_WriteShort(sv_client->number);
     MSG_WriteString(sv.configstrings[CS_NAME]);
 
-    MSG_WriteByte(sv_client->pmp.strafehack);
     MSG_WriteByte(sv_client->pmp.qwmode);
-    MSG_WriteByte(sv_client->pmp.waterhack);
 
     SV_ClientAddMessage(sv_client, MSG_RELIABLE | MSG_CLEAR);
 

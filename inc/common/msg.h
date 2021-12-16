@@ -72,8 +72,7 @@ typedef enum {
     MSG_ES_FORCE        = (1 << 0),
     MSG_ES_NEWENTITY    = (1 << 1),
     MSG_ES_FIRSTPERSON  = (1 << 2),
-    MSG_ES_UMASK        = (1 << 3),
-    MSG_ES_REMOVE       = (1 << 4)
+    MSG_ES_REMOVE       = (1 << 3)
 } msgEsFlags_t;
 
 extern sizebuf_t    msg_write;

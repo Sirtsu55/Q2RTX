@@ -589,19 +589,8 @@ static void PM_CategorizePosition(void)
                 pm->s.pm_time = 0;
             }
 
-            if (!(pm->s.pm_flags & PMF_ON_GROUND)) {
-                // just hit the ground
-                pm->s.pm_flags |= PMF_ON_GROUND;
-                // don't do landing time if we were just going down a slope
-                if (pml.velocity[2] < -200 && !pmp->strafehack) {
-                    pm->s.pm_flags |= PMF_TIME_LAND;
-                    // don't allow another jump for a little while
-                    if (pml.velocity[2] < -400)
-                        pm->s.pm_time = 25;
-                    else
-                        pm->s.pm_time = 18;
-                }
-            }
+            // just hit the ground
+            pm->s.pm_flags |= PMF_ON_GROUND;
         }
 
         if (pm->numtouch < MAXTOUCH && trace.ent) {
@@ -665,21 +654,6 @@ static void PM_CheckJump(void)
     if (pm->waterlevel >= 2) {
         // swimming, not jumping
         pm->groundentity = NULL;
-
-        if (pmp->waterhack)
-            return;
-
-        if (pml.velocity[2] <= -300)
-            return;
-
-        // FIXME: makes velocity dependent on client FPS,
-        // even causes prediction misses
-        if (pm->watertype == CONTENTS_WATER)
-            pml.velocity[2] = 100;
-        else if (pm->watertype == CONTENTS_SLIME)
-            pml.velocity[2] = 80;
-        else
-            pml.velocity[2] = 50;
         return;
     }
 
