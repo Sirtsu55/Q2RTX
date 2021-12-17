@@ -43,9 +43,6 @@ cvar_t  *sv_timescale_time;
 cvar_t  *sv_timescale_warn;
 cvar_t  *sv_timescale_kick;
 cvar_t  *sv_allow_nodelta;
-#if USE_FPS
-cvar_t  *sv_fps;
-#endif
 
 cvar_t  *sv_timeout;            // seconds without any message
 cvar_t  *sv_zombietime;         // seconds to sink messages after disconnect
@@ -985,10 +982,6 @@ static void SVC_DirectConnect(void)
 	newcl->last_valid_cluster = -1;
     strcpy(newcl->reconnect_var, params.reconnect_var);
     strcpy(newcl->reconnect_val, params.reconnect_val);
-#if USE_FPS
-    newcl->framediv = sv.framediv;
-    newcl->settings[CLS_FPS] = BASE_FRAMERATE;
-#endif
 
     init_pmove_and_es_flags(newcl);
 
@@ -1277,7 +1270,7 @@ static void SV_CalcPings(void)
     }
 
     // update avg ping and fps every 10 seconds
-    res = sv.framenum % (10 * SV_FRAMERATE);
+    res = sv.framenum % (10 * BASE_FRAMERATE);
 
     FOR_EACH_CLIENT(cl) {
         if (cl->state == cs_spawned) {
@@ -1321,7 +1314,7 @@ static void SV_GiveMsec(void)
 {
     client_t    *cl;
 
-    if (!(sv.framenum % (16 * SV_FRAMEDIV))) {
+    if (!(sv.framenum % (16 * BASE_FRAMEDIV))) {
         FOR_EACH_CLIENT(cl) {
             cl->command_msec = 1800; // 1600 + some slop
         }
@@ -1559,9 +1552,6 @@ static void SV_PrepWorldFrame(void)
     edict_t    *ent;
     int        i;
 
-    if (!SV_FRAMESYNC)
-        return;
-
     for (i = 1; i < ge->num_edicts; i++) {
         ent = EDICT_NUM(i);
 
@@ -1748,8 +1738,8 @@ unsigned SV_Frame(unsigned msec)
 
     // move autonomous things around if enough time has passed
     sv.frameresidual += msec;
-    if (sv.frameresidual < SV_FRAMETIME) {
-        return SV_FRAMETIME - sv.frameresidual;
+    if (sv.frameresidual < BASE_FRAMETIME) {
+        return BASE_FRAMETIME - sv.frameresidual;
     }
 
     if (svs.initialized && !check_paused()) {
@@ -1786,9 +1776,9 @@ unsigned SV_Frame(unsigned msec)
     }
 
     // decide how long to sleep next frame
-    sv.frameresidual -= SV_FRAMETIME;
-    if (sv.frameresidual < SV_FRAMETIME) {
-        return SV_FRAMETIME - sv.frameresidual;
+    sv.frameresidual -= BASE_FRAMETIME;
+    if (sv.frameresidual < BASE_FRAMETIME) {
+        return BASE_FRAMETIME - sv.frameresidual;
     }
 
     // don't accumulate bogus residual
@@ -1850,6 +1840,8 @@ void SV_UserinfoChanged(client_t *cl)
     } else {
         cl->rate = 5000;
     }
+
+    cl->rate *= BASE_FRAMEDIV;
 
     // never drop over the loopback
     if (NET_IsLocalAddress(&cl->netchan->remote_address)) {
@@ -1995,9 +1987,6 @@ void SV_Init(void)
     sv_timescale_warn = Cvar_Get("sv_timescale_warn", "0", 0);
     sv_timescale_kick = Cvar_Get("sv_timescale_kick", "0", 0);
     sv_allow_nodelta = Cvar_Get("sv_allow_nodelta", "1", 0);
-#if USE_FPS
-    sv_fps = Cvar_Get("sv_fps", "10", CVAR_LATCH);
-#endif
     sv_force_reconnect = Cvar_Get("sv_force_reconnect", "", CVAR_LATCH);
     sv_show_name_changes = Cvar_Get("sv_show_name_changes", "0", 0);
 
@@ -2063,11 +2052,6 @@ void SV_Init(void)
     map_override_path = Cvar_Get("map_override_path", "", 0);
 
     init_rate_limits();
-
-#if USE_FPS
-    // set up default frametime for main loop
-    sv.frametime = BASE_FRAMETIME;
-#endif
 
     // set up default pmove parameters
     PmoveInit(&sv_pmp);
@@ -2173,11 +2157,6 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
 
     // reset rate limits
     init_rate_limits();
-
-#if USE_FPS
-    // set up default frametime for main loop
-    sv.frametime = BASE_FRAMETIME;
-#endif
 
     sv_client = NULL;
     sv_player = NULL;

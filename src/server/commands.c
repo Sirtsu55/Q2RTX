@@ -641,8 +641,8 @@ static void dump_settings(void)
     char        opt[8];
 
     Com_Printf(
-        "num name            proto options upd fps\n"
-        "--- --------------- ----- ------- --- ---\n");
+        "num name            proto options upd\n"
+        "--- --------------- ----- ------- ---\n");
 
     opt[6] = ' ';
     opt[7] = 0;
@@ -653,9 +653,9 @@ static void dump_settings(void)
         opt[3] = cl->settings[CLS_NOGIBS]         ? 'I' : ' ';
         opt[4] = cl->settings[CLS_NOFOOTSTEPS]    ? 'F' : ' ';
         opt[5] = cl->settings[CLS_NOPREDICT]      ? 'P' : ' ';
-        Com_Printf("%3i %-15.15s %5d %s %3d %3d\n",
+        Com_Printf("%3i %-15.15s %5d %s %3d\n",
                    cl->number, cl->name, cl->protocol, opt,
-                   cl->settings[CLS_PLAYERUPDATES], cl->settings[CLS_FPS]);
+                   cl->settings[CLS_PLAYERUPDATES]);
     }
 }
 
@@ -770,9 +770,6 @@ void SV_PrintMiscInfo(void)
     Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
     Com_Printf("ping                 %d\n", sv_client->ping);
     Com_Printf("movement fps         %d\n", sv_client->moves_per_sec);
-#if USE_FPS
-    Com_Printf("update rate          %d\n", sv_client->settings[CLS_FPS]);
-#endif
     Com_Printf("RTT (min/avg/max)    %d/%d/%d ms\n",
                sv_client->min_ping, AVG_PING(sv_client), sv_client->max_ping);
     Com_Printf("PL server to client  %.2f%% (approx)\n", PL_S2C(sv_client));

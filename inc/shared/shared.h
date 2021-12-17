@@ -1349,47 +1349,13 @@ typedef enum {
 #define DF_NO_SPHERES       0x00100000
 //ROGUE
 
-/*
-ROGUE - VERSIONS
-1234    08/13/1998      Activision
-1235    08/14/1998      Id Software
-1236    08/15/1998      Steve Tietze
-1237    08/15/1998      Phil Dobranski
-1238    08/15/1998      John Sheley
-1239    08/17/1998      Barrett Alexander
-1230    08/17/1998      Brandon Fish
-1245    08/17/1998      Don MacAskill
-1246    08/17/1998      David "Zoid" Kirsch
-1247    08/17/1998      Manu Smith
-1248    08/17/1998      Geoff Scully
-1249    08/17/1998      Andy Van Fossen
-1240    08/20/1998      Activision Build 2
-1256    08/20/1998      Ranger Clan
-1257    08/20/1998      Ensemble Studios
-1258    08/21/1998      Robert Duffy
-1259    08/21/1998      Stephen Seachord
-1250    08/21/1998      Stephen Heaslip
-1267    08/21/1998      Samir Sandesara
-1268    08/21/1998      Oliver Wyman
-1269    08/21/1998      Steven Marchegiano
-1260    08/21/1998      Build #2 for Nihilistic
-1278    08/21/1998      Build #2 for Ensemble
-
-9999    08/20/1998      Internal Use
-*/
-#define ROGUE_VERSION_ID        1278
-
-#define ROGUE_VERSION_STRING    "08/21/1998 Beta 2 for Ensemble"
-
-// ROGUE
-
-#define UF_AUTOSCREENSHOT   1
-#define UF_AUTORECORD       2
-#define UF_LOCALFOV         4
-#define UF_MUTE_PLAYERS     8
-#define UF_MUTE_OBSERVERS   16
-#define UF_MUTE_MISC        32
-#define UF_PLAYERFOV        64
+#define UF_AUTOSCREENSHOT   1   // stuff a screenshot
+#define UF_AUTORECORD       2   // force demo recording
+#define UF_LOCALFOV         4   // keep FOV when chasing
+#define UF_MUTE_PLAYERS     8   // mute
+#define UF_MUTE_OBSERVERS   16  // mute
+#define UF_MUTE_MISC        32  // mute
+#define UF_PLAYERFOV        64  // hard caps fov at 90??
 
 /*
 ==========================================================
@@ -1400,20 +1366,19 @@ ROGUE - VERSIONS
 */
 
 // default server FPS
-#define BASE_FRAMERATE          10
-#define BASE_FRAMETIME          100
-#define BASE_1_FRAMETIME        0.01f   // 1/BASE_FRAMETIME
-#define BASE_FRAMETIME_1000     0.1f    // BASE_FRAMETIME/1000
-
-// maximum variable FPS factor
-#define MAX_FRAMEDIV    6
+#define BASE_FRAMERATE          20
+// default server frametime (milliseconds per frame)
+#define BASE_FRAMETIME          ((1.0 / BASE_FRAMERATE) * 1000)
+#define BASE_1_FRAMETIME        (1.0 / BASE_FRAMETIME)
+#define BASE_FRAMETIME_1000     (BASE_FRAMETIME / 1000)
+// framediv compared to vanilla Q2
+#define BASE_FRAMEDIV           (BASE_FRAMERATE / 10)
 
 #define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
 #define SHORT2ANGLE(x)  ((x)*(360.0f/65536))
 
 #define COORD2SHORT(x)  ((int)((x)*8.0f))
 #define SHORT2COORD(x)  ((x)*(1.0f/8))
-
 
 //
 // config strings are a general means of communication from

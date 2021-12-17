@@ -50,7 +50,7 @@ typedef struct {
     int8_t          gunangles[3];
     int8_t          gunoffset[3];
     uint8_t         gunindex;
-    uint8_t         gunframe;
+    uint16_t        gunframe;
     uint8_t         blend[4];
     uint8_t         fov;
     uint8_t         rdflags;

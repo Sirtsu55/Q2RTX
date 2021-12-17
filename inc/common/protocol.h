@@ -245,7 +245,6 @@ typedef enum {
     CLS_NOBLEND,
     CLS_RECORDING,
     CLS_PLAYERUPDATES,
-    CLS_FPS,
 
     // q2pro specific
     CLS_NOGIBS            = 10,

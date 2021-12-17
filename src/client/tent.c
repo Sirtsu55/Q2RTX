@@ -177,7 +177,7 @@ static explosion_t *CL_PlainExplosion(bool big)
     VectorCopy(te.pos1, ex->ent.origin);
     ex->type = ex_poly;
     ex->ent.flags = RF_FULLBRIGHT;
-    ex->start = cl.servertime - CL_FRAMETIME;
+    ex->start = cl.servertime - BASE_FRAMETIME;
     ex->light = 350;
     VectorSet(ex->lightcolor, 1.0f, 0.5f, 0.5f);
     ex->ent.angles[1] = Q_rand() % 360;
@@ -216,7 +216,7 @@ void CL_SmokeAndFlash(vec3_t origin)
     ex->type = ex_misc;
     ex->frames = 4;
     ex->ent.flags = RF_TRANSLUCENT | RF_NOSHADOW;
-    ex->start = cl.servertime - CL_FRAMETIME;
+    ex->start = cl.servertime - BASE_FRAMETIME;
     ex->ent.model = cl_mod_smoke;
 
     ex = CL_AllocExplosion();
@@ -224,7 +224,7 @@ void CL_SmokeAndFlash(vec3_t origin)
     ex->type = ex_flash;
     ex->ent.flags = RF_FULLBRIGHT;
     ex->frames = 2;
-    ex->start = cl.servertime - CL_FRAMETIME;
+    ex->start = cl.servertime - BASE_FRAMETIME;
     ex->ent.model = cl_mod_flash;
 }
 
@@ -703,12 +703,12 @@ static void CL_AddPlayerBeams(void)
         // if coming from the player, update the start position
         if (b->entity == cl.frame.clientNum + 1) {
             // set up gun position
-            ps = CL_KEYPS;
-            ops = CL_OLDKEYPS;
+            ps = &cl.frame.ps;
+            ops = &cl.oldframe.ps;
 
             for (j = 0; j < 3; j++)
                 b->start[j] = cl.refdef.vieworg[j] + ops->gunoffset[j] +
-                    CL_KEYLERPFRAC * (ps->gunoffset[j] - ops->gunoffset[j]);
+                    cl.lerpfrac * (ps->gunoffset[j] - ops->gunoffset[j]);
 
             VectorMA(b->start, (hand_multiplier * b->offset[0]), cl.v_right, org);
             VectorMA(org, b->offset[1], cl.v_forward, org);
@@ -1181,7 +1181,7 @@ void CL_ParseTEnt(void)
 			ex->type = ex_flare;
 			break;
         }
-        ex->start = cl.servertime - CL_FRAMETIME;
+        ex->start = cl.servertime - BASE_FRAMETIME;
         ex->light = 150;
         ex->ent.model = cl_mod_explode;
         ex->frames = 4;
@@ -1276,7 +1276,7 @@ void CL_ParseTEnt(void)
         VectorCopy(te.pos1, ex->ent.origin);
         ex->type = ex_poly;
         ex->ent.flags = RF_FULLBRIGHT;
-        ex->start = cl.servertime - CL_FRAMETIME;
+        ex->start = cl.servertime - BASE_FRAMETIME;
         ex->light = 350;
         ex->lightcolor[0] = 0.0f;
         ex->lightcolor[1] = 1.0f;
@@ -1325,7 +1325,7 @@ void CL_ParseTEnt(void)
         // note to self
         // we need a better no draw flag
         ex->ent.flags = RF_BEAM;
-        ex->start = cl.servertime - CL_FRAMETIME;
+        ex->start = cl.servertime - BASE_FRAMETIME;
         ex->light = 100 + (Q_rand() % 75);
         ex->lightcolor[0] = 1.0f;
         ex->lightcolor[1] = 1.0f;

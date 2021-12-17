@@ -979,13 +979,15 @@ void PrecacheItem(gitem_t *it)
             s++;
 
         // determine type based on extension
-        if (!strcmp(data + len - 3, "md2"))
+        if (!strcmp(data + len - 3, "md2") ||
+            !strcmp(data + len - 3, "md3") ||
+            !strcmp(data + len - 3, "iqm"))
             gi.modelindex(data);
         else if (!strcmp(data + len - 3, "sp2"))
             gi.modelindex(data);
         else if (!strcmp(data + len - 3, "wav"))
             gi.soundindex(data);
-        if (!strcmp(data + len - 3, "pcx"))
+        else if (!strcmp(data + len - 3, "pcx"))
             gi.imageindex(data);
     }
 }
@@ -1224,7 +1226,7 @@ gitem_t itemlist[] = {
         Weapon_Blaster,
         "misc/w_pkup.wav",
         NULL, 0,
-        "models/weapons/v_blast/tris.md2",
+        "models/weapons/axe/axe.iqm",
         /* icon */      "w_blaster",
         /* pickup */    "Blaster",
         0,
