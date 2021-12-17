@@ -375,7 +375,7 @@ void SV_InitGame()
     svs.client_pool = SV_Mallocz(sizeof(client_t) * sv_maxclients->integer);
 
     svs.num_entities = sv_maxclients->integer * UPDATE_BACKUP * MAX_PACKET_ENTITIES;
-    svs.entities = SV_Mallocz(sizeof(entity_packed_t) * svs.num_entities);
+    svs.entities = SV_Mallocz(sizeof(entity_state_t) * svs.num_entities);
 
     Cvar_ClampInteger(sv_reserved_slots, 0, sv_maxclients->integer - 1);
 

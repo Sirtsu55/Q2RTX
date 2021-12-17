@@ -45,7 +45,7 @@ static void SV_CreateBaselines(void)
 {
     int        i;
     edict_t    *ent;
-    entity_packed_t *base, **chunk;
+    entity_state_t *base, **chunk;
 
     // clear baselines from previous level
     for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
@@ -75,18 +75,18 @@ static void SV_CreateBaselines(void)
         }
 
         base = *chunk + (i & SV_BASELINES_MASK);
-        MSG_PackEntity(base, &ent->s);
+        *base = ent->s;
     }
 }
 
-static void write_baseline(entity_packed_t *base)
+static void write_baseline(entity_state_t *base)
 {
     MSG_WriteDeltaEntity(NULL, base, sv_client->esFlags | MSG_ES_FORCE);
 }
 
 static void write_gamestate(void)
 {
-    entity_packed_t  *base;
+    entity_state_t  *base;
     int         i, j;
     size_t      length;
     char        *string;

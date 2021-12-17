@@ -43,8 +43,8 @@ static void SV_EmitPacketEntities(client_t         *client,
                                   client_frame_t   *to,
                                   int              clientEntityNum)
 {
-    entity_packed_t *newent;
-    const entity_packed_t *oldent;
+    entity_state_t *newent;
+    const entity_state_t *oldent;
     int i, oldnum, newnum, oldindex, newindex, from_num_entities;
     msgEsFlags_t flags;
 
@@ -277,10 +277,10 @@ void SV_BuildClientFrame(client_t *client)
     vec3_t      org;
     edict_t     *ent;
     edict_t     *clent;
-    client_frame_t  *frame;
-    entity_packed_t *state;
-    player_state_t  *ps;
-	entity_state_t  es;
+    client_frame_t *frame;
+    entity_state_t *state;
+    player_state_t *ps;
+	entity_state_t es;
     int         clientarea, clientcluster;
     mleaf_t     *leaf;
     byte        clientphs[VIS_MAX_BYTES];
@@ -431,7 +431,8 @@ void SV_BuildClientFrame(client_t *client)
 
         // add it to the circular client_entities array
         state = &svs.entities[svs.next_entity % svs.num_entities];
-        MSG_PackEntity(state, &es);
+
+        *state = es;
 
         // clear footsteps
         if (state->event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {

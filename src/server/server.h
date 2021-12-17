@@ -273,7 +273,7 @@ typedef struct client_s {
     unsigned            msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
-    entity_packed_t *baselines[SV_BASELINES_CHUNKS];
+    entity_state_t      *baselines[SV_BASELINES_CHUNKS];
 
     // netchan
     netchan_t       *netchan;
@@ -370,7 +370,7 @@ typedef struct server_static_s {
 
     unsigned        num_entities;   // maxclients*UPDATE_BACKUP*MAX_PACKET_ENTITIES
     unsigned        next_entity;    // next state to use
-    entity_packed_t *entities;      // [num_entities]
+    entity_state_t  *entities;      // [num_entities]
 
 #if USE_ZLIB
     z_stream        z;  // for compressing messages at once

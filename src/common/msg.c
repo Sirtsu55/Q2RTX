@@ -37,9 +37,9 @@ byte        msg_write_buffer[MAX_MSGLEN];
 sizebuf_t   msg_read;
 byte        msg_read_buffer[MAX_MSGLEN];
 
-const entity_packed_t   nullEntityState;
-const player_state_t    nullPlayerState;
-const usercmd_t         nullUserCmd;
+const entity_state_t   nullEntityState;
+const player_state_t   nullPlayerState;
+const usercmd_t        nullUserCmd;
 
 /*
 =============
@@ -199,6 +199,11 @@ void MSG_WritePos(const vec3_t pos)
     MSG_WriteCoord(pos[2]);
 }
 
+#define CoordCompare(x, y) \
+    (COORD2SHORT((x)[0]) == COORD2SHORT((y)[0]) && \
+    COORD2SHORT((x)[1]) == COORD2SHORT((y)[1]) && \
+    COORD2SHORT((x)[2]) == COORD2SHORT((y)[2]))
+
 /*
 =============
 MSG_WriteAngle
@@ -211,6 +216,11 @@ MSG_WriteAngle
 void MSG_WriteAngle(float f)
 {
     MSG_WriteByte(ANGLE2BYTE(f));
+}
+
+void MSG_WriteAngle16(float f)
+{
+    MSG_WriteShort(ANGLE2SHORT(f));
 }
 
 #if USE_CLIENT
@@ -365,38 +375,9 @@ void MSG_WriteDir(const vec3_t dir)
     MSG_WriteByte(best);
 }
 
-void MSG_PackEntity(entity_packed_t *out, const entity_state_t *in)
-{
-    // allow 0 to accomodate empty baselines
-    if (in->number < 0 || in->number >= MAX_EDICTS)
-        Com_Error(ERR_DROP, "%s: bad number: %d", __func__, in->number);
-
-    out->number = in->number;
-    out->origin[0] = COORD2SHORT(in->origin[0]);
-    out->origin[1] = COORD2SHORT(in->origin[1]);
-    out->origin[2] = COORD2SHORT(in->origin[2]);
-    out->angles[0] = ANGLE2SHORT(in->angles[0]);
-    out->angles[1] = ANGLE2SHORT(in->angles[1]);
-    out->angles[2] = ANGLE2SHORT(in->angles[2]);
-    out->old_origin[0] = COORD2SHORT(in->old_origin[0]);
-    out->old_origin[1] = COORD2SHORT(in->old_origin[1]);
-    out->old_origin[2] = COORD2SHORT(in->old_origin[2]);
-    out->modelindex = in->modelindex;
-    out->modelindex2 = in->modelindex2;
-    out->modelindex3 = in->modelindex3;
-    out->modelindex4 = in->modelindex4;
-    out->skinnum = in->skinnum;
-    out->effects = in->effects;
-    out->renderfx = in->renderfx;
-    out->solid = in->solid;
-    out->frame = in->frame;
-    out->sound = in->sound;
-    out->event = in->event;
-}
-
-void MSG_WriteDeltaEntity(const entity_packed_t *from,
-                          const entity_packed_t *to,
-                          msgEsFlags_t          flags)
+void MSG_WriteDeltaEntity(const entity_state_t *from,
+                          const entity_state_t *to,
+                          msgEsFlags_t         flags)
 {
     uint32_t    bits;
 
@@ -407,7 +388,7 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
         if (from->number < 1 || from->number >= MAX_EDICTS)
             Com_Error(ERR_DROP, "%s: bad number: %d", __func__, from->number);
 
-        bits = U_REMOVE;
+        uint32_t bits = U_REMOVE;
         if (from->number & 0xff00)
             bits |= U_NUMBER16 | U_MOREBITS1;
 
@@ -433,21 +414,21 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
     bits = 0;
 
     if (!(flags & MSG_ES_FIRSTPERSON)) {
-        if (to->origin[0] != from->origin[0])
+        if (COORD2SHORT(to->origin[0]) != COORD2SHORT(from->origin[0]))
             bits |= U_ORIGIN1;
-        if (to->origin[1] != from->origin[1])
+        if (COORD2SHORT(to->origin[1]) != COORD2SHORT(from->origin[1]))
             bits |= U_ORIGIN2;
-        if (to->origin[2] != from->origin[2])
+        if (COORD2SHORT(to->origin[2]) != COORD2SHORT(from->origin[2]))
             bits |= U_ORIGIN3;
 
-        if (to->angles[0] != from->angles[0])
+        if (ANGLE2SHORT(to->angles[0]) != ANGLE2SHORT(from->angles[0]))
             bits |= U_ANGLE1;
-        if (to->angles[1] != from->angles[1])
+        if (ANGLE2SHORT(to->angles[1]) != ANGLE2SHORT(from->angles[1]))
             bits |= U_ANGLE2;
-        if (to->angles[2] != from->angles[2])
+        if (ANGLE2SHORT(to->angles[2]) != ANGLE2SHORT(from->angles[2]))
             bits |= U_ANGLE3;
 
-        if ((flags & MSG_ES_NEWENTITY) && !VectorCompare(to->old_origin, from->origin))
+        if ((flags & MSG_ES_NEWENTITY) && !CoordCompare(to->old_origin, from->origin))
             bits |= U_OLDORIGIN;
     }
 
@@ -585,24 +566,21 @@ void MSG_WriteDeltaEntity(const entity_packed_t *from,
         MSG_WriteShort(to->renderfx);
 
     if (bits & U_ORIGIN1)
-        MSG_WriteShort(to->origin[0]);
+        MSG_WriteCoord(to->origin[0]);
     if (bits & U_ORIGIN2)
-        MSG_WriteShort(to->origin[1]);
+        MSG_WriteCoord(to->origin[1]);
     if (bits & U_ORIGIN3)
-        MSG_WriteShort(to->origin[2]);
+        MSG_WriteCoord(to->origin[2]);
 
     if (bits & U_ANGLE1)
-        MSG_WriteShort(to->angles[0]);
+        MSG_WriteAngle16(to->angles[0]);
     if (bits & U_ANGLE2)
-        MSG_WriteShort(to->angles[1]);
+        MSG_WriteAngle16(to->angles[1]);
     if (bits & U_ANGLE3)
-        MSG_WriteShort(to->angles[2]);
+        MSG_WriteAngle16(to->angles[2]);
 
-    if (bits & U_OLDORIGIN) {
-        MSG_WriteShort(to->old_origin[0]);
-        MSG_WriteShort(to->old_origin[1]);
-        MSG_WriteShort(to->old_origin[2]);
-    }
+    if (bits & U_OLDORIGIN)
+        MSG_WritePos(to->old_origin);
 
     if (bits & U_SOUND)
         MSG_WriteByte(to->sound);
@@ -617,15 +595,33 @@ static inline int OFFSET2CHAR(float x)
     return clamp(x, -32, 127.0f / 4) * 4;
 }
 
-static inline int BLEND2BYTE(float x)
+static inline void MSG_WriteOffset(vec3_t v)
 {
-    return clamp(x, 0, 1) * 255;
+    MSG_WriteChar(OFFSET2CHAR(v[0]));
+    MSG_WriteChar(OFFSET2CHAR(v[1]));
+    MSG_WriteChar(OFFSET2CHAR(v[2]));
 }
+
+#define OffsetCompare(x, y) \
+    (OFFSET2CHAR((x)[0]) == OFFSET2CHAR((y)[0]) && \
+    OFFSET2CHAR((x)[1]) == OFFSET2CHAR((y)[1]) && \
+    OFFSET2CHAR((x)[2]) == OFFSET2CHAR((y)[2]))
 
 static inline float CHAR2OFFSET(int x)
 {
     return x * 0.25f;
 }
+
+static inline int BLEND2BYTE(float x)
+{
+    return clamp(x, 0, 1) * 255;
+}
+
+#define BlendCompare(x, y) \
+    (BLEND2BYTE((x)[0]) == BLEND2BYTE((y)[0]) && \
+    BLEND2BYTE((x)[1]) == BLEND2BYTE((y)[1]) && \
+    BLEND2BYTE((x)[2]) == BLEND2BYTE((y)[2]) && \
+    BLEND2BYTE((x)[3]) == BLEND2BYTE((y)[3]))
 
 static inline float BYTE2BLEND(int x)
 {
@@ -718,39 +714,35 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
         VectorCopy(from->pmove.delta_angles, to->pmove.delta_angles);
     }
 
-    if (!VectorCompare(from->viewoffset, to->viewoffset)) {
+    if (!OffsetCompare(from->viewoffset, to->viewoffset)) {
         *pflags |= PS_VIEWOFFSET;
-        MSG_WriteChar(OFFSET2CHAR(to->viewoffset[0]));
-        MSG_WriteChar(OFFSET2CHAR(to->viewoffset[1]));
-        MSG_WriteChar(OFFSET2CHAR(to->viewoffset[2]));
+        MSG_WriteOffset(to->viewoffset);
     }
 
     if (!(flags & MSG_PS_IGNORE_VIEWANGLES)) {
-        if (from->viewangles[0] != to->viewangles[0] ||
-            from->viewangles[1] != to->viewangles[1]) {
+        if (ANGLE2SHORT(from->viewangles[0]) != ANGLE2SHORT(to->viewangles[0]) ||
+            ANGLE2SHORT(from->viewangles[1]) != ANGLE2SHORT(to->viewangles[1])) {
             *pflags |= PS_VIEWANGLES;
-            MSG_WriteShort(ANGLE2SHORT(to->viewangles[0]));
-            MSG_WriteShort(ANGLE2SHORT(to->viewangles[1]));
+            MSG_WriteAngle16(to->viewangles[0]);
+            MSG_WriteAngle16(to->viewangles[1]);
         }
 
-        if (from->viewangles[2] != to->viewangles[2]) {
+        if (ANGLE2SHORT(from->viewangles[2]) != ANGLE2SHORT(to->viewangles[2])) {
             eflags |= EPS_VIEWANGLE2;
-            MSG_WriteShort(ANGLE2SHORT(to->viewangles[2]));
+            MSG_WriteAngle16(to->viewangles[2]);
         }
     } else {
         // save previous state
         VectorCopy(from->viewangles, to->viewangles);
     }
 
-    if (!VectorCompare(from->kick_angles, to->kick_angles)) {
+    if (!OffsetCompare(from->kick_angles, to->kick_angles)) {
         *pflags |= PS_KICKANGLES;
-        MSG_WriteChar(OFFSET2CHAR(to->kick_angles[0]));
-        MSG_WriteChar(OFFSET2CHAR(to->kick_angles[1]));
-        MSG_WriteChar(OFFSET2CHAR(to->kick_angles[2]));
+        MSG_WriteOffset(to->kick_angles);
     }
 
     if (!(flags & MSG_PS_IGNORE_BLEND)) {
-        if (!Vector4Compare(from->blend, to->blend)) {
+        if (!BlendCompare(from->blend, to->blend)) {
             *pflags |= PS_BLEND;
             MSG_WriteByte(BLEND2BYTE(to->blend[0]));
             MSG_WriteByte(BLEND2BYTE(to->blend[1]));
@@ -762,7 +754,7 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
         Vector4Copy(from->blend, to->blend);
     }
 
-    if (from->fov != to->fov) {
+    if ((uint8_t) from->fov != (uint8_t) to->fov) {
         *pflags |= PS_FOV;
         MSG_WriteByte(to->fov);
     }
@@ -788,18 +780,14 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
             MSG_WriteByte(to->gunframe);
         }
 
-        if (!VectorCompare(from->gunoffset, to->gunoffset)) {
+        if (!OffsetCompare(from->gunoffset, to->gunoffset)) {
             eflags |= EPS_GUNOFFSET;
-            MSG_WriteChar(OFFSET2CHAR(to->gunoffset[0]));
-            MSG_WriteChar(OFFSET2CHAR(to->gunoffset[1]));
-            MSG_WriteChar(OFFSET2CHAR(to->gunoffset[2]));
+            MSG_WriteOffset(to->gunoffset);
         }
 
-        if (!VectorCompare(from->gunangles, to->gunangles)) {
+        if (!OffsetCompare(from->gunangles, to->gunangles)) {
             eflags |= EPS_GUNANGLES;
-            MSG_WriteChar(OFFSET2CHAR(to->gunangles[0]));
-            MSG_WriteChar(OFFSET2CHAR(to->gunangles[1]));
-            MSG_WriteChar(OFFSET2CHAR(to->gunangles[2]));
+            MSG_WriteOffset(to->gunangles);
         }
     } else {
         // save previous state

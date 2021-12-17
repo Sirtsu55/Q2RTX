@@ -22,26 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/protocol.h"
 #include "common/sizebuf.h"
 
-// entity and player states are pre-quantized before sending to make delta
-// comparsion easier
-typedef struct {
-    uint16_t    number;
-    int16_t     origin[3];
-    int16_t     angles[3];
-    int16_t     old_origin[3];
-    uint8_t     modelindex;
-    uint8_t     modelindex2;
-    uint8_t     modelindex3;
-    uint8_t     modelindex4;
-    uint32_t    skinnum;
-    uint32_t    effects;
-    uint32_t    renderfx;
-    uint32_t    solid;
-    uint16_t    frame;
-    uint8_t     sound;
-    uint8_t     event;
-} entity_packed_t;
-
 typedef enum {
     MSG_PS_IGNORE_GUNINDEX      = (1 << 0),
     MSG_PS_IGNORE_GUNFRAMES     = (1 << 1),
@@ -63,9 +43,9 @@ extern byte         msg_write_buffer[MAX_MSGLEN];
 extern sizebuf_t    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
-extern const entity_packed_t    nullEntityState;
-extern const player_state_t     nullPlayerState;
-extern const usercmd_t          nullUserCmd;
+extern const entity_state_t    nullEntityState;
+extern const player_state_t    nullPlayerState;
+extern const usercmd_t         nullUserCmd;
 
 void    MSG_Init(void);
 
@@ -77,13 +57,13 @@ void    MSG_WriteLong(int c);
 void    MSG_WriteString(const char *s);
 void    MSG_WritePos(const vec3_t pos);
 void    MSG_WriteAngle(float f);
+void    MSG_WriteAngle16(float f);
 #if USE_CLIENT
 void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd);
 #endif
 void    MSG_WriteDir(const vec3_t vector);
-void    MSG_PackEntity(entity_packed_t *out, const entity_state_t *in);
-void    MSG_WriteDeltaEntity(const entity_packed_t *from, const entity_packed_t *to, msgEsFlags_t flags);
+void    MSG_WriteDeltaEntity(const entity_state_t *from, const entity_state_t *to, msgEsFlags_t flags);
 int     MSG_WriteDeltaPlayerstate(const player_state_t *from, player_state_t *to, msgPsFlags_t flags);
 
 static inline void *MSG_WriteData(const void *data, size_t len)
