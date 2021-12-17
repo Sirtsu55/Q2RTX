@@ -167,7 +167,7 @@ SV_WriteFrameToClient
 void SV_WriteFrameToClient(client_t *client)
 {
     client_frame_t  *frame, *oldframe;
-    player_packed_t *oldstate;
+    player_state_t  *oldstate;
     uint32_t        extraflags, delta;
     int             suppressed;
     byte            *b1, *b2;
@@ -312,7 +312,7 @@ void SV_BuildClientFrame(client_t *client)
     frame->areabytes = CM_WriteAreaBits(&sv.cm, frame->areabits, clientarea);
 
     // grab the current player_state_t
-    MSG_PackPlayer(&frame->ps, ps);
+    frame->ps = *ps;
 
     // grab the current clientNum
     if (g_features->integer & GMF_CLIENTNUM) {

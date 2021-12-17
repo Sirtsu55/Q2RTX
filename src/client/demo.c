@@ -145,21 +145,16 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
                              int fromnum, int tonum)
 {
-    player_packed_t oldpack, newpack;
-
     uint32_t delta;
-    player_packed_t *oldstate;
+    player_state_t *oldstate;
 
     if (from) {
-        oldstate = &oldpack;
-        MSG_PackPlayer(&oldpack, &from->ps);
+        oldstate = &from->ps;
         delta = tonum - fromnum;
     } else {
         oldstate = NULL;
         delta = 31;
     }
-
-    MSG_PackPlayer(&newpack, &to->ps);
 
     // first byte to be patched
     byte *b1 = SZ_GetSpace(&msg_write, 1);
@@ -181,7 +176,7 @@ static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
     int suppressed = 0;
 
     // delta encode the playerstate
-    uint32_t extraflags = MSG_WriteDeltaPlayerstate(oldstate, &newpack, psFlags);
+    uint32_t extraflags = MSG_WriteDeltaPlayerstate(oldstate, &to->ps, psFlags);
 
     // delta encode the clientNum
     int clientNum = from ? from->clientNum : 0;

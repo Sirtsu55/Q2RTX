@@ -42,21 +42,6 @@ typedef struct {
     uint8_t     event;
 } entity_packed_t;
 
-typedef struct {
-    pmove_state_t   pmove;
-    int16_t         viewangles[3];
-    int8_t          viewoffset[3];
-    int8_t          kick_angles[3];
-    int8_t          gunangles[3];
-    int8_t          gunoffset[3];
-    uint8_t         gunindex;
-    uint16_t        gunframe;
-    uint8_t         blend[4];
-    uint8_t         fov;
-    uint8_t         rdflags;
-    int16_t         stats[MAX_STATS];
-} player_packed_t;
-
 typedef enum {
     MSG_PS_IGNORE_GUNINDEX      = (1 << 0),
     MSG_PS_IGNORE_GUNFRAMES     = (1 << 1),
@@ -79,7 +64,7 @@ extern sizebuf_t    msg_read;
 extern byte         msg_read_buffer[MAX_MSGLEN];
 
 extern const entity_packed_t    nullEntityState;
-extern const player_packed_t    nullPlayerState;
+extern const player_state_t     nullPlayerState;
 extern const usercmd_t          nullUserCmd;
 
 void    MSG_Init(void);
@@ -99,8 +84,7 @@ int     MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd);
 void    MSG_WriteDir(const vec3_t vector);
 void    MSG_PackEntity(entity_packed_t *out, const entity_state_t *in);
 void    MSG_WriteDeltaEntity(const entity_packed_t *from, const entity_packed_t *to, msgEsFlags_t flags);
-void    MSG_PackPlayer(player_packed_t *out, const player_state_t *in);
-int     MSG_WriteDeltaPlayerstate(const player_packed_t *from, player_packed_t *to, msgPsFlags_t flags);
+int     MSG_WriteDeltaPlayerstate(const player_state_t *from, player_state_t *to, msgPsFlags_t flags);
 
 static inline void *MSG_WriteData(const void *data, size_t len)
 {

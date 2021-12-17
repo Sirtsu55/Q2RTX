@@ -84,7 +84,7 @@ typedef struct {
     int         number;
     int         num_entities;
     unsigned    first_entity;
-    player_packed_t ps;
+    player_state_t ps;
     int         clientNum;
     int         areabytes;
     byte        areabits[MAX_MAP_AREA_BYTES];  // portalarea visibility bits
