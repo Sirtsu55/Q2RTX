@@ -8,83 +8,83 @@ if (UNIX)
 	endif()
 endif()
 
-SET(SRC_BASEQ2
-	baseq2/g_ai.c
-	baseq2/g_chase.c
-	baseq2/g_cmds.c
-	baseq2/g_combat.c
-	baseq2/g_func.c
-	baseq2/g_items.c
-	baseq2/g_main.c
-	baseq2/g_misc.c
-	baseq2/g_monster.c
-	baseq2/g_phys.c
-	baseq2/g_ptrs.c
-	baseq2/g_save.c
-	baseq2/g_spawn.c
-	baseq2/g_svcmds.c
-	baseq2/g_target.c
-	baseq2/g_trigger.c
-	baseq2/g_turret.c
-	baseq2/g_utils.c
-	baseq2/g_weapon.c
-	baseq2/m_actor.c
-	baseq2/m_berserk.c
-	baseq2/m_boss2.c
-	baseq2/m_boss3.c
-	baseq2/m_boss31.c
-	baseq2/m_boss32.c
-	baseq2/m_brain.c
-	baseq2/m_chick.c
-	baseq2/m_flipper.c
-	baseq2/m_float.c
-	baseq2/m_flyer.c
-	baseq2/m_gladiator.c
-	baseq2/m_gunner.c
-	baseq2/m_hover.c
-	baseq2/m_hover.c
-	baseq2/m_infantry.c
-	baseq2/m_insane.c
-	baseq2/m_medic.c
-	baseq2/m_move.c
-	baseq2/m_mutant.c
-	baseq2/m_parasite.c
-	baseq2/m_soldier.c
-	baseq2/m_supertank.c
-	baseq2/m_tank.c
-	baseq2/p_client.c
-	baseq2/p_hud.c
-	baseq2/p_trail.c
-	baseq2/p_view.c
-	baseq2/p_weapon.c
+SET(SRC_BASENAC
+	basenac/g_ai.c
+	basenac/g_chase.c
+	basenac/g_cmds.c
+	basenac/g_combat.c
+	basenac/g_func.c
+	basenac/g_items.c
+	basenac/g_main.c
+	basenac/g_misc.c
+	basenac/g_monster.c
+	basenac/g_phys.c
+	basenac/g_ptrs.c
+	basenac/g_save.c
+	basenac/g_spawn.c
+	basenac/g_svcmds.c
+	basenac/g_target.c
+	basenac/g_trigger.c
+	basenac/g_turret.c
+	basenac/g_utils.c
+	basenac/g_weapon.c
+	basenac/m_actor.c
+	basenac/m_berserk.c
+	basenac/m_boss2.c
+	basenac/m_boss3.c
+	basenac/m_boss31.c
+	basenac/m_boss32.c
+	basenac/m_brain.c
+	basenac/m_chick.c
+	basenac/m_flipper.c
+	basenac/m_float.c
+	basenac/m_flyer.c
+	basenac/m_gladiator.c
+	basenac/m_gunner.c
+	basenac/m_hover.c
+	basenac/m_hover.c
+	basenac/m_infantry.c
+	basenac/m_insane.c
+	basenac/m_medic.c
+	basenac/m_move.c
+	basenac/m_mutant.c
+	basenac/m_parasite.c
+	basenac/m_soldier.c
+	basenac/m_supertank.c
+	basenac/m_tank.c
+	basenac/p_client.c
+	basenac/p_hud.c
+	basenac/p_trail.c
+	basenac/p_view.c
+	basenac/p_weapon.c
 )
 
-SET(HEADERS_BASEQ2
-	baseq2/g_local.h
-	baseq2/g_ptrs.h
-	baseq2/m_actor.h
-	baseq2/m_berserk.h
-	baseq2/m_boss2.h
-	baseq2/m_boss31.h
-	baseq2/m_boss32.h
-	baseq2/m_brain.h
-	baseq2/m_chick.h
-	baseq2/m_flipper.h
-	baseq2/m_float.h
-	baseq2/m_flyer.h
-	baseq2/m_gladiator.h
-	baseq2/m_gunner.h
-	baseq2/m_hover.h
-	baseq2/m_infantry.h
-	baseq2/m_insane.h
-	baseq2/m_medic.h
-	baseq2/m_mutant.h
-	baseq2/m_parasite.h
-	baseq2/m_player.h
-	baseq2/m_rider.h
-	baseq2/m_soldier.h
-	baseq2/m_supertank.h
-	baseq2/m_tank.h
+SET(HEADERS_BASENAC
+	basenac/g_local.h
+	basenac/g_ptrs.h
+	basenac/m_actor.h
+	basenac/m_berserk.h
+	basenac/m_boss2.h
+	basenac/m_boss31.h
+	basenac/m_boss32.h
+	basenac/m_brain.h
+	basenac/m_chick.h
+	basenac/m_flipper.h
+	basenac/m_float.h
+	basenac/m_flyer.h
+	basenac/m_gladiator.h
+	basenac/m_gunner.h
+	basenac/m_hover.h
+	basenac/m_infantry.h
+	basenac/m_insane.h
+	basenac/m_medic.h
+	basenac/m_mutant.h
+	basenac/m_parasite.h
+	basenac/m_player.h
+	basenac/m_rider.h
+	basenac/m_soldier.h
+	basenac/m_supertank.h
+	basenac/m_tank.h
 )
 
 
@@ -365,7 +365,7 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
-ADD_LIBRARY(baseq2 SHARED ${SRC_BASEQ2} ${HEADERS_BASEQ2} ${SRC_SHARED})
+ADD_LIBRARY(basenac SHARED ${SRC_BASENAC} ${HEADERS_BASENAC} ${SRC_SHARED})
 
 IF(WIN32)
     IF(IS_64_BIT)
@@ -447,8 +447,8 @@ IF (TARGET client)
     TARGET_LINK_LIBRARIES(client tinyobjloader)
 ENDIF()
 
-SOURCE_GROUP("baseq2\\sources" FILES ${SRC_BASEQ2})
-SOURCE_GROUP("baseq2\\headers" FILES ${HEADERS_BASEQ2})
+SOURCE_GROUP("basenac\\sources" FILES ${SRC_BASENAC})
+SOURCE_GROUP("basenac\\headers" FILES ${HEADERS_BASENAC})
 SOURCE_GROUP("client\\sources" FILES ${SRC_CLIENT})
 SOURCE_GROUP("client\\headers" FILES ${HEADERS_CLIENT})
 SOURCE_GROUP("server\\sources" FILES ${SRC_SERVER})
@@ -472,8 +472,8 @@ IF (WIN32)
     ENDIF()
 
     TARGET_INCLUDE_DIRECTORIES(server PRIVATE ../VC/inc)
-    TARGET_INCLUDE_DIRECTORIES(baseq2 PRIVATE ../VC/inc)
-    TARGET_SOURCES(baseq2 PRIVATE windows/res/baseq2.rc)
+    TARGET_INCLUDE_DIRECTORIES(basenac PRIVATE ../VC/inc)
+    TARGET_SOURCES(basenac PRIVATE windows/res/baseq2.rc)
 
     TARGET_LINK_LIBRARIES(server winmm ws2_32)
 
@@ -481,10 +481,10 @@ IF (WIN32)
 
     # macro redefinition, deprecation
     TARGET_COMPILE_OPTIONS(server PRIVATE /wd4005 /wd4996)
-    TARGET_COMPILE_OPTIONS(baseq2 PRIVATE /wd4005 /wd4996)
+    TARGET_COMPILE_OPTIONS(basenac PRIVATE /wd4005 /wd4996)
 ENDIF()
 
-TARGET_INCLUDE_DIRECTORIES(baseq2 PRIVATE ../inc)
+TARGET_INCLUDE_DIRECTORIES(basenac PRIVATE ../inc)
 
 IF(TARGET client)
     TARGET_INCLUDE_DIRECTORIES(client PRIVATE ../inc)
@@ -542,7 +542,7 @@ ENDIF()
 
 # specify both LIBRARY and RUNTIME because one works only on Windows and another works only on Linux
 
-SET_TARGET_PROPERTIES(baseq2
+SET_TARGET_PROPERTIES(basenac
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/basenac"
     LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/basenac"
@@ -560,20 +560,20 @@ SET_TARGET_PROPERTIES(baseq2
 
 IF(IS_64_BIT)
 	IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-		SET_TARGET_PROPERTIES(baseq2
+		SET_TARGET_PROPERTIES(basenac
 			PROPERTIES
 			LIBRARY_OUTPUT_NAME "gameaarch64"
 			RUNTIME_OUTPUT_NAME "gameaarch64"
 		)
 	ELSE()
-		SET_TARGET_PROPERTIES(baseq2
+		SET_TARGET_PROPERTIES(basenac
 			PROPERTIES
 			LIBRARY_OUTPUT_NAME "gamex86_64"
 			RUNTIME_OUTPUT_NAME "gamex86_64"
 		)
 	ENDIF()
 ELSE()
-    SET_TARGET_PROPERTIES(baseq2
+    SET_TARGET_PROPERTIES(basenac
         PROPERTIES
         LIBRARY_OUTPUT_NAME "gamex86"
         RUNTIME_OUTPUT_NAME "gamex86"
@@ -594,7 +594,7 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
 	        SCRIPT "${CMAKE_SOURCE_DIR}/setup/package_shaders.cmake"
 	        COMPONENT shareware)
 	ENDIF()
-    INSTALL(TARGETS baseq2 DESTINATION share/quake2rtx/baseq2 COMPONENT shareware)
+    INSTALL(TARGETS basenac DESTINATION share/quake2rtx/baseq2 COMPONENT shareware)
 
     # Package data files, including the shareware pak0 for demo levels
     set (SHAREWARE_DATA_FILES_LIST
