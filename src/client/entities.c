@@ -136,7 +136,7 @@ static void parse_entity_update(const entity_state_t *state)
 
     // work around Q2PRO server bandwidth optimization
     if (entity_is_optimized(state)) {
-        VectorScale(cl.frame.ps.pmove.origin, 0.125f, origin_v);
+        VectorScale(cl.frame.ps.pmove.origin, 1.f / COORDSCALE, origin_v);
         origin = origin_v;
     } else {
         origin = state->origin;
@@ -215,8 +215,8 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        VectorScale(cl.frame.ps.pmove.origin, 0.125f, cl.predicted_origin);
-        VectorScale(cl.frame.ps.pmove.velocity, 0.125f, cl.predicted_velocity);
+        VectorScale(cl.frame.ps.pmove.origin, 1.f / COORDSCALE, cl.predicted_origin);
+        VectorScale(cl.frame.ps.pmove.velocity, 1.f / COORDSCALE, cl.predicted_velocity);
         if (cl.frame.ps.pmove.pm_type < PM_DEAD) {
             // server won't send angles for these pm_types
             CL_PredictAngles();
@@ -1179,7 +1179,7 @@ void CL_CalcViewValues(void)
         VectorMA(cl.predicted_origin, backlerp, cl.prediction_error, cl.refdef.vieworg);
 
         // smooth out stair climbing
-        if (cl.predicted_step < 127 * 0.125f) {
+        if (cl.predicted_step < SHORT2COORD(127)) {
             delta <<= 1; // small steps
         }
         if (delta < 100) {

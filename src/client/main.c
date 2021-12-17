@@ -2052,7 +2052,7 @@ static size_t CL_Ups_m(char *buffer, size_t size)
         cl_predict->integer) {
         VectorCopy(cl.predicted_velocity, vel);
     } else {
-        VectorScale(cl.frame.ps.pmove.velocity, 0.125f, vel);
+        VectorScale(cl.frame.ps.pmove.velocity, 1.f / COORDSCALE, vel);
     }
 
     return Q_scnprintf(buffer, size, "%.f", VectorLength(vel));

@@ -67,7 +67,7 @@ void CL_CheckPredictionError(void)
     VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK]);
 
     // save for error interpolation
-    VectorScale(delta, 0.125f, cl.prediction_error);
+    VectorScale(delta, 1.f / COORDSCALE, cl.prediction_error);
 }
 
 /*
@@ -175,7 +175,8 @@ void CL_PredictMovement(void)
 {
     unsigned    ack, current, frame;
     pmove_t     pm;
-    int         step, oldz;
+    int         oldz;
+    float       step;
 
     if (cls.state != ca_active) {
         return;
@@ -245,9 +246,9 @@ void CL_PredictMovement(void)
 
     if (pm.s.pm_type != PM_SPECTATOR && (pm.s.pm_flags & PMF_ON_GROUND)) {
         oldz = cl.predicted_origins[cl.predicted_step_frame & CMD_MASK][2];
-        step = pm.s.origin[2] - oldz;
-        if (step > 63 && step < 160) {
-            cl.predicted_step = step * 0.125f;
+        step = SHORT2COORD(pm.s.origin[2] - oldz);
+        if (step > 7.875f && step < 20) {
+            cl.predicted_step = step;
             cl.predicted_step_time = cls.realtime;
             cl.predicted_step_frame = frame + 1;    // don't double step
         }
@@ -258,8 +259,8 @@ void CL_PredictMovement(void)
     }
 
     // copy results out for rendering
-    VectorScale(pm.s.origin, 0.125f, cl.predicted_origin);
-    VectorScale(pm.s.velocity, 0.125f, cl.predicted_velocity);
+    VectorScale(pm.s.origin, 1.f / COORDSCALE, cl.predicted_origin);
+    VectorScale(pm.s.velocity, 1.f / COORDSCALE, cl.predicted_velocity);
     VectorCopy(pm.viewangles, cl.predicted_angles);
 }
 

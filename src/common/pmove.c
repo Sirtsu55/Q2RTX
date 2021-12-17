@@ -881,7 +881,7 @@ static bool PM_GoodPosition(void)
         return true;
 
     for (i = 0; i < 3; i++)
-        origin[i] = end[i] = pm->s.origin[i] * 0.125f;
+        origin[i] = end[i] = pm->s.origin[i] * (1.f / COORDSCALE);
     trace = pm->trace(origin, pm->mins, pm->maxs, end);
 
     return !trace.allsolid;
@@ -891,7 +891,7 @@ static bool PM_GoodPosition(void)
 ================
 PM_SnapPosition
 
-On exit, the origin will have a value that is pre-quantized to the 0.125
+On exit, the origin will have a value that is pre-quantized to the COORDSCALE
 precision of the network channel and in a valid position.
 ================
 */
@@ -905,15 +905,15 @@ static void PM_SnapPosition(void)
 
     // snap velocity to eigths
     for (i = 0; i < 3; i++)
-        pm->s.velocity[i] = (int)(pml.velocity[i] * 8);
+        pm->s.velocity[i] = (int)(pml.velocity[i] * COORDSCALE);
 
     for (i = 0; i < 3; i++) {
         if (pml.origin[i] >= 0)
             sign[i] = 1;
         else
             sign[i] = -1;
-        pm->s.origin[i] = (int)(pml.origin[i] * 8);
-        if (pm->s.origin[i] * 0.125f == pml.origin[i])
+        pm->s.origin[i] = (int)(pml.origin[i] * COORDSCALE);
+        if (pm->s.origin[i] * (1.f / COORDSCALE) == pml.origin[i])
             sign[i] = 0;
     }
     VectorCopy(pm->s.origin, base);
@@ -955,9 +955,9 @@ static void PM_InitialSnapPosition(void)
             for (x = 0; x < 3; x++) {
                 pm->s.origin[0] = base[0] + offset[x];
                 if (PM_GoodPosition()) {
-                    pml.origin[0] = pm->s.origin[0] * 0.125f;
-                    pml.origin[1] = pm->s.origin[1] * 0.125f;
-                    pml.origin[2] = pm->s.origin[2] * 0.125f;
+                    pml.origin[0] = pm->s.origin[0] * (1.f / COORDSCALE);
+                    pml.origin[1] = pm->s.origin[1] * (1.f / COORDSCALE);
+                    pml.origin[2] = pm->s.origin[2] * (1.f / COORDSCALE);
                     VectorCopy(pm->s.origin, pml.previous_origin);
                     return;
                 }
@@ -1018,8 +1018,8 @@ void Pmove(pmove_t *pmove, pmoveParams_t *params)
     memset(&pml, 0, sizeof(pml));
 
     // convert origin and velocity to float values
-    VectorScale(pm->s.origin, 0.125f, pml.origin);
-    VectorScale(pm->s.velocity, 0.125f, pml.velocity);
+    VectorScale(pm->s.origin, 1.f / COORDSCALE, pml.origin);
+    VectorScale(pm->s.velocity, 1.f / COORDSCALE, pml.velocity);
 
     // save old org in case we get stuck
     VectorCopy(pm->s.origin, pml.previous_origin);

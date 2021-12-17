@@ -1366,7 +1366,7 @@ typedef enum {
 */
 
 // default server FPS
-#define BASE_FRAMERATE          20
+#define BASE_FRAMERATE          10
 // default server frametime (milliseconds per frame)
 #define BASE_FRAMETIME          ((1.0 / BASE_FRAMERATE) * 1000)
 #define BASE_1_FRAMETIME        (1.0 / BASE_FRAMETIME)
@@ -1377,8 +1377,10 @@ typedef enum {
 #define ANGLE2SHORT(x)  ((int)((x)*65536/360) & 65535)
 #define SHORT2ANGLE(x)  ((x)*(360.0f/65536))
 
-#define COORD2SHORT(x)  ((int)((x)*8.0f))
-#define SHORT2COORD(x)  ((x)*(1.0f/8))
+#define COORDSCALE  8.f
+
+#define COORD2SHORT(x)  ((int)((x)*COORDSCALE))
+#define SHORT2COORD(x)  ((x)*(1.0f/COORDSCALE))
 
 //
 // config strings are a general means of communication from

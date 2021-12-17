@@ -398,12 +398,12 @@ bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
     // be accurate for client side prediction
     for (i = 0 ; i < 3 ; i++) {
         float   temp;
-        temp = move[i] * 8.0f;
+        temp = COORD2SHORT(move[i]);
         if (temp > 0.0f)
             temp += 0.5f;
         else
             temp -= 0.5f;
-        move[i] = 0.125f * (int)temp;
+        move[i] = SHORT2COORD((int)temp);
     }
 
     // find the bounding box
