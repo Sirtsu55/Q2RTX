@@ -28,7 +28,6 @@ void CL_CheckPredictionError(void)
     int         frame;
     int         delta[3];
     unsigned    cmd;
-    int         len;
 
     if (!cls.netchan) {
         return;
@@ -50,8 +49,8 @@ void CL_CheckPredictionError(void)
     VectorSubtract(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK], delta);
 
     // save the prediction error for interpolation
-    len = abs(delta[0]) + abs(delta[1]) + abs(delta[2]);
-    if (len < 1 || len > 640) {
+    float len = SHORT2COORD(abs(delta[0]) + abs(delta[1]) + abs(delta[2]));
+    if (len < SHORT2COORD(1) || len > SHORT2COORD(640)) {
         // > 80 world units is a teleport or something
         VectorClear(cl.prediction_error);
         return;
@@ -166,9 +165,7 @@ Sets cl.predicted_origin and cl.predicted_angles
 */
 void CL_PredictAngles(void)
 {
-    cl.predicted_angles[0] = cl.viewangles[0] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[0]);
-    cl.predicted_angles[1] = cl.viewangles[1] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[1]);
-    cl.predicted_angles[2] = cl.viewangles[2] + SHORT2ANGLE(cl.frame.ps.pmove.delta_angles[2]);
+    VectorAdd(cl.viewangles, cl.frame.ps.pmove.delta_angles, cl.predicted_angles);
 }
 
 void CL_PredictMovement(void)

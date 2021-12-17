@@ -1728,9 +1728,7 @@ void teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t
     other->s.event = EV_PLAYER_TELEPORT;
 
     // set angles
-    for (i = 0 ; i < 3 ; i++) {
-        other->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(dest->s.angles[i] - other->client->resp.cmd_angles[i]);
-    }
+    VectorSubtract(dest->s.angles, other->client->resp.cmd_angles, other->client->ps.pmove.delta_angles);
 
     VectorClear(other->s.angles);
     VectorClear(other->client->ps.viewangles);

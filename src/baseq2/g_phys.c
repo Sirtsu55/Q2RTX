@@ -394,14 +394,14 @@ bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
     pushed_t    *p;
     vec3_t      org, org2, move2, forward, right, up;
 
-    // clamp the move to 1/8 units, so the position will
+    // clamp the move to COORDSCALE units, so the position will
     // be accurate for client side prediction
     for (i = 0 ; i < 3 ; i++) {
         float   temp;
         temp = COORD2SHORT(move[i]);
         if (temp > 0.0f)
             temp += 0.5f;
-        else
+        else if (temp < 0.0f)
             temp -= 0.5f;
         move[i] = SHORT2COORD((int)temp);
     }

@@ -55,6 +55,7 @@ void    MSG_WriteByte(int c);
 void    MSG_WriteShort(int c);
 void    MSG_WriteLong(int c);
 void    MSG_WriteString(const char *s);
+void    MSG_WriteCoord(float f);
 void    MSG_WritePos(const vec3_t pos);
 void    MSG_WriteAngle(float f);
 void    MSG_WriteAngle16(float f);

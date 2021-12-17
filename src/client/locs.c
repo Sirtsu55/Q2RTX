@@ -93,9 +93,9 @@ void LOC_LoadLocations(void)
                 Com_WPrintf("Line %d is incomplete in %s\n", line, path);
             } else {
                 loc = LOC_Alloc(Cmd_RawArgsFrom(3));
-                loc->origin[0] = SHORT2COORD(atof(Cmd_Argv(0)));
-                loc->origin[1] = SHORT2COORD(atof(Cmd_Argv(1)));
-                loc->origin[2] = SHORT2COORD(atof(Cmd_Argv(2)));
+                loc->origin[0] = atof(Cmd_Argv(0));
+                loc->origin[1] = atof(Cmd_Argv(1));
+                loc->origin[2] = atof(Cmd_Argv(2));
                 List_Append(&cl_locations, &loc->entry);
                 count++;
             }
@@ -355,9 +355,9 @@ static void LOC_Write_f(void)
     count = 0;
     LIST_FOR_EACH(location_t, loc, &cl_locations, entry) {
         FS_FPrintf(f, "%.f %.f %.f %s\n",
-                   loc->origin[0] * 8,
-                   loc->origin[1] * 8,
-                   loc->origin[2] * 8,
+                   loc->origin[0],
+                   loc->origin[1],
+                   loc->origin[2],
                    loc->name);
         count++;
     }

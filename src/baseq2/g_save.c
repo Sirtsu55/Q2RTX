@@ -299,8 +299,8 @@ static const save_field_t clientfields[] = {
     SA(ps.pmove.velocity, 3),
     B(ps.pmove.pm_flags),
     B(ps.pmove.pm_time),
-    S(ps.pmove.gravity),
-    SA(ps.pmove.delta_angles, 3),
+    F(ps.pmove.gravity),
+    V(ps.pmove.delta_angles),
 
     V(ps.viewangles),
     V(ps.viewoffset),

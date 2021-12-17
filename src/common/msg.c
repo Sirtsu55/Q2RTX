@@ -181,8 +181,7 @@ void MSG_WriteString(const char *string)
 MSG_WriteCoord
 =============
 */
-
-static inline void MSG_WriteCoord(float f)
+void MSG_WriteCoord(float f)
 {
     MSG_WriteShort(COORD2SHORT(f));
 }
@@ -690,7 +689,7 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
             MSG_WriteByte(to->pmove.pm_flags);
         }
 
-        if (to->pmove.gravity != from->pmove.gravity) {
+        if ((int16_t) to->pmove.gravity != (int16_t) from->pmove.gravity) {
             *pflags |= PS_M_GRAVITY;
             MSG_WriteShort(to->pmove.gravity);
         }
@@ -703,11 +702,13 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
     }
 
     if (!(flags & MSG_PS_IGNORE_DELTAANGLES)) {
-        if (!VectorCompare(from->pmove.delta_angles, to->pmove.delta_angles)) {
+        if (ANGLE2SHORT(from->pmove.delta_angles[0]) != ANGLE2SHORT(to->pmove.delta_angles[0]) ||
+            ANGLE2SHORT(from->pmove.delta_angles[1]) != ANGLE2SHORT(to->pmove.delta_angles[1]) ||
+            ANGLE2SHORT(from->pmove.delta_angles[2]) != ANGLE2SHORT(to->pmove.delta_angles[2])) {
             *pflags |= PS_M_DELTA_ANGLES;
-            MSG_WriteShort(to->pmove.delta_angles[0]);
-            MSG_WriteShort(to->pmove.delta_angles[1]);
-            MSG_WriteShort(to->pmove.delta_angles[2]);
+            MSG_WriteAngle16(to->pmove.delta_angles[0]);
+            MSG_WriteAngle16(to->pmove.delta_angles[1]);
+            MSG_WriteAngle16(to->pmove.delta_angles[2]);
         }
     } else {
         // save previous state
@@ -1317,9 +1318,9 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
         to->pmove.gravity = MSG_ReadShort();
 
     if (flags & PS_M_DELTA_ANGLES) {
-        to->pmove.delta_angles[0] = MSG_ReadShort();
-        to->pmove.delta_angles[1] = MSG_ReadShort();
-        to->pmove.delta_angles[2] = MSG_ReadShort();
+        to->pmove.delta_angles[0] = MSG_ReadAngle16();
+        to->pmove.delta_angles[1] = MSG_ReadAngle16();
+        to->pmove.delta_angles[2] = MSG_ReadAngle16();
     }
 
     //

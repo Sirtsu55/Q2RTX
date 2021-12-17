@@ -783,9 +783,6 @@ typedef enum {
 #define PMF_NO_PREDICTION   64  // temporarily disables prediction (used for grappling hook)
 #define PMF_TELEPORT_BIT    128 // used by q2pro
 
-// this structure needs to be communicated bit-accurate
-// from the server to the client to guarantee that
-// prediction stays in sync, so no floats are used.
 // if any part of the game code modifies this struct, it
 // will result in a prediction error of some degree.
 typedef struct {
@@ -793,11 +790,11 @@ typedef struct {
 
     short       origin[3];      // 12.3
     short       velocity[3];    // 12.3
-    byte        pm_flags;       // ducked, jump_held, etc
-    byte        pm_time;        // each unit = 8 ms
-    short       gravity;
-    short       delta_angles[3];    // add to command angles to get view direction
-                                    // changed by spawns, rotating objects, and teleporters
+    byte        pm_flags;        // ducked, jump_held, etc
+    byte        pm_time;         // each unit = 8 ms
+    float       gravity;
+    vec3_t      delta_angles;    // add to command angles to get view direction
+                                 // changed by spawns, rotating objects, and teleporters
 } pmove_state_t;
 
 
@@ -1381,6 +1378,14 @@ typedef enum {
 
 #define COORD2SHORT(x)  ((int)((x)*COORDSCALE))
 #define SHORT2COORD(x)  ((x)*(1.0f/COORDSCALE))
+
+#define SnapCoord(a) \
+    SHORT2COORD(COORD2SHORT((a)))
+
+#define VectorSnapCoord(a, b) \
+    (b)[0] = SnapCoord((a)[0]), \
+    (b)[1] = SnapCoord((a)[1]), \
+    (b)[2] = SnapCoord((a)[2])
 
 //
 // config strings are a general means of communication from
