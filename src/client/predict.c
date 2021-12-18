@@ -257,7 +257,7 @@ void CL_PredictMovement(void)
 
     // copy results out for rendering
     VectorScale(pm.s.origin, 1.f / COORDSCALE, cl.predicted_origin);
-    VectorScale(pm.s.velocity, 1.f / COORDSCALE, cl.predicted_velocity);
+    VectorCopy(pm.s.velocity, cl.predicted_velocity);
     VectorCopy(pm.viewangles, cl.predicted_angles);
 }
 

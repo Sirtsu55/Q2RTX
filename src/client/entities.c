@@ -216,7 +216,7 @@ static void set_active_state(void)
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
         VectorScale(cl.frame.ps.pmove.origin, 1.f / COORDSCALE, cl.predicted_origin);
-        VectorScale(cl.frame.ps.pmove.velocity, 1.f / COORDSCALE, cl.predicted_velocity);
+        VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
         if (cl.frame.ps.pmove.pm_type < PM_DEAD) {
             // server won't send angles for these pm_types
             CL_PredictAngles();

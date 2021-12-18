@@ -904,8 +904,9 @@ void ClientEndServerFrame(edict_t *ent)
     //
     for (i = 0 ; i < 3 ; i++) {
         current_client->ps.pmove.origin[i] = COORD2SHORT(ent->s.origin[i]);
-        current_client->ps.pmove.velocity[i] = COORD2SHORT(ent->velocity[i]);
     }
+
+    VectorSnapCoord(ent->velocity, current_client->ps.pmove.velocity);
 
     //
     // If the end of unit layout is displayed, don't give

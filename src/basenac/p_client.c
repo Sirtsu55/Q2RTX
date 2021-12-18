@@ -1264,8 +1264,6 @@ to be placed into the game.  This will happen every level load.
 */
 void ClientBegin(edict_t *ent)
 {
-    int     i;
-
     ent->client = game.clients + (ent - g_edicts - 1);
 
     if (deathmatch->value) {
@@ -1574,8 +1572,9 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 
         for (i = 0 ; i < 3 ; i++) {
             pm.s.origin[i] = COORD2SHORT(ent->s.origin[i]);
-            pm.s.velocity[i] = COORD2SHORT(ent->velocity[i]);
         }
+
+        VectorCopy(ent->velocity, pm.s.velocity);
 
         if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s))) {
             pm.snapinitial = true;
@@ -1596,8 +1595,9 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 
         for (i = 0 ; i < 3 ; i++) {
             ent->s.origin[i] = SHORT2COORD(pm.s.origin[i]);
-            ent->velocity[i] = SHORT2COORD(pm.s.velocity[i]);
         }
+
+        VectorCopy(pm.s.velocity, ent->velocity);
 
         VectorCopy(pm.mins, ent->mins);
         VectorCopy(pm.maxs, ent->maxs);

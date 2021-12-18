@@ -904,8 +904,7 @@ static void PM_SnapPosition(void)
     static const byte jitterbits[8] = {0, 4, 1, 2, 3, 5, 6, 7};
 
     // snap velocity to eigths
-    for (i = 0; i < 3; i++)
-        pm->s.velocity[i] = (int)(pml.velocity[i] * COORDSCALE);
+    VectorSnapCoord(pml.velocity, pm->s.velocity);
 
     for (i = 0; i < 3; i++) {
         if (pml.origin[i] >= 0)
@@ -1015,7 +1014,7 @@ void Pmove(pmove_t *pmove, pmoveParams_t *params)
 
     // convert origin and velocity to float values
     VectorScale(pm->s.origin, 1.f / COORDSCALE, pml.origin);
-    VectorScale(pm->s.velocity, 1.f / COORDSCALE, pml.velocity);
+    VectorCopy(pm->s.velocity, pml.velocity);
 
     // save old org in case we get stuck
     VectorCopy(pm->s.origin, pml.previous_origin);

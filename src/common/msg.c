@@ -667,16 +667,16 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
     }
 
     if (!(flags & MSG_PS_IGNORE_PREDICTION)) {
-        if (to->pmove.velocity[0] != from->pmove.velocity[0] ||
-            to->pmove.velocity[1] != from->pmove.velocity[1]) {
+        if (COORD2SHORT(to->pmove.velocity[0]) != COORD2SHORT(from->pmove.velocity[0]) ||
+            COORD2SHORT(to->pmove.velocity[1]) != COORD2SHORT(from->pmove.velocity[1])) {
             *pflags |= PS_M_VELOCITY;
-            MSG_WriteShort(to->pmove.velocity[0]);
-            MSG_WriteShort(to->pmove.velocity[1]);
+            MSG_WriteCoord(to->pmove.velocity[0]);
+            MSG_WriteCoord(to->pmove.velocity[1]);
         }
 
-        if (to->pmove.velocity[2] != from->pmove.velocity[2]) {
+        if (COORD2SHORT(to->pmove.velocity[2]) != COORD2SHORT(from->pmove.velocity[2])) {
             eflags |= EPS_M_VELOCITY2;
-            MSG_WriteShort(to->pmove.velocity[2]);
+            MSG_WriteCoord(to->pmove.velocity[2]);
         }
 
         if (to->pmove.pm_time != from->pmove.pm_time) {
@@ -1300,12 +1300,12 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
     }
 
     if (flags & PS_M_VELOCITY) {
-        to->pmove.velocity[0] = MSG_ReadShort();
-        to->pmove.velocity[1] = MSG_ReadShort();
+        to->pmove.velocity[0] = MSG_ReadCoord();
+        to->pmove.velocity[1] = MSG_ReadCoord();
     }
 
     if (extraflags & EPS_M_VELOCITY2) {
-        to->pmove.velocity[2] = MSG_ReadShort();
+        to->pmove.velocity[2] = MSG_ReadCoord();
     }
 
     if (flags & PS_M_TIME)
