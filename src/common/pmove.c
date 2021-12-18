@@ -235,6 +235,13 @@ static void PM_StepSlideMove(void)
     // push down the final amount
     VectorCopy(pml.origin, down);
     down[2] -= STEPSIZE;
+
+    // if we're already on ground, go down twice
+    // so we go down stairs/slopes
+    if (pm->s.pm_flags & PMF_ON_GROUND) {
+        down[2] -= STEPSIZE;
+    }
+
     trace = pm->trace(pml.origin, pm->mins, pm->maxs, down);
     if (!trace.allsolid)
         VectorCopy(trace.endpos, pml.origin);
@@ -874,15 +881,11 @@ static void PM_DeadMove(void)
 static bool PM_GoodPosition(void)
 {
     trace_t trace;
-    vec3_t  origin, end;
-    int     i;
 
     if (pm->s.pm_type == PM_SPECTATOR)
         return true;
 
-    for (i = 0; i < 3; i++)
-        origin[i] = end[i] = pm->s.origin[i] * (1.f / COORDSCALE);
-    trace = pm->trace(origin, pm->mins, pm->maxs, end);
+    trace = pm->trace(pm->s.origin, pm->mins, pm->maxs, pm->s.origin);
 
     return !trace.allsolid;
 }
@@ -897,22 +900,22 @@ precision of the network channel and in a valid position.
 */
 static void PM_SnapPosition(void)
 {
-    int     sign[3];
+    vec3_t  sign;
     int     i, j, bits;
-    short   base[3];
+    vec3_t  base;
     // try all single bits first
     static const byte jitterbits[8] = {0, 4, 1, 2, 3, 5, 6, 7};
 
     // snap velocity to eigths
     VectorSnapCoord(pml.velocity, pm->s.velocity);
+    VectorSnapCoord(pml.origin, pm->s.origin);
 
     for (i = 0; i < 3; i++) {
-        if (pml.origin[i] >= 0)
-            sign[i] = 1;
+        if (pml.origin[i] > 0)
+            sign[i] = SHORT2COORD(1);
+        else if (pml.origin[i] < 0)
+            sign[i] = SHORT2COORD(-1);
         else
-            sign[i] = -1;
-        pm->s.origin[i] = (int)(pml.origin[i] * COORDSCALE);
-        if (pm->s.origin[i] * (1.f / COORDSCALE) == pml.origin[i])
             sign[i] = 0;
     }
     VectorCopy(pm->s.origin, base);
@@ -925,8 +928,9 @@ static void PM_SnapPosition(void)
             if (bits & (1 << i))
                 pm->s.origin[i] += sign[i];
 
-        if (PM_GoodPosition())
+        if (PM_GoodPosition()) {
             return;
+        }
     }
 
     // go back to the last position
@@ -942,8 +946,8 @@ PM_InitialSnapPosition
 static void PM_InitialSnapPosition(void)
 {
     int        x, y, z;
-    short      base[3];
-    static const short offset[3] = { 0, -1, 1 };
+    vec3_t     base;
+    static const vec3_t offset = { 0, SHORT2COORD(-1), SHORT2COORD(1) };
 
     VectorCopy(pm->s.origin, base);
 
@@ -954,9 +958,6 @@ static void PM_InitialSnapPosition(void)
             for (x = 0; x < 3; x++) {
                 pm->s.origin[0] = base[0] + offset[x];
                 if (PM_GoodPosition()) {
-                    pml.origin[0] = pm->s.origin[0] * (1.f / COORDSCALE);
-                    pml.origin[1] = pm->s.origin[1] * (1.f / COORDSCALE);
-                    pml.origin[2] = pm->s.origin[2] * (1.f / COORDSCALE);
                     VectorCopy(pm->s.origin, pml.previous_origin);
                     return;
                 }
@@ -1010,7 +1011,7 @@ void Pmove(pmove_t *pmove, pmoveParams_t *params)
     memset(&pml, 0, sizeof(pml));
 
     // convert origin and velocity to float values
-    VectorScale(pm->s.origin, 1.f / COORDSCALE, pml.origin);
+    VectorCopy(pm->s.origin, pml.origin);
     VectorCopy(pm->s.velocity, pml.velocity);
 
     // save old org in case we get stuck

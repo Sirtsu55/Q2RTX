@@ -136,7 +136,7 @@ static void parse_entity_update(const entity_state_t *state)
 
     // work around Q2PRO server bandwidth optimization
     if (entity_is_optimized(state)) {
-        VectorScale(cl.frame.ps.pmove.origin, 1.f / COORDSCALE, origin_v);
+        VectorCopy(cl.frame.ps.pmove.origin, origin_v);
         origin = origin_v;
     } else {
         origin = state->origin;
@@ -215,7 +215,7 @@ static void set_active_state(void)
         CL_FirstDemoFrame();
     } else {
         // set initial cl.predicted_origin and cl.predicted_angles
-        VectorScale(cl.frame.ps.pmove.origin, 1.f / COORDSCALE, cl.predicted_origin);
+        VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origin);
         VectorCopy(cl.frame.ps.pmove.velocity, cl.predicted_velocity);
         if (cl.frame.ps.pmove.pm_type < PM_DEAD) {
             // server won't send angles for these pm_types
@@ -260,9 +260,9 @@ check_player_lerp(server_frame_t *oldframe, server_frame_t *frame, int framediv)
         goto dup;
 
     // no lerping if player entity was teleported (origin check)
-    if (abs(ops->pmove.origin[0] - ps->pmove.origin[0]) > COORD2SHORT(256) ||
-        abs(ops->pmove.origin[1] - ps->pmove.origin[1]) > COORD2SHORT(256) ||
-        abs(ops->pmove.origin[2] - ps->pmove.origin[2]) > COORD2SHORT(256)) {
+    if (fabs(ops->pmove.origin[0] - ps->pmove.origin[0]) > 256 ||
+        fabs(ops->pmove.origin[1] - ps->pmove.origin[1]) > 256 ||
+        fabs(ops->pmove.origin[2] - ps->pmove.origin[2]) > 256) {
         goto dup;
     }
 
@@ -1179,20 +1179,17 @@ void CL_CalcViewValues(void)
         VectorMA(cl.predicted_origin, backlerp, cl.prediction_error, cl.refdef.vieworg);
 
         // smooth out stair climbing
-        if (cl.predicted_step < SHORT2COORD(127)) {
-            delta <<= 1; // small steps
-        }
-        if (delta < 100) {
-            cl.refdef.vieworg[2] -= cl.predicted_step * (100 - delta) * 0.01f;
+        if (cl.predicted_step) {
+            if (fabsf(cl.predicted_step) < 15.875f) {
+                delta <<= 1; // small steps
+            }
+            if (delta < 100) {
+                cl.refdef.vieworg[2] -= cl.predicted_step * (100 - delta) * 0.01f;
+            }
         }
     } else {
-        int i;
-
         // just use interpolated values
-        for (i = 0; i < 3; i++) {
-            cl.refdef.vieworg[i] = SHORT2COORD(ops->pmove.origin[i] +
-                lerp * (ps->pmove.origin[i] - ops->pmove.origin[i]));
-        }
+        LerpVector(ops->pmove.origin, ps->pmove.origin, lerp, cl.refdef.vieworg);
     }
 
     // if not running a demo or on a locked frame, add the local angle movement

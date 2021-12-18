@@ -302,7 +302,7 @@ void SV_BuildClientFrame(client_t *client)
 
     // find the client's PVS
     ps = &clent->client->ps;
-    VectorMA(ps->viewoffset, 1.f / COORDSCALE, ps->pmove.origin, org);
+    VectorAdd(ps->viewoffset, ps->pmove.origin, org);
 
     leaf = CM_PointLeaf(&sv.cm, org);
     clientarea = leaf->area;

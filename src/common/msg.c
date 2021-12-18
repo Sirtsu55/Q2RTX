@@ -183,7 +183,7 @@ MSG_WriteCoord
 */
 void MSG_WriteCoord(float f)
 {
-    MSG_WriteShort(COORD2SHORT(f));
+    MSG_WriteLong(COORD2SHORT(f));
 }
 
 /*
@@ -654,16 +654,16 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
         MSG_WriteByte(to->pmove.pm_type);
     }
 
-    if (to->pmove.origin[0] != from->pmove.origin[0] ||
-        to->pmove.origin[1] != from->pmove.origin[1]) {
+    if (COORD2SHORT(to->pmove.origin[0]) != COORD2SHORT(from->pmove.origin[0]) ||
+        COORD2SHORT(to->pmove.origin[1]) != COORD2SHORT(from->pmove.origin[1])) {
         *pflags |= PS_M_ORIGIN;
-        MSG_WriteShort(to->pmove.origin[0]);
-        MSG_WriteShort(to->pmove.origin[1]);
+        MSG_WriteCoord(to->pmove.origin[0]);
+        MSG_WriteCoord(to->pmove.origin[1]);
     }
 
-    if (to->pmove.origin[2] != from->pmove.origin[2]) {
+    if (COORD2SHORT(to->pmove.origin[2]) != COORD2SHORT(from->pmove.origin[2])) {
         eflags |= EPS_M_ORIGIN2;
-        MSG_WriteShort(to->pmove.origin[2]);
+        MSG_WriteCoord(to->pmove.origin[2]);
     }
 
     if (!(flags & MSG_PS_IGNORE_PREDICTION)) {
@@ -965,7 +965,7 @@ size_t MSG_ReadStringLine(char *dest, size_t size)
 
 static inline float MSG_ReadCoord(void)
 {
-    return SHORT2COORD(MSG_ReadShort());
+    return SHORT2COORD(MSG_ReadLong());
 }
 
 void MSG_ReadPos(vec3_t pos)
@@ -1291,12 +1291,12 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
         to->pmove.pm_type = MSG_ReadByte();
 
     if (flags & PS_M_ORIGIN) {
-        to->pmove.origin[0] = MSG_ReadShort();
-        to->pmove.origin[1] = MSG_ReadShort();
+        to->pmove.origin[0] = MSG_ReadCoord();
+        to->pmove.origin[1] = MSG_ReadCoord();
     }
 
     if (extraflags & EPS_M_ORIGIN2) {
-        to->pmove.origin[2] = MSG_ReadShort();
+        to->pmove.origin[2] = MSG_ReadCoord();
     }
 
     if (flags & PS_M_VELOCITY) {

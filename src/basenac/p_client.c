@@ -1156,9 +1156,7 @@ void PutClientInServer(edict_t *ent)
     // clear playerstate values
     memset(&ent->client->ps, 0, sizeof(client->ps));
 
-    for (i = 0; i < 3; i++) {
-        client->ps.pmove.origin[i] = COORD2SHORT(spawn_origin[i]);
-    }
+    VectorSnapCoord(spawn_origin, client->ps.pmove.origin);
 
     if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV)) {
         client->ps.fov = 90;
@@ -1181,7 +1179,7 @@ void PutClientInServer(edict_t *ent)
     ent->s.skinnum = ent - g_edicts - 1;
 
     ent->s.frame = 0;
-    VectorCopy(spawn_origin, ent->s.origin);
+    VectorCopy(client->ps.pmove.origin, ent->s.origin);
     ent->s.origin[2] += 1;  // make sure off ground
     VectorCopy(ent->s.origin, ent->s.old_origin);
 
@@ -1565,10 +1563,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         client->ps.pmove.gravity = sv_gravity->value;
         pm.s = client->ps.pmove;
 
-        for (i = 0 ; i < 3 ; i++) {
-            pm.s.origin[i] = COORD2SHORT(ent->s.origin[i]);
-        }
-
+        VectorCopy(ent->s.origin, pm.s.origin);
         VectorCopy(ent->velocity, pm.s.velocity);
 
         if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s))) {
@@ -1588,10 +1583,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         client->ps.pmove = pm.s;
         client->old_pmove = pm.s;
 
-        for (i = 0 ; i < 3 ; i++) {
-            ent->s.origin[i] = SHORT2COORD(pm.s.origin[i]);
-        }
-
+        VectorCopy(pm.s.origin, ent->s.origin);
         VectorCopy(pm.s.velocity, ent->velocity);
 
         VectorCopy(pm.mins, ent->mins);

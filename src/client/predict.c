@@ -26,7 +26,7 @@ CL_CheckPredictionError
 void CL_CheckPredictionError(void)
 {
     int         frame;
-    int         delta[3];
+    vec3_t      delta;
     unsigned    cmd;
 
     if (!cls.netchan) {
@@ -49,8 +49,8 @@ void CL_CheckPredictionError(void)
     VectorSubtract(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK], delta);
 
     // save the prediction error for interpolation
-    float len = SHORT2COORD(abs(delta[0]) + abs(delta[1]) + abs(delta[2]));
-    if (len < SHORT2COORD(1) || len > SHORT2COORD(640)) {
+    float len = fabs(delta[0] + fabs(delta[1]) + fabs(delta[2]));
+    if (len < SHORT2COORD(1) || len > 80.f) {
         // > 80 world units is a teleport or something
         VectorClear(cl.prediction_error);
         return;
@@ -66,7 +66,7 @@ void CL_CheckPredictionError(void)
     VectorCopy(cl.frame.ps.pmove.origin, cl.predicted_origins[cmd & CMD_MASK]);
 
     // save for error interpolation
-    VectorScale(delta, 1.f / COORDSCALE, cl.prediction_error);
+    VectorCopy(delta, cl.prediction_error);
 }
 
 /*
@@ -243,8 +243,9 @@ void CL_PredictMovement(void)
 
     if (pm.s.pm_type != PM_SPECTATOR && (pm.s.pm_flags & PMF_ON_GROUND)) {
         oldz = cl.predicted_origins[cl.predicted_step_frame & CMD_MASK][2];
-        step = SHORT2COORD(pm.s.origin[2] - oldz);
-        if (step > 7.875f && step < 20) {
+        step = pm.s.origin[2] - oldz;
+        float step_abs = fabsf(step);
+        if (step_abs > 7.875f && step_abs < 20) {
             cl.predicted_step = step;
             cl.predicted_step_time = cls.realtime;
             cl.predicted_step_frame = frame + 1;    // don't double step
@@ -256,7 +257,7 @@ void CL_PredictMovement(void)
     }
 
     // copy results out for rendering
-    VectorScale(pm.s.origin, 1.f / COORDSCALE, cl.predicted_origin);
+    VectorCopy(pm.s.origin, cl.predicted_origin);
     VectorCopy(pm.s.velocity, cl.predicted_velocity);
     VectorCopy(pm.viewangles, cl.predicted_angles);
 }
