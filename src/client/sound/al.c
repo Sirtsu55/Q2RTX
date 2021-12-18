@@ -134,8 +134,6 @@ bool AL_Init(void)
         goto fail0;
     }
 
-    AL_SoundInfo();
-
     // check for linear distance extension
     if (!qalIsExtensionPresent("AL_EXT_LINEAR_DISTANCE")) {
         Com_SetLastError("AL_EXT_LINEAR_DISTANCE extension is missing");
@@ -173,6 +171,9 @@ bool AL_Init(void)
 	AL_InitStreamSource();
 
     Com_Printf("OpenAL initialized.\n");
+
+    AL_SoundInfo();
+
     return true;
 
 fail1:

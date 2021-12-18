@@ -797,7 +797,6 @@ typedef struct {
                                  // changed by spawns, rotating objects, and teleporters
 } pmove_state_t;
 
-
 //
 // button bits
 //
@@ -805,17 +804,15 @@ typedef struct {
 #define BUTTON_USE          2
 #define BUTTON_ANY          128         // any key whatsoever
 
-
 // usercmd_t is sent to the server each client frame
 typedef struct usercmd_s {
     byte    msec;
     byte    buttons;
-    short   angles[3];
+    vec3_t  angles;
     short   forwardmove, sidemove, upmove;
     byte    impulse;        // remove?
     byte    lightlevel;     // light level the player is standing on
 } usercmd_t;
-
 
 #define MAXTOUCH    32
 typedef struct {

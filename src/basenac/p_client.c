@@ -1548,13 +1548,8 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
     pm_passent = ent;
 
     if (ent->client->chase_target) {
-
-        client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
-        client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
-        client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
-
+        VectorCopy(ucmd->angles, client->resp.cmd_angles);
     } else {
-
         // set up for pmove
         memset(&pm, 0, sizeof(pm));
 
@@ -1602,9 +1597,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         VectorCopy(pm.mins, ent->mins);
         VectorCopy(pm.maxs, ent->maxs);
 
-        client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
-        client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
-        client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
+        VectorCopy(ucmd->angles, client->resp.cmd_angles);
 
         if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0)) {
             gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);

@@ -292,11 +292,11 @@ int MSG_WriteDeltaUsercmd(const usercmd_t *from,
 // send the movement message
 //
     bits = 0;
-    if (cmd->angles[0] != from->angles[0])
+    if (ANGLE2SHORT(cmd->angles[0]) != ANGLE2SHORT(from->angles[0]))
         bits |= CM_ANGLE1;
-    if (cmd->angles[1] != from->angles[1])
+    if (ANGLE2SHORT(cmd->angles[1]) != ANGLE2SHORT(from->angles[1]))
         bits |= CM_ANGLE2;
-    if (cmd->angles[2] != from->angles[2])
+    if (ANGLE2SHORT(cmd->angles[2]) != ANGLE2SHORT(from->angles[2]))
         bits |= CM_ANGLE3;
     if (cmd->forwardmove != from->forwardmove)
         bits |= CM_FORWARD;
@@ -318,27 +318,27 @@ int MSG_WriteDeltaUsercmd(const usercmd_t *from,
     MSG_WriteBits(bits, 8);
 
     if (bits & CM_ANGLE1) {
-        delta = cmd->angles[0] - from->angles[0];
+        delta = ANGLE2SHORT(cmd->angles[0] - from->angles[0]);
         if (delta >= -128 && delta <= 127) {
             MSG_WriteBits(1, 1);
             MSG_WriteBits(delta, -8);
         } else {
             MSG_WriteBits(0, 1);
-            MSG_WriteBits(cmd->angles[0], -16);
+            MSG_WriteBits(ANGLE2SHORT(cmd->angles[0]), -16);
         }
     }
     if (bits & CM_ANGLE2) {
-        delta = cmd->angles[1] - from->angles[1];
+        delta = ANGLE2SHORT(cmd->angles[1] - from->angles[1]);
         if (delta >= -128 && delta <= 127) {
             MSG_WriteBits(1, 1);
             MSG_WriteBits(delta, -8);
         } else {
             MSG_WriteBits(0, 1);
-            MSG_WriteBits(cmd->angles[1], -16);
+            MSG_WriteBits(ANGLE2SHORT(cmd->angles[1]), -16);
         }
     }
     if (bits & CM_ANGLE3) {
-        MSG_WriteBits(cmd->angles[2], -16);
+        MSG_WriteBits(ANGLE2SHORT(cmd->angles[2]), -16);
     }
 
     count = -10;
@@ -1069,20 +1069,20 @@ void MSG_ReadDeltaUsercmd(const usercmd_t *from,
 // read current angles
     if (bits & CM_ANGLE1) {
         if (MSG_ReadBits(1)) {
-            to->angles[0] += MSG_ReadBits(-8);
+            to->angles[0] += SHORT2ANGLE(MSG_ReadBits(-8));
         } else {
-            to->angles[0] = MSG_ReadBits(-16);
+            to->angles[0] = SHORT2ANGLE(MSG_ReadBits(-16));
         }
     }
     if (bits & CM_ANGLE2) {
         if (MSG_ReadBits(1)) {
-            to->angles[1] += MSG_ReadBits(-8);
+            to->angles[1] += SHORT2ANGLE(MSG_ReadBits(-8));
         } else {
-            to->angles[1] = MSG_ReadBits(-16);
+            to->angles[1] = SHORT2ANGLE(MSG_ReadBits(-16));
         }
     }
     if (bits & CM_ANGLE3) {
-        to->angles[2] = MSG_ReadBits(-16);
+        to->angles[2] = SHORT2ANGLE(MSG_ReadBits(-16));
     }
 
 // read movement
