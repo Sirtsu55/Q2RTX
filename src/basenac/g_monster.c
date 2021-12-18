@@ -335,7 +335,7 @@ void M_MoveFrame(edict_t *self)
     int     index;
 
     move = self->monsterinfo.currentmove;
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.framenum + 1 * BASE_FRAMEDIV;
 
     if ((self->monsterinfo.nextframe) && (self->monsterinfo.nextframe >= move->firstframe) && (self->monsterinfo.nextframe <= move->lastframe)) {
         self->s.frame = self->monsterinfo.nextframe;

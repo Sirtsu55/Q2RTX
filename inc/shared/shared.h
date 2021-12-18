@@ -1360,11 +1360,12 @@ typedef enum {
 */
 
 // default server FPS
-#define BASE_FRAMERATE          10
+#define BASE_FRAMERATE          20
+// seconds per frame
+#define BASE_FRAMETIME_S        (1.0 / BASE_FRAMERATE)
 // default server frametime (milliseconds per frame)
-#define BASE_FRAMETIME          ((1.0 / BASE_FRAMERATE) * 1000)
+#define BASE_FRAMETIME          (BASE_FRAMETIME_S * 1000)
 #define BASE_1_FRAMETIME        (1.0 / BASE_FRAMETIME)
-#define BASE_FRAMETIME_1000     (BASE_FRAMETIME / 1000)
 // framediv compared to vanilla Q2
 #define BASE_FRAMEDIV           (BASE_FRAMERATE / 10)
 

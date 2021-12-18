@@ -623,15 +623,21 @@ static void window_event(SDL_WindowEvent *event)
     vrect_t rc;
 
     switch (event->event) {
-    case SDL_WINDOWEVENT_MINIMIZED:
     case SDL_WINDOWEVENT_RESTORED:
     case SDL_WINDOWEVENT_ENTER:
-    case SDL_WINDOWEVENT_LEAVE:
     case SDL_WINDOWEVENT_FOCUS_GAINED:
-    case SDL_WINDOWEVENT_FOCUS_LOST:
         if (flags & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS)) {
             active = ACT_ACTIVATED;
-        } else if (flags & SDL_WINDOW_MINIMIZED) {
+        } else {
+            active = ACT_RESTORED;
+        }
+        CL_Activate(active);
+        break;
+
+    case SDL_WINDOWEVENT_MINIMIZED:
+    case SDL_WINDOWEVENT_LEAVE:
+    case SDL_WINDOWEVENT_FOCUS_LOST:
+        if (flags & SDL_WINDOW_MINIMIZED) {
             active = ACT_MINIMIZED;
         } else {
             active = ACT_RESTORED;

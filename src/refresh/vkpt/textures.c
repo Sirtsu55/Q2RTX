@@ -954,6 +954,7 @@ vkpt_extract_emissive_texture_info(image_t *image)
 void
 vkpt_normalize_normal_map(image_t *image)
 {
+#if 0
     int w = image->upload_width;
     int h = image->upload_height;
 
@@ -987,6 +988,7 @@ vkpt_normalize_normal_map(image_t *image)
             current_pixel += 4;
         }
     }
+#endif
 
     image->processing_complete = true;
 }

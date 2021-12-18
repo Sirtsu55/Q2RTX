@@ -778,7 +778,7 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
     if (!(flags & MSG_PS_IGNORE_GUNFRAMES)) {
         if (to->gunframe != from->gunframe) {
             *pflags |= PS_WEAPONFRAME;
-            MSG_WriteByte(to->gunframe);
+            MSG_WriteShort(to->gunframe);
         }
 
         if (!OffsetCompare(from->gunoffset, to->gunoffset)) {
@@ -1365,7 +1365,7 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
     }
 
     if (flags & PS_WEAPONFRAME) {
-        to->gunframe = MSG_ReadByte();
+        to->gunframe = MSG_ReadWord();
     }
 
     if (extraflags & EPS_GUNOFFSET) {

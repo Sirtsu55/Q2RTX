@@ -773,10 +773,68 @@ void Weapon_Blaster_Fire(edict_t *ent)
 
 void Weapon_Blaster(edict_t *ent)
 {
-    static int  pause_frames[]  = {19, 32, 0};
-    static int  fire_frames[]   = {5, 0};
+    switch (ent->client->weaponstate)
+    {
+    case WEAPON_ACTIVATING:
+        if (++ent->client->ps.gunframe >= 9)
+        {
+            ent->client->ps.gunframe = 10;
+            ent->client->weaponstate = WEAPON_READY;
+        }
+        break;
+    case WEAPON_READY:
+        if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
+            ent->client->weaponstate = WEAPON_DROPPING;
+            ent->client->ps.gunframe = 271;
+        } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
+            ent->client->latched_buttons &= ~BUTTON_ATTACK;
+            ent->client->ps.gunframe = 117;
+            ent->client->weaponstate = WEAPON_FIRING;
+        } else if (++ent->client->ps.gunframe >= 116)
+            ent->client->ps.gunframe = 10;
+        break;
+    case WEAPON_FIRING:
+        if (++ent->client->ps.gunframe >= 132)
+        {
+            ent->client->ps.gunframe = 10;
+            ent->client->weaponstate = WEAPON_READY;
+        }
 
-    Weapon_Generic(ent, 348, 394, 837, 868, pause_frames, fire_frames, Weapon_Blaster_Fire);
+        if (ent->client->ps.gunframe == 121)
+        {
+            vec3_t forward, right, start, end, offset;
+            AngleVectors(ent->client->v_angle, forward, right, NULL);
+            VectorSet(offset, 24, 8, ent->viewheight - 8);
+            P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+            VectorMA(start, 24.f, forward, end);
+            trace_t tr = gi.trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+
+            if (tr.fraction < 1.f)
+            {
+                if (tr.ent && tr.ent->takedamage)
+                {
+                    T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
+                    gi.sound(ent, CHAN_AUTO, gi.soundindex("makron/brain1.wav"), 1.f, ATTN_NORM, 0.f);
+                }
+                else if (!(tr.surface->flags & SURF_SKY))
+                {
+                    gi.WriteByte(svc_temp_entity);
+                    gi.WriteByte(TE_GUNSHOT);
+                    gi.WritePosition(tr.endpos);
+                    gi.WriteDir(tr.plane.normal);
+                    gi.multicast(tr.endpos, MULTICAST_PVS);
+                }
+            }
+        }
+        break;
+    case WEAPON_DROPPING:
+        if (++ent->client->ps.gunframe >= 278)
+        {
+            ChangeWeapon(ent);
+            return;
+        }
+        break;
+    }
 }
 
 

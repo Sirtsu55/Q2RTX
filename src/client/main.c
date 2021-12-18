@@ -2753,7 +2753,7 @@ CL_Activate
 */
 void CL_Activate(active_t active)
 {
-    if (cls.active != active) {
+    //if (cls.active != active) {
         Com_DDDPrintf("%s: %u\n", __func__, active);
         cls.active = active;
         cls.disable_screen = 0;
@@ -2761,7 +2761,7 @@ void CL_Activate(active_t active)
         IN_Activate();
         S_Activate();
         CL_UpdateFrameTimes();
-    }
+    //}
 }
 
 static void CL_SetClientTime(void)
