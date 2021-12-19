@@ -209,6 +209,10 @@ void CL_PredictMovement(void)
 
     // copy current state to pmove
     memset(&pm, 0, sizeof(pm));
+
+    pm.bobtime = cl.bobtime;
+    VectorCopy(cl.gunangles, pm.gunangles);
+
     pm.trace = CL_Trace;
     pm.pointcontents = CL_PointContents;
 
@@ -260,5 +264,8 @@ void CL_PredictMovement(void)
     VectorCopy(pm.s.origin, cl.predicted_origin);
     VectorCopy(pm.s.velocity, cl.predicted_velocity);
     VectorCopy(pm.viewangles, cl.predicted_angles);
+
+    cl.bobtime = pm.bobtime;
+    VectorCopy(pm.gunangles, cl.gunangles);
 }
 

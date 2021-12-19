@@ -930,11 +930,8 @@ static void CL_AddViewWeapon(void)
 	gun.id = RESERVED_ENTITIY_GUN;
 
     // set up gun position
-    for (i = 0; i < 3; i++) {
-        gun.origin[i] = cl.refdef.vieworg[i];
-        gun.angles[i] = cl.refdef.viewangles[i] + LerpAngle(ops->gunangles[i],
-                        ps->gunangles[i], cl.lerpfrac);
-    }
+    VectorCopy(cl.refdef.vieworg, gun.origin);
+    VectorAdd(cl.refdef.viewangles, cl.gunangles, gun.angles);
 
     // adjust for high fov
     if (ps->fov > 90) {

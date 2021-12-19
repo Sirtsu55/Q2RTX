@@ -32,13 +32,16 @@ typedef struct {
     vec3_t      forward, right, up;
     float       frametime;
 
-
     csurface_t  *groundsurface;
     cplane_t    groundplane;
     int         groundcontents;
 
     vec3_t      previous_origin;
     bool        ladder;
+
+    float       xyspeed;
+    float       bobmove, bobtime, bobfracsin;
+    int         bobcycle;
 } pml_t;
 
 static pmove_t      *pm;
@@ -987,6 +990,46 @@ static void PM_ClampAngles(void)
     AngleVectors(pm->viewangles, pml.forward, pml.right, pml.up);
 }
 
+static void PM_CalculateGunAngles(void)
+{
+    // calculate speed and cycle to be used for
+    // all cyclic walking effects 
+    pml.xyspeed = sqrtf(pml.velocity[0] * pml.velocity[0] + pml.velocity[1] * pml.velocity[1]);
+
+    if (pml.xyspeed < 5) {
+        pml.bobmove = 0;
+        pm->bobtime = 0;    // start at beginning of cycle again
+    } else if (pm->s.pm_flags & PMF_ON_GROUND) {
+        // so bobbing only cycles when on ground
+        if (pml.xyspeed > 210)
+            pml.bobmove = 0.25f;
+        else if (pml.xyspeed > 100)
+            pml.bobmove = 0.125f;
+        else
+            pml.bobmove = 0.0625f;
+    }
+
+    pml.bobmove *= pml.frametime;
+
+    pml.bobtime = (pm->bobtime += pml.bobmove);
+
+    if (pm->s.pm_flags & PMF_DUCKED)
+        pml.bobtime *= 4;
+
+    pml.bobcycle = (int) pml.bobtime;
+    pml.bobfracsin = fabsf(sinf(pml.bobtime * M_PI));
+
+    // gun angles from bobbing
+    pm->gunangles[ROLL] = pml.xyspeed * pml.bobfracsin * 0.005f;
+    pm->gunangles[YAW] = pml.xyspeed * pml.bobfracsin * 0.01f;
+    if (pml.bobcycle & 1) {
+        pm->gunangles[ROLL] = -pm->gunangles[ROLL];
+        pm->gunangles[YAW] = -pm->gunangles[YAW];
+    }
+
+    pm->gunangles[PITCH] = pml.xyspeed * pml.bobfracsin * 0.005f;
+}
+
 /*
 ================
 Pmove
@@ -1102,6 +1145,8 @@ void Pmove(pmove_t *pmove, pmoveParams_t *params)
     PM_CategorizePosition();
 
     PM_SnapPosition();
+
+    PM_CalculateGunAngles();
 }
 
 void PmoveInit(pmoveParams_t *pmp)

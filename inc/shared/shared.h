@@ -836,6 +836,10 @@ typedef struct {
     int         watertype;
     int         waterlevel;
 
+    // client-side only
+    float       bobtime;
+    vec3_t      gunangles;
+
     // callbacks to test the world
     trace_t     (* q_gameabi trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
     int         (*pointcontents)(vec3_t point);
@@ -1476,7 +1480,6 @@ typedef struct {
     vec3_t      kick_angles;    // add to view direction to get render angles
                                 // set by weapon kicks, pain effects, etc
 
-    vec3_t      gunangles;
     int         gunindex;
     int         gunframe;
 

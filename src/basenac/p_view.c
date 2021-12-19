@@ -325,44 +325,6 @@ void SV_CalcViewOffset(edict_t *ent)
 }
 
 /*
-==============
-SV_CalcGunOffset
-==============
-*/
-void SV_CalcGunOffset(edict_t *ent)
-{
-    int     i;
-    float   delta;
-
-    // gun angles from bobbing
-    ent->client->ps.gunangles[ROLL] = xyspeed * bobfracsin * 0.005f;
-    ent->client->ps.gunangles[YAW] = xyspeed * bobfracsin * 0.01f;
-    if (bobcycle & 1) {
-        ent->client->ps.gunangles[ROLL] = -ent->client->ps.gunangles[ROLL];
-        ent->client->ps.gunangles[YAW] = -ent->client->ps.gunangles[YAW];
-    }
-
-    ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005f;
-
-    // gun angles from delta movement
-    for (i = 0 ; i < 3 ; i++) {
-        delta = ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
-        if (delta > 180)
-            delta -= 360;
-        if (delta < -180)
-            delta += 360;
-        if (delta > 45)
-            delta = 45;
-        if (delta < -45)
-            delta = -45;
-        if (i == YAW)
-            ent->client->ps.gunangles[ROLL] += 0.1f * delta;
-        ent->client->ps.gunangles[i] += 0.2f * delta;
-    }
-}
-
-
-/*
 =============
 SV_AddBlend
 =============
@@ -960,9 +922,6 @@ void ClientEndServerFrame(edict_t *ent)
 
     // determine the view offsets
     SV_CalcViewOffset(ent);
-
-    // determine the gun offsets
-    SV_CalcGunOffset(ent);
 
     // determine the full screen color blend
     // must be after viewoffset, so eye contents can be

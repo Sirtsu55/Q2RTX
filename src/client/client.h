@@ -266,6 +266,9 @@ typedef struct client_state_s {
 
     char    weaponModels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
     int     numWeaponModels;
+
+    float   bobtime;
+    vec3_t  gunangles;
 } client_state_t;
 
 extern    client_state_t    cl;

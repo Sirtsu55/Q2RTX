@@ -306,7 +306,6 @@ static const save_field_t clientfields[] = {
     V(ps.viewoffset),
     V(ps.kick_angles),
 
-    V(ps.gunangles),
     I(ps.gunindex),
     I(ps.gunframe),
 
