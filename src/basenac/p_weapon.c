@@ -773,41 +773,53 @@ void Weapon_Blaster_Fire(edict_t *ent)
 
 void Weapon_Blaster(edict_t *ent)
 {
+    ent->client->ps.gunframe++;
+
     switch (ent->client->weaponstate)
     {
     case WEAPON_ACTIVATING:
-        if (++ent->client->ps.gunframe >= 9)
+        if (ent->client->ps.gunframe == 8)
         {
-            ent->client->ps.gunframe = 10;
+            ent->client->ps.gunframe = 9;
             ent->client->weaponstate = WEAPON_READY;
         }
         break;
     case WEAPON_READY:
         if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
             ent->client->weaponstate = WEAPON_DROPPING;
-            ent->client->ps.gunframe = 271;
+            ent->client->ps.gunframe = 270;
         } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
-            ent->client->ps.gunframe = 117;
+            ent->client->ps.gunframe = 116;
             ent->client->weaponstate = WEAPON_FIRING;
-        } else if (++ent->client->ps.gunframe >= 116)
-            ent->client->ps.gunframe = 10;
+        } else if (ent->client->ps.gunframe == 115)
+            ent->client->ps.gunframe = 9;
         break;
     case WEAPON_FIRING:
-        if (++ent->client->ps.gunframe >= 132)
+        if (ent->client->ps.gunframe == 132 || ent->client->ps.gunframe == 147 || ent->client->ps.gunframe == 162)
         {
-            ent->client->ps.gunframe = 10;
-            ent->client->weaponstate = WEAPON_READY;
+            if (!(ent->client->buttons & BUTTON_ATTACK))
+            {
+                ent->client->ps.gunframe = 9;
+                ent->client->weaponstate = WEAPON_READY;
+            }
+            else if (ent->client->ps.gunframe == 162)
+                ent->client->ps.gunframe = 116;
         }
 
-        if (ent->client->ps.gunframe == 121)
+        if (ent->client->ps.gunframe == 121 || ent->client->ps.gunframe == 138 || ent->client->ps.gunframe == 154)
         {
             vec3_t forward, right, start, end, offset;
+
             AngleVectors(ent->client->v_angle, forward, right, NULL);
             VectorSet(offset, 24, 8, ent->viewheight - 8);
             P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
             VectorMA(start, 24.f, forward, end);
-            trace_t tr = gi.trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+            
+            trace_t tr = gi.trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
+
+            if (tr.fraction == 1.f)
+                tr = gi.trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
 
             if (tr.fraction < 1.f)
             {
@@ -826,9 +838,21 @@ void Weapon_Blaster(edict_t *ent)
                 }
             }
         }
+
+        if (ent->client->latched_buttons & BUTTON_ATTACK)
+        {
+            ent->client->latched_buttons &= ~BUTTON_ATTACK;
+
+            if (ent->client->ps.gunframe >= 121 && ent->client->ps.gunframe <= 132)
+                ent->client->ps.gunframe = 133;
+            else if (ent->client->ps.gunframe >= 138 && ent->client->ps.gunframe <= 147)
+                ent->client->ps.gunframe = 148;
+            else if (ent->client->ps.gunframe >= 154 && ent->client->ps.gunframe <= 162)
+                ent->client->ps.gunframe = 117;
+        }
         break;
     case WEAPON_DROPPING:
-        if (++ent->client->ps.gunframe >= 278)
+        if (ent->client->ps.gunframe == 277)
         {
             ChangeWeapon(ent);
             return;
