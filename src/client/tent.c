@@ -707,8 +707,7 @@ static void CL_AddPlayerBeams(void)
             ops = &cl.oldframe.ps;
 
             for (j = 0; j < 3; j++)
-                b->start[j] = cl.refdef.vieworg[j] + ops->gunoffset[j] +
-                    cl.lerpfrac * (ps->gunoffset[j] - ops->gunoffset[j]);
+                b->start[j] = cl.refdef.vieworg[j];
 
             VectorMA(b->start, (hand_multiplier * b->offset[0]), cl.v_right, org);
             VectorMA(org, b->offset[1], cl.v_forward, org);

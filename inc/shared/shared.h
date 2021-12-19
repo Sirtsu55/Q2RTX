@@ -1477,7 +1477,6 @@ typedef struct {
                                 // set by weapon kicks, pain effects, etc
 
     vec3_t      gunangles;
-    vec3_t      gunoffset;
     int         gunindex;
     int         gunframe;
 

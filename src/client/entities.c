@@ -931,8 +931,7 @@ static void CL_AddViewWeapon(void)
 
     // set up gun position
     for (i = 0; i < 3; i++) {
-        gun.origin[i] = cl.refdef.vieworg[i] + ops->gunoffset[i] +
-                        cl.lerpfrac * (ps->gunoffset[i] - ops->gunoffset[i]);
+        gun.origin[i] = cl.refdef.vieworg[i];
         gun.angles[i] = cl.refdef.viewangles[i] + LerpAngle(ops->gunangles[i],
                         ps->gunangles[i], cl.lerpfrac);
     }

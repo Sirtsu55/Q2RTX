@@ -359,17 +359,6 @@ void SV_CalcGunOffset(edict_t *ent)
             ent->client->ps.gunangles[ROLL] += 0.1f * delta;
         ent->client->ps.gunangles[i] += 0.2f * delta;
     }
-
-    // gun height
-    VectorClear(ent->client->ps.gunoffset);
-//  ent->ps->gunorigin[2] += bob;
-
-    // gun_x / gun_y / gun_z are development tools
-    for (i = 0 ; i < 3 ; i++) {
-        ent->client->ps.gunoffset[i] += forward[i] * (gun_y->value);
-        ent->client->ps.gunoffset[i] += right[i] * gun_x->value;
-        ent->client->ps.gunoffset[i] += up[i] * (-gun_z->value);
-    }
 }
 
 

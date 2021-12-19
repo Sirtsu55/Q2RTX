@@ -781,11 +781,6 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
             MSG_WriteShort(to->gunframe);
         }
 
-        if (!OffsetCompare(from->gunoffset, to->gunoffset)) {
-            eflags |= EPS_GUNOFFSET;
-            MSG_WriteOffset(to->gunoffset);
-        }
-
         if (!OffsetCompare(from->gunangles, to->gunangles)) {
             eflags |= EPS_GUNANGLES;
             MSG_WriteOffset(to->gunangles);
@@ -793,7 +788,6 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
     } else {
         // save previous state
         to->gunframe = from->gunframe;
-        VectorCopy(from->gunoffset, to->gunoffset);
         VectorCopy(from->gunangles, to->gunangles);
     }
 
@@ -1368,12 +1362,6 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
         to->gunframe = MSG_ReadWord();
     }
 
-    if (extraflags & EPS_GUNOFFSET) {
-        to->gunoffset[0] = CHAR2OFFSET(MSG_ReadChar());
-        to->gunoffset[1] = CHAR2OFFSET(MSG_ReadChar());
-        to->gunoffset[2] = CHAR2OFFSET(MSG_ReadChar());
-    }
-
     if (extraflags & EPS_GUNANGLES) {
         to->gunangles[0] = CHAR2OFFSET(MSG_ReadChar());
         to->gunangles[1] = CHAR2OFFSET(MSG_ReadChar());
@@ -1427,7 +1415,6 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(KICKANGLES,      "kick_angles");
     SP(WEAPONINDEX,     "gunindex");
     SP(WEAPONFRAME,     "gunframe");
-    SE(GUNOFFSET,       "gunoffset");
     SE(GUNANGLES,       "gunangles");
     SP(BLEND,           "blend");
     SP(FOV,             "fov");
