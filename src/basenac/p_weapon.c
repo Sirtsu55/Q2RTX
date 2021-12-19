@@ -773,41 +773,58 @@ void Weapon_Blaster_Fire(edict_t *ent)
 
 void Weapon_Blaster(edict_t *ent)
 {
+    enum {
+        ANIM_EQUIP_FIRST    = 0,
+        ANIM_EQUIP_LAST     = 8,
+        ANIM_IDLE_FIRST,
+        ANIM_IDLE_LAST      = 115,
+        ANIM_ATTACK1_FIRST,
+        ANIM_ATTACK1_LAST   = 131,
+        ANIM_ATTACK2_FIRST,
+        ANIM_ATTACK2_LAST   = 147,
+        ANIM_ATTACK3_FIRST,
+        ANIM_ATTACK3_LAST   = 162,
+        ANIM_PUTAWAY_FIRST,
+        ANIM_PUTAWAY_LAST   = 167
+    };
     ent->client->ps.gunframe++;
 
     switch (ent->client->weaponstate)
     {
     case WEAPON_ACTIVATING:
-        if (ent->client->ps.gunframe == 8)
-        {
-            ent->client->ps.gunframe = 9;
+        if (ent->client->ps.gunframe == ANIM_EQUIP_LAST)
             ent->client->weaponstate = WEAPON_READY;
-        }
         break;
     case WEAPON_READY:
         if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
             ent->client->weaponstate = WEAPON_DROPPING;
-            ent->client->ps.gunframe = 270;
+            ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
         } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
-            ent->client->ps.gunframe = 116;
+            ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
             ent->client->weaponstate = WEAPON_FIRING;
-        } else if (ent->client->ps.gunframe == 115)
-            ent->client->ps.gunframe = 9;
+            ent->client->axe_attack = true;
+        } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST)
+            ent->client->ps.gunframe = ANIM_IDLE_FIRST;
         break;
     case WEAPON_FIRING:
-        if (ent->client->ps.gunframe == 132 || ent->client->ps.gunframe == 147 || ent->client->ps.gunframe == 162)
+        if (ent->client->ps.gunframe == ANIM_ATTACK1_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK2_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
         {
+            ent->client->axe_attack = true;
+
             if (!(ent->client->buttons & BUTTON_ATTACK))
             {
-                ent->client->ps.gunframe = 9;
+                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
                 ent->client->weaponstate = WEAPON_READY;
             }
-            else if (ent->client->ps.gunframe == 162)
-                ent->client->ps.gunframe = 116;
+            else if (ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
+                ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
         }
 
-        if (ent->client->ps.gunframe == 121 || ent->client->ps.gunframe == 138 || ent->client->ps.gunframe == 154)
+        if (ent->client->axe_attack && (
+            (ent->client->ps.gunframe >= 120 && ent->client->ps.gunframe <= 123) ||
+            (ent->client->ps.gunframe >= 134 && ent->client->ps.gunframe <= 137) ||
+            (ent->client->ps.gunframe >= 151 && ent->client->ps.gunframe < 154)))
         {
             vec3_t forward, right, start, end, offset;
 
@@ -836,6 +853,8 @@ void Weapon_Blaster(edict_t *ent)
                     gi.WriteDir(tr.plane.normal);
                     gi.multicast(tr.endpos, MULTICAST_PVS);
                 }
+
+                ent->client->axe_attack = false;
             }
         }
 
@@ -843,16 +862,25 @@ void Weapon_Blaster(edict_t *ent)
         {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
 
-            if (ent->client->ps.gunframe >= 121 && ent->client->ps.gunframe <= 132)
-                ent->client->ps.gunframe = 133;
-            else if (ent->client->ps.gunframe >= 138 && ent->client->ps.gunframe <= 147)
-                ent->client->ps.gunframe = 148;
-            else if (ent->client->ps.gunframe >= 154 && ent->client->ps.gunframe <= 162)
-                ent->client->ps.gunframe = 117;
+            if (ent->client->ps.gunframe >= 121 && ent->client->ps.gunframe <= ANIM_ATTACK2_FIRST)
+            {
+                ent->client->ps.gunframe = ANIM_ATTACK2_FIRST + 1;
+                ent->client->axe_attack = true;
+            }
+            else if (ent->client->ps.gunframe >= 138 && ent->client->ps.gunframe <= ANIM_ATTACK3_FIRST)
+            {
+                ent->client->ps.gunframe = ANIM_ATTACK3_FIRST + 1;
+                ent->client->axe_attack = true;
+            }
+            else if (ent->client->ps.gunframe >= 154 && ent->client->ps.gunframe <= ANIM_ATTACK3_LAST)
+            {
+                ent->client->ps.gunframe = ANIM_ATTACK1_FIRST + 1;
+                ent->client->axe_attack = true;
+            }
         }
         break;
     case WEAPON_DROPPING:
-        if (ent->client->ps.gunframe == 277)
+        if (ent->client->ps.gunframe == ANIM_PUTAWAY_LAST)
         {
             ChangeWeapon(ent);
             return;

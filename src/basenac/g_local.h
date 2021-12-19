@@ -948,6 +948,9 @@ struct gclient_s {
 
     edict_t     *chase_target;      // player we are chasing
     bool        update_chase;       // need to update chase info?
+
+    // N&C
+    bool        axe_attack;
 };
 
 
