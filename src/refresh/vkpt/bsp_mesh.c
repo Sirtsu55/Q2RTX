@@ -1526,6 +1526,7 @@ load_sky_and_lava_clusters(bsp_mesh_t* wm, const char* map_name)
 
 	Z_Free(filebuf);
 }
+
 static void
 compute_sky_visibility(bsp_mesh_t *wm, bsp_t *bsp)
 {
