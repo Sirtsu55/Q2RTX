@@ -953,6 +953,8 @@ void ClientEndServerFrame(edict_t *ent)
             bobmove = 0.0625f;
     }
 
+    bobmove /= BASE_FRAMEDIV;
+
     bobtime = (current_client->bobtime += bobmove);
 
     if (current_client->ps.pmove.pm_flags & PMF_DUCKED)

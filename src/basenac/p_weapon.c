@@ -824,7 +824,7 @@ void Weapon_Blaster(edict_t *ent)
         if (ent->client->axe_attack && (
             (ent->client->ps.gunframe >= 120 && ent->client->ps.gunframe <= 123) ||
             (ent->client->ps.gunframe >= 134 && ent->client->ps.gunframe <= 137) ||
-            (ent->client->ps.gunframe >= 151 && ent->client->ps.gunframe < 154)))
+            (ent->client->ps.gunframe >= 151 && ent->client->ps.gunframe <= 154)))
         {
             vec3_t forward, right, start, end, offset;
 
