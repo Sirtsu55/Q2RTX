@@ -441,7 +441,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
     // check for invincibility
     if ((client && client->invincible_framenum > level.framenum) && !(dflags & DAMAGE_NO_PROTECTION)) {
         if (targ->pain_debounce_framenum < level.framenum) {
-            gi.sound(targ, CHAN_ITEM, gi.soundindex("items/protect4.wav"), 1, ATTN_NORM, 0);
+            gi.sound(targ, CHAN_ITEM, gi.soundindex("items/protect4.wav"), 1, ATTN_NORM);
             targ->pain_debounce_framenum = level.framenum + 2 * BASE_FRAMERATE;
         }
         take = 0;

@@ -34,22 +34,22 @@ static int  sound_scream[8];
 
 void insane_fist(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_fist, 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, sound_fist, 1, ATTN_IDLE);
 }
 
 void insane_shake(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_shake, 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, sound_shake, 1, ATTN_IDLE);
 }
 
 void insane_moan(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_moan, 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, sound_moan, 1, ATTN_IDLE);
 }
 
 void insane_scream(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_scream[Q_rand() % 8], 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, sound_scream[Q_rand() % 8], 1, ATTN_IDLE);
 }
 
 
@@ -474,7 +474,7 @@ void insane_pain(edict_t *self, edict_t *other, float kick, int damage)
         l = 75;
     else
         l = 100;
-    gi.sound(self, CHAN_VOICE, gi.soundindex(va("player/male/pain%i_%i.wav", l, r)), 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, gi.soundindex(va("player/male/pain%i_%i.wav", l, r)), 1, ATTN_IDLE);
 
     if (skill->value == 3)
         return;     // no pain anims in nightmare
@@ -555,7 +555,7 @@ void insane_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     int     n;
 
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_IDLE, 0);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_IDLE);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -568,7 +568,7 @@ void insane_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     if (self->deadflag == DEAD_DEAD)
         return;
 
-    gi.sound(self, CHAN_VOICE, gi.soundindex(va("player/male/death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, gi.soundindex(va("player/male/death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_IDLE);
 
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;

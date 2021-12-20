@@ -23,7 +23,6 @@ void UpdateChaseCam(edict_t *ent)
     edict_t *targ;
     vec3_t forward, right;
     trace_t trace;
-    int i;
     vec3_t angles;
 
     // is our chase target gone?

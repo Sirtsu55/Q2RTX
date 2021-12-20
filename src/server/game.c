@@ -478,9 +478,9 @@ or the midpoint of the entity box for bmodels.
 */
 static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
                           int soundindex, float volume,
-                          float attenuation, float timeofs)
+                          float attenuation, int pitch_shift)
 {
-    int         i, ent, flags, sendchan;
+    int         ent, flags, sendchan;
     vec3_t      origin_v;
     client_t    *client;
     byte        mask[VIS_MAX_BYTES];
@@ -494,8 +494,6 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
         Com_Error(ERR_DROP, "%s: volume = %f", __func__, volume);
     if (attenuation < 0 || attenuation > 4)
         Com_Error(ERR_DROP, "%s: attenuation = %f", __func__, attenuation);
-    if (timeofs < 0 || timeofs > 0.255f)
-        Com_Error(ERR_DROP, "%s: timeofs = %f", __func__, timeofs);
     if (soundindex < 0 || soundindex >= MAX_SOUNDS)
         Com_Error(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
 
@@ -511,8 +509,8 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
         flags |= SND_VOLUME;
     if (attenuation != DEFAULT_SOUND_PACKET_ATTENUATION)
         flags |= SND_ATTENUATION;
-    if (timeofs)
-        flags |= SND_OFFSET;
+    if (pitch_shift)
+        flags |= SND_PITCH;
 
     // send origin for invisible entities
     // the origin can also be explicitly set
@@ -538,11 +536,12 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
         MSG_WriteByte(volume * 255);
     if (flags & SND_ATTENUATION)
         MSG_WriteByte(attenuation * 64);
-    if (flags & SND_OFFSET)
-        MSG_WriteByte(timeofs * 1000);
 
     MSG_WriteShort(sendchan);
     MSG_WritePos(origin);
+
+    if (flags & SND_PITCH)
+        MSG_WriteChar(pitch_shift);
 
     // if the sound doesn't attenuate, send it to everyone
     // (global radio chatter, voiceovers, etc)
@@ -611,9 +610,9 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
         msg->index = soundindex;
         msg->volume = volume * 255;
         msg->attenuation = attenuation * 64;
-        msg->timeofs = timeofs * 1000;
         msg->sendchan = sendchan;
         VectorCopy(origin, msg->pos);
+        msg->pitch = pitch_shift;
 
         List_Remove(&msg->entry);
         List_Append(&client->msg_unreliable_list, &msg->entry);
@@ -626,11 +625,11 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
 
 static void PF_StartSound(edict_t *entity, int channel,
                           int soundindex, float volume,
-                          float attenuation, float timeofs)
+                          float attenuation)
 {
     if (!entity)
         return;
-    SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, timeofs);
+    SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, 0);
 }
 
 void PF_Pmove(pmove_t *pm)

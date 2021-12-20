@@ -38,17 +38,17 @@ static int  sound_sight;
 
 void gunner_idlesound(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE);
 }
 
 void gunner_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM);
 }
 
 void gunner_search(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM);
 }
 
 
@@ -281,9 +281,9 @@ void gunner_pain(edict_t *self, edict_t *other, float kick, int damage)
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
 
     if (Q_rand() & 1)
-        gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM);
     else
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM);
 
     if (skill->value == 3)
         return;     // no pain anims in nightmare
@@ -327,7 +327,7 @@ void gunner_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -341,7 +341,7 @@ void gunner_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.currentmove = &gunner_move_death;
@@ -406,7 +406,7 @@ void gunner_dodge(edict_t *self, edict_t *attacker, float eta)
 
 void gunner_opengun(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_open, 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_VOICE, sound_open, 1, ATTN_IDLE);
 }
 
 void GunnerFire(edict_t *self)

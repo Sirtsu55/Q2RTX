@@ -71,7 +71,7 @@ void Use_Target_Speaker(edict_t *ent, edict_t *other, edict_t *activator)
             chan = CHAN_VOICE;
         // use a positioned_sound, because this entity won't normally be
         // sent to any clients because it is invisible
-        gi.positioned_sound(ent->s.origin, ent, chan, ent->noise_index, ent->volume, ent->attenuation, 0);
+        gi.positioned_sound(ent->s.origin, ent, chan, ent->noise_index, ent->volume, ent->attenuation);
     }
 }
 
@@ -148,7 +148,7 @@ These are single use targets.
 */
 void use_target_secret(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.sound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM, 0);
+    gi.sound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM);
 
     level.found_secrets++;
 
@@ -183,7 +183,7 @@ These are single use targets.
 */
 void use_target_goal(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.sound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM, 0);
+    gi.sound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM);
 
     level.found_goals++;
 
@@ -416,7 +416,7 @@ void use_target_blaster(edict_t *self, edict_t *other, edict_t *activator)
 #endif
 
     fire_blaster(self, self->s.origin, self->movedir, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
-    gi.sound(self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM);
 }
 
 void SP_target_blaster(edict_t *self)
@@ -729,7 +729,7 @@ void target_earthquake_think(edict_t *self)
     edict_t *e;
 
     if (self->last_move_framenum < level.framenum) {
-        gi.positioned_sound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0f, ATTN_NONE, 0);
+        gi.positioned_sound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0f, ATTN_NONE);
         self->last_move_framenum = level.framenum + 0.5f * BASE_FRAMERATE;
     }
 

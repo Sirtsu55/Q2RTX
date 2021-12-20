@@ -625,7 +625,7 @@ typedef struct {
     vec3_t  pos;
     float   volume;
     float   attenuation;
-    float   timeofs;
+    int     pitch;
 } snd_params_t;
 
 extern tent_params_t    te;

@@ -108,7 +108,7 @@ void gib_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
     self->touch = NULL;
 
     if (plane) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/fhit3.wav"), 1, ATTN_NORM);
 
         vectoangles(plane->normal, normal_angles);
         AngleVectors(normal_angles, NULL, right, NULL);
@@ -1091,14 +1091,14 @@ void commander_body_think(edict_t *self)
         self->nextthink = 0;
 
     if (self->s.frame == 22)
-        gi.sound(self, CHAN_BODY, gi.soundindex("tank/thud.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_BODY, gi.soundindex("tank/thud.wav"), 1, ATTN_NORM);
 }
 
 void commander_body_use(edict_t *self, edict_t *other, edict_t *activator)
 {
     self->think = commander_body_think;
     self->nextthink = level.framenum + 1;
-    gi.sound(self, CHAN_BODY, gi.soundindex("tank/pain.wav"), 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, gi.soundindex("tank/pain.wav"), 1, ATTN_NORM);
 }
 
 void commander_body_drop(edict_t *self)
@@ -1161,7 +1161,7 @@ void misc_deadsoldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, 
     if (self->health > -80)
         return;
 
-    gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
     for (n = 0; n < 4; n++)
         ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
@@ -1701,7 +1701,6 @@ void SP_func_clock(edict_t *self)
 void teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
     edict_t     *dest;
-    int         i;
 
     if (!other->client)
         return;

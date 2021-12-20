@@ -488,6 +488,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     self->s.angles[2] = 0;
 
     self->s.sound = 0;
+    self->s.sound_pitch = 0;
     self->client->weapon_sound = 0;
 
     self->maxs[2] = -8;
@@ -522,7 +523,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
     if (self->health < -40) {
         // gib
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
@@ -553,7 +554,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
                     self->client->anim_end = FRAME_death308;
                     break;
                 }
-            gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_NORM, 0);
+            gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_NORM);
         }
     }
 
@@ -901,7 +902,7 @@ void body_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
     int n;
 
     if (self->health < -40) {
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         self->s.origin[2] -= 48;
@@ -1077,7 +1078,6 @@ void PutClientInServer(edict_t *ent)
     int     index;
     vec3_t  spawn_origin, spawn_angles;
     gclient_t   *client;
-    int     i;
     client_persistant_t saved;
     client_respawn_t    resp;
 
@@ -1472,6 +1472,7 @@ void ClientDisconnect(edict_t *ent)
     gi.unlinkentity(ent);
     ent->s.modelindex = 0;
     ent->s.sound = 0;
+    ent->s.sound_pitch = 0;
     ent->s.event = 0;
     ent->s.effects = 0;
     ent->solid = SOLID_NOT;
@@ -1592,7 +1593,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         VectorCopy(ucmd->angles, client->resp.cmd_angles);
 
         if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0)) {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
+            gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM);
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 

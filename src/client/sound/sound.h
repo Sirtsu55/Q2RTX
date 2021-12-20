@@ -49,6 +49,7 @@ typedef struct playsound_s {
     bool        fixed_origin;   // use origin field instead of entnum's origin
     vec3_t      origin;
     unsigned    begin;          // begin on this sample
+    int         pitch;
 } playsound_t;
 
 typedef struct channel_s {
@@ -67,6 +68,9 @@ typedef struct channel_s {
     bool        autosound;      // from an entity->sound, cleared each frame
     int         autoframe;
     int         srcnum;
+
+    // Pitch shifting
+    int         pitch;
 } channel_t;
 
 typedef struct {
@@ -136,4 +140,10 @@ sfx_t *S_SfxForHandle(qhandle_t hSfx);
 sfxcache_t *S_LoadSound(sfx_t *s);
 channel_t *S_PickChannel(int entnum, int entchannel);
 void S_IssuePlaysound(playsound_t *ps);
-void S_BuildSoundList(int *sounds);
+
+typedef struct {
+    int     sound;
+    int     pitch;
+} entity_sound_t;
+
+void S_BuildSoundList(entity_sound_t *sounds);

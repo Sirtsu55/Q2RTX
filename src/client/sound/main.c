@@ -646,6 +646,7 @@ void S_IssuePlaysound(playsound_t *ps)
     ch->sfx = ps->sfx;
     VectorCopy(ps->origin, ch->origin);
     ch->fixed_origin = ps->fixed_origin;
+    ch->pitch = ps->pitch;
 
     if (s_started == SS_OAL)
         AL_PlayChannel(ch);
@@ -670,7 +671,7 @@ if pos is NULL, the sound will be dynamically sourced from the entity
 Entchannel 0 will never override a playing sound
 ====================
 */
-void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSfx, float vol, float attenuation, float timeofs)
+void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSfx, float vol, float attenuation, float timeofs, int pitch_shift)
 {
     sfxcache_t  *sc;
     playsound_t *ps, *sort;
@@ -717,6 +718,8 @@ void S_StartSound(const vec3_t origin, int entnum, int entchannel, qhandle_t hSf
     if (s_started == SS_OAL)
         ps->begin = paintedtime + timeofs * 1000;
 
+    ps->pitch = pitch_shift;
+
     // sort into the pending sound list
     for (sort = s_pendingplays.next; sort != &s_pendingplays && sort->begin < ps->begin; sort = sort->next)
         ;
@@ -742,7 +745,7 @@ void S_ParseStartSound(void)
 
     S_StartSound((snd.flags & SND_POS) ? snd.pos : NULL,
                  snd.entity, snd.channel, handle,
-                 snd.volume, snd.attenuation, snd.timeofs);
+                 snd.volume, snd.attenuation, 0, 0);
 }
 
 /*
@@ -754,7 +757,7 @@ void S_StartLocalSound(const char *sound)
 {
     if (s_started) {
         qhandle_t sfx = S_RegisterSound(sound);
-        S_StartSound(NULL, listener_entnum, 0, sfx, 1, ATTN_NONE, 0);
+        S_StartSound(NULL, listener_entnum, 0, sfx, 1, ATTN_NONE, 0, 0);
     }
 }
 
@@ -762,7 +765,7 @@ void S_StartLocalSound_(const char *sound)
 {
     if (s_started) {
         qhandle_t sfx = S_RegisterSound(sound);
-        S_StartSound(NULL, listener_entnum, 256, sfx, 1, ATTN_NONE, 0);
+        S_StartSound(NULL, listener_entnum, 256, sfx, 1, ATTN_NONE, 0, 0);
     }
 }
 
@@ -801,7 +804,7 @@ void S_StopAllSounds(void)
 // Update sound buffer
 // =======================================================================
 
-void S_BuildSoundList(int *sounds)
+void S_BuildSoundList(entity_sound_t *sounds)
 {
     int         i;
     int         num;
@@ -811,11 +814,12 @@ void S_BuildSoundList(int *sounds)
         num = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
         ent = &cl.entityStates[num];
         if (s_ambient->integer == 2 && !ent->modelindex) {
-            sounds[i] = 0;
+            sounds[i].sound = 0;
         } else if (s_ambient->integer == 3 && ent->number != listener_entnum) {
-            sounds[i] = 0;
+            sounds[i].sound = 0;
         } else {
-            sounds[i] = ent->sound;
+            sounds[i].sound = ent->sound;
+            sounds[i].pitch = ent->sound_pitch;
         }
     }
 }

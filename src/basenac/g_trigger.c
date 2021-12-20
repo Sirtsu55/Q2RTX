@@ -211,11 +211,11 @@ void trigger_key_use(edict_t *self, edict_t *other, edict_t *activator)
             return;
         self->touch_debounce_framenum = level.framenum + 5.0f * BASE_FRAMERATE;
         gi.centerprintf(activator, "You need the %s", self->item->pickup_name);
-        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keytry.wav"), 1, ATTN_NORM, 0);
+        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keytry.wav"), 1, ATTN_NORM);
         return;
     }
 
-    gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
+    gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keyuse.wav"), 1, ATTN_NORM);
     if (coop->value) {
         int     player;
         edict_t *ent;
@@ -307,14 +307,14 @@ void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
     if (self->count) {
         if (!(self->spawnflags & 1)) {
             gi.centerprintf(activator, "%i more to go...", self->count);
-            gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM);
         }
         return;
     }
 
     if (!(self->spawnflags & 1)) {
         gi.centerprintf(activator, "Sequence completed!");
-        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM);
     }
     self->activator = activator;
     multi_trigger(self);
@@ -374,7 +374,7 @@ void trigger_push_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
             VectorCopy(other->velocity, other->client->oldvelocity);
             if (other->fly_sound_debounce_framenum < level.framenum) {
                 other->fly_sound_debounce_framenum = level.framenum + 1.5f * BASE_FRAMERATE;
-                gi.sound(other, CHAN_AUTO, windsound, 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_AUTO, windsound, 1, ATTN_NORM);
             }
         }
     }
@@ -448,7 +448,7 @@ void hurt_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 
     if (!(self->spawnflags & 4)) {
         if ((level.framenum % 10) == 0)
-            gi.sound(other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
+            gi.sound(other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM);
     }
 
     if (self->spawnflags & 8)

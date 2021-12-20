@@ -491,6 +491,9 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
             bits |= U_OLDORIGIN;
     }
 
+    if (to->sound_pitch != from->sound_pitch)
+        bits |= U_SOUNDPITCH;
+
     //
     // write the message
     //
@@ -587,6 +590,9 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
         MSG_WriteByte(to->event);
     if (bits & U_SOLID)
         MSG_WriteLong(to->solid);
+
+    if (bits & U_SOUNDPITCH)
+        MSG_WriteChar(to->sound_pitch);
 }
 
 static inline int OFFSET2CHAR(float x)
@@ -1247,6 +1253,10 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
     if (bits & U_SOLID) {
         to->solid = MSG_ReadLong();
     }
+
+    if (bits & U_SOUNDPITCH) {
+        to->sound_pitch = MSG_ReadChar();
+    }
 }
 
 #endif // USE_CLIENT
@@ -1488,6 +1498,7 @@ void MSG_ShowDeltaEntityBits(int bits)
     S(SOUND, "sound");
     S(EVENT, "event");
     S(SOLID, "solid");
+    S(SOUNDPITCH, "soundpitch");
 #undef S
 }
 

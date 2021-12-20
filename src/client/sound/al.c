@@ -254,6 +254,8 @@ void AL_DeleteSfx(sfx_t *s)
     qalDeleteBuffers(1, &name);
 }
 
+#define TONES_PER_OCTAVE	48
+
 static void AL_Spatialize(channel_t *ch)
 {
     vec3_t      origin;
@@ -269,6 +271,16 @@ static void AL_Spatialize(channel_t *ch)
     }
 
     qalSource3f(ch->srcnum, AL_POSITION, AL_UnpackVector(origin));
+
+	// offset pitch by sound-requested offset
+    float pitch = 1.f;
+
+	if (ch->pitch) {
+		const float octaves = (float) pow(2.0, 0.69314718 * ((float) ch->pitch / TONES_PER_OCTAVE));
+		pitch *= octaves;
+	}
+
+    qalSourcef(ch->srcnum, AL_PITCH, pitch);
 }
 
 void AL_StopChannel(channel_t *ch)
@@ -367,7 +379,7 @@ static channel_t *AL_FindLoopingSound(int entnum, sfx_t *sfx)
 static void AL_AddLoopSounds(void)
 {
     int         i;
-    int         sounds[MAX_EDICTS];
+    entity_sound_t sounds[MAX_EDICTS];
     channel_t   *ch, *ch2;
     sfx_t       *sfx;
     sfxcache_t  *sc;
@@ -383,10 +395,10 @@ static void AL_AddLoopSounds(void)
     S_BuildSoundList(sounds);
 
     for (i = 0; i < cl.frame.numEntities; i++) {
-        if (!sounds[i])
+        if (!sounds[i].sound)
             continue;
 
-        sfx = S_SfxForHandle(cl.sound_precache[sounds[i]]);
+        sfx = S_SfxForHandle(cl.sound_precache[sounds[i].sound]);
         if (!sfx)
             continue;       // bad sound effect
         sc = sfx->cache;
@@ -400,6 +412,7 @@ static void AL_AddLoopSounds(void)
         if (ch) {
             ch->autoframe = s_framecount;
             ch->end = paintedtime + sc->length;
+            ch->pitch = sounds[i].pitch;
             continue;
         }
 
@@ -425,6 +438,7 @@ static void AL_AddLoopSounds(void)
         ch->master_vol = 1;
         ch->dist_mult = SOUND_LOOPATTENUATE;
         ch->end = paintedtime + sc->length;
+        ch->pitch = sounds[i].pitch;
 
         AL_PlayChannel(ch);
 

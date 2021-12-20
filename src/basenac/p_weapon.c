@@ -182,6 +182,7 @@ void ChangeWeapon(edict_t *ent)
     if (ent->client->grenade_framenum) {
         ent->client->grenade_framenum = level.framenum;
         ent->client->weapon_sound = 0;
+        ent->s.sound_pitch = 0;
         weapon_grenade_fire(ent, false);
         ent->client->grenade_framenum = 0;
     }
@@ -441,7 +442,7 @@ void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, 
                 }
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -470,7 +471,7 @@ void Weapon_Generic(edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, 
         for (n = 0; fire_frames[n]; n++) {
             if (ent->client->ps.gunframe == fire_frames[n]) {
                 if (ent->client->quad_framenum > level.framenum)
-                    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage3.wav"), 1, ATTN_NORM);
 
                 fire(ent);
                 break;
@@ -565,7 +566,7 @@ void Weapon_Grenade(edict_t *ent)
                 ent->client->grenade_framenum = 0;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -585,7 +586,7 @@ void Weapon_Grenade(edict_t *ent)
 
     if (ent->client->weaponstate == WEAPON_FIRING) {
         if (ent->client->ps.gunframe == 5)
-            gi.sound(ent, CHAN_WEAPON, gi.soundindex("weapons/hgrena1b.wav"), 1, ATTN_NORM, 0);
+            gi.sound(ent, CHAN_WEAPON, gi.soundindex("weapons/hgrena1b.wav"), 1, ATTN_NORM);
 
         if (ent->client->ps.gunframe == 11) {
             if (!ent->client->grenade_framenum) {
@@ -859,7 +860,7 @@ void Weapon_Blaster(edict_t *ent)
                 if (tr.ent && tr.ent->takedamage)
                 {
                     T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
-                    gi.sound(ent, CHAN_AUTO, gi.soundindex("makron/brain1.wav"), 1.f, ATTN_NORM, 0.f);
+                    gi.sound(ent, CHAN_AUTO, gi.soundindex("makron/brain1.wav"), 1.f, ATTN_NORM);
                 }
                 else if (!(tr.surface->flags & SURF_SKY))
                 {
@@ -920,7 +921,7 @@ void Weapon_HyperBlaster_Fire(edict_t *ent)
     } else {
         if (! ent->client->pers.inventory[ent->client->ammo_index]) {
             if (level.framenum >= ent->pain_debounce_framenum) {
-                gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM);
                 ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
             }
             NoAmmoWeaponChange(ent);
@@ -958,7 +959,7 @@ void Weapon_HyperBlaster_Fire(edict_t *ent)
     }
 
     if (ent->client->ps.gunframe == 12) {
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
+        gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM);
         ent->client->weapon_sound = 0;
     }
 
@@ -1004,7 +1005,7 @@ void Machinegun_Fire(edict_t *ent)
     if (ent->client->pers.inventory[ent->client->ammo_index] < 1) {
         ent->client->ps.gunframe = 6;
         if (level.framenum >= ent->pain_debounce_framenum) {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+            gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM);
             ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
         }
         NoAmmoWeaponChange(ent);
@@ -1077,7 +1078,7 @@ void Weapon_Chaingun(edict_t *ent)
         ANIM_IDLE_FIRST,
         ANIM_IDLE_LAST      = 57,
         ANIM_ATTACK_FIRST   = 62,
-        ANIM_ATTACK_LAST    = 72,
+        ANIM_ATTACK_LAST    = 69,
         ANIM_PUTAWAY_FIRST  = 58,
         ANIM_PUTAWAY_LAST   = 60
     };
@@ -1090,39 +1091,29 @@ void Weapon_Chaingun(edict_t *ent)
             ent->client->weaponstate = WEAPON_READY;
         break;
     case WEAPON_READY:
-        if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
-            ent->client->weaponstate = WEAPON_DROPPING;
-            ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
-            break;
-        } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
+        if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
             ent->client->weaponstate = WEAPON_FIRING;
             // intentional fall-through
         } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST) {
             ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            break;
         }
     case WEAPON_FIRING:
+        if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
+            ent->client->weaponstate = WEAPON_DROPPING;
+            ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
+            break;
+        }
+
+        ent->client->weapon_sound = gi.soundindex("misc/lasfly.wav");
         if ((ent->client->buttons | ent->client->latched_buttons) & BUTTON_ATTACK) {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
             ent->client->ps.gunspin = min(MAX_ROTATION, ent->client->ps.gunspin + ROTATION_SPEED);
 
             if (ent->client->ps.gunspin >= MAX_ROTATION)
             {
-                if (ent->client->ps.gunframe <= ANIM_ATTACK_FIRST) {
-                    int current_frame = ent->client->ps.gunframe;
-                    int possible_frames[] = { ANIM_ATTACK_FIRST, ANIM_ATTACK_FIRST + 2, ANIM_ATTACK_FIRST + 4, ANIM_ATTACK_FIRST + 6 };
-                    int frame_num = 4;
-
-                    for (int i = 0; i < 4; i++) {
-                        if (possible_frames[i] == ent->client->ps.gunframe) {
-                            possible_frames[i] = possible_frames[3];
-                            frame_num--;
-                            break;
-                        }
-                    }
-
-                    ent->client->ps.gunframe = possible_frames[Q_rand_uniform(frame_num)];
+                if (ent->client->ps.gunframe < ANIM_ATTACK_FIRST) {
+                    ent->client->ps.gunframe = ANIM_ATTACK_FIRST;
                 }
 
                 vec3_t forward, right, up, start;
@@ -1132,14 +1123,19 @@ void Weapon_Chaingun(edict_t *ent)
                 VectorCopy(ent->s.origin, start);
                 start[2] += ent->viewheight;
                 VectorMA(start, 32, forward, start);
-                VectorMA(start, -8, up, start);
+                VectorMA(start, -10, up, start);
 
-                float rotation = (ent->client->ps.gunframe - ANIM_ATTACK_FIRST) * (M_PI / 9) * 2;
+                float rotation = fmodf(level.time * 10.0f, M_PI * 2);
 
-                VectorMA(start, -5 * cosf(rotation), right, start);
-                VectorMA(start, 5 * sinf(rotation), up, start);
+                VectorMA(start, -4 * cosf(rotation), right, start);
+                VectorMA(start, 4 * sinf(rotation), up, start);
 
                 fire_nail(ent, start, forward, 12, 2000);
+
+                gi.WriteByte(svc_muzzleflash);
+                gi.WriteShort(ent - g_edicts);
+                gi.WriteByte(MZ_CHAINGUN1 | is_silenced);
+                gi.multicast(ent->s.origin, MULTICAST_PVS);
             }
 
             if (ent->client->ps.gunframe == ANIM_IDLE_LAST) {
@@ -1149,8 +1145,18 @@ void Weapon_Chaingun(edict_t *ent)
             }
         } else {
             ent->client->ps.gunspin = max(0.f, ent->client->ps.gunspin - ROTATION_SPEED);
-            ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            ent->client->weaponstate = WEAPON_READY;
+
+            if (ent->client->weaponstate == WEAPON_FIRING) {
+                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+                ent->client->weaponstate = WEAPON_READY;
+            }
+        }
+
+        if (ent->client->ps.gunspin <= 0) {
+            ent->client->weapon_sound = 0;
+            ent->s.sound_pitch = 0;
+        } else {
+            ent->s.sound_pitch = -63 + ((ent->client->ps.gunspin / MAX_ROTATION) * 63 * 2);
         }
         break;
     case WEAPON_DROPPING:

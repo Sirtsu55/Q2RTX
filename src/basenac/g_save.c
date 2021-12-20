@@ -68,6 +68,7 @@ static const save_field_t entityfields[] = {
     I(s.solid),
     I(s.sound),
     I(s.event),
+    I(s.sound_pitch),
 
     // [...]
 

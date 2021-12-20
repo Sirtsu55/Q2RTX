@@ -114,8 +114,8 @@ typedef struct {
     void (* q_printf(1, 2) dprintf)(const char *fmt, ...);
     void (* q_printf(3, 4) cprintf)(edict_t *ent, int printlevel, const char *fmt, ...);
     void (* q_printf(2, 3) centerprintf)(edict_t *ent, const char *fmt, ...);
-    void (*sound)(edict_t *ent, int channel, int soundindex, float volume, float attenuation, float timeofs);
-    void (*positioned_sound)(vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation, float timeofs);
+    void (*sound)(edict_t *ent, int channel, int soundindex, float volume, float attenuation);
+    void (*positioned_sound)(vec3_t origin, edict_t *ent, int channel, int soundinedex, float volume, float attenuation);
 
     // config strings hold all the index strings, the lightstyles,
     // and misc data like the sky definition and cdtrack.

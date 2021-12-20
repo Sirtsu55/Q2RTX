@@ -543,15 +543,15 @@ static void emit_snd(client_t *client, message_packet_t *msg)
         MSG_WriteByte(msg->volume);
     if (flags & SND_ATTENUATION)
         MSG_WriteByte(msg->attenuation);
-    if (flags & SND_OFFSET)
-        MSG_WriteByte(msg->timeofs);
 
     MSG_WriteShort(msg->sendchan);
 
     if (flags & SND_POS) {
-        for (i = 0; i < 3; i++) {
-            MSG_WriteCoord(msg->pos[i]);
-        }
+        MSG_WritePos(msg->pos);
+    }
+
+    if (flags & SND_PITCH) {
+        MSG_WriteChar(msg->pitch / 2);
     }
 }
 

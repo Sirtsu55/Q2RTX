@@ -341,7 +341,7 @@ void Use_Quad(edict_t *ent, gitem_t *item)
     else
         ent->client->quad_framenum = level.framenum + timeout;
 
-    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
+    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -356,7 +356,7 @@ void Use_Breather(edict_t *ent, gitem_t *item)
     else
         ent->client->breather_framenum = level.framenum + 300;
 
-//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
+//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -371,7 +371,7 @@ void Use_Envirosuit(edict_t *ent, gitem_t *item)
     else
         ent->client->enviro_framenum = level.framenum + 300;
 
-//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
+//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -386,7 +386,7 @@ void    Use_Invulnerability(edict_t *ent, gitem_t *item)
     else
         ent->client->invincible_framenum = level.framenum + 300;
 
-    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect.wav"), 1, ATTN_NORM, 0);
+    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -397,7 +397,7 @@ void    Use_Silencer(edict_t *ent, gitem_t *item)
     ValidateSelectedItem(ent);
     ent->client->silencer_shots += 30;
 
-//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
+//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -675,7 +675,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
 
     if (ent->flags & FL_POWER_ARMOR) {
         ent->flags &= ~FL_POWER_ARMOR;
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
+        gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM);
     } else {
         index = ITEM_INDEX(FindItem("cells"));
         if (!ent->client->pers.inventory[index]) {
@@ -683,7 +683,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
             return;
         }
         ent->flags |= FL_POWER_ARMOR;
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM, 0);
+        gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM);
     }
 }
 
@@ -748,15 +748,15 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
         if (ent->item->pickup == Pickup_Health) {
             if (ent->count == 2)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM);
             else if (ent->count == 10)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM);
             else if (ent->count == 25)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM);
             else // (ent->count == 100)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM);
         } else if (ent->item->pickup_sound) {
-            gi.sound(other, CHAN_ITEM, gi.soundindex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
+            gi.sound(other, CHAN_ITEM, gi.soundindex(ent->item->pickup_sound), 1, ATTN_NORM);
         }
     }
 

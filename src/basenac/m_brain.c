@@ -45,12 +45,12 @@ static int  sound_melee3;
 
 void brain_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM);
 }
 
 void brain_search(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM);
 }
 
 
@@ -146,7 +146,7 @@ mmove_t brain_move_idle = {FRAME_stand31, FRAME_stand60, brain_frames_idle, brai
 
 void brain_idle(edict_t *self)
 {
-    gi.sound(self, CHAN_AUTO, sound_idle3, 1, ATTN_IDLE, 0);
+    gi.sound(self, CHAN_AUTO, sound_idle3, 1, ATTN_IDLE);
     self->monsterinfo.currentmove = &brain_move_idle;
 }
 
@@ -393,7 +393,7 @@ mmove_t brain_move_death1 = {FRAME_death101, FRAME_death118, brain_frames_death1
 //
 
 void brain_swing_right(edict_t *self) {
-    gi.sound(self, CHAN_BODY, sound_melee1, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, sound_melee1, 1, ATTN_NORM);
 }
 
 void brain_hit_right(edict_t *self) {
@@ -401,11 +401,11 @@ void brain_hit_right(edict_t *self) {
 
     VectorSet(aim, MELEE_DISTANCE, self->maxs[0], 8);
     if (fire_hit(self, aim, (15 + (Q_rand() % 5)), 40))
-        gi.sound(self, CHAN_WEAPON, sound_melee3, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_WEAPON, sound_melee3, 1, ATTN_NORM);
 }
 
 void brain_swing_left(edict_t *self) {
-    gi.sound(self, CHAN_BODY, sound_melee2, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, sound_melee2, 1, ATTN_NORM);
 }
 
 void brain_hit_left(edict_t *self) {
@@ -413,7 +413,7 @@ void brain_hit_left(edict_t *self) {
 
     VectorSet(aim, MELEE_DISTANCE, self->mins[0], 8);
     if (fire_hit(self, aim, (15 + (Q_rand() % 5)), 40))
-        gi.sound(self, CHAN_WEAPON, sound_melee3, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_WEAPON, sound_melee3, 1, ATTN_NORM);
 }
 
 mframe_t brain_frames_attack1 [] =
@@ -442,7 +442,7 @@ mmove_t brain_move_attack1 = {FRAME_attak101, FRAME_attak118, brain_frames_attac
 void brain_chest_open(edict_t *self) {
     self->spawnflags &= ~65536;
     self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
-    gi.sound(self, CHAN_BODY, sound_chest_open, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, sound_chest_open, 1, ATTN_NORM);
 }
 
 void brain_tentacle_attack(edict_t *self) {
@@ -451,7 +451,7 @@ void brain_tentacle_attack(edict_t *self) {
     VectorSet(aim, MELEE_DISTANCE, 0, 8);
     if (fire_hit(self, aim, (10 + (Q_rand() % 5)), -600) && skill->value > 0)
         self->spawnflags |= 65536;
-    gi.sound(self, CHAN_WEAPON, sound_tentacles_retract, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_WEAPON, sound_tentacles_retract, 1, ATTN_NORM);
 }
 
 void brain_chest_closed(edict_t *self) {
@@ -536,13 +536,13 @@ void brain_pain(edict_t *self, edict_t *other, float kick, int damage) {
 
     r = random();
     if (r < 0.33f) {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
         self->monsterinfo.currentmove = &brain_move_pain1;
     } else if (r < 0.66f) {
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM);
         self->monsterinfo.currentmove = &brain_move_pain2;
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
         self->monsterinfo.currentmove = &brain_move_pain3;
     }
 }
@@ -566,7 +566,7 @@ void brain_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -580,7 +580,7 @@ void brain_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     if (random() <= 0.5f)

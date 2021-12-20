@@ -685,11 +685,6 @@ static void CL_ParseStartSoundPacket(void)
     else
         snd.attenuation = DEFAULT_SOUND_PACKET_ATTENUATION;
 
-    if (flags & SND_OFFSET)
-        snd.timeofs = MSG_ReadByte() / 1000.0f;
-    else
-        snd.timeofs = 0;
-
     if (flags & SND_ENT) {
         // entity relative
         channel = MSG_ReadShort();
@@ -706,6 +701,9 @@ static void CL_ParseStartSoundPacket(void)
     // positioned in space
     if (flags & SND_POS)
         MSG_ReadPos(snd.pos);
+
+    if (flags & SND_PITCH)
+        snd.pitch = MSG_ReadChar();
 
     snd.flags = flags;
 

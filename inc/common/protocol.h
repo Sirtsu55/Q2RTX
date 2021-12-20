@@ -182,7 +182,7 @@ typedef enum {
 #define SND_ATTENUATION     (1<<1)  // a byte
 #define SND_POS             (1<<2)  // three coordinates
 #define SND_ENT             (1<<3)  // a short 0-2: channel, 3-12: entity
-#define SND_OFFSET          (1<<4)  // a byte, msec offset from frame start
+#define SND_PITCH           (1<<4)  // a byte, * 2
 
 #define DEFAULT_SOUND_PACKET_VOLUME         1.0f
 #define DEFAULT_SOUND_PACKET_ATTENUATION    1.0f
@@ -225,6 +225,7 @@ typedef enum {
 #define U_SKIN16        (1<<24)
 #define U_SOUND         (1<<25)
 #define U_SOLID         (1<<26)
+#define U_SOUNDPITCH    (1<<27)
 
 // ==============================================================
 

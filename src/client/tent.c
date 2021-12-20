@@ -1096,11 +1096,11 @@ void CL_ParseTEnt(void)
             // impact sound
             r = Q_rand() & 15;
             if (r == 1)
-                S_StartSound(te.pos1, 0, 0, cl_sfx_ric1, 1, ATTN_NORM, 0);
+                S_StartSound(te.pos1, 0, 0, cl_sfx_ric1, 1, ATTN_NORM, 0, 0);
             else if (r == 2)
-                S_StartSound(te.pos1, 0, 0, cl_sfx_ric2, 1, ATTN_NORM, 0);
+                S_StartSound(te.pos1, 0, 0, cl_sfx_ric2, 1, ATTN_NORM, 0, 0);
             else if (r == 3)
-                S_StartSound(te.pos1, 0, 0, cl_sfx_ric3, 1, ATTN_NORM, 0);
+                S_StartSound(te.pos1, 0, 0, cl_sfx_ric3, 1, ATTN_NORM, 0, 0);
         }
         break;
 
@@ -1111,7 +1111,7 @@ void CL_ParseTEnt(void)
         else
             CL_ParticleEffect(te.pos1, te.dir, 0xb0, 40);
         //FIXME : replace or remove this sound
-        S_StartSound(te.pos1, 0, 257, cl_sfx_lashit, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 257, cl_sfx_lashit, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_SHOTGUN:            // bullet hitting wall
@@ -1129,11 +1129,11 @@ void CL_ParseTEnt(void)
         if (te.color == SPLASH_SPARKS) {
             r = Q_rand() & 3;
             if (r == 0)
-                S_StartSound(te.pos1, 0, 0, cl_sfx_spark5, 1, ATTN_STATIC, 0);
+                S_StartSound(te.pos1, 0, 0, cl_sfx_spark5, 1, ATTN_STATIC, 0, 0);
             else if (r == 1)
-                S_StartSound(te.pos1, 0, 0, cl_sfx_spark6, 1, ATTN_STATIC, 0);
+                S_StartSound(te.pos1, 0, 0, cl_sfx_spark6, 1, ATTN_STATIC, 0, 0);
             else
-                S_StartSound(te.pos1, 0, 0, cl_sfx_spark7, 1, ATTN_STATIC, 0);
+                S_StartSound(te.pos1, 0, 0, cl_sfx_spark7, 1, ATTN_STATIC, 0, 0);
         }
         break;
 
@@ -1187,19 +1187,19 @@ void CL_ParseTEnt(void)
 
 		if (te.type != TE_FLARE)
 		{
-            S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+            S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0, 0);
         }
         else
         {
             // te.count is set to 1 on the first tick of the flare, 0 afterwards
             if (te.count!=0)
-                S_StartSound(NULL, te.entity1, 0, cl_sfx_flare, 0.5, ATTN_NORM, 0);
+                S_StartSound(NULL, te.entity1, 0, cl_sfx_flare, 0.5, ATTN_NORM, 0, 0);
         }
         break;
 
     case TE_RAILTRAIL:          // railgun effect
         CL_RailTrail();
-        S_StartSound(te.pos2, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos2, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_GRENADE_EXPLOSION:
@@ -1217,9 +1217,9 @@ void CL_ParseTEnt(void)
             CL_ExplosionParticles(te.pos1);
 
         if (te.type == TE_GRENADE_EXPLOSION_WATER)
-            S_StartSound(te.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
+            S_StartSound(te.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0, 0);
         else
-            S_StartSound(te.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
+            S_StartSound(te.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_EXPLOSION2:
@@ -1230,13 +1230,13 @@ void CL_ParseTEnt(void)
             ex->baseframe = 30;
 		}
         CL_ExplosionParticles(te.pos1);
-        S_StartSound(te.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_grenexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_PLASMA_EXPLOSION:
         CL_PlainExplosion(false);
         CL_ExplosionParticles(te.pos1);
-        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_ROCKET_EXPLOSION:
@@ -1249,25 +1249,25 @@ void CL_ParseTEnt(void)
             CL_ExplosionParticles(te.pos1);
 
         if (te.type == TE_ROCKET_EXPLOSION_WATER)
-            S_StartSound(te.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
+            S_StartSound(te.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0, 0);
         else
-            S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+            S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_EXPLOSION1:
         CL_PlainExplosion(false);
         CL_ExplosionParticles(te.pos1);
-        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_EXPLOSION1_NP:
         CL_PlainExplosion(false);
-        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_EXPLOSION1_BIG:
         ex = CL_PlainExplosion(true);
-        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_BFG_EXPLOSION:
@@ -1307,7 +1307,7 @@ void CL_ParseTEnt(void)
 
     case TE_BOSSTPORT:          // boss teleporting to station
         CL_BigTeleportParticles(te.pos1);
-        S_StartSound(te.pos1, 0, 0, S_RegisterSound("misc/bigtele.wav"), 1, ATTN_NONE, 0);
+        S_StartSound(te.pos1, 0, 0, S_RegisterSound("misc/bigtele.wav"), 1, ATTN_NONE, 0, 0);
         break;
 
     case TE_GRAPPLE_CABLE:
@@ -1342,7 +1342,7 @@ void CL_ParseTEnt(void)
         break;
 
     case TE_LIGHTNING:
-        S_StartSound(NULL, te.entity1, CHAN_WEAPON, cl_sfx_lightning, 1, ATTN_NORM, 0);
+        S_StartSound(NULL, te.entity1, CHAN_WEAPON, cl_sfx_lightning, 1, ATTN_NORM, 0, 0);
         VectorClear(te.offset);
         CL_ParseBeam(cl_mod_lightning);
         break;
@@ -1377,12 +1377,12 @@ void CL_ParseTEnt(void)
 
     case TE_HEATBEAM_SPARKS:
         CL_ParticleSteamEffect(te.pos1, te.dir, 0x8, 50, 60);
-        S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_HEATBEAM_STEAM:
         CL_ParticleSteamEffect(te.pos1, te.dir, 0xE0, 20, 60);
-        S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_STEAM:
@@ -1391,7 +1391,7 @@ void CL_ParseTEnt(void)
 
     case TE_BUBBLETRAIL2:
         CL_BubbleTrail2(te.pos1, te.pos2, 8);
-        S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_MOREBLOOD:
@@ -1406,7 +1406,7 @@ void CL_ParseTEnt(void)
     case TE_ELECTRIC_SPARKS:
         CL_ParticleEffect(te.pos1, te.dir, 0x75, 40);
         //FIXME : replace or remove this sound
-        S_StartSound(te.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_TRACKER_EXPLOSION:
@@ -1414,7 +1414,7 @@ void CL_ParseTEnt(void)
         CL_ColorFlash(te.pos1, 0, 150, -1, -1, -1);
 #endif
         CL_ColorExplosionParticles(te.pos1, 0, 1);
-        S_StartSound(te.pos1, 0, 0, cl_sfx_disrexp, 1, ATTN_NORM, 0);
+        S_StartSound(te.pos1, 0, 0, cl_sfx_disrexp, 1, ATTN_NORM, 0, 0);
         break;
 
     case TE_TELEPORT_EFFECT:

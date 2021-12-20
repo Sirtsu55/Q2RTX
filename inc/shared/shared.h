@@ -1466,6 +1466,8 @@ typedef struct entity_state_s {
     int     event;          // impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
                             // are automatically cleared each frame
+
+    int     sound_pitch;    // pitch offset for looping sounds
 } entity_state_t;
 
 //==============================================

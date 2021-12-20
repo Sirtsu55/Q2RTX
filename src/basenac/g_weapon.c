@@ -434,11 +434,11 @@ void Grenade_Touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
     if (!other->takedamage) {
         if (ent->spawnflags & 1) {
             if (random() > 0.5f)
-                gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/hgrenb1a.wav"), 1, ATTN_NORM, 0);
+                gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/hgrenb1a.wav"), 1, ATTN_NORM);
             else
-                gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/hgrenb2a.wav"), 1, ATTN_NORM, 0);
+                gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/hgrenb2a.wav"), 1, ATTN_NORM);
         } else {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/grenlb1b.wav"), 1, ATTN_NORM, 0);
+            gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/grenlb1b.wav"), 1, ATTN_NORM);
         }
         return;
     }
@@ -524,7 +524,7 @@ void fire_grenade2(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
     if (timer <= 0.0f)
         Grenade_Explode(grenade);
     else {
-        gi.sound(self, CHAN_WEAPON, gi.soundindex("weapons/hgrent1a.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_WEAPON, gi.soundindex("weapons/hgrent1a.wav"), 1, ATTN_NORM);
         gi.linkentity(grenade);
     }
 }
@@ -620,9 +620,6 @@ fire_nail
 */
 void nail_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-    vec3_t      origin;
-    int         n;
-
     if (other == ent->owner)
         return;
 
@@ -636,13 +633,13 @@ void nail_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
     if (other->takedamage) {
         T_Damage(other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
+    } else {
+        gi.WriteByte(svc_temp_entity);
+        gi.WriteByte(TE_GUNSHOT);
+        gi.WritePosition(ent->s.origin);
+        gi.WriteDir(plane->normal);
+        gi.multicast(ent->s.origin, MULTICAST_PHS);
     }
-
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_GUNSHOT);
-    gi.WritePosition(ent->s.origin);
-    gi.WriteDir(plane->normal);
-    gi.multicast(ent->s.origin, MULTICAST_PHS);
 
     G_FreeEdict(ent);
 }
@@ -799,7 +796,7 @@ void bfg_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
         T_Damage(other, self, self->owner, self->velocity, self->s.origin, plane->normal, 200, 0, 0, MOD_BFG_BLAST);
     T_RadiusDamage(self, self->owner, 200, other, 100, MOD_BFG_BLAST);
 
-    gi.sound(self, CHAN_VOICE, gi.soundindex("weapons/bfg__x1b.wav"), 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_VOICE, gi.soundindex("weapons/bfg__x1b.wav"), 1, ATTN_NORM);
     self->solid = SOLID_NOT;
     self->touch = NULL;
     VectorMA(self->s.origin, -1 * FRAMETIME, self->velocity, self->s.origin);

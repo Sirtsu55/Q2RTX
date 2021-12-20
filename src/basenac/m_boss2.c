@@ -39,7 +39,7 @@ static int  sound_search1;
 void boss2_search(edict_t *self)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NONE, 0);
+        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NONE);
 }
 
 void boss2_run(edict_t *self);
@@ -462,13 +462,13 @@ void boss2_pain(edict_t *self, edict_t *other, float kick, int damage)
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
 // American wanted these at no attenuation
     if (damage < 10) {
-        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NONE, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NONE);
         self->monsterinfo.currentmove = &boss2_move_pain_light;
     } else if (damage < 30) {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NONE, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NONE);
         self->monsterinfo.currentmove = &boss2_move_pain_light;
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NONE, 0);
+        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NONE);
         self->monsterinfo.currentmove = &boss2_move_pain_heavy;
     }
 }
@@ -485,7 +485,7 @@ void boss2_dead(edict_t *self)
 
 void boss2_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
+    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NONE);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_NO;
     self->count = 0;
@@ -496,7 +496,7 @@ void boss2_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     self->s.sound = 0;
     // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)

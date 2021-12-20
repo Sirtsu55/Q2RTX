@@ -156,8 +156,8 @@ typedef struct {
             uint16_t    sendchan;
             uint8_t     volume;
             uint8_t     attenuation;
-            uint8_t     timeofs;
             vec3_t      pos;     // saved in case entity is freed
+            int8_t      pitch;
         };
     };
 } message_packet_t;
