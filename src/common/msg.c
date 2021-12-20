@@ -780,9 +780,14 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
             *pflags |= PS_WEAPONFRAME;
             MSG_WriteShort(to->gunframe);
         }
+        if (FLOAT2COMPRESS(to->gunspin, 2048) != FLOAT2COMPRESS(from->gunspin, 2048)) {
+            *pflags |= PS_WEAPONSPIN;
+            MSG_WriteLong(FLOAT2COMPRESS(to->gunspin, 2048));
+        }
     } else {
         // save previous state
         to->gunframe = from->gunframe;
+        to->gunspin = from->gunspin;
     }
 
     statbits = 0;
@@ -1356,6 +1361,10 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
         to->gunframe = MSG_ReadWord();
     }
 
+    if (flags & PS_WEAPONSPIN) {
+        to->gunspin = COMPRESS2FLOAT(MSG_ReadLong(), 2048);
+    }
+
     // parse stats
     if (extraflags & EPS_STATS) {
         statbits = MSG_ReadLong();
@@ -1403,6 +1412,7 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(KICKANGLES,      "kick_angles");
     SP(WEAPONINDEX,     "gunindex");
     SP(WEAPONFRAME,     "gunframe");
+    SP(WEAPONSPIN,      "gunspin");
     SP(BLEND,           "blend");
     SP(FOV,             "fov");
     SP(RDFLAGS,         "rdflags");

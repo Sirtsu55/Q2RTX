@@ -222,10 +222,12 @@ typedef struct vrect_s {
         ((d)[0]=LerpAngle((a)[0],(b)[0],c), \
          (d)[1]=LerpAngle((a)[1],(b)[1],c), \
          (d)[2]=LerpAngle((a)[2],(b)[2],c))
+#define Lerp(a,b,c) \
+    (a)+(c)*((b)-(a))
 #define LerpVector(a,b,c,d) \
-    ((d)[0]=(a)[0]+(c)*((b)[0]-(a)[0]), \
-     (d)[1]=(a)[1]+(c)*((b)[1]-(a)[1]), \
-     (d)[2]=(a)[2]+(c)*((b)[2]-(a)[2]))
+    ((d)[0]=Lerp((a)[0],(b)[0],c), \
+     (d)[1]=Lerp((a)[1],(b)[1],c), \
+     (d)[2]=Lerp((a)[2],(b)[2],c))
 #define LerpVector2(a,b,c,d,e) \
     ((e)[0]=(a)[0]*(c)+(b)[0]*(d), \
      (e)[1]=(a)[1]*(c)+(b)[1]*(d), \
@@ -1378,8 +1380,11 @@ typedef enum {
 
 #define COORDSCALE  32.f
 
-#define COORD2SHORT(x)  ((int)((x)*COORDSCALE))
-#define SHORT2COORD(x)  ((x)*(1.0f/COORDSCALE))
+#define FLOAT2COMPRESS(x, s)  ((int)((x)*s))
+#define COMPRESS2FLOAT(x, s)  ((x)*(1.0f/s))
+
+#define COORD2SHORT(x)  FLOAT2COMPRESS(x, COORDSCALE)
+#define SHORT2COORD(x)  COMPRESS2FLOAT(x, COORDSCALE)
 
 #define SnapCoord(a) \
     SHORT2COORD(COORD2SHORT((a)))
@@ -1482,6 +1487,7 @@ typedef struct {
 
     int         gunindex;
     int         gunframe;
+    float       gunspin;
 
     float       blend[4];       // rgba full screen effect
 

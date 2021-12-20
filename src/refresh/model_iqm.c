@@ -180,7 +180,6 @@ int MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const c
 {
 	iqm_transform_t* transform;
 	float* mat, * matInv;
-	size_t joint_names;
 	iqm_model_t* iqmData;
 	char meshName[MAX_QPATH];
 	int vertexArrayFormat[IQM_COLOR + 1];
@@ -392,8 +391,6 @@ int MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const c
 		return Q_ERR_INVALID_FORMAT;
 	}
 
-	joint_names = 0;
-
 	if (header->num_joints)
 	{
 		// check joints
@@ -410,8 +407,6 @@ int MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const c
 				joint->name >= header->num_text) {
 				return Q_ERR_INVALID_FORMAT;
 			}
-			joint_names += strlen((const char*)header + header->ofs_text +
-				joint->name) + 1;
 		}
 	}
 
@@ -488,7 +483,7 @@ int MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const c
 
 	if (header->num_joints)
 	{
-		CHECK(iqmData->jointNames = (char*)MOD_Malloc(joint_names));
+		CHECK(iqmData->jointNames = (joint_name_t*)MOD_Malloc(header->num_joints * sizeof(joint_name_t)));
 		CHECK(iqmData->jointParents = (int*)MOD_Malloc(header->num_joints * sizeof(int)));
 		CHECK(iqmData->bindJoints = (float*)MOD_Malloc(header->num_joints * 12 * sizeof(float))); // bind joint matricies
 		CHECK(iqmData->invBindJoints = (float*)MOD_Malloc(header->num_joints * 12 * sizeof(float))); // inverse bind joint matricies
@@ -604,14 +599,13 @@ int MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const c
 	if (header->num_joints)
 	{
 		// copy joint names
-		char* str = iqmData->jointNames;
+		joint_name_t* str = iqmData->jointNames;
 		const iqmJoint_t* joint = (const iqmJoint_t*)((const byte*)header + header->ofs_joints);
 		for (uint32_t joint_idx = 0; joint_idx < header->num_joints; joint_idx++, joint++)
 		{
 			const char* name = (const char*)header + header->ofs_text + joint->name;
-			size_t len = strlen(name) + 1;
-			memcpy(str, name, len);
-			str += len;
+			Q_strlcpy((char *) str, name, sizeof(*str));
+			str++;
 		}
 
 		// copy joint parents
@@ -740,6 +734,72 @@ fail:
 	return ret;
 }
 
+static inline void QuatRotateX(quat_t out, quat_t a, float rad)
+{
+	rad *= 0.5;
+
+	float ax = a[0],
+		ay = a[1],
+		az = a[2],
+		aw = a[3];
+	float bx = sinf(rad),
+		bw = cosf(rad);
+
+	out[0] = ax * bw + aw * bx;
+	out[1] = ay * bw + az * bx;
+	out[2] = az * bw - ay * bx;
+	out[3] = aw * bw - ax * bx;
+}
+
+static inline void QuatRotateY(quat_t out, quat_t a, float rad) {
+	rad *= 0.5;
+
+	float ax = a[0],
+		ay = a[1],
+		az = a[2],
+		aw = a[3];
+	float by = sinf(rad),
+		bw = cosf(rad);
+
+	out[0] = ax * bw - az * by;
+	out[1] = ay * bw + aw * by;
+	out[2] = az * bw + ax * by;
+	out[3] = aw * bw - ay * by;
+}
+
+static inline void QuatRotateZ(quat_t out, quat_t a, float rad) {
+	rad *= 0.5;
+
+	float ax = a[0],
+		ay = a[1],
+		az = a[2],
+		aw = a[3];
+	float bz = sinf(rad),
+		bw = cosf(rad);
+
+	out[0] = ax * bw + ay * bz;
+	out[1] = ay * bw - ax * bz;
+	out[2] = az * bw + aw * bz;
+	out[3] = aw * bw - az * bz;
+}
+
+static inline void QuatMultiply(quat_t out, quat_t a, quat_t b)
+{
+	float ax = a[0],
+		ay = a[1],
+		az = a[2],
+		aw = a[3];
+	float bx = b[0],
+		by = b[1],
+		bz = b[2],
+		bw = b[3];
+
+	out[0] = ax * bw + aw * bx + ay * bz - az * by;
+	out[1] = ay * bw + aw * by + az * bx - ax * bz;
+	out[2] = az * bw + aw * bz + ax * by - ay * bx;
+	out[3] = aw * bw - ax * bx - ay * by - az * bz;
+}
+
 /*
 =================
 R_ComputeIQMTransforms
@@ -747,7 +807,7 @@ R_ComputeIQMTransforms
 Compute matrices for this model, returns [model->num_poses] 3x4 matrices in the (pose_matrices) array
 =================
 */
-bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, float* pose_matrices)
+bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, float* pose_matrices, refdef_t *fd)
 {
 	iqm_transform_t relativeJoints[IQM_MAX_JOINTS];
 
@@ -757,6 +817,25 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 	const int oldframe = model->num_frames ? entity->oldframe % (int)model->num_frames : 0;
 	const float backlerp = entity->backlerp;
 
+	// SPIN
+	int32_t spin_id = -1;
+	static float spin_angle = 0;
+	
+	for (uint32_t i = 0; i < model->num_joints; i++)
+	{
+		if (Q_strcasecmp(model->jointNames[i], "spin") == 0)
+		{
+			spin_id = i;
+			break;
+		}
+	}
+
+	quat_t spin_quat = { 0, 0, 0, 1 };
+
+	if (spin_id != -1 && entity->spin_angle)
+		QuatRotateY(spin_quat, spin_quat, entity->spin_angle);
+	// SPIN
+
 	// copy or lerp animation frame pose
 	if (oldframe == frame)
 	{
@@ -764,8 +843,11 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, pose++, relativeJoint++)
 		{
 			VectorCopy(pose->translate, relativeJoint->translate);
-			QuatCopy(pose->rotate, relativeJoint->rotate);
 			VectorCopy(pose->scale, relativeJoint->scale);
+			QuatCopy(pose->rotate, relativeJoint->rotate);
+
+			if (pose_idx == spin_id)
+				QuatMultiply(relativeJoint->rotate, relativeJoint->rotate, spin_quat);
 		}
 	}
 	else
@@ -784,6 +866,9 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 			relativeJoint->scale[2] = oldpose->scale[2] * backlerp + pose->scale[2] * lerp;
 
 			QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
+
+			if (pose_idx == spin_id)
+				QuatMultiply(relativeJoint->rotate, relativeJoint->rotate, spin_quat);
 		}
 	}
 

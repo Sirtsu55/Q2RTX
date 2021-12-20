@@ -1806,7 +1806,8 @@ static void process_regular_entity(
 	bool* contains_transparent,
 	bool* contains_masked,
 	int* iqm_matrix_offset,
-	float* iqm_matrix_data)
+	float* iqm_matrix_data,
+	refdef_t *fd)
 {
 	QVKInstanceBuffer_t* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 	uint32_t* ubo_instance_buf_offset = (uint32_t*)uniform_instance_buffer->model_instance_buf_offset;
@@ -1835,7 +1836,7 @@ static void process_regular_entity(
 			return;
 		}
 		
-		R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12));
+		R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12), fd);
 		
 		*iqm_matrix_offset += (int)model->iqmData->num_poses;
 	}
@@ -1945,7 +1946,7 @@ vkpt_drop_shaderballs()
 #endif
 
 static void
-prepare_entities(EntityUploadInfo* upload_info)
+prepare_entities(EntityUploadInfo* upload_info, refdef_t *fd)
 {
 	entity_frame_num = !entity_frame_num;
 
@@ -2009,7 +2010,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 				bool contains_transparent = false;
 				bool contains_masked = false;
 				process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
-					MESH_FILTER_OPAQUE, &contains_transparent, &contains_masked, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
+					MESH_FILTER_OPAQUE, &contains_transparent, &contains_masked, &iqm_matrix_offset, qvk.iqm_matrices_shadow, fd);
 
 				if (contains_transparent)
 					transparent_model_indices[transparent_model_num++] = i;
@@ -2043,7 +2044,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 		{
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
-				MESH_FILTER_TRANSPARENT, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
+				MESH_FILTER_TRANSPARENT, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow, fd);
 		}
 	}
 
@@ -2063,7 +2064,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 		{
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
-				MESH_FILTER_MASKED, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
+				MESH_FILTER_MASKED, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow, fd);
 		}
 	}
 
@@ -2078,7 +2079,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 			const entity_t* entity = vkpt_refdef.fd->entities + viewer_model_indices[i];
 			const model_t* model = MOD_ForHandle(entity->model);
 			process_regular_entity(entity, model, false, true, &model_instance_idx, &instance_idx, &num_instanced_vert,
-				MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
+				MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow, fd);
 		}
 	}
 
@@ -2093,7 +2094,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 		const entity_t* entity = vkpt_refdef.fd->entities + viewer_weapon_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, true, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
-			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
+			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow, fd);
 
 		if (entity->flags & RF_LEFTHAND)
 			upload_info->weapon_left_handed = true;
@@ -2108,7 +2109,7 @@ prepare_entities(EntityUploadInfo* upload_info)
 		const entity_t* entity = vkpt_refdef.fd->entities + explosion_indices[i];
 		const model_t* model = MOD_ForHandle(entity->model);
 		process_regular_entity(entity, model, false, false, &model_instance_idx, &instance_idx, &num_instanced_vert,
-			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow);
+			MESH_FILTER_ALL, NULL, NULL, &iqm_matrix_offset, qvk.iqm_matrices_shadow, fd);
 	}
 
 	upload_info->explosions_vertex_offset = explosion_base_vertex_num;
@@ -2793,7 +2794,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 
 	num_model_lights = 0;
 	EntityUploadInfo upload_info = { 0 };
-	prepare_entities(&upload_info);
+	prepare_entities(&upload_info, fd);
 	if (bsp_world_model)
 	{
 		vkpt_build_beam_lights(model_lights, &num_model_lights, MAX_MODEL_LIGHTS, bsp_world_model, fd->entities, fd->num_entities, prev_adapted_luminance);

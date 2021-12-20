@@ -615,6 +615,64 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 
 /*
 =================
+fire_nail
+=================
+*/
+void nail_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+    vec3_t      origin;
+    int         n;
+
+    if (other == ent->owner)
+        return;
+
+    if (surf && (surf->flags & SURF_SKY)) {
+        G_FreeEdict(ent);
+        return;
+    }
+
+    if (ent->owner->client)
+        PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
+
+    if (other->takedamage) {
+        T_Damage(other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
+    }
+
+    gi.WriteByte(svc_temp_entity);
+    gi.WriteByte(TE_GUNSHOT);
+    gi.WritePosition(ent->s.origin);
+    gi.WriteDir(plane->normal);
+    gi.multicast(ent->s.origin, MULTICAST_PHS);
+
+    G_FreeEdict(ent);
+}
+
+void fire_nail(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed)
+{
+    edict_t *nail = G_Spawn();
+    VectorCopy(start, nail->s.origin);
+    vectoangles(dir, nail->s.angles);
+    VectorScale(dir, speed, nail->velocity);
+    nail->movetype = MOVETYPE_FLYMISSILE;
+    nail->clipmask = MASK_SHOT;
+    nail->solid = SOLID_BBOX;
+    nail->s.modelindex = gi.modelindex("models/objects/nail/tris.md3");
+    nail->owner = self;
+    nail->touch = nail_touch;
+    nail->nextthink = level.framenum + BASE_FRAMERATE * 8000 / speed;
+    nail->think = G_FreeEdict;
+    nail->dmg = damage;
+    nail->classname = "nail";
+
+    if (self->client)
+        check_dodge(self, nail->s.origin, dir, speed);
+
+    gi.linkentity(nail);
+}
+
+
+/*
+=================
 fire_rail
 =================
 */

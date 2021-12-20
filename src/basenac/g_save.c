@@ -308,6 +308,7 @@ static const save_field_t clientfields[] = {
 
     I(ps.gunindex),
     I(ps.gunframe),
+    F(ps.gunspin),
 
     FA(ps.blend, 4),
 

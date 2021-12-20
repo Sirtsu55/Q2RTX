@@ -1318,7 +1318,7 @@ gitem_t itemlist[] = {
         Weapon_Chaingun,
         "misc/w_pkup.wav",
         "models/weapons/g_chain/tris.md2", EF_ROTATE,
-        "models/weapons/v_chain/tris.md2",
+        "models/weapons/v_perf/v_perf.iqm",
         /* icon */      "w_chaingun",
         /* pickup */    "Chaingun",
         0,

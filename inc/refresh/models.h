@@ -65,6 +65,8 @@ typedef struct
 	bool loop;
 } iqm_anim_t;
 
+typedef char joint_name_t[MAX_QPATH];
+
 // inter-quake-model
 typedef struct
 {
@@ -88,7 +90,7 @@ typedef struct
     byte* blend_indices; // byte4 per vertex
 	float* blend_weights; // float4 per vertex
 	
-	char* jointNames;
+	joint_name_t* jointNames; // [num_joints * MAX_QPATH]
 	int* jointParents;
 	float* bindJoints; // [num_joints * 12]
 	float* invBindJoints; // [num_joints * 12]
@@ -179,7 +181,7 @@ struct dmd2header_s;
 int MOD_ValidateMD2(struct dmd2header_s *header, size_t length);
 
 int MOD_LoadIQM_Base(model_t* mod, const void* rawdata, size_t length, const char* mod_name);
-bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, float* pose_matrices);
+bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, float* pose_matrices, struct refdef_s *fd);
 
 // these are implemented in [gl,sw]_models.c
 typedef int (*mod_load_t)(model_t *, const void *, size_t, const char*);

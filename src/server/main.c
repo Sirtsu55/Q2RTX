@@ -81,7 +81,6 @@ cvar_t  *sv_changemapcmd;
 #if USE_PACKETDUP
 cvar_t  *sv_packetdup_hack;
 #endif
-cvar_t  *sv_allow_map;
 #if !USE_CLIENT
 cvar_t  *sv_recycle;
 #endif
@@ -2015,8 +2014,6 @@ void SV_Init(void)
 #if USE_PACKETDUP
     sv_packetdup_hack = Cvar_Get("sv_packetdup_hack", "0", 0);
 #endif
-
-    sv_allow_map = Cvar_Get("sv_allow_map", "0", 0);
 
 #if !USE_CLIENT
     sv_recycle = Cvar_Get("sv_recycle", "0", 0);

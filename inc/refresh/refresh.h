@@ -91,6 +91,7 @@ typedef struct entity_s {
 	int tent_type;
 
 	float scale;
+    float spin_angle;
 } entity_t;
 
 typedef struct dlight_s {
@@ -151,7 +152,7 @@ typedef struct refdef_s {
     vec3_t      vieworg;
     vec3_t      viewangles;
     vec4_t      blend;          // rgba 0-1 full screen blend
-    float       time;               // time is uesed to auto animate
+    float       time;               // time is used to auto animate
     int         rdflags;            // RDF_UNDERWATER, etc
 
     byte        *areabits;          // if not NULL, only areas with set bits will be drawn

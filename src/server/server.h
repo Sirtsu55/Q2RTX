@@ -429,7 +429,6 @@ extern cvar_t       *sv_changemapcmd;
 #if USE_PACKETDUP
 extern cvar_t       *sv_packetdup_hack;
 #endif
-extern cvar_t       *sv_allow_map;
 #if !USE_CLIENT
 extern cvar_t       *sv_recycle;
 #endif

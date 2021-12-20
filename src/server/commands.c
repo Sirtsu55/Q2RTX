@@ -349,45 +349,6 @@ static void SV_GameMap_f(void)
     SV_Map(false);
 }
 
-static int should_really_restart(void)
-{
-    static bool warned;
-
-    if (sv.state != ss_game && sv.state != ss_pic && sv.state != ss_cinematic)
-        return 1;   // the game is just starting
-
-#if !USE_CLIENT
-    if (sv_recycle->integer)
-        return 1;   // there is recycle pending
-#endif
-
-    if (Cvar_CountLatchedVars())
-        return 1;   // there are latched cvars
-
-    if (!strcmp(Cmd_Argv(2), "force"))
-        return 1;   // forced restart
-
-    if (sv_allow_map->integer == 1)
-        return 1;   // `map' warning disabled
-
-    if (sv_allow_map->integer != 0)
-        return 0;   // turn `map' into `gamemap'
-
-    Com_Printf(
-        "Using 'map' will cause full server restart. "
-        "Use 'gamemap' for changing maps.\n");
-
-    if (!warned) {
-        Com_Printf(
-            "(You can set 'sv_allow_map' to 1 if you wish to permanently "
-            "disable this warning. To force restart for a single invocation "
-            "of this command, use 'map <mapname> force')\n");
-        warned = true;
-    }
-
-    return -1;  // ignore this command
-}
-
 /*
 ==================
 SV_Map_f
@@ -398,18 +359,12 @@ For development work
 */
 static void SV_Map_f(void)
 {
-    int res;
-
     if (Cmd_Argc() < 2) {
         Com_Printf("Usage: %s <mapname>\n", Cmd_Argv(0));
         return;
     }
 
-    res = should_really_restart();
-    if (res < 0)
-        return;
-
-    SV_Map(res);
+    SV_Map(true);
 }
 
 static void SV_Map_c(genctx_t *ctx, int argnum)
