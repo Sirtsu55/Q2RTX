@@ -940,6 +940,7 @@ static void CL_AddViewWeapon(void)
     }
 
 	// adjust the gun origin so that the gun doesn't intersect with walls
+    if (0)
 	{
 		vec3_t view_dir, right_dir, up_dir;
 		vec3_t gun_real_pos, gun_tip;

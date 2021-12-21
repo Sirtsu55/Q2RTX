@@ -1069,15 +1069,29 @@ static void material_command(void)
 		{
 			// Regenerate emissive image
 			MAT_SynthesizeEmissive(mat);
-			// Make sure it's loaded by CL_PrepRefresh()
-			if (mat->image_emissive) {
-				IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
+
+			// In some cases, MAT_SynthesizeEmissive might not create an emissive image - test for that
+			if (mat->image_emissive)
+			{
+				// Make sure it's loaded by CL_PrepRefresh()
+				if (mat->image_emissive) {
+					IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
 			}
+
 			reload_flags |= RELOAD_MAP;
 		}
 	}
+
 	if ((reload_flags & RELOAD_MAP) != 0)
+	{
+		// Trigger a re-upload and rebuild of the models that use this material.
+		// Reason to rebuild: some material changes result in meshes being classified as
+		// transparent or masked, which affects the static model BLAS.
+		vkpt_vertex_buffer_invalidate_static_model_vbos(vkpt_refdef.fd->feedback.view_material_index);
+
+		// Reload the map and necessary models.
 		CL_PrepRefresh();
+}
 }
 
 static void material_completer(genctx_t* ctx, int argnum)
@@ -1138,4 +1152,19 @@ void MAT_SynthesizeEmissive(pbr_material_t * mat)
 			vkpt_extract_emissive_texture_info(mat->image_emissive);
 		}
 	}
+}
+
+bool MAT_IsTransparent(uint32_t material)
+{
+	return MAT_IsKind(material, MATERIAL_KIND_SLIME)
+		|| MAT_IsKind(material, MATERIAL_KIND_WATER)
+		|| MAT_IsKind(material, MATERIAL_KIND_GLASS)
+		|| MAT_IsKind(material, MATERIAL_KIND_TRANSPARENT);
+}
+
+bool MAT_IsMasked(uint32_t material)
+{
+	const pbr_material_t* mat = MAT_ForIndex((int)(material & MATERIAL_INDEX_MASK));
+
+	return mat && mat->image_mask;
 }
