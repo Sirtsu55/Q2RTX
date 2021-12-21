@@ -1792,7 +1792,7 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 	mi->iqm_matrix_offset_curr_frame = -1;
 	mi->iqm_matrix_offset_prev_frame = -1;
 	mi->frame = entity->frame;
-	mi->alpha = 1.f;
+	mi->alpha = (entity->flags & RF_TRANSLUCENT) ? entity->alpha : 1.0f;
 	mi->render_buffer_idx = VERTEX_BUFFER_WORLD;
 	mi->render_prim_offset = model->geometry.prim_offsets[0];
 	
@@ -2826,7 +2826,7 @@ R_RenderFrame_RTX(refdef_t *fd)
 	EntityUploadInfo upload_info = { 0 };
 	vkpt_pt_reset_instances();
 	vkpt_shadow_map_reset_instances();
-	prepare_entities(&upload_info);
+	prepare_entities(&upload_info, fd);
 	if (bsp_world_model && render_world)
 	{
 		vkpt_pt_instance_model_blas(&vkpt_refdef.bsp_mesh_world.geom_opaque,      g_identity_transform, VERTEX_BUFFER_WORLD, -1);

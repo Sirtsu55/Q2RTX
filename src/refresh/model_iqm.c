@@ -567,7 +567,7 @@ int MOD_LoadIQM_Base(model_t* model, const void* rawdata, size_t length, const c
 			case IQM_BLENDINDEXES:
 				memcpy(iqmData->blend_indices,
 					(const byte*)header + vertexarray->offset,
-					n * sizeof(float));
+					n * sizeof(byte));
 				break;
 			case IQM_BLENDWEIGHTS:
 				if (vertexArrayFormat[IQM_BLENDWEIGHTS] == IQM_UBYTE)

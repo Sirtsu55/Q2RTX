@@ -1074,8 +1074,7 @@ static void material_command(void)
 			if (mat->image_emissive)
 			{
 				// Make sure it's loaded by CL_PrepRefresh()
-				if (mat->image_emissive) {
-					IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
+				IMG_Load(mat->image_emissive, mat->image_emissive->pix_data);
 			}
 
 			reload_flags |= RELOAD_MAP;
@@ -1091,7 +1090,7 @@ static void material_command(void)
 
 		// Reload the map and necessary models.
 		CL_PrepRefresh();
-}
+	}
 }
 
 static void material_completer(genctx_t* ctx, int argnum)

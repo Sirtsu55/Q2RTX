@@ -1161,6 +1161,8 @@ void SP_func_door(edict_t *ent)
         ent->think = Think_CalcMoveSpeed;
     else
         ent->think = Think_SpawnDoorTrigger;
+
+    ent->s.renderfx |= RF_TRANSLUCENT;
 }
 
 
