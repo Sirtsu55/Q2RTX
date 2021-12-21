@@ -373,6 +373,9 @@ trace_effects_ray(Ray ray, bool skip_procedural)
 	ray_payload_effects.distances = 0;
 	ray_payload_effects.fog1 = uvec4(0);
 	ray_payload_effects.fog2 = uvec4(0);
+#ifndef KHR_RAY_QUERY
+	ray_payload_effects.rayTmax = ray.t_max;
+#endif
 
 	if (!skip_procedural)
 		find_fog_volumes(ray_payload_effects, ray);
@@ -847,7 +850,7 @@ get_sunlight(
 	if(global_ubo.sun_visible == 0)
 		return;
 
-	bool visible = (cluster_idx == ~0u) || (get_sky_visibility(cluster_idx >> 5) & (1 << (cluster_idx & 31))) != 0;
+	bool visible = (cluster_idx == ~0u) || (light_buffer.sky_visibility[cluster_idx >> 5] & (1 << (cluster_idx & 31))) != 0;
 
 	if(!visible)
 		return;

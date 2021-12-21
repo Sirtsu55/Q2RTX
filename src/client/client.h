@@ -518,6 +518,15 @@ extern cvar_t    *info_hand;
 extern cvar_t    *info_gender;
 extern cvar_t    *info_uf;
 
+//
+// models.c
+//
+extern cvar_t    *cl_testmodel;
+extern cvar_t    *cl_testfps;
+extern cvar_t    *cl_testalpha;
+extern qhandle_t  cl_testmodel_handle;
+extern vec3_t     cl_testmodel_position;
+
 //=============================================================================
 
 //
@@ -933,6 +942,3 @@ byte COM_BlockSequenceCRCByte(byte *base, size_t length, int sequence);
 // effects.c
 //
 void FX_Init(void);
-
-// RTX development feature that loads and spawns a set of material sample balls
-#define CL_RTX_SHADERBALLS 1
