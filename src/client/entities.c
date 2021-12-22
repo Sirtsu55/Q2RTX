@@ -939,8 +939,9 @@ static void CL_AddViewWeapon(void)
         VectorMA(gun.origin, ofs, cl.v_forward, gun.origin);
     }
 
+    float alpha = cl_gunalpha->value;
+
 	// adjust the gun origin so that the gun doesn't intersect with walls
-    if (0)
 	{
 		vec3_t view_dir, right_dir, up_dir;
 		vec3_t gun_real_pos, gun_tip;
@@ -962,6 +963,8 @@ static void CL_AddViewWeapon(void)
 			VectorMA(trace.endpos, -gun_length, view_dir, gun.origin);
 			VectorMA(gun.origin, -gun_right, right_dir, gun.origin);
 			VectorMA(gun.origin, -gun_up, up_dir, gun.origin);
+
+            alpha = min(alpha, trace.fraction);
 		}
 	}
 
@@ -985,8 +988,8 @@ static void CL_AddViewWeapon(void)
         gun.flags |= RF_LEFTHAND;
     }
 
-    if (cl_gunalpha->value != 1) {
-        gun.alpha = Cvar_ClampValue(cl_gunalpha, 0.1f, 1.0f);
+    if (alpha != 1) {
+        gun.alpha = alpha;
         gun.flags |= RF_TRANSLUCENT;
     }
 

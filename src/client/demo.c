@@ -200,6 +200,14 @@ static void emit_delta_frame(server_frame_t *from, server_frame_t *to,
 CL_EmitDemoFrame
 
 Writes delta from the last frame we got to the current frame.
+TODO: ideally we can do what vanilla did and just spit out
+the svc_frame's we receive directly from the server. Currently
+that can't be done because the first frame has to be delta
+uncompressed, & emit_delta_frame/emit_packet_entities above
+handle creating an uncompressed frame from the client state.
+Even if we restored the old method of writing svc_frame, we still
+need to emit the first uncompressed frame, so the code above
+still needs to exist, so it isn't worth doing atm.
 ====================
 */
 void CL_EmitDemoFrame(void)
@@ -315,14 +323,6 @@ void CL_Stop_f(void)
     CL_UpdateRecordingSetting();
 }
 
-static const cmd_option_t o_record[] = {
-    { "h", "help", "display this message" },
-    { "z", "compress", "compress demo with gzip" },
-    { "e", "extended", "use extended packet size" },
-    { "s", "standard", "use standard packet size" },
-    { NULL }
-};
-
 /*
 ====================
 CL_Record_f
@@ -335,37 +335,11 @@ Begins recording a demo from the current position
 static void CL_Record_f(void)
 {
     char    buffer[MAX_OSPATH];
-    int     i, c;
+    int     i;
     size_t  len;
     entity_state_t  *ent;
     char            *s;
     qhandle_t       f;
-    unsigned        mode = FS_MODE_WRITE;
-    size_t          size = Cvar_ClampInteger(
-                               cl_demomsglen,
-                               MIN_PACKETLEN,
-                               MAX_PACKETLEN_WRITABLE);
-
-    while ((c = Cmd_ParseOptions(o_record)) != -1) {
-        switch (c) {
-        case 'h':
-            Cmd_PrintUsage(o_record, "<filename>");
-            Com_Printf("Begin client demo recording.\n");
-            Cmd_PrintHelp(o_record);
-            return;
-        case 'z':
-            mode |= FS_FLAG_GZIP;
-            break;
-        case 'e':
-            size = MAX_PACKETLEN_WRITABLE;
-            break;
-        case 's':
-            size = MAX_PACKETLEN_WRITABLE_DEFAULT;
-            break;
-        default:
-            return;
-        }
-    }
 
     if (cls.demo.recording) {
         format_demo_status(buffer, sizeof(buffer));
@@ -373,7 +347,7 @@ static void CL_Record_f(void)
         return;
     }
 
-    if (!cmd_optarg[0]) {
+    if (Cmd_Argc() < 2) {
         Com_Printf("Missing filename argument.\n");
         Cmd_PrintHint();
         return;
@@ -387,8 +361,8 @@ static void CL_Record_f(void)
     //
     // open the demo file
     //
-    f = FS_EasyOpenFile(buffer, sizeof(buffer), mode,
-                        "demos/", cmd_optarg, ".dm2");
+    f = FS_EasyOpenFile(buffer, sizeof(buffer), FS_MODE_WRITE | FS_FLAG_GZIP,
+                        "demos/", Cmd_Argv(1), ".dm2");
     if (!f) {
         return;
     }
@@ -401,7 +375,7 @@ static void CL_Record_f(void)
     // the first frame will be delta uncompressed
     cls.demo.last_server_frame = -1;
 
-    SZ_Init(&cls.demo.buffer, demo_buffer, size);
+    SZ_Init(&cls.demo.buffer, demo_buffer, MAX_PACKETLEN_WRITABLE);
 
     // clear dirty configstrings
     memset(cl.dcs, 0, sizeof(cl.dcs));
@@ -434,7 +408,7 @@ static void CL_Record_f(void)
         if (len > MAX_QPATH)
             len = MAX_QPATH;
 
-        if (msg_write.cursize + len + 4 > size) {
+        if (msg_write.cursize + len + 4 > MAX_PACKETLEN_WRITABLE) {
             if (!CL_WriteDemoMessage(&msg_write))
                 return;
         }
@@ -451,7 +425,7 @@ static void CL_Record_f(void)
         if (!ent->number)
             continue;
 
-        if (msg_write.cursize + 64 > size) {
+        if (msg_write.cursize + 64 > MAX_PACKETLEN_WRITABLE) {
             if (!CL_WriteDemoMessage(&msg_write))
                 return;
         }

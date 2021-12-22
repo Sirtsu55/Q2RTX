@@ -181,8 +181,6 @@ void ChangeWeapon(edict_t *ent)
 
     if (ent->client->grenade_framenum) {
         ent->client->grenade_framenum = level.framenum;
-        ent->client->weapon_sound = 0;
-        ent->s.sound_pitch = 0;
         weapon_grenade_fire(ent, false);
         ent->client->grenade_framenum = 0;
     }
@@ -205,6 +203,10 @@ void ChangeWeapon(edict_t *ent)
         ent->client->ammo_index = ITEM_INDEX(FindItem(ent->client->pers.weapon->ammo));
     else
         ent->client->ammo_index = 0;
+
+    ent->client->weapon_sound = 0;
+    ent->s.sound_pitch = 0;
+    ent->client->ps.gunspin = 0;
 
     if (!ent->client->pers.weapon) {
         // dead
@@ -802,7 +804,10 @@ void Weapon_Blaster(edict_t *ent)
         ANIM_ATTACK3_FIRST,
         ANIM_ATTACK3_LAST   = 162,
         ANIM_PUTAWAY_FIRST,
-        ANIM_PUTAWAY_LAST   = 167
+        ANIM_PUTAWAY_LAST   = 167,
+        ANIM_HUG_FIRST      = 163,
+        ANIM_HUG_WAIT       = 168,
+        ANIM_HUG_LAST       = 172
     };
     ent->client->ps.gunframe++;
 
@@ -821,8 +826,9 @@ void Weapon_Blaster(edict_t *ent)
             ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
             ent->client->weaponstate = WEAPON_FIRING;
             ent->client->axe_attack = true;
-        } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST)
+        } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST + 1 || ent->client->ps.gunframe == ANIM_HUG_LAST + 1) {
             ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+        }
         break;
     case WEAPON_FIRING:
         if (ent->client->ps.gunframe == ANIM_ATTACK1_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK2_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)

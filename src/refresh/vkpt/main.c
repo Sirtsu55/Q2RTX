@@ -1801,13 +1801,13 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 	if (model->geometry.accel)
 	{
 		vkpt_pt_instance_model_blas(&model->geometry, mi->transform, VERTEX_BUFFER_WORLD, current_instance_idx);
-}
+	}
 
 	if (!model->transparent)
-{
+	{
 		vkpt_shadow_map_add_instance(transform, qvk.buf_world.buffer, vkpt_refdef.bsp_mesh_world.vertex_data_offset
 			+ mi->render_prim_offset * sizeof(prim_positions_t), mi->prim_count);
-}
+	}
 
 	(*instance_count)++;
 }
