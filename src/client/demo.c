@@ -242,8 +242,7 @@ void CL_EmitDemoFrame(void)
 
         // warn the user if drop rate is too high
         if (cls.demo.frames_written < 10 && cls.demo.frames_dropped == 50)
-            Com_WPrintf("Too many demo frames don't fit into %zu bytes.\n"
-                        "Try to increase 'cl_demomsglen' value and restart recording.\n",
+            Com_WPrintf("Too many demo frames don't fit into %zu bytes.\n",
                         cls.demo.buffer.maxsize);
     } else {
         SZ_Write(&cls.demo.buffer, msg_write.data, msg_write.cursize);
@@ -1191,7 +1190,6 @@ CL_InitDemos
 void CL_InitDemos(void)
 {
     cl_demosnaps = Cvar_Get("cl_demosnaps", "10", 0);
-    cl_demomsglen = Cvar_Get("cl_demomsglen", va("%d", MAX_PACKETLEN_WRITABLE_DEFAULT), 0);
     cl_demowait = Cvar_Get("cl_demowait", "0", 0);
 
     Cmd_Register(c_demo);

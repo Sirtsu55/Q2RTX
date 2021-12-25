@@ -625,11 +625,11 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
 
 static void PF_StartSound(edict_t *entity, int channel,
                           int soundindex, float volume,
-                          float attenuation)
+                          float attenuation, int pitch_shift)
 {
     if (!entity)
         return;
-    SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, 0);
+    SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, pitch_shift);
 }
 
 void PF_Pmove(pmove_t *pm)

@@ -54,9 +54,9 @@ static int  sound_search;
 void ChickMoan(edict_t *self)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE);
+        gi.sound(self, CHAN_VOICE, sound_idle1, 1, ATTN_IDLE, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_idle2, 1, ATTN_IDLE);
+        gi.sound(self, CHAN_VOICE, sound_idle2, 1, ATTN_IDLE, 0);
 }
 
 mframe_t chick_frames_fidget [] = {
@@ -263,11 +263,11 @@ void chick_pain(edict_t *self, edict_t *other, float kick, int damage)
 
     r = random();
     if (r < 0.33f)
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
     else if (r < 0.66f)
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM, 0);
 
     if (skill->value == 3)
         return;     // no pain anims in nightmare
@@ -340,7 +340,7 @@ void chick_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -360,10 +360,10 @@ void chick_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     n = Q_rand() % 2;
     if (n == 0) {
         self->monsterinfo.currentmove = &chick_move_death1;
-        gi.sound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
     } else {
         self->monsterinfo.currentmove = &chick_move_death2;
-        gi.sound(self, CHAN_VOICE, sound_death2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_death2, 1, ATTN_NORM, 0);
     }
 }
 
@@ -422,7 +422,7 @@ void ChickSlash(edict_t *self)
     vec3_t  aim;
 
     VectorSet(aim, MELEE_DISTANCE, self->mins[0], 10);
-    gi.sound(self, CHAN_WEAPON, sound_melee_swing, 1, ATTN_NORM);
+    gi.sound(self, CHAN_WEAPON, sound_melee_swing, 1, ATTN_NORM, 0);
     fire_hit(self, aim, (10 + (Q_rand() % 6)), 100);
 }
 
@@ -447,12 +447,12 @@ void ChickRocket(edict_t *self)
 
 void Chick_PreAttack1(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_missile_prelaunch, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_missile_prelaunch, 1, ATTN_NORM, 0);
 }
 
 void ChickReload(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_missile_reload, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_missile_reload, 1, ATTN_NORM, 0);
 }
 
 
@@ -586,7 +586,7 @@ void chick_attack(edict_t *self)
 
 void chick_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 /*QUAKED monster_chick (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight

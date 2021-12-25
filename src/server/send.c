@@ -523,7 +523,6 @@ static bool check_entity(client_t *client, int entnum)
 static void emit_snd(client_t *client, message_packet_t *msg)
 {
     int flags, entnum;
-    int i;
 
     entnum = msg->sendchan >> 3;
     flags = msg->flags;
@@ -551,7 +550,7 @@ static void emit_snd(client_t *client, message_packet_t *msg)
     }
 
     if (flags & SND_PITCH) {
-        MSG_WriteChar(msg->pitch / 2);
+        MSG_WriteChar(msg->pitch);
     }
 }
 

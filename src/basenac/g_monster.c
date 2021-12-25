@@ -245,7 +245,7 @@ void M_WorldEffects(edict_t *ent)
 
     if (ent->waterlevel == 0) {
         if (ent->flags & FL_INWATER) {
-            gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM);
+            gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM, 0);
             ent->flags &= ~FL_INWATER;
         }
         return;
@@ -268,13 +268,13 @@ void M_WorldEffects(edict_t *ent)
         if (!(ent->svflags & SVF_DEADMONSTER)) {
             if (ent->watertype & CONTENTS_LAVA)
                 if (random() <= 0.5f)
-                    gi.sound(ent, CHAN_BODY, gi.soundindex("player/lava1.wav"), 1, ATTN_NORM);
+                    gi.sound(ent, CHAN_BODY, gi.soundindex("player/lava1.wav"), 1, ATTN_NORM, 0);
                 else
-                    gi.sound(ent, CHAN_BODY, gi.soundindex("player/lava2.wav"), 1, ATTN_NORM);
+                    gi.sound(ent, CHAN_BODY, gi.soundindex("player/lava2.wav"), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_SLIME)
-                gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM);
+                gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_WATER)
-                gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM);
+                gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
         }
 
         ent->flags |= FL_INWATER;

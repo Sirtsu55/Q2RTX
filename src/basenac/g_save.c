@@ -335,9 +335,7 @@ static const save_field_t clientfields[] = {
     I(pers.max_bullets),
     I(pers.max_shells),
     I(pers.max_rockets),
-    I(pers.max_grenades),
     I(pers.max_cells),
-    I(pers.max_slugs),
 
     T(pers.weapon),
     T(pers.lastweapon),

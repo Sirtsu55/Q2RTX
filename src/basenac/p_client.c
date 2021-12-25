@@ -523,7 +523,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
     if (self->health < -40) {
         // gib
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
@@ -554,7 +554,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
                     self->client->anim_end = FRAME_death308;
                     break;
                 }
-            gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_NORM);
+            gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_NORM, 0);
         }
     }
 
@@ -579,38 +579,18 @@ void InitClientPersistant(gclient_t *client)
 
 	memset(&client->pers, 0, sizeof(client->pers));
 
-	item = FindItem("Blaster");
+	item = FindItem("Axe");
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[client->pers.selected_item] = 1;
 
 	client->pers.weapon = item;
-
-	if (sv_flaregun->integer > 0)
-	{
-		// Q2RTX: Spawn with a flare gun and some grenades to use with it.
-		// Flare gun is new and not found anywhere in the game as a pickup item.
-		gitem_t* item_flareg = FindItem("Flare Gun");
-		if (item_flareg)
-		{
-			client->pers.inventory[ITEM_INDEX(item_flareg)] = 1;
-
-			if (sv_flaregun->integer == 2)
-			{
-				gitem_t* item_grenades = FindItem("Grenades");
-				client->pers.inventory[ITEM_INDEX(item_grenades)] = 5;
-			}
-		}
-	}
-
     client->pers.health         = 100;
     client->pers.max_health     = 100;
 
     client->pers.max_bullets    = 200;
     client->pers.max_shells     = 100;
     client->pers.max_rockets    = 50;
-    client->pers.max_grenades   = 50;
     client->pers.max_cells      = 200;
-    client->pers.max_slugs      = 50;
 
     client->pers.connected = true;
 }
@@ -902,7 +882,7 @@ void body_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
     int n;
 
     if (self->health < -40) {
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         self->s.origin[2] -= 48;
@@ -1593,7 +1573,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         VectorCopy(ucmd->angles, client->resp.cmd_angles);
 
         if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0)) {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM);
+            gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, (int) Q_rand_uniform(10) - 5);
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 

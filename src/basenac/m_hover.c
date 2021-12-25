@@ -40,15 +40,15 @@ static int  sound_search2;
 
 void hover_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void hover_search(edict_t *self)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_search2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_search2, 1, ATTN_NORM, 0);
 }
 
 
@@ -480,14 +480,14 @@ void hover_pain(edict_t *self, edict_t *other, float kick, int damage)
 
     if (damage <= 25) {
         if (random() < 0.5f) {
-            gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
+            gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
             self->monsterinfo.currentmove = &hover_move_pain3;
         } else {
-            gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM);
+            gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
             self->monsterinfo.currentmove = &hover_move_pain2;
         }
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &hover_move_pain1;
     }
 }
@@ -518,7 +518,7 @@ void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 2; n++)
@@ -533,9 +533,9 @@ void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // regular death
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_death2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_death2, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.currentmove = &hover_move_death1;

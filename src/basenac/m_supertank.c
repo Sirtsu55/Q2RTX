@@ -41,15 +41,15 @@ void BossExplode(edict_t *self);
 
 void TreadSound(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, tread_sound, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, tread_sound, 1, ATTN_NORM, 0);
 }
 
 void supertank_search(edict_t *self)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_search2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_search2, 1, ATTN_NORM, 0);
 }
 
 
@@ -457,13 +457,13 @@ void supertank_pain(edict_t *self, edict_t *other, float kick, int damage)
         return;     // no pain anims in nightmare
 
     if (damage <= 10) {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &supertank_move_pain1;
     } else if (damage <= 25) {
-        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &supertank_move_pain2;
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &supertank_move_pain3;
     }
 }
@@ -630,7 +630,7 @@ void BossExplode(edict_t *self)
 
 void supertank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_NO;
     self->count = 0;

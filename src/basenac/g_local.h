@@ -100,9 +100,7 @@ typedef enum {
     AMMO_BULLETS,
     AMMO_SHELLS,
     AMMO_ROCKETS,
-    AMMO_GRENADES,
-    AMMO_CELLS,
-    AMMO_SLUGS
+    AMMO_CELLS
 } ammo_t;
 
 
@@ -544,8 +542,6 @@ extern  cvar_t  *sv_maplist;
 
 extern  cvar_t  *sv_features;
 
-extern  cvar_t  *sv_flaregun;
-
 #define world   (&g_edicts[0])
 
 // item spawnflags
@@ -839,9 +835,7 @@ typedef struct {
     int         max_bullets;
     int         max_shells;
     int         max_rockets;
-    int         max_grenades;
     int         max_cells;
-    int         max_slugs;
 
     gitem_t     *weapon;
     gitem_t     *lastweapon;
@@ -951,6 +945,7 @@ struct gclient_s {
 
     // N&C
     bool        axe_attack;
+    bool        inspect;
 };
 
 

@@ -704,6 +704,8 @@ static void CL_ParseStartSoundPacket(void)
 
     if (flags & SND_PITCH)
         snd.pitch = MSG_ReadChar();
+    else
+        snd.pitch = 0;
 
     snd.flags = flags;
 

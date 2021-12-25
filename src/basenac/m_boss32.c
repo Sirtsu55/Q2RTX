@@ -57,11 +57,11 @@ void makron_taunt(edict_t *self)
 
     r = random();
     if (r <= 0.3f)
-        gi.sound(self, CHAN_AUTO, sound_taunt1, 1, ATTN_NONE);
+        gi.sound(self, CHAN_AUTO, sound_taunt1, 1, ATTN_NONE, 0);
     else if (r <= 0.6f)
-        gi.sound(self, CHAN_AUTO, sound_taunt2, 1, ATTN_NONE);
+        gi.sound(self, CHAN_AUTO, sound_taunt2, 1, ATTN_NONE, 0);
     else
-        gi.sound(self, CHAN_AUTO, sound_taunt3, 1, ATTN_NONE);
+        gi.sound(self, CHAN_AUTO, sound_taunt3, 1, ATTN_NONE, 0);
 }
 
 //
@@ -153,32 +153,32 @@ mmove_t makron_move_run = {FRAME_walk204, FRAME_walk213, makron_frames_run, NULL
 
 void makron_hit(edict_t *self)
 {
-    gi.sound(self, CHAN_AUTO, sound_hit, 1, ATTN_NONE);
+    gi.sound(self, CHAN_AUTO, sound_hit, 1, ATTN_NONE, 0);
 }
 
 void makron_popup(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_popup, 1, ATTN_NONE);
+    gi.sound(self, CHAN_BODY, sound_popup, 1, ATTN_NONE, 0);
 }
 
 void makron_step_left(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_step_left, 1, ATTN_NORM);
+    gi.sound(self, CHAN_BODY, sound_step_left, 1, ATTN_NORM, 0);
 }
 
 void makron_step_right(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_step_right, 1, ATTN_NORM);
+    gi.sound(self, CHAN_BODY, sound_step_right, 1, ATTN_NORM, 0);
 }
 
 void makron_brainsplorch(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_brainsplorch, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_brainsplorch, 1, ATTN_NORM, 0);
 }
 
 void makron_prerailgun(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_prerailgun, 1, ATTN_NORM);
+    gi.sound(self, CHAN_WEAPON, sound_prerailgun, 1, ATTN_NORM, 0);
 }
 
 
@@ -410,7 +410,7 @@ void makronBFG(edict_t *self)
     vec[2] += self->enemy->viewheight;
     VectorSubtract(vec, start, dir);
     VectorNormalize(dir);
-    gi.sound(self, CHAN_VOICE, sound_attack_bfg, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_attack_bfg, 1, ATTN_NORM, 0);
     monster_fire_bfg(self, start, dir, 50, 300, 100, 300, MZ2_MAKRON_BFG);
 }
 
@@ -555,20 +555,20 @@ void makron_pain(edict_t *self, edict_t *other, float kick, int damage)
 
 
     if (damage <= 40) {
-        gi.sound(self, CHAN_VOICE, sound_pain4, 1, ATTN_NONE);
+        gi.sound(self, CHAN_VOICE, sound_pain4, 1, ATTN_NONE, 0);
         self->monsterinfo.currentmove = &makron_move_pain4;
     } else if (damage <= 110) {
-        gi.sound(self, CHAN_VOICE, sound_pain5, 1, ATTN_NONE);
+        gi.sound(self, CHAN_VOICE, sound_pain5, 1, ATTN_NONE, 0);
         self->monsterinfo.currentmove = &makron_move_pain5;
     } else {
         if (damage <= 150) {
             if (random() <= 0.45f) {
-                gi.sound(self, CHAN_VOICE, sound_pain6, 1, ATTN_NONE);
+                gi.sound(self, CHAN_VOICE, sound_pain6, 1, ATTN_NONE, 0);
                 self->monsterinfo.currentmove = &makron_move_pain6;
             }
         } else {
             if (random() <= 0.35f) {
-                gi.sound(self, CHAN_VOICE, sound_pain6, 1, ATTN_NONE);
+                gi.sound(self, CHAN_VOICE, sound_pain6, 1, ATTN_NONE, 0);
                 self->monsterinfo.currentmove = &makron_move_pain6;
             }
         }
@@ -649,7 +649,7 @@ void makron_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     self->s.sound = 0;
     // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 1 /*4*/; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -663,7 +663,7 @@ void makron_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NONE);
+    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
 

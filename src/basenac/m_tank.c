@@ -46,28 +46,28 @@ static int  sound_strike;
 
 void tank_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 
 void tank_footstep(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM);
+    gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
 }
 
 void tank_thud(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_thud, 1, ATTN_NORM);
+    gi.sound(self, CHAN_BODY, sound_thud, 1, ATTN_NORM, 0);
 }
 
 void tank_windup(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_windup, 1, ATTN_NORM);
+    gi.sound(self, CHAN_WEAPON, sound_windup, 1, ATTN_NORM, 0);
 }
 
 void tank_idle(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE);
+    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
 
@@ -293,7 +293,7 @@ void tank_pain(edict_t *self, edict_t *other, float kick, int damage)
     }
 
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
-    gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 
     if (skill->value == 3)
         return;     // no pain anims in nightmare
@@ -338,7 +338,7 @@ void TankBlaster(edict_t *self)
 
 void TankStrike(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_strike, 1, ATTN_NORM);
+    gi.sound(self, CHAN_WEAPON, sound_strike, 1, ATTN_NORM, 0);
 }
 
 void TankRocket(edict_t *self)
@@ -717,7 +717,7 @@ void tank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 1 /*4*/; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -732,7 +732,7 @@ void tank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
 

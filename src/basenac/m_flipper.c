@@ -178,7 +178,7 @@ void flipper_bite(edict_t *self)
 
 void flipper_preattack(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_chomp, 1, ATTN_NORM);
+    gi.sound(self, CHAN_WEAPON, sound_chomp, 1, ATTN_NORM, 0);
 }
 
 mframe_t flipper_frames_attack [] = {
@@ -227,10 +227,10 @@ void flipper_pain(edict_t *self, edict_t *other, float kick, int damage)
 
     n = (Q_rand() + 1) % 2;
     if (n == 0) {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &flipper_move_pain1;
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &flipper_move_pain2;
     }
 }
@@ -312,7 +312,7 @@ mmove_t flipper_move_death = {FRAME_flpdth01, FRAME_flpdth56, flipper_frames_dea
 
 void flipper_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void flipper_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -321,7 +321,7 @@ void flipper_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 2; n++)
@@ -335,7 +335,7 @@ void flipper_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM);
+    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.currentmove = &flipper_move_death;

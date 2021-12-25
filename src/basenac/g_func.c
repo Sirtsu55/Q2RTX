@@ -336,7 +336,7 @@ void plat_hit_top(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_end)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC);
+            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         ent->s.sound = 0;
     }
     ent->moveinfo.state = STATE_TOP;
@@ -349,7 +349,7 @@ void plat_hit_bottom(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_end)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC);
+            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         ent->s.sound = 0;
     }
     ent->moveinfo.state = STATE_BOTTOM;
@@ -359,7 +359,7 @@ void plat_go_down(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_start)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC);
+            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         ent->s.sound = ent->moveinfo.sound_middle;
     }
     ent->moveinfo.state = STATE_DOWN;
@@ -370,7 +370,7 @@ void plat_go_up(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_start)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC);
+            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         ent->s.sound = ent->moveinfo.sound_middle;
     }
     ent->moveinfo.state = STATE_UP;
@@ -693,7 +693,7 @@ void button_fire(edict_t *self)
 
     self->moveinfo.state = STATE_UP;
     if (self->moveinfo.sound_start && !(self->flags & FL_TEAMSLAVE))
-        gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC);
+        gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
     Move_Calc(self, self->moveinfo.end_origin, button_wait);
 }
 
@@ -830,7 +830,7 @@ void door_hit_top(edict_t *self)
 {
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_end)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC);
+            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         self->s.sound = 0;
     }
     self->moveinfo.state = STATE_TOP;
@@ -846,7 +846,7 @@ void door_hit_bottom(edict_t *self)
 {
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_end)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC);
+            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         self->s.sound = 0;
     }
     self->moveinfo.state = STATE_BOTTOM;
@@ -857,7 +857,7 @@ void door_go_down(edict_t *self)
 {
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC);
+            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         self->s.sound = self->moveinfo.sound_middle;
     }
     if (self->max_health) {
@@ -886,7 +886,7 @@ void door_go_up(edict_t *self, edict_t *activator)
 
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC);
+            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         self->s.sound = self->moveinfo.sound_middle;
     }
     self->moveinfo.state = STATE_UP;
@@ -1072,7 +1072,7 @@ void door_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
     self->touch_debounce_framenum = level.framenum + 5.0f * BASE_FRAMERATE;
 
     gi.centerprintf(other, "%s", self->message);
-    gi.sound(other, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM);
+    gi.sound(other, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
 }
 
 void SP_func_door(edict_t *ent)
@@ -1436,7 +1436,7 @@ void train_wait(edict_t *self)
 
         if (!(self->flags & FL_TEAMSLAVE)) {
             if (self->moveinfo.sound_end)
-                gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC);
+                gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
             self->s.sound = 0;
         }
     } else {
@@ -1485,7 +1485,7 @@ again:
 
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC);
+            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         self->s.sound = self->moveinfo.sound_middle;
     }
 

@@ -313,7 +313,7 @@ void CL_MuzzleFlash(void)
         break;
     case MZ_HYPERBLASTER:
         DL_COLOR(1, 1, 0);
-        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0, 0);
+        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0, crand() * 14);
         break;
     case MZ_MACHINEGUN:
         DL_COLOR(1, 1, 0);
@@ -322,8 +322,7 @@ void CL_MuzzleFlash(void)
         break;
     case MZ_SHOTGUN:
         DL_COLOR(1, 1, 0);
-        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0, 0);
-        S_StartSound(NULL, mz.entity, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1f, 0);
+        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0, crand() * 8);
         break;
     case MZ_SSHOTGUN:
         DL_COLOR(1, 1, 0);
@@ -332,7 +331,7 @@ void CL_MuzzleFlash(void)
     case MZ_CHAINGUN1:
         DL_RADIUS(200 + (Q_rand() & 31));
         DL_COLOR(1, 0.25f, 0);
-        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0, crand() * 14);
+        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/hyprbf1a.wav"), volume, ATTN_NORM, 0, crand() * 14);
         break;
     case MZ_CHAINGUN2:
         DL_RADIUS(225 + (Q_rand() & 31));

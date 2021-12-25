@@ -745,7 +745,7 @@ void S_ParseStartSound(void)
 
     S_StartSound((snd.flags & SND_POS) ? snd.pos : NULL,
                  snd.entity, snd.channel, handle,
-                 snd.volume, snd.attenuation, 0, 0);
+                 snd.volume, snd.attenuation, 0, snd.pitch);
 }
 
 /*
