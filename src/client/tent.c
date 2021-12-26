@@ -335,7 +335,7 @@ static void CL_AddExplosions(void)
                 ex->type = ex_free;
                 break;
             }
-            ent->alpha = 1.0f - frac / (ex->frames - 1);
+            ent->alpha = (1.0f - frac / (ex->frames - 1)) / 8.f;
             break;
         case ex_flash:
             if (f >= 1) {

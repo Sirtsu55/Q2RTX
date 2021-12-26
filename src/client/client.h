@@ -346,6 +346,7 @@ typedef struct client_static_s {
 
     int         framecount;
     unsigned    realtime;           // always increasing, no clamping, etc
+    float       realdelta;          // seconds delta since last frame
     float       frametime;          // seconds since last frame
 
 // preformance measurement
@@ -717,7 +718,7 @@ void CL_InitTEnts(void);
 void CL_PredictAngles(void);
 void CL_PredictMovement(void);
 void CL_CheckPredictionError(void);
-
+void CL_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, trace_t *tr, int mask);
 
 //
 // effects.c
@@ -739,6 +740,7 @@ typedef struct cparticle_s {
     float   alphavel;
     color_t rgba;
 	float   brightness;
+    float   bounce;
 } cparticle_t;
 
 #if USE_DLIGHTS
@@ -778,6 +780,7 @@ void CL_ParticleEffectWaterSplash(vec3_t org, vec3_t dir, int color, int count);
 void CL_BloodParticleEffect(vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2(vec3_t org, vec3_t dir, int color, int count);
 cparticle_t *CL_AllocParticle(void);
+void CL_RunParticles(void);
 void CL_AddParticles(void);
 #if USE_DLIGHTS
 cdlight_t *CL_AllocDlight(int key);

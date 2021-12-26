@@ -24,7 +24,12 @@ void        Drop_Weapon(edict_t *ent, gitem_t *inv);
 
 void Weapon_Axe(edict_t *ent);
 void Weapon_Shotgun(edict_t *ent);
+void Weapon_SuperShotgun(edict_t *ent);
+void Weapon_Nailgun(edict_t *ent);
 void Weapon_Perforator(edict_t *ent);
+void Weapon_GrenadeLauncher(edict_t *ent);
+void Weapon_RocketLauncher(edict_t *ent);
+void Weapon_Thunderbolt(edict_t *ent);
 
 gitem_armor_t jacketarmor_info  = { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info  = { 50, 100, .60, .30, ARMOR_COMBAT};
@@ -1217,6 +1222,52 @@ gitem_t itemlist[] = {
         /* precache */ "weapons/shotgf1b.wav"
     },
 
+    /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_supershotgun",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_SuperShotgun,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
+        "models/weapons/v_shotg/v_shotg.iqm",
+        /* icon */      "w_sshotgun",
+        /* pickup */    "Double-Barreled Shotgun",
+        0,
+        2,
+        "Shells",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/shotgf1b.wav"
+    },
+
+    /*QUAKED weapon_nailgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_nailgun",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_Nailgun,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
+        "models/weapons/v_shotg/v_shotg.iqm",
+        /* icon */      "w_machg",
+        /* pickup */    "Nailgun",
+        0,
+        1,
+        "Bullets",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/shotgf1b.wav"
+    },
+
     /*QUAKED weapon_perforator (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
@@ -1238,6 +1289,75 @@ gitem_t itemlist[] = {
         NULL,
         0,
         /* precache */ "misc/lasfly.wav weapons/hyprbf1a.wav"
+    },
+
+    /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_grenadelauncher",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_GrenadeLauncher,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
+        "models/weapons/v_shotg/v_shotg.iqm",
+        /* icon */      "w_glauncher",
+        /* pickup */    "Grenade Launcher",
+        0,
+        1,
+        "Rockets",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/shotgf1b.wav"
+    },
+
+    /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_rocketlauncher",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_RocketLauncher,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
+        "models/weapons/v_shotg/v_shotg.iqm",
+        /* icon */      "w_rlauncher",
+        /* pickup */    "Rocket Launcher",
+        0,
+        1,
+        "Rockets",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/shotgf1b.wav"
+    },
+
+    /*QUAKED weapon_thunderbolt (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    {
+        "weapon_thunderbolt",
+        Pickup_Weapon,
+        Use_Weapon,
+        Drop_Weapon,
+        Weapon_Thunderbolt,
+        "misc/w_pkup.wav",
+        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
+        "models/weapons/v_shotg/v_shotg.iqm",
+        /* icon */      "w_railgun",
+        /* pickup */    "Thunderbolt",
+        0,
+        1,
+        "Cells",
+        IT_WEAPON | IT_STAY_COOP,
+        WEAP_SHOTGUN,
+        NULL,
+        0,
+        /* precache */ "weapons/shotgf1b.wav"
     },
 
     //

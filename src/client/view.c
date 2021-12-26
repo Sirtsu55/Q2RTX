@@ -442,7 +442,9 @@ void V_RenderView(void)
             cl.refdef.fov_y = V_CalcFov(cl.refdef.fov_x, cl.refdef.width, cl.refdef.height);
         }
 
-        cl.refdef.time = cl.time * 0.001f;
+        float current = cl.time * 0.001f;
+        cl.refdef.timedelta = current - cl.refdef.time;
+        cl.refdef.time = current;
 
         if (cl.frame.areabytes) {
             cl.refdef.areabits = cl.frame.areabits;

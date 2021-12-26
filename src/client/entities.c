@@ -1007,7 +1007,6 @@ static void CL_AddViewWeapon(void)
 
     // SPIN
     static float spin_angle = 0;
-    static unsigned last_frame = 0;
     static int last_weapon = -1;
 
     if (last_weapon != ps->gunindex)
@@ -1016,8 +1015,7 @@ static void CL_AddViewWeapon(void)
         last_weapon = ps->gunindex;
     }
 
-    float delta = (cls.realtime - last_frame) / 1000.f;
-    last_frame = cls.realtime;
+    float delta = cls.realdelta;
     float speed = Lerp(ops->gunspin, ps->gunspin, cl.lerpfrac);
     spin_angle += (speed * delta);
     gun.spin_angle = spin_angle;

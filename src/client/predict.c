@@ -75,7 +75,7 @@ CL_ClipMoveToEntities
 
 ====================
 */
-static void CL_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, trace_t *tr)
+void CL_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, trace_t *tr, int mask)
 {
     int         i;
     trace_t     trace;
@@ -100,7 +100,7 @@ static void CL_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
             return;
 
         CM_TransformedBoxTrace(&trace, start, end,
-                               mins, maxs, headnode,  MASK_PLAYERSOLID,
+                               mins, maxs, headnode, mask,
                                ent->current.origin, ent->current.angles);
 
         CM_ClipEntity(tr, &trace, (struct edict_s *)ent);
@@ -123,7 +123,7 @@ static trace_t q_gameabi CL_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
         t.ent = (struct edict_s *)1;
 
     // check all other solid models
-    CL_ClipMoveToEntities(start, mins, maxs, end, &t);
+    CL_ClipMoveToEntities(start, mins, maxs, end, &t, MASK_PLAYERSOLID);
 
     return t;
 }

@@ -866,6 +866,8 @@ cparticle_t *CL_AllocParticle(void)
     p->next = active_particles;
     active_particles = p;
 
+    p->bounce = 0.f;
+
     return p;
 }
 
@@ -926,6 +928,7 @@ void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->alpha = 1.0f;
 
         p->alphavel = -1.0f / (0.5f + frand() * 0.3f);
+        p->bounce = 1.5f;
     }
 
     for (int i = 0; i < spark_count; i++) {
@@ -955,6 +958,7 @@ void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->alpha = 1.0f;
 
         p->alphavel = -2.0f / (0.5f + frand() * 0.3f);
+        p->bounce = 1.5f;
     }
 }
 
@@ -1488,7 +1492,7 @@ void CL_DiminishingTrail(vec3_t start, vec3_t end, centity_t *old, int flags)
                     p->vel[j] = crand() * velscale;
                     p->accel[j] = 0;
                 }
-                p->vel[2] -= PARTICLE_GRAVITY;
+                p->accel[2] -= PARTICLE_GRAVITY;
             } else if (flags & EF_GREENGIB) {
                 p->alpha = 1.0f;
                 p->alphavel = -1.0f / (1 + frand() * 0.4f);
@@ -1501,7 +1505,7 @@ void CL_DiminishingTrail(vec3_t start, vec3_t end, centity_t *old, int flags)
                     p->vel[j] = crand() * velscale;
                     p->accel[j] = 0;
                 }
-                p->vel[2] -= PARTICLE_GRAVITY;
+                p->accel[2] -= PARTICLE_GRAVITY;
             } else {
                 p->alpha = 1.0f;
                 p->alphavel = -1.0f / (1 + frand() * 0.2f);
@@ -1943,11 +1947,45 @@ CL_AddParticles
 void CL_AddParticles(void)
 {
     cparticle_t     *p, *next;
-    float           alpha;
-    float           time = 0, time2;
-    int             color;
-    cparticle_t     *active, *tail;
     particle_t      *part;
+
+    for (p = active_particles; p; p = next) {
+        next = p->next;
+
+        if (r_numparticles >= MAX_PARTICLES)
+            break;
+
+        part = &r_particles[r_numparticles++];
+
+        float alpha = p->alpha;
+
+        if (alpha > 1.0f)
+            alpha = 1;
+
+        VectorCopy(p->org, part->origin);
+
+        if (p->color == -1) {
+            part->rgba.u8[0] = p->rgba.u8[0];
+            part->rgba.u8[1] = p->rgba.u8[1];
+            part->rgba.u8[2] = p->rgba.u8[2];
+            part->rgba.u8[3] = p->rgba.u8[3] * alpha;
+        }
+
+        part->color = p->color;
+		part->brightness = p->brightness;
+        part->alpha = alpha;
+		part->radius = 0.f;
+    }
+}
+
+void CL_RunParticles(void)
+{
+    cparticle_t     *p, *next;
+    float           alpha;
+    cparticle_t     *active, *tail;
+
+    if (sv_paused->integer)
+        return;
 
     active = NULL;
     tail = NULL;
@@ -1956,21 +1994,17 @@ void CL_AddParticles(void)
         next = p->next;
 
         if (p->alphavel != INSTANT_PARTICLE) {
-            time = (cl.time - p->time) * 0.001f;
-            alpha = p->alpha + time * p->alphavel;
+            alpha = p->alpha + (p->alphavel * cl.refdef.timedelta);
             if (alpha <= 0) {
                 // faded out
                 p->next = free_particles;
                 free_particles = p;
                 continue;
             }
+            p->alpha = alpha;
         } else {
             alpha = p->alpha;
         }
-
-        if (r_numparticles >= MAX_PARTICLES)
-            break;
-        part = &r_particles[r_numparticles++];
 
         p->next = NULL;
         if (!tail)
@@ -1980,27 +2014,33 @@ void CL_AddParticles(void)
             tail = p;
         }
 
-        if (alpha > 1.0f)
-            alpha = 1;
-        color = p->color;
+        vec3_t next_origin;
 
-        time2 = time * time;
-
-        part->origin[0] = p->org[0] + p->vel[0] * time + p->accel[0] * time2;
-        part->origin[1] = p->org[1] + p->vel[1] * time + p->accel[1] * time2;
-        part->origin[2] = p->org[2] + p->vel[2] * time + p->accel[2] * time2;
-
-        if (color == -1) {
-            part->rgba.u8[0] = p->rgba.u8[0];
-            part->rgba.u8[1] = p->rgba.u8[1];
-            part->rgba.u8[2] = p->rgba.u8[2];
-            part->rgba.u8[3] = p->rgba.u8[3] * alpha;
+        for (int i = 0; i < 3; i++) {
+            next_origin[i] = p->org[i] + p->vel[i] * cl.refdef.timedelta;
+            p->vel[i] += p->accel[i] * cl.refdef.timedelta;
         }
 
-        part->color = color;
-		part->brightness = p->brightness;
-        part->alpha = alpha;
-		part->radius = 0.f;
+        if (p->bounce) {
+            trace_t    t;
+
+            // check against world
+            CM_BoxTrace(&t, p->org, next_origin, vec3_origin, vec3_origin, cl.bsp->nodes, MASK_SOLID);
+            if (t.fraction < 1.0f)
+                t.ent = (struct edict_s *)1;
+
+            // check all other solid models
+            CL_ClipMoveToEntities(p->org, vec3_origin, vec3_origin, next_origin, &t, MASK_SOLID);
+
+            if (t.fraction < 1.0f) {
+                ClipVelocity(p->vel, t.plane.normal, p->vel, 1.5f);
+                VectorCopy(t.endpos, p->org);
+            } else {
+                VectorCopy(next_origin, p->org);
+            }
+        } else {
+            VectorCopy(next_origin, p->org);
+        }
 
         if (p->alphavel == INSTANT_PARTICLE) {
             p->alphavel = 0.0f;
@@ -2010,7 +2050,6 @@ void CL_AddParticles(void)
 
     active_particles = active;
 }
-
 
 /*
 ==============

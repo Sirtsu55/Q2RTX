@@ -317,19 +317,23 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 		CrossProduct(z_axis, view_y, x_axis);
 		CrossProduct(x_axis, z_axis, y_axis);
 
-		const float size_factor = pow(particle->alpha, 0.05f);
-		if (particle->radius == 0.f)
-		{
-			VectorScale(y_axis, particle_size * size_factor, y_axis);
-			VectorScale(x_axis, particle_size * size_factor, x_axis);
-		}
-		else
-		{
-			VectorScale(y_axis, particle->radius, y_axis);
-			VectorScale(x_axis, particle->radius, x_axis);
-		}
+		float radius;
 
+		if (particle->radius == 0.f)
+			radius = particle_size * pow(particle->alpha, 0.05f);
+		else
+			radius = particle->radius;
+
+		// Keep particles near-ish the same size even
+		// if they're far away
 		vec3_t temp;
+		VectorSubtract(particle->origin, view_origin, temp);
+		float len = VectorLength(temp);
+		radius += len / 512.f;
+
+		VectorScale(y_axis, radius, y_axis);
+		VectorScale(x_axis, radius, x_axis);
+
 		VectorSubtract(origin, x_axis, temp);
 		VectorAdd(temp, y_axis, vertex_positions[0]);
 

@@ -3004,7 +3004,10 @@ unsigned CL_Frame(unsigned msec)
     }
 
     main_extra += msec;
-    cls.realtime += msec;
+
+    unsigned current = cls.realtime + msec;
+    cls.realdelta = (current - cls.realtime) / 1000.f;
+    cls.realtime = current;
 
     CL_ProcessEvents();
 
@@ -3134,6 +3137,8 @@ run_fx:
 #if USE_DLIGHTS
         CL_RunDLights();
 #endif
+
+        CL_RunParticles();
 
         CL_RunLightStyles();
         SCR_RunCinematic();

@@ -765,3 +765,198 @@ void Weapon_Shotgun(edict_t *ent)
     };
     Weapon_Generic(ent, frames, weapon_shotgun_fire);
 }
+
+void weapon_supershotgun_fire(edict_t *ent)
+{
+    vec3_t      start;
+    vec3_t      forward, right;
+    vec3_t      offset;
+    int         damage = 4;
+    int         kick = 8;
+
+    if (is_quad) {
+        damage *= 4;
+        kick *= 4;
+    }
+
+    AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+    VectorScale(forward, -4, ent->client->kick_origin);
+    ent->client->kick_angles[0] = -4;
+    
+    VectorSet(offset, 0, 10, ent->viewheight);
+    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+    if (deathmatch->value)
+        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+    else
+        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+
+    VectorSet(offset, 0, -10, ent->viewheight);
+    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+    if (deathmatch->value)
+        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+    else
+        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+
+    // send muzzle flash
+    gi.WriteByte(svc_muzzleflash);
+    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(MZ_SHOTGUN | is_silenced);
+    gi.multicast(ent->s.origin, MULTICAST_PVS);
+}
+
+void Weapon_SuperShotgun(edict_t *ent)
+{
+    static const int frames[] = {
+        [EQUIP_FIRST]    = 0,
+        [EQUIP_LAST]     = 8,
+        [IDLE_FIRST]     = 9,
+        [IDLE_LAST]      = 68,
+        [ATTACK_FIRST]   = 69,
+        [ATTACK_LAST]    = 78,
+        [PUTAWAY_FIRST]  = 79,
+        [PUTAWAY_LAST]   = 81,
+        [INSPECT_FIRST]  = -1,
+        [INSPECT_LAST]   = -1
+    };
+    Weapon_Generic(ent, frames, weapon_supershotgun_fire);
+}
+
+void weapon_nailgun_fire(edict_t *ent)
+{
+    vec3_t      start;
+    vec3_t      forward, right;
+    vec3_t      offset;
+
+    AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+    VectorScale(forward, -1, ent->client->kick_origin);
+    ent->client->kick_angles[0] = -1;
+    
+    VectorSet(offset, 0, 0, ent->viewheight);
+    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+    fire_nail(ent, start, forward, 12, 2000);
+
+    // send muzzle flash
+    gi.WriteByte(svc_muzzleflash);
+    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(MZ_SHOTGUN | is_silenced);
+    gi.multicast(ent->s.origin, MULTICAST_PVS);
+}
+
+void Weapon_Nailgun(edict_t *ent)
+{
+    static const int frames[] = {
+        [EQUIP_FIRST]    = 0,
+        [EQUIP_LAST]     = 8,
+        [IDLE_FIRST]     = 9,
+        [IDLE_LAST]      = 68,
+        [ATTACK_FIRST]   = 69,
+        [ATTACK_LAST]    = 78,
+        [PUTAWAY_FIRST]  = 79,
+        [PUTAWAY_LAST]   = 81,
+        [INSPECT_FIRST]  = -1,
+        [INSPECT_LAST]   = -1
+    };
+    Weapon_Generic(ent, frames, weapon_nailgun_fire);
+}
+
+void weapon_grenadelauncher_fire(edict_t *ent)
+{
+    vec3_t      start;
+    vec3_t      forward, right;
+    vec3_t      offset;
+
+    AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+    VectorScale(forward, -1, ent->client->kick_origin);
+    ent->client->kick_angles[0] = -1;
+    
+    VectorSet(offset, 0, 0, ent->viewheight);
+    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+    fire_grenade(ent, start, forward, 100, 800, 2.5f, 75);
+
+    // send muzzle flash
+    gi.WriteByte(svc_muzzleflash);
+    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(MZ_SHOTGUN | is_silenced);
+    gi.multicast(ent->s.origin, MULTICAST_PVS);
+}
+
+void Weapon_GrenadeLauncher(edict_t *ent)
+{
+    static const int frames[] = {
+        [EQUIP_FIRST]    = 0,
+        [EQUIP_LAST]     = 8,
+        [IDLE_FIRST]     = 9,
+        [IDLE_LAST]      = 68,
+        [ATTACK_FIRST]   = 69,
+        [ATTACK_LAST]    = 78,
+        [PUTAWAY_FIRST]  = 79,
+        [PUTAWAY_LAST]   = 81,
+        [INSPECT_FIRST]  = -1,
+        [INSPECT_LAST]   = -1
+    };
+    Weapon_Generic(ent, frames, weapon_grenadelauncher_fire);
+}
+
+void weapon_rocketlauncher_fire(edict_t *ent)
+{
+    vec3_t      start;
+    vec3_t      forward, right;
+    vec3_t      offset;
+
+    AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+    VectorScale(forward, -1, ent->client->kick_origin);
+    ent->client->kick_angles[0] = -1;
+    
+    VectorSet(offset, 0, 0, ent->viewheight);
+    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+    fire_rocket(ent, start, forward, 100, 800, 120, 75);
+
+    // send muzzle flash
+    gi.WriteByte(svc_muzzleflash);
+    gi.WriteShort(ent - g_edicts);
+    gi.WriteByte(MZ_SHOTGUN | is_silenced);
+    gi.multicast(ent->s.origin, MULTICAST_PVS);
+}
+
+void Weapon_RocketLauncher(edict_t *ent)
+{
+    static const int frames[] = {
+        [EQUIP_FIRST]    = 0,
+        [EQUIP_LAST]     = 8,
+        [IDLE_FIRST]     = 9,
+        [IDLE_LAST]      = 68,
+        [ATTACK_FIRST]   = 69,
+        [ATTACK_LAST]    = 78,
+        [PUTAWAY_FIRST]  = 79,
+        [PUTAWAY_LAST]   = 81,
+        [INSPECT_FIRST]  = -1,
+        [INSPECT_LAST]   = -1
+    };
+    Weapon_Generic(ent, frames, weapon_rocketlauncher_fire);
+}
+
+void Weapon_Thunderbolt(edict_t *ent)
+{
+    static const int frames[] = {
+        [EQUIP_FIRST]    = 0,
+        [EQUIP_LAST]     = 8,
+        [IDLE_FIRST]     = 9,
+        [IDLE_LAST]      = 68,
+        [ATTACK_FIRST]   = 69,
+        [ATTACK_LAST]    = 78,
+        [PUTAWAY_FIRST]  = 79,
+        [PUTAWAY_LAST]   = 81,
+        [INSPECT_FIRST]  = -1,
+        [INSPECT_LAST]   = -1
+    };
+    Weapon_Generic(ent, frames, weapon_rocketlauncher_fire);
+}

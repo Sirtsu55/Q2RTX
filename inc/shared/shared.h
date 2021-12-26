@@ -265,6 +265,29 @@ void AddPointToBounds(const vec3_t v, vec3_t mins, vec3_t maxs);
 vec_t RadiusFromBounds(const vec3_t mins, const vec3_t maxs);
 void UnionBounds(vec3_t a[2], vec3_t b[2], vec3_t c[2]);
 
+/*
+==================
+ClipVelocity
+
+Slide off of the impacting object
+returns the blocked flags (1 = floor, 2 = step / wall)
+==================
+*/
+static inline void ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+{
+	float backoff = DotProduct(in, normal);
+
+	if (backoff < 0.f) {
+		backoff *= overbounce;
+	} else {
+		backoff /= overbounce;
+	}
+
+    for (int i = 0; i < 3; i++) {
+        out[i] = in[i] - (normal[i] * backoff);
+    }
+}
+
 static inline void AnglesToAxis(vec3_t angles, vec3_t axis[3])
 {
     AngleVectors(angles, axis[0], axis[1], axis[2]);
