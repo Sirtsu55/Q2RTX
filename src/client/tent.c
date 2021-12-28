@@ -602,6 +602,7 @@ static void CL_AddBeams(void)
     vec3_t      angles;
     float       len, steps;
     float       model_length;
+    float       roll = RAD2DEG(sinf(cl.refdef.time * 100));
 
 // update beams
     for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
@@ -621,7 +622,7 @@ static void CL_AddBeams(void)
         // add new entities for the beams
         d = VectorNormalize(dist);
         if (b->model == cl_mod_lightning) {
-            model_length = 35.0f;
+            model_length = 31.0f;
             d -= 20.0f; // correction so it doesn't end in middle of tesla
         } else {
             model_length = 30.0f;
@@ -640,22 +641,24 @@ static void CL_AddBeams(void)
             ent.flags = RF_FULLBRIGHT;
             ent.angles[0] = angles[0];
             ent.angles[1] = angles[1];
-            ent.angles[2] = Q_rand() % 360;
+            ent.angles[2] = roll;
             V_AddEntity(&ent);
             return;
         }
 
         while (d > 0) {
+            roll += model_length;
+
             VectorCopy(org, ent.origin);
             if (b->model == cl_mod_lightning) {
                 ent.flags = RF_FULLBRIGHT;
                 ent.angles[0] = -angles[0];
                 ent.angles[1] = angles[1] + 180.0f;
-                ent.angles[2] = Q_rand() % 360;
+                ent.angles[2] = roll;
             } else {
                 ent.angles[0] = angles[0];
                 ent.angles[1] = angles[1];
-                ent.angles[2] = Q_rand() % 360;
+                ent.angles[2] = roll;
             }
 
             V_AddEntity(&ent);
@@ -687,6 +690,7 @@ static void CL_AddPlayerBeams(void)
     float       model_length;
     float       hand_multiplier;
     player_state_t  *ps, *ops;
+    float       roll = RAD2DEG(sinf(cl.refdef.time * 100));
 
     if (info_hand->integer == 2)
         hand_multiplier = 0;
@@ -731,7 +735,7 @@ static void CL_AddPlayerBeams(void)
             vectoangles2(dist, angles);
 
             // if it's the heatbeam, draw the particle effect
-            CL_Heatbeam(org, dist);
+            //CL_Heatbeam(org, dist);
 
             framenum = 1;
         } else {
@@ -755,7 +759,7 @@ static void CL_AddPlayerBeams(void)
                 VectorMA(org, -b->offset[2] - 10, u, org);
             } else {
                 // if it's a monster, do the particle effect
-                CL_MonsterPlasma_Shell(b->start);
+                //CL_MonsterPlasma_Shell(b->start);
             }
 
             framenum = 2;
@@ -773,11 +777,12 @@ static void CL_AddPlayerBeams(void)
         ent.flags = RF_FULLBRIGHT;
         ent.angles[0] = -angles[0];
         ent.angles[1] = angles[1] + 180.0f;
-        ent.angles[2] = cl.time % 360;
+        ent.angles[2] = roll;
 
         while (d > 0) {
             VectorCopy(org, ent.origin);
-
+            
+            ent.angles[2] += model_length;
             V_AddEntity(&ent);
 
             for (j = 0; j < 3; j++)
@@ -1343,8 +1348,14 @@ void CL_ParseTEnt(void)
 
     case TE_LIGHTNING:
         S_StartSound(NULL, te.entity1, CHAN_WEAPON, cl_sfx_lightning, 1, ATTN_NORM, 0, 0);
-        VectorClear(te.offset);
-        CL_ParseBeam(cl_mod_lightning);
+
+        if (te.entity1 - 1 == cl.clientNum) {
+            VectorSet(te.offset, 0, 0, -8);
+            CL_ParsePlayerBeam(cl_mod_lightning);
+        } else {
+            VectorClear(te.offset);
+            CL_ParseBeam(cl_mod_lightning);
+        }
         break;
 
     case TE_DEBUGTRAIL:
