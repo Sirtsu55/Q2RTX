@@ -35,7 +35,6 @@ static int          floodvalid;
 static int          checkcount;
 
 static cvar_t       *map_noareas;
-static cvar_t       *map_allsolid_bug;
 
 static void    FloodAreaConnections(cm_t *cm);
 
@@ -381,7 +380,7 @@ static void CM_ClipBoxToBrush(vec3_t p1, vec3_t p2, trace_t *trace, mbrush_t *br
             startout = true;
 
         // if completely in front of face, no intersection
-        if (d1 > 0 && d2 >= d1)
+        if (d1 > 0 && (d2 >= DIST_EPSILON || d2 >= d1))
             return;
 
         if (d1 <= 0 && d2 <= 0)
@@ -390,7 +389,7 @@ static void CM_ClipBoxToBrush(vec3_t p1, vec3_t p2, trace_t *trace, mbrush_t *br
         // crosses face
         if (d1 > d2) {
             // enter
-            f = (d1 - DIST_EPSILON) / (d1 - d2);
+            f = max(0, (d1 - DIST_EPSILON) / (d1 - d2));
             if (f > enterfrac) {
                 enterfrac = f;
                 clipplane = plane;
@@ -398,7 +397,7 @@ static void CM_ClipBoxToBrush(vec3_t p1, vec3_t p2, trace_t *trace, mbrush_t *br
             }
         } else {
             // leave
-            f = (d1 + DIST_EPSILON) / (d1 - d2);
+            f = min(1, (d1 + DIST_EPSILON) / (d1 - d2));
             if (f < leavefrac)
                 leavefrac = f;
         }
@@ -409,19 +408,14 @@ static void CM_ClipBoxToBrush(vec3_t p1, vec3_t p2, trace_t *trace, mbrush_t *br
         trace->startsolid = true;
         if (!getout) {
             trace->allsolid = true;
-            if (!map_allsolid_bug->integer) {
-                // original Q2 didn't set these
-                trace->fraction = 0;
-                trace->contents = brush->contents;
-            }
+            trace->fraction = 0;
+            trace->contents = brush->contents;
         }
         return;
     }
     if (enterfrac < leavefrac) {
         if (enterfrac > -1 && enterfrac < trace->fraction) {
-            if (enterfrac < 0)
-                enterfrac = 0;
-            trace->fraction = enterfrac;
+            trace->fraction = max(0, enterfrac);
             trace->plane = *clipplane;
             trace->surface = &(leadside->texinfo->c);
             trace->contents = brush->contents;
@@ -565,9 +559,10 @@ recheck:
         if (trace_ispoint)
             offset = 0;
         else
-            offset = fabsf(trace_extents[0] * plane->normal[0]) +
+            /*offset = fabsf(trace_extents[0] * plane->normal[0]) +
                      fabsf(trace_extents[1] * plane->normal[1]) +
-                     fabsf(trace_extents[2] * plane->normal[2]);
+                     fabsf(trace_extents[2] * plane->normal[2]);*/
+            offset = 2048;
     }
 
     // see which sides we need to consider
@@ -582,12 +577,12 @@ recheck:
 
     // put the crosspoint DIST_EPSILON pixels on the near side
     if (t1 < t2) {
-        idist = 1.0f / (t1 - t2);
+        idist = 1.0 / (t1 - t2);
         side = 1;
         frac2 = (t1 + offset + DIST_EPSILON) * idist;
         frac = (t1 - offset + DIST_EPSILON) * idist;
     } else if (t1 > t2) {
-        idist = 1.0f / (t1 - t2);
+        idist = 1.0 / (t1 - t2);
         side = 0;
         frac2 = (t1 - offset - DIST_EPSILON) * idist;
         frac = (t1 + offset + DIST_EPSILON) * idist;
@@ -1024,6 +1019,5 @@ void CM_Init(void)
     nullleaf.cluster = -1;
 
     map_noareas = Cvar_Get("map_noareas", "0", 0);
-    map_allsolid_bug = Cvar_Get("map_allsolid_bug", "1", 0);
 }
 

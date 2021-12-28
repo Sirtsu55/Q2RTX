@@ -915,7 +915,7 @@ void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         VectorCopy(org, origin);
         VectorMA(origin, dirt_horizontal_spread * crand(), ox, origin);
         VectorMA(origin, dirt_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, dirt_vertical_spread * frand() + 1.0f, dir, origin);
+        VectorMA(origin, (dirt_vertical_spread * frand()) + dirt_horizontal_spread, dir, origin);
         VectorCopy(origin, p->org);
 
         vec3_t velocity;
@@ -928,7 +928,7 @@ void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->alpha = 1.0f;
 
         p->alphavel = -1.0f / (0.5f + frand() * 0.3f);
-        p->bounce = 1.5f;
+        p->bounce = 0.65f;
     }
 
     for (int i = 0; i < spark_count; i++) {
@@ -945,7 +945,7 @@ void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         VectorCopy(org, origin);
         VectorMA(origin, spark_horizontal_spread * crand(), ox, origin);
         VectorMA(origin, spark_horizontal_spread * crand(), oy, origin);
-        VectorMA(origin, spark_vertical_spread * frand() + 1.0f, dir, origin);
+        VectorMA(origin, (spark_vertical_spread * frand()) + spark_horizontal_spread, dir, origin);
         VectorCopy(origin, p->org);
 
         vec3_t velocity;
@@ -958,7 +958,7 @@ void CL_ParticleEffect(vec3_t org, vec3_t dir, int color, int count)
         p->alpha = 1.0f;
 
         p->alphavel = -2.0f / (0.5f + frand() * 0.3f);
-        p->bounce = 1.5f;
+        p->bounce = 1.f;
     }
 }
 
@@ -1978,6 +1978,52 @@ void CL_AddParticles(void)
     }
 }
 
+static void CL_Trace(trace_t *tr, vec3_t start, vec3_t end, vec3_t mins, vec3_t maxs, int mask)
+{
+    // check against world
+    CM_BoxTrace(tr, start, end, mins, maxs, cl.bsp->nodes, mask);
+
+    if (tr->fraction < 1.0f)
+        tr->ent = (struct edict_s *)1;
+
+    // check all other solid models
+    CL_ClipMoveToEntities(start, mins, maxs, end, tr, mask);
+}
+
+static void CL_RunParticleBounce(cparticle_t *p, vec3_t next_origin)
+{
+    static vec3_t mins = { -0.5f, -0.5f, -0.5f };
+    static vec3_t maxs = { 0.5f, 0.5f, 0.5f };
+    trace_t tr;
+
+    // trace a line from the previous position to the current position
+	CL_Trace(&tr, p->org, next_origin, mins, maxs, MASK_SOLID);
+
+	if ( tr.startsolid || tr.allsolid ) {
+		// make sure the tr.entityNum is set to the entity we're stuck in
+		CL_Trace(&tr, p->org, p->org, mins, maxs, MASK_SOLID);
+		tr.fraction = 0;
+	}
+	else {
+		VectorCopy( tr.endpos, p->org );
+	}
+
+    if (tr.fraction != 1) {
+	    // reflect the velocity on the trace plane
+	    float dot = DotProduct( p->vel, tr.plane.normal );
+	    VectorMA( p->vel, -2*dot, tr.plane.normal, p->vel );
+
+	    VectorScale(p->vel, p->bounce, p->vel);
+	    // check for stop
+	    if ( tr.plane.normal[2] > 0.2 && VectorLength(p->vel) <= 24.f ) {
+		    VectorCopy(tr.endpos, p->org);
+		    return;
+	    }
+
+	    VectorAdd(p->org, tr.plane.normal, p->org);
+    }
+}
+
 void CL_RunParticles(void)
 {
     cparticle_t     *p, *next;
@@ -2015,29 +2061,10 @@ void CL_RunParticles(void)
         }
 
         vec3_t next_origin;
-
-        for (int i = 0; i < 3; i++) {
-            next_origin[i] = p->org[i] + p->vel[i] * cl.refdef.timedelta;
-            p->vel[i] += p->accel[i] * cl.refdef.timedelta;
-        }
+        VectorMA(p->org, cl.refdef.timedelta, p->vel, next_origin);
 
         if (p->bounce) {
-            trace_t    t;
-
-            // check against world
-            CM_BoxTrace(&t, p->org, next_origin, vec3_origin, vec3_origin, cl.bsp->nodes, MASK_SOLID);
-            if (t.fraction < 1.0f)
-                t.ent = (struct edict_s *)1;
-
-            // check all other solid models
-            CL_ClipMoveToEntities(p->org, vec3_origin, vec3_origin, next_origin, &t, MASK_SOLID);
-
-            if (t.fraction < 1.0f) {
-                ClipVelocity(p->vel, t.plane.normal, p->vel, 1.5f);
-                VectorCopy(t.endpos, p->org);
-            } else {
-                VectorCopy(next_origin, p->org);
-            }
+            CL_RunParticleBounce(p, next_origin);
         } else {
             VectorCopy(next_origin, p->org);
         }
@@ -2046,6 +2073,8 @@ void CL_RunParticles(void)
             p->alphavel = 0.0f;
             p->alpha = 0.0f;
         }
+
+        VectorMA(p->vel, cl.refdef.timedelta, p->accel, p->vel);
     }
 
     active_particles = active;

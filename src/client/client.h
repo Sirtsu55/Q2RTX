@@ -735,6 +735,7 @@ typedef struct cparticle_s {
     color_t rgba;
 	float   brightness;
     float   bounce;
+    trace_t groundSurface;
 } cparticle_t;
 
 #if USE_DLIGHTS
