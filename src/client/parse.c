@@ -909,12 +909,7 @@ static void CL_ParseDownload(int cmd)
 
     // read optional decompressed packet size
     if (cmd == svc_zdownload) {
-#if USE_ZLIB
         decompressed_size = -1;
-#else
-        Com_Error(ERR_DROP, "Compressed server packet received, "
-                  "but no zlib support linked in.");
-#endif
     } else {
         decompressed_size = 0;
     }
@@ -935,7 +930,6 @@ static void CL_ParseDownload(int cmd)
 
 static void CL_ParseZPacket(void)
 {
-#if USE_ZLIB
     sizebuf_t   temp;
     byte        buffer[MAX_MSGLEN];
     int         ret, inlen, outlen;
@@ -975,10 +969,6 @@ static void CL_ParseZPacket(void)
     CL_ParseServerMessage();
 
     msg_read = temp;
-#else
-    Com_Error(ERR_DROP, "Compressed server packet received, "
-              "but no zlib support linked in.");
-#endif
 }
 
 static void CL_ParseSetting(void)

@@ -445,16 +445,14 @@ static void SV_BeginDownload_f(void)
     f = 0;
     downloadcmd = svc_download;
 
-#if USE_ZLIB
     // prefer raw deflate stream from .pkz if supported
-    if (sv_client->has_zlib && offset == 0) {
+    if (offset == 0) {
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ | FS_FLAG_DEFLATE);
         if (f) {
             Com_DPrintf("Serving compressed download to %s\n", sv_client->name);
             downloadcmd = svc_zdownload;
         }
     }
-#endif
 
     if (!f) {
         downloadsize = FS_FOpenFile(name, &f, FS_MODE_READ);

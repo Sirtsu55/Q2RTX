@@ -49,9 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/ui.h"
 #include "client/video.h"
 
-#if USE_ZLIB
 #include <zlib.h>
-#endif
 
 //=============================================================================
 
@@ -372,9 +370,7 @@ typedef struct client_static_s {
     int         connect_count;
     bool        passive;
 
-#if USE_ZLIB
     z_stream    z;
-#endif
 
     int         quakePort;          // a 16 bit value that allows quake servers
                                     // to work around address translating routers
@@ -401,9 +397,7 @@ typedef struct client_static_s {
         int         position;           // how much downloaded (in bytes)
         qhandle_t   file;               // UDP file transfer from server
         char        temp[MAX_QPATH + 4];// account 4 bytes for .tmp suffix
-#if USE_ZLIB
         z_stream    z;                  // UDP download zlib stream
-#endif
         string_entry_t  *ignores;       // list of ignored paths
     } download;
 

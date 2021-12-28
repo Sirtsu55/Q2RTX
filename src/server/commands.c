@@ -579,14 +579,13 @@ static void dump_protocols(void)
     client_t    *cl;
 
     Com_Printf(
-        "num name            major msglen zlib\n"
-        "--- --------------- ----- ------ ----\n");
+        "num name            major msglen\n"
+        "--- --------------- ----- ------\n");
 
     FOR_EACH_CLIENT(cl) {
-        Com_Printf("%3i %-15.15s %5d %6zu  %s\n",
+        Com_Printf("%3i %-15.15s %5d %6zu\n",
                    cl->number, cl->name, cl->protocol,
-                   cl->netchan->maxpacketlen,
-                   cl->has_zlib ? "yes" : "no ");
+                   cl->netchan->maxpacketlen);
     }
 }
 
@@ -722,7 +721,6 @@ void SV_PrintMiscInfo(void)
                sv_client->version_string ? sv_client->version_string : "-");
     Com_Printf("protocol             %d\n", sv_client->protocol);
     Com_Printf("maxmsglen            %zu\n", sv_client->netchan->maxpacketlen);
-    Com_Printf("zlib support         %s\n", sv_client->has_zlib ? "yes" : "no");
     Com_Printf("ping                 %d\n", sv_client->ping);
     Com_Printf("movement fps         %d\n", sv_client->moves_per_sec);
     Com_Printf("RTT (min/avg/max)    %d/%d/%d ms\n",

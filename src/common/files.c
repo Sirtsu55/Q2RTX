@@ -39,9 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     #define stat _stat
 #endif
 
-#if USE_ZLIB
 #include <zlib.h>
-#endif
 
 /*
 =============================================================================
@@ -59,7 +57,6 @@ QUAKE FILESYSTEM
 
 #define MAX_FILE_HANDLES    32
 
-#if USE_ZLIB
 #define ZIP_MAXFILES    0x8000  // 32k files
 #define ZIP_BUFSIZE     0x10000 // inflate in blocks of 64k
 
@@ -71,7 +68,6 @@ QUAKE FILESYSTEM
 #define ZIP_LOCALHEADERMAGIC    0x04034b50
 #define ZIP_CENTRALHEADERMAGIC  0x02014b50
 #define ZIP_ENDHEADERMAGIC      0x06054b50
-#endif
 
 #ifdef _DEBUG
 #define FS_DPrintf(...) \
@@ -100,31 +96,25 @@ typedef enum {
     FS_FREE,
     FS_REAL,
     FS_PAK,
-#if USE_ZLIB
     FS_ZIP,
     FS_GZ,
-#endif
     FS_BAD
 } filetype_t;
 
-#if USE_ZLIB
 typedef struct {
     z_stream    stream;
     unsigned    rest_in;
     byte        buffer[ZIP_BUFSIZE];
 } zipstream_t;
-#endif
 
 typedef struct packfile_s {
     char        *name;
     unsigned    namelen;
     unsigned    filepos;
     unsigned    filelen;
-#if USE_ZLIB
     unsigned    complen;
     byte        compmtd;    // compression method, 0 (stored) or Z_DEFLATED
     bool        coherent;   // true if local file header has been checked
-#endif
     struct packfile_s *hash_next;
 } packfile_t;
 
@@ -151,9 +141,7 @@ typedef struct {
     filetype_t  type;
     unsigned    mode;
     FILE        *fp;
-#if USE_ZLIB
     void        *zfp;       // gzFile for FS_GZ or zipstream_t for FS_ZIP
-#endif
     packfile_t  *entry;     // pack entry this handle is tied to
     pack_t      *pack;      // points to the pack entry is from
     bool        unique;     // if true, then pack must be freed on close
@@ -206,7 +194,6 @@ cvar_t              *fs_game;
 
 cvar_t              *fs_shareware;
 
-#if USE_ZLIB
 // local stream used for all file loads
 static zipstream_t  fs_zipstream;
 
@@ -214,7 +201,6 @@ static void open_zip_file(file_t *file);
 static void close_zip_file(file_t *file);
 static int tell_zip_file(file_t *file);
 static int read_zip_file(file_t *file, void *buf, size_t len);
-#endif
 
 // for tracking users of pack_t instance
 // allows FS to be restarted while reading something from pack
@@ -522,7 +508,6 @@ int64_t FS_Tell(qhandle_t f)
         return ret;
     case FS_PAK:
         return file->length - file->rest_out;
-#if USE_ZLIB
     case FS_ZIP:
         return tell_zip_file(file);
     case FS_GZ:
@@ -531,7 +516,6 @@ int64_t FS_Tell(qhandle_t f)
             return Q_ERR_LIBRARY_ERROR;
         }
         return ret;
-#endif
     default:
         return Q_ERR_NOSYS;
     }
@@ -577,13 +561,11 @@ int FS_Seek(qhandle_t f, int64_t offset)
         return Q_ERR_SUCCESS;
     case FS_PAK:
         return seek_pak_file(file, offset);
-#if USE_ZLIB
     case FS_GZ:
         if (gzseek(file->zfp, offset, SEEK_SET) == -1) {
             return Q_ERR_LIBRARY_ERROR;
         }
         return Q_ERR_SUCCESS;
-#endif
     default:
         return Q_ERR_NOSYS;
     }
@@ -665,7 +647,6 @@ int FS_FCloseFile(qhandle_t f)
             pack_put(file->pack);
         }
         break;
-#if USE_ZLIB
     case FS_GZ:
         if (gzclose(file->zfp))
             ret = Q_ERR_LIBRARY_ERROR;
@@ -676,7 +657,6 @@ int FS_FCloseFile(qhandle_t f)
             pack_put(file->pack);
         }
         break;
-#endif
     default:
         ret = Q_ERR_NOSYS;
         break;
@@ -827,7 +807,6 @@ fail:
 
 static int64_t open_file_write_gzip(file_t *file, const char *fullpath, const char *mode_str)
 {
-#if USE_ZLIB
     void *zfp = gzopen(fullpath, mode_str);
     if (!zfp)
         return Q_ERR_LIBRARY_ERROR;
@@ -837,9 +816,6 @@ static int64_t open_file_write_gzip(file_t *file, const char *fullpath, const ch
     file->unique = true;
     file->error = Q_ERR_SUCCESS;
     return 0;
-#else
-    return Q_ERR_NOSYS;
-#endif
 }
 
 static int64_t open_file_write(file_t *file, const char *name)
@@ -928,8 +904,6 @@ fail:
     FS_DPrintf("%s: %s: %s\n", __func__, normalized, Q_ErrorString(ret));
     return ret;
 }
-
-#if USE_ZLIB
 
 static int check_header_coherency(FILE *fp, packfile_t *entry)
 {
@@ -1098,8 +1072,6 @@ static int read_zip_file(file_t *file, void *buf, size_t len)
     return len;
 }
 
-#endif
-
 // open a new file on the pakfile
 static int64_t open_from_pak(file_t *file, pack_t *pack, packfile_t *entry, bool unique)
 {
@@ -1117,14 +1089,12 @@ static int64_t open_from_pak(file_t *file, pack_t *pack, packfile_t *entry, bool
         clearerr(fp);
     }
 
-#if USE_ZLIB
     if (pack->type == FS_ZIP && !entry->coherent) {
         ret = check_header_coherency(fp, entry);
         if (ret) {
             goto fail2;
         }
     }
-#endif
 
     if (os_fseek(fp, entry->filepos, SEEK_SET) == -1) {
         ret = Q_ERRNO;
@@ -1140,7 +1110,6 @@ static int64_t open_from_pak(file_t *file, pack_t *pack, packfile_t *entry, bool
     file->rest_out = entry->filelen;
     file->length = entry->filelen;
 
-#if USE_ZLIB
     if (pack->type == FS_ZIP) {
         if (file->mode & FS_FLAG_DEFLATE) {
             // server wants raw deflated data for downloads
@@ -1154,7 +1123,6 @@ static int64_t open_from_pak(file_t *file, pack_t *pack, packfile_t *entry, bool
             file->type = FS_PAK;
         }
     }
-#endif
 
     if (unique) {
         // reference source pak
@@ -1175,7 +1143,6 @@ fail1:
     return ret;
 }
 
-#if USE_ZLIB
 static int check_for_gzip(file_t *file, const char *fullpath)
 {
     uint32_t magic, length;
@@ -1221,7 +1188,6 @@ static int check_for_gzip(file_t *file, const char *fullpath)
     file->length = LittleLong(length);
     return 1;
 }
-#endif
 
 static int64_t open_from_disk(file_t *file, const char *fullpath)
 {
@@ -1249,7 +1215,6 @@ static int64_t open_from_disk(file_t *file, const char *fullpath)
     file->error = Q_ERR_SUCCESS;
     file->length = info.size;
 
-#if USE_ZLIB
     if (file->mode & FS_FLAG_GZIP) {
         ret = check_for_gzip(file, fullpath);
         if (ret) {
@@ -1260,7 +1225,6 @@ static int64_t open_from_disk(file_t *file, const char *fullpath)
             }
         }
     }
-#endif
 
     FS_DPrintf("%s: %s: %"PRId64" bytes\n", __func__, fullpath, file->length);
     return file->length;
@@ -1353,22 +1317,22 @@ static int64_t open_file_read(file_t *file, const char *normalized, size_t namel
                 continue;
             }
             pak = search->pack;
-#if USE_ZLIB
+
             if ((file->mode & FS_FLAG_DEFLATE) && pak->type != FS_ZIP) {
                 continue;
             }
-#endif
+
             // look through all the pak file elements
             entry = pak->file_hash[hash & (pak->hash_size - 1)];
             for (; entry; entry = entry->hash_next) {
                 if (entry->namelen != namelen) {
                     continue;
                 }
-#if USE_ZLIB
+
                 if ((file->mode & FS_FLAG_DEFLATE) && entry->compmtd != Z_DEFLATED) {
                     continue;
                 }
-#endif
+
                 FS_COUNT_STRCMP;
                 if (!FS_pathcmp(entry->name, normalized)) {
                     // found it!
@@ -1379,11 +1343,11 @@ static int64_t open_file_read(file_t *file, const char *normalized, size_t namel
             if ((file->mode & FS_TYPE_MASK) == FS_TYPE_PAK) {
                 continue;
             }
-#if USE_ZLIB
+
             if (file->mode & FS_FLAG_DEFLATE) {
                 continue;
             }
-#endif
+
             // don't error out immediately if the path is found to be invalid,
             // just stop looking for it in directory tree but continue to search
             // for it in packs, to give broken maps or mods a chance to work
@@ -1508,9 +1472,7 @@ FS_Read
 int FS_Read(void *buf, size_t len, qhandle_t f)
 {
     file_t *file = file_for_handle(f);
-#if USE_ZLIB
     int ret;
-#endif
 
     if (!file)
         return Q_ERR_BADF;
@@ -1533,7 +1495,6 @@ int FS_Read(void *buf, size_t len, qhandle_t f)
         return read_phys_file(file, buf, len);
     case FS_PAK:
         return read_pak_file(file, buf, len);
-#if USE_ZLIB
     case FS_GZ:
         ret = gzread(file->zfp, buf, len);
         if (ret < 0) {
@@ -1542,7 +1503,6 @@ int FS_Read(void *buf, size_t len, qhandle_t f)
         return ret;
     case FS_ZIP:
         return read_zip_file(file, buf, len);
-#endif
     default:
         return Q_ERR_NOSYS;
     }
@@ -1586,11 +1546,9 @@ void FS_Flush(qhandle_t f)
     case FS_REAL:
         fflush(file->fp);
         break;
-#if USE_ZLIB
     case FS_GZ:
         gzflush(file->zfp, Z_SYNC_FLUSH);
         break;
-#endif
     default:
         break;
     }
@@ -1628,14 +1586,12 @@ int FS_Write(const void *buf, size_t len, qhandle_t f)
             return file->error;
         }
         break;
-#if USE_ZLIB
     case FS_GZ:
         if (gzwrite(file->zfp, buf, len) != len) {
             file->error = Q_ERR_LIBRARY_ERROR;
             return file->error;
         }
         break;
-#endif
     default:
         Com_Error(ERR_FATAL, "%s: bad file type", __func__);
     }
@@ -2146,9 +2102,7 @@ static pack_t *load_pak_file(const char *packfile)
 
         file->filepos = dfile->filepos;
         file->filelen = dfile->filelen;
-#if USE_ZLIB
         file->coherent = true;
-#endif
 
         pack_hash_file(pack, file);
         file++;
@@ -2163,8 +2117,6 @@ fail:
     fclose(fp);
     return NULL;
 }
-
-#if USE_ZLIB
 
 // Locate the central directory of a zipfile (at the end, just before the global comment)
 static unsigned search_central_header(FILE *fp)
@@ -2418,7 +2370,6 @@ fail2:
     fclose(fp);
     return NULL;
 }
-#endif
 
 // this is complicated as we need pakXX.pak loaded first,
 // sorted in numerical order, then the rest of the paks in
@@ -2477,11 +2428,7 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
 
     // add any pack files
     memset(&list, 0, sizeof(list));
-#if USE_ZLIB
     list.filter = ".pak;.pkz";
-#else
-    list.filter = ".pak";
-#endif
     Sys_ListFiles_r(&list, fs_gamedir, 0);
 
     // Can't exit early for game directory
@@ -2497,13 +2444,13 @@ static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
             Com_EPrintf("%s: refusing oversize path\n", __func__);
             continue;
         }
-#if USE_ZLIB
+
         // FIXME: guess packfile type by contents instead?
         if (len > 4 && !Q_stricmp(path + len - 4, ".pkz"))
             pack = load_zip_file(path);
         else
-#endif
             pack = load_pak_file(path);
+
         if (!pack)
             continue;
         search = FS_Malloc(sizeof(searchpath_t) + 1);
@@ -3144,17 +3091,14 @@ static void FS_Path_f(void)
 {
     searchpath_t *s;
     int numFilesInPAK = 0;
-#if USE_ZLIB
     int numFilesInZIP = 0;
-#endif
+
     Com_Printf("Current search path:\n");
     for (s = fs_searchpaths; s; s = s->next) {
         if (s->pack) {
-#if USE_ZLIB
             if (s->pack->type == FS_ZIP)
                 numFilesInZIP += s->pack->num_files;
             else
-#endif
                 numFilesInPAK += s->pack->num_files;
             Com_Printf("%s (%i files)\n", s->pack->filename, s->pack->num_files);
         } else {
@@ -3166,11 +3110,9 @@ static void FS_Path_f(void)
         Com_Printf("%i files in PAK files\n", numFilesInPAK);
     }
 
-#if USE_ZLIB
     if (numFilesInZIP) {
         Com_Printf("%i files in PKZ files\n", numFilesInZIP);
     }
-#endif
 }
 
 #ifdef _DEBUG
@@ -3552,9 +3494,7 @@ void FS_Shutdown(void)
     // free search paths
     free_all_paths();
 
-#if USE_ZLIB
     inflateEnd(&fs_zipstream.stream);
-#endif
 
     Z_LeakTest(TAG_FILESYSTEM);
 

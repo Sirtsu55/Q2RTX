@@ -40,9 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/server.h"
 #include "system/system.h"
 
-#if USE_ZLIB
 #include <zlib.h>
-#endif
 
 //=============================================================================
 
@@ -202,7 +200,6 @@ typedef struct client_s {
     // client flags
     bool            reconnected: 1;
     bool            nodata: 1;
-    bool            has_zlib: 1;
     bool            drop_hack: 1;
 #if USE_ICMP
     bool            unreachable: 1;
@@ -372,9 +369,7 @@ typedef struct server_static_s {
     unsigned        next_entity;    // next state to use
     entity_state_t  *entities;      // [num_entities]
 
-#if USE_ZLIB
     z_stream        z;  // for compressing messages at once
-#endif
 
     unsigned        last_heartbeat;
     unsigned        last_timescale_check;
@@ -477,10 +472,8 @@ addrmatch_t *SV_MatchAddress(list_t *list, netadr_t *address);
 
 int SV_CountClients(void);
 
-#if USE_ZLIB
 voidpf SV_zalloc(voidpf opaque, uInt items, uInt size);
 void SV_zfree(voidpf opaque, voidpf address);
-#endif
 
 void sv_sec_timeout_changed(cvar_t *self);
 void sv_min_timeout_changed(cvar_t *self);

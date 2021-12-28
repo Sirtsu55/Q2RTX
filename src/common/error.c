@@ -39,11 +39,9 @@ static const char *const error_table[] = {
     "Infinite loop avoided",
     "Library error",
     "Out of slots",
-#if USE_ZLIB
     "Inflate failed",
     "Deflate failed",
     "Coherency check failed",
-#endif
 };
 
 static const int num_errors = q_countof(error_table);

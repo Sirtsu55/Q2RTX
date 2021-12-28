@@ -311,7 +311,6 @@ void SV_Multicast(vec3_t origin, multicast_t to)
 static void add_message(client_t *client, byte *data,
                         size_t len, bool reliable);
 
-#if USE_ZLIB
 static size_t max_compressed_len(client_t *client)
 {
     return MAX_MSGLEN - ZPACKET_HEADER;
@@ -319,9 +318,6 @@ static size_t max_compressed_len(client_t *client)
 
 static bool can_compress_message(client_t *client)
 {
-    if (!client->has_zlib)
-        return false;
-
     // compress only sufficiently large layouts
     if (msg_write.cursize < client->netchan->maxpacketlen / 2)
         return false;
@@ -333,9 +329,6 @@ static bool compress_message(client_t *client, int flags)
 {
     byte    buffer[MAX_MSGLEN];
     int     ret, len;
-
-    if (!client->has_zlib)
-        return false;
 
     svs.z.next_in = msg_write.data;
     svs.z.avail_in = msg_write.cursize;
@@ -372,10 +365,6 @@ static bool compress_message(client_t *client, int flags)
     add_message(client, buffer, len, flags & MSG_RELIABLE);
     return true;
 }
-#else
-#define can_compress_message(client)    false
-#define compress_message(client, flags) false
-#endif
 
 /*
 =======================

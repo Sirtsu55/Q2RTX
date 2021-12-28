@@ -399,8 +399,7 @@ void CL_CheckForResend(void)
     }
 
     // add protocol dependent stuff
-    Q_snprintf(tail, sizeof(tail), " %d %d",
-               maxmsglen, USE_ZLIB);
+    Q_snprintf(tail, sizeof(tail), " %d", maxmsglen);
     cls.quakePort = net_qport->integer & 0xff;
 
     Cvar_BitInfo(userinfo, CVAR_USERINFO);
@@ -3221,11 +3220,9 @@ void CL_Init(void)
     CL_InitLocal();
     IN_Init();
 
-#if USE_ZLIB
     if (inflateInit2(&cls.z, -MAX_WBITS) != Z_OK) {
         Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
     }
-#endif
 
     CL_LoadDownloadIgnores();
 
@@ -3268,9 +3265,7 @@ void CL_Shutdown(void)
 
     CL_Disconnect(ERR_FATAL);
 
-#if USE_ZLIB
     inflateEnd(&cls.z);
-#endif
 
     HTTP_Shutdown();
     S_Shutdown();

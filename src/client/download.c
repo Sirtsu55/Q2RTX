@@ -163,9 +163,7 @@ void CL_CleanupDownloads(void)
 
     cls.download.temp[0] = 0;
 
-#if USE_ZLIB
     inflateEnd(&cls.download.z);
-#endif
 }
 
 /*
@@ -325,9 +323,7 @@ static void finish_udp_download(const char *msg)
 
     cls.download.temp[0] = 0;
 
-#if USE_ZLIB
     inflateReset(&cls.download.z);
-#endif
 
     if (msg) {
         Com_Printf("[UDP] %s [%s] [%d remaining file%s]\n",
@@ -355,7 +351,6 @@ static bool write_udp_download(byte *data, int size)
     return true;
 }
 
-#if USE_ZLIB
 // handles both continuous deflate stream for entire download and chunked
 // per-packet streams for compatibility.
 static bool inflate_udp_download(byte *data, int size, int decompressed_size)
@@ -401,9 +396,6 @@ static bool inflate_udp_download(byte *data, int size, int decompressed_size)
 
     return true;
 }
-#else
-#define inflate_udp_download(data, size, decompressed_size)   false
-#endif
 
 /*
 =====================

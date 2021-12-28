@@ -595,7 +595,6 @@ typedef struct {
     int         challenge;
 
     int         maxlength;
-    bool        has_zlib;
 
     int         reserved;   // hidden client slots
     char        reconnect_var[16];
@@ -724,17 +723,6 @@ static bool parse_packet_length(conn_params_t *p)
     // don't allow too small packets
     if (p->maxlength < MIN_PACKETLEN)
         p->maxlength = MIN_PACKETLEN;
-
-    return true;
-}
-
-static bool parse_enhanced_params(conn_params_t *p)
-{
-    char *s;
-
-    // set zlib
-    s = Cmd_Argv(6);
-    p->has_zlib = !*s || atoi(s);
 
     return true;
 }
@@ -933,10 +921,10 @@ static void append_extra_userinfo(conn_params_t *params, char *userinfo)
     Q_snprintf(userinfo + strlen(userinfo) + 1, MAX_INFO_STRING,
                "\\challenge\\%d\\ip\\%s"
                "\\major\\%d"
-               "\\packetlen\\%d\\qport\\%d\\zlib\\%d",
+               "\\packetlen\\%d\\qport\\%d",
                params->challenge, userinfo_ip_string(),
                params->protocol,
-               params->maxlength, params->qport, params->has_zlib);
+               params->maxlength, params->qport);
 }
 
 static void SVC_DirectConnect(void)
@@ -957,8 +945,6 @@ static void SVC_DirectConnect(void)
         return;
     if (!parse_packet_length(&params))
         return;
-    if (!parse_enhanced_params(&params))
-        return;
     if (!parse_userinfo(&params, userinfo))
         return;
 
@@ -976,7 +962,6 @@ static void SVC_DirectConnect(void)
     newcl->number = number;
     newcl->challenge = params.challenge; // save challenge for checksumming
     newcl->protocol = params.protocol;
-    newcl->has_zlib = params.has_zlib;
     newcl->edict = EDICT_NUM(number + 1);
 	newcl->last_valid_cluster = -1;
     strcpy(newcl->reconnect_var, params.reconnect_var);
@@ -1926,7 +1911,6 @@ static void sv_hostname_changed(cvar_t *self)
 }
 #endif
 
-#if USE_ZLIB
 voidpf SV_zalloc(voidpf opaque, uInt items, uInt size)
 {
     return SV_Malloc(items * size);
@@ -1936,7 +1920,6 @@ void SV_zfree(voidpf opaque, voidpf address)
 {
     Z_Free(address);
 }
-#endif
 
 /*
 ===============
@@ -2147,9 +2130,7 @@ void SV_Shutdown(const char *finalmsg, error_type_t type)
     // free server static data
     Z_Free(svs.client_pool);
     Z_Free(svs.entities);
-#if USE_ZLIB
     deflateEnd(&svs.z);
-#endif
     memset(&svs, 0, sizeof(svs));
 
     // reset rate limits
