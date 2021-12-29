@@ -341,7 +341,7 @@ static ioentry_t *os_add_io(qsocket_t fd)
 
     if (i == io_numfds) {
         if (++io_numfds > FD_SETSIZE)
-            Com_Error(ERR_FATAL, "%s: no more space for fd: %" PRIdPTR, __func__, fd);
+            Com_Errorf(ERR_FATAL, "%s: no more space for fd: %" PRIdPTR, __func__, fd);
     }
 
     e->fd = fd;
@@ -360,7 +360,7 @@ static ioentry_t *os_get_io(qsocket_t fd)
             return e;
     }
 
-    Com_Error(ERR_FATAL, "%s: fd not found: %" PRIdPTR, __func__, fd);
+    Com_Errorf(ERR_FATAL, "%s: fd not found: %" PRIdPTR, __func__, fd);
     return NULL;
 }
 
@@ -387,7 +387,7 @@ static void os_net_init(void)
 
     ret = WSAStartup(MAKEWORD(1, 1), &ws);
     if (ret) {
-        Com_Error(ERR_FATAL, "Winsock initialization failed: %s (%d)",
+        Com_Errorf(ERR_FATAL, "Winsock initialization failed: %s (%d)",
                   os_error_string(ret), ret);
     }
 

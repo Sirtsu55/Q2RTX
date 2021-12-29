@@ -36,7 +36,7 @@ static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
 
     // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
     if (frame->numEntities >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: MAX_EDICTS exceeded", __func__);
+        Com_Errorf(ERR_DROP, "%s: MAX_EDICTS exceeded", __func__);
     }
 
     state = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
@@ -87,11 +87,11 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
     while (1) {
         newnum = MSG_ParseEntityBits(&bits);
         if (newnum < 0 || newnum >= MAX_EDICTS) {
-            Com_Error(ERR_DROP, "%s: bad number: %d", __func__, newnum);
+            Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, newnum);
         }
 
         if (msg_read.readcount > msg_read.cursize) {
-            Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+            Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
         }
 
         if (!newnum) {
@@ -121,7 +121,7 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
                 Com_DPrintf("U_REMOVE: oldnum != newnum\n");
             }
             if (!oldframe) {
-                Com_Error(ERR_DROP, "%s: U_REMOVE with NULL oldframe", __func__);
+                Com_Errorf(ERR_DROP, "%s: U_REMOVE with NULL oldframe", __func__);
             }
 
             oldindex++;
@@ -271,10 +271,10 @@ static void CL_ParseFrame(int extrabits)
     length = MSG_ReadByte();
     if (length) {
         if (length < 0 || msg_read.readcount + length > msg_read.cursize) {
-            Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+            Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
         }
         if (length > sizeof(frame.areabits)) {
-            Com_Error(ERR_DROP, "%s: invalid areabits length", __func__);
+            Com_Errorf(ERR_DROP, "%s: invalid areabits length", __func__);
         }
         memcpy(frame.areabits, msg_read.data + msg_read.readcount, length);
         msg_read.readcount += length;
@@ -331,7 +331,7 @@ static void CL_ParseFrame(int extrabits)
 
     if (!frame.ps.fov) {
         // fail out early to prevent spurious errors later
-        Com_Error(ERR_DROP, "%s: bad fov", __func__);
+        Com_Errorf(ERR_DROP, "%s: bad fov", __func__);
     }
 
     if (cls.state < ca_precached)
@@ -360,7 +360,7 @@ static void CL_ParseConfigstring(int index)
     char    *s;
 
     if (index < 0 || index >= MAX_CONFIGSTRINGS) {
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 
     s = cl.configstrings[index];
@@ -391,7 +391,7 @@ static void CL_ParseConfigstring(int index)
 static void CL_ParseBaseline(int index, int bits)
 {
     if (index < 1 || index >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
     if (cl_shownet->integer > 2) {
@@ -446,7 +446,7 @@ static void CL_ParseServerData(void)
 
     // check protocol
     if (cls.serverProtocol != protocol && !cls.demo.playback) {
-        Com_Error(ERR_DROP, "Requested protocol version %d, but server returned %d.",
+        Com_Errorf(ERR_DROP, "Requested protocol version %d, but server returned %d.",
                     cls.serverProtocol, protocol);
     }
 
@@ -645,7 +645,7 @@ static void CL_ParseTEntPacket(void)
         break;
 
     default:
-        Com_Error(ERR_DROP, "%s: bad type", __func__);
+        Com_Errorf(ERR_DROP, "%s: bad type", __func__);
     }
 }
 
@@ -655,7 +655,7 @@ static void CL_ParseMuzzleFlashPacket(int mask)
 
     entity = MSG_ReadShort();
     if (entity < 1 || entity >= MAX_EDICTS)
-        Com_Error(ERR_DROP, "%s: bad entity", __func__);
+        Com_Errorf(ERR_DROP, "%s: bad entity", __func__);
 
     weapon = MSG_ReadByte();
     mz.silenced = weapon & mask;
@@ -669,11 +669,11 @@ static void CL_ParseStartSoundPacket(void)
 
     flags = MSG_ReadByte();
     if ((flags & (SND_ENT | SND_POS)) == 0)
-        Com_Error(ERR_DROP, "%s: neither SND_ENT nor SND_POS set", __func__);
+        Com_Errorf(ERR_DROP, "%s: neither SND_ENT nor SND_POS set", __func__);
 
     snd.index = MSG_ReadByte();
     if (snd.index == -1)
-        Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+        Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
 
     if (flags & SND_VOLUME)
         snd.volume = MSG_ReadByte() / 255.0f;
@@ -690,7 +690,7 @@ static void CL_ParseStartSoundPacket(void)
         channel = MSG_ReadShort();
         entity = channel >> 3;
         if (entity < 0 || entity >= MAX_EDICTS)
-            Com_Error(ERR_DROP, "%s: bad entity: %d", __func__, entity);
+            Com_Errorf(ERR_DROP, "%s: bad entity: %d", __func__, entity);
         snd.entity = entity;
         snd.channel = channel & 7;
     } else {
@@ -896,7 +896,7 @@ static void CL_ParseDownload(int cmd)
     byte *data;
 
     if (!cls.download.temp[0]) {
-        Com_Error(ERR_DROP, "%s: no download requested", __func__);
+        Com_Errorf(ERR_DROP, "%s: no download requested", __func__);
     }
 
     // read the data
@@ -915,11 +915,11 @@ static void CL_ParseDownload(int cmd)
     }
 
     if (size < 0) {
-        Com_Error(ERR_DROP, "%s: bad size: %d", __func__, size);
+        Com_Errorf(ERR_DROP, "%s: bad size: %d", __func__, size);
     }
 
     if (msg_read.readcount + size > msg_read.cursize) {
-        Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+        Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
     }
 
     data = msg_read.data + msg_read.readcount;
@@ -935,18 +935,18 @@ static void CL_ParseZPacket(void)
     int         ret, inlen, outlen;
 
     if (msg_read.data != msg_read_buffer) {
-        Com_Error(ERR_DROP, "%s: recursively entered", __func__);
+        Com_Errorf(ERR_DROP, "%s: recursively entered", __func__);
     }
 
     inlen = MSG_ReadWord();
     outlen = MSG_ReadWord();
 
     if (inlen == -1 || outlen == -1 || msg_read.readcount + inlen > msg_read.cursize) {
-        Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+        Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
     }
 
     if (outlen > MAX_MSGLEN) {
-        Com_Error(ERR_DROP, "%s: invalid output length", __func__);
+        Com_Errorf(ERR_DROP, "%s: invalid output length", __func__);
     }
 
     inflateReset(&cls.z);
@@ -957,7 +957,7 @@ static void CL_ParseZPacket(void)
     cls.z.avail_out = (uInt)outlen;
     ret = inflate(&cls.z, Z_FINISH);
     if (ret != Z_STREAM_END) {
-        Com_Error(ERR_DROP, "%s: inflate() failed with error %d", __func__, ret);
+        Com_Errorf(ERR_DROP, "%s: inflate() failed with error %d", __func__, ret);
     }
 
     msg_read.readcount += inlen;
@@ -1009,7 +1009,7 @@ void CL_ParseServerMessage(void)
 //
     while (1) {
         if (msg_read.readcount > msg_read.cursize) {
-            Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
+            Com_Errorf(ERR_DROP, "%s: read past end of server message", __func__);
         }
 
         readcount = msg_read.readcount;
@@ -1031,7 +1031,7 @@ void CL_ParseServerMessage(void)
         // other commands
         switch (cmd) {
         default:
-            Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
+            Com_Errorf(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
             break;
 
         case svc_nop:
@@ -1166,7 +1166,7 @@ void CL_SeekDemoMessage(void)
 //
     while (1) {
         if (msg_read.readcount > msg_read.cursize) {
-            Com_Error(ERR_DROP, "%s: read past end of server message", __func__);
+            Com_Errorf(ERR_DROP, "%s: read past end of server message", __func__);
         }
 
         if ((cmd = MSG_ReadByte()) == -1) {
@@ -1186,7 +1186,7 @@ void CL_SeekDemoMessage(void)
         // other commands
         switch (cmd) {
         default:
-            Com_Error(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
+            Com_Errorf(ERR_DROP, "%s: illegible server message: %d", __func__, cmd);
             break;
 
         case svc_nop:

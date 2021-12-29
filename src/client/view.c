@@ -162,7 +162,7 @@ void V_AddLightStyle(int style, vec4_t value)
     lightstyle_t    *ls;
 
     if (style < 0 || style >= MAX_LIGHTSTYLES)
-        Com_Error(ERR_DROP, "Bad light style %i", style);
+        Com_Errorf(ERR_DROP, "Bad light style %i", style);
     ls = &r_lightstyles[style];
 
     //ls->white = r+g+b;
@@ -375,7 +375,7 @@ float V_CalcFov(float fov_x, float width, float height)
     float    x;
 
     if (fov_x < 1 || fov_x > 179)
-        Com_Error(ERR_DROP, "%s: bad fov: %f", __func__, fov_x);
+        Com_Errorf(ERR_DROP, "%s: bad fov: %f", __func__, fov_x);
 
     x = width / tan(fov_x * (M_PI / 360));
 

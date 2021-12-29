@@ -57,7 +57,7 @@ static void tty_fatal_error(const char *what)
     tty_enabled = false;
     tty_input = NULL;
 
-    Com_Error(ERR_FATAL, "%s: %s() failed: %s",
+    Com_Errorf(ERR_FATAL, "%s: %s() failed: %s",
               __func__, what, strerror(errno));
 }
 
@@ -724,13 +724,7 @@ void Sys_SetConsoleColor(color_index_t color)
 
 void Sys_Printf(const char *fmt, ...)
 {
-    va_list     argptr;
-    char        msg[MAXPRINTMSG];
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
-
+    Com_VarArgs(MAXPRINTMSG);
     Sys_ConsoleOutput(msg);
 }
 

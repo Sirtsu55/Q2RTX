@@ -623,7 +623,7 @@ void Key_Event(unsigned key, bool down, unsigned time)
     char    cmd[MAX_STRING_CHARS];
 
     if (key >= 256) {
-        Com_Error(ERR_FATAL, "%s: bad key", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad key", __func__);
     }
 
     Com_DDDPrintf("%u: %c%s\n", time,

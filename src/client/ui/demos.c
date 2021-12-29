@@ -346,7 +346,7 @@ static void BuildList(void)
 
     // format our extra status line
     i = m_demos.list.numItems - m_demos.numDirs;
-    len = Q_scnprintf(m_demos.status, sizeof(m_demos.status),
+    len = Q_snprintf(m_demos.status, sizeof(m_demos.status),
                       "%d demo%s, ", i, i == 1 ? "" : "s");
     Com_FormatSizeLong(m_demos.status + len, sizeof(m_demos.status) - len,
                        m_demos.total_bytes);

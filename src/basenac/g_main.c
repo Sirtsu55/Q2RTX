@@ -77,7 +77,6 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo);
 void ClientDisconnect(edict_t *ent);
 void ClientBegin(edict_t *ent);
 void ClientCommand(edict_t *ent);
-void RunEntity(edict_t *ent);
 void WriteGame(const char *filename, qboolean autosave);
 void ReadGame(const char *filename);
 void WriteLevel(const char *filename);
@@ -91,7 +90,7 @@ void G_RunFrame(void);
 
 void ShutdownGame(void)
 {
-    gi.dprintf("==== ShutdownGame ====\n");
+    Com_Print("==== ShutdownGame ====\n");
 
     gi.FreeTags(TAG_LEVEL);
     gi.FreeTags(TAG_GAME);
@@ -108,7 +107,7 @@ is loaded.
 */
 void InitGame(void)
 {
-    gi.dprintf("==== InitGame ====\n");
+    Com_Print("==== InitGame ====\n");
 
     Q_srand(time(NULL));
 
@@ -224,36 +223,48 @@ q_exported game_export_t *GetGameAPI(game_import_t *import)
     return &globals;
 }
 
-#ifndef GAME_HARD_LINKED
-// this is only here so the functions in q_shared.c can link
-void Com_LPrintf(print_type_t type, const char *fmt, ...)
+void SV_CenterPrint(edict_t *ent, const char *message)
 {
-    va_list     argptr;
-    char        text[MAX_STRING_CHARS];
-
-    if (type == PRINT_DEVELOPER) {
-        return;
-    }
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(text, sizeof(text), fmt, argptr);
-    va_end(argptr);
-
-    gi.dprintf("%s", text);
+    gi.centerprint(ent, message);
 }
 
-void Com_Error(error_type_t type, const char *fmt, ...)
+void SV_CenterPrintf(edict_t *ent, const char *fmt, ...)
 {
-    va_list     argptr;
-    char        text[MAX_STRING_CHARS];
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(text, sizeof(text), fmt, argptr);
-    va_end(argptr);
-
-    gi.error("%s", text);
+    Com_VarArgs(MAXPRINTMSG);
+    gi.centerprint(ent, msg);
 }
-#endif
+
+void SV_BroadcastPrint(client_print_type_t level, const char *message)
+{
+    gi.bprint(level, message);
+}
+
+void SV_BroadcastPrintf(client_print_type_t level, const char *fmt, ...)
+{
+    Com_VarArgs(MAXPRINTMSG);
+    gi.bprint(level, msg);
+}
+
+void SV_ClientPrint(edict_t *ent, client_print_type_t level, const char *message)
+{
+    gi.cprint(ent, level, message);
+}
+
+void SV_ClientPrintf(edict_t *ent, client_print_type_t level, const char *fmt, ...)
+{
+    Com_VarArgs(MAXPRINTMSG);
+    gi.cprint(ent, level, msg);
+}
+
+void Com_LPrint(print_type_t type, const char *message)
+{
+    gi.dprint(type, message);
+}
+
+void Com_Error(error_type_t type, const char *message)
+{
+    gi.error(type, message);
+}
 
 //======================================================================
 
@@ -400,7 +411,7 @@ void CheckDMRules(void)
 
     if (timelimit->value) {
         if (level.time >= timelimit->value * 60) {
-            gi.bprintf(PRINT_HIGH, "Timelimit hit.\n");
+            SV_BroadcastPrint(PRINT_HIGH, "Timelimit hit.\n");
             EndDMLevel();
             return;
         }
@@ -413,7 +424,7 @@ void CheckDMRules(void)
                 continue;
 
             if (cl->resp.score >= fraglimit->value) {
-                gi.bprintf(PRINT_HIGH, "Fraglimit hit.\n");
+                SV_BroadcastPrint(PRINT_HIGH, "Fraglimit hit.\n");
                 EndDMLevel();
                 return;
             }

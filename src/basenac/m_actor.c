@@ -237,7 +237,7 @@ void actor_pain(edict_t *self, edict_t *other, float kick, int damage)
         else
             self->monsterinfo.currentmove = &actor_move_taunt;
         name = actor_names[(self - g_edicts) % MAX_ACTOR_NAMES];
-        gi.cprintf(other, PRINT_CHAT, "%s: %s!\n", name, messages[Q_rand() % 3]);
+        SV_ClientPrintf(other, PRINT_CHAT, "%s: %s!\n", name, messages[Q_rand() % 3]);
         return;
     }
 
@@ -379,7 +379,7 @@ void actor_use(edict_t *self, edict_t *other, edict_t *activator)
 
     self->goalentity = self->movetarget = G_PickTarget(self->target);
     if ((!self->movetarget) || (strcmp(self->movetarget->classname, "target_actor") != 0)) {
-        gi.dprintf("%s has bad target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
+        Com_WPrintf("%s has bad target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
         self->target = NULL;
         self->monsterinfo.pause_framenum = INT_MAX;
         self->monsterinfo.stand(self);
@@ -404,13 +404,13 @@ void SP_misc_actor(edict_t *self)
     }
 
     if (!self->targetname) {
-        gi.dprintf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
+        Com_WPrintf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
         G_FreeEdict(self);
         return;
     }
 
     if (!self->target) {
-        gi.dprintf("%s with no target at %s\n", self->classname, vtos(self->s.origin));
+        Com_WPrintf("%s with no target at %s\n", self->classname, vtos(self->s.origin));
         G_FreeEdict(self);
         return;
     }
@@ -484,7 +484,7 @@ void target_actor_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
             ent = &g_edicts[n];
             if (!ent->inuse)
                 continue;
-            gi.cprintf(ent, PRINT_CHAT, "%s: %s\n", actor_names[(other - g_edicts) % MAX_ACTOR_NAMES], self->message);
+            SV_ClientPrintf(ent, PRINT_CHAT, "%s: %s\n", actor_names[(other - g_edicts) % MAX_ACTOR_NAMES], self->message);
         }
     }
 
@@ -541,7 +541,7 @@ void target_actor_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
 void SP_target_actor(edict_t *self)
 {
     if (!self->targetname)
-        gi.dprintf("%s with no targetname at %s\n", self->classname, vtos(self->s.origin));
+        Com_WPrintf("%s with no targetname at %s\n", self->classname, vtos(self->s.origin));
 
     self->solid = SOLID_TRIGGER;
     self->touch = target_actor_touch;

@@ -45,9 +45,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define COM_HISTORYFILE_NAME    "." APPLICATION ".conhistory"
 #define COM_DEMOCACHE_NAME      "." APPLICATION ".democache"
 
-#define MAXPRINTMSG     4096
-#define MAXERRORMSG     1024
-
 #define CONST_STR_LEN(x) x, x ? sizeof(x) - 1 : 0
 
 #define STRINGIFY2(x)   #x

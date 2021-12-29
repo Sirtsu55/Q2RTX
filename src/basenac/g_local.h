@@ -1097,3 +1097,11 @@ struct edict_s {
     monsterinfo_t   monsterinfo;
 };
 
+// API wrappers
+
+void SV_CenterPrint(edict_t *ent, const char *message);
+void SV_CenterPrintf(edict_t *ent, const char *fmt, ...);
+void SV_BroadcastPrint(client_print_type_t level, const char *message);
+void SV_BroadcastPrintf(client_print_type_t level, const char *fmt, ...);
+void SV_ClientPrint(edict_t *ent, client_print_type_t level, const char *message);
+void SV_ClientPrintf(edict_t *ent, client_print_type_t level, const char *fmt, ...);

@@ -139,7 +139,7 @@ int FS_Read(void *buffer, size_t len, qhandle_t f);
 int FS_Write(const void *buffer, size_t len, qhandle_t f);
 // properly handles partial reads
 
-int FS_FPrintf(qhandle_t f, const char *format, ...) q_printf(2, 3);
+int FS_FPrintf(qhandle_t f, const char *fmt, ...) q_printf(2, 3);
 int FS_ReadLine(qhandle_t f, char *buffer, size_t size);
 
 void    FS_Flush(qhandle_t f);

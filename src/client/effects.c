@@ -92,7 +92,7 @@ void CL_SetLightStyle(int index, const char *s)
     ls = &cl_lightstyles[index];
     ls->length = strlen(s);
     if (ls->length > MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize style", __func__);
+        Com_Errorf(ERR_DROP, "%s: oversize style", __func__);
     }
 
     for (i = 0; i < ls->length; i++) {

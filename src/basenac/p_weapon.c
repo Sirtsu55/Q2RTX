@@ -298,12 +298,12 @@ void Use_Weapon(edict_t *ent, gitem_t *item)
         ammo_index = ITEM_INDEX(ammo_item);
 
         if (!ent->client->pers.inventory[ammo_index]) {
-            gi.cprintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+            SV_ClientPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
             return;
         }
 
         if (ent->client->pers.inventory[ammo_index] < item->quantity) {
-            gi.cprintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+            SV_ClientPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
             return;
         }
     }
@@ -327,7 +327,7 @@ void Drop_Weapon(edict_t *ent, gitem_t *item)
     index = ITEM_INDEX(item);
     // see if we're already using it
     if (((item == ent->client->pers.weapon) || (item == ent->client->newweapon)) && (ent->client->pers.inventory[index] == 1)) {
-        gi.cprintf(ent, PRINT_HIGH, "Can't drop current weapon\n");
+        SV_ClientPrint(ent, PRINT_HIGH, "Can't drop current weapon\n");
         return;
     }
 

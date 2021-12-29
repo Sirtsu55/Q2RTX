@@ -115,25 +115,19 @@ Sends text across to be displayed if the level passes.
 */
 void SV_ClientPrintf(client_t *client, int level, const char *fmt, ...)
 {
-    va_list     argptr;
-    char        string[MAX_STRING_CHARS];
-    size_t      len;
-
     if (level < client->messagelevel)
         return;
 
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(string, sizeof(string), fmt, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAX_STRING_CHARS);
 
-    if (len >= sizeof(string)) {
+    if (len >= sizeof(msg)) {
         Com_WPrintf("%s: overflow\n", __func__);
         return;
     }
 
     MSG_WriteByte(svc_print);
     MSG_WriteByte(level);
-    MSG_WriteData(string, len + 1);
+    MSG_WriteData(msg, len + 1);
 
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 }
@@ -147,23 +141,18 @@ Sends text to all active clients.
 */
 void SV_BroadcastPrintf(int level, const char *fmt, ...)
 {
-    va_list     argptr;
-    char        string[MAX_STRING_CHARS];
     client_t    *client;
-    size_t      len;
 
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(string, sizeof(string), fmt, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAX_STRING_CHARS);
 
-    if (len >= sizeof(string)) {
+    if (len >= sizeof(msg)) {
         Com_WPrintf("%s: overflow\n", __func__);
         return;
     }
 
     MSG_WriteByte(svc_print);
     MSG_WriteByte(level);
-    MSG_WriteData(string, len + 1);
+    MSG_WriteData(msg, len + 1);
 
     FOR_EACH_CLIENT(client) {
         if (client->state != cs_spawned)
@@ -178,21 +167,15 @@ void SV_BroadcastPrintf(int level, const char *fmt, ...)
 
 void SV_ClientCommand(client_t *client, const char *fmt, ...)
 {
-    va_list     argptr;
-    char        string[MAX_STRING_CHARS];
-    size_t      len;
+    Com_VarArgs(MAX_STRING_CHARS);
 
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(string, sizeof(string), fmt, argptr);
-    va_end(argptr);
-
-    if (len >= sizeof(string)) {
+    if (len >= sizeof(msg)) {
         Com_WPrintf("%s: overflow\n", __func__);
         return;
     }
 
     MSG_WriteByte(svc_stufftext);
-    MSG_WriteData(string, len + 1);
+    MSG_WriteData(msg, len + 1);
 
     SV_ClientAddMessage(client, MSG_RELIABLE | MSG_CLEAR);
 }
@@ -206,22 +189,17 @@ Sends command to all active clients.
 */
 void SV_BroadcastCommand(const char *fmt, ...)
 {
-    va_list     argptr;
-    char        string[MAX_STRING_CHARS];
     client_t    *client;
-    size_t      len;
 
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(string, sizeof(string), fmt, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAX_STRING_CHARS);
 
-    if (len >= sizeof(string)) {
+    if (len >= sizeof(msg)) {
         Com_WPrintf("%s: overflow\n", __func__);
         return;
     }
 
     MSG_WriteByte(svc_stufftext);
-    MSG_WriteData(string, len + 1);
+    MSG_WriteData(msg, len + 1);
 
     FOR_EACH_CLIENT(client) {
         SV_ClientAddMessage(client, MSG_RELIABLE);
@@ -252,7 +230,7 @@ void SV_Multicast(vec3_t origin, multicast_t to)
     int         flags = 0;
 
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
     }
 
     switch (to) {
@@ -278,7 +256,7 @@ void SV_Multicast(vec3_t origin, multicast_t to)
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PVS2);
         break;
     default:
-        Com_Error(ERR_DROP, "SV_Multicast: bad to: %i", to);
+        Com_Errorf(ERR_DROP, "SV_Multicast: bad to: %i", to);
     }
 
     // send the data to all relevent clients
@@ -411,7 +389,7 @@ static inline void free_msg_packet(client_t *client, message_packet_t *msg)
 
     if (msg->cursize > MSG_TRESHOLD) {
         if (msg->cursize > client->msg_dynamic_bytes) {
-            Com_Error(ERR_FATAL, "%s: bad packet size", __func__);
+            Com_Errorf(ERR_FATAL, "%s: bad packet size", __func__);
         }
         client->msg_dynamic_bytes -= msg->cursize;
         Z_Free(msg);
@@ -452,7 +430,7 @@ static void add_msg_packet(client_t     *client,
 
     if (len > MSG_TRESHOLD) {
         if (len > MAX_MSGLEN) {
-            Com_Error(ERR_FATAL, "%s: oversize packet", __func__);
+            Com_Errorf(ERR_FATAL, "%s: oversize packet", __func__);
         }
         if (client->msg_dynamic_bytes + len > MAX_MSGLEN) {
             Com_WPrintf("%s: %s: out of dynamic memory\n",

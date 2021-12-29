@@ -235,7 +235,7 @@ void MSG_WriteBits(int value, int bits)
     size_t bitpos;
 
     if (bits == 0 || bits < -31 || bits > 32) {
-        Com_Error(ERR_FATAL, "MSG_WriteBits: bad bits: %d", bits);
+        Com_Errorf(ERR_FATAL, "MSG_WriteBits: bad bits: %d", bits);
     }
 
     if (msg_write.maxsize - msg_write.cursize < 4) {
@@ -382,10 +382,10 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
 
     if (!to) {
         if (!from)
-            Com_Error(ERR_DROP, "%s: NULL", __func__);
+            Com_Errorf(ERR_DROP, "%s: NULL", __func__);
 
         if (from->number < 1 || from->number >= MAX_EDICTS)
-            Com_Error(ERR_DROP, "%s: bad number: %d", __func__, from->number);
+            Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, from->number);
 
         uint32_t bits = U_REMOVE;
         if (from->number & 0xff00)
@@ -404,7 +404,7 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
     }
 
     if (to->number < 1 || to->number >= MAX_EDICTS)
-        Com_Error(ERR_DROP, "%s: bad number: %d", __func__, to->number);
+        Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, to->number);
 
     if (!from)
         from = &nullEntityState;
@@ -642,7 +642,7 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
     int     statbits;
 
     if (!to)
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Errorf(ERR_DROP, "%s: NULL", __func__);
 
     if (!from)
         from = &nullPlayerState;
@@ -839,7 +839,7 @@ byte *MSG_ReadData(size_t len)
 
     if (msg_read.readcount > msg_read.cursize) {
         if (!msg_read.allowunderflow) {
-            Com_Error(ERR_DROP, "%s: read past end of message", __func__);
+            Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
         }
         return NULL;
     }
@@ -1001,7 +1001,7 @@ int MSG_ReadBits(int bits)
     bool sgn;
 
     if (bits == 0 || bits < -31 || bits > 32) {
-        Com_Error(ERR_FATAL, "MSG_ReadBits: bad bits: %d", bits);
+        Com_Errorf(ERR_FATAL, "MSG_ReadBits: bad bits: %d", bits);
     }
 
     bitpos = msg_read.bitpos;
@@ -1161,11 +1161,11 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
                           msgEsFlags_t   flags)
 {
     if (!to) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Errorf(ERR_DROP, "%s: NULL", __func__);
     }
 
     if (number < 1 || number >= MAX_EDICTS) {
-        Com_Error(ERR_DROP, "%s: bad entity number: %d", __func__, number);
+        Com_Errorf(ERR_DROP, "%s: bad entity number: %d", __func__, number);
     }
 
     // set everything to the state we are delta'ing from
@@ -1277,7 +1277,7 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
     int         statbits;
 
     if (!to) {
-        Com_Error(ERR_DROP, "%s: NULL", __func__);
+        Com_Errorf(ERR_DROP, "%s: NULL", __func__);
     }
 
     // clear to old value before delta parsing

@@ -289,7 +289,7 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker)
             }
         }
         if (message) {
-            gi.bprintf(PRINT_MEDIUM, "%s %s.\n", self->client->pers.netname, message);
+            SV_BroadcastPrintf(PRINT_MEDIUM, "%s %s.\n", self->client->pers.netname, message);
             if (deathmatch->value)
                 self->client->resp.score--;
             self->enemy = NULL;
@@ -369,7 +369,7 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker)
                 break;
             }
             if (message) {
-                gi.bprintf(PRINT_MEDIUM, "%s %s %s%s\n", self->client->pers.netname, message, attacker->client->pers.netname, message2);
+                SV_BroadcastPrintf(PRINT_MEDIUM, "%s %s %s%s\n", self->client->pers.netname, message, attacker->client->pers.netname, message2);
                 if (deathmatch->value) {
                     if (ff)
                         attacker->client->resp.score--;
@@ -381,7 +381,7 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker)
         }
     }
 
-    gi.bprintf(PRINT_MEDIUM, "%s died.\n", self->client->pers.netname);
+    SV_BroadcastPrintf(PRINT_MEDIUM, "%s died.\n", self->client->pers.netname);
     if (deathmatch->value)
         self->client->resp.score--;
 }
@@ -853,7 +853,7 @@ void    SelectSpawnPoint(edict_t *ent, vec3_t origin, vec3_t angles)
                 spot = G_Find(spot, FOFS(classname), "info_player_start");
             }
             if (!spot)
-                gi.error("Couldn't find spawn point %s", game.spawnpoint);
+                Com_Errorf(ERR_DROP, "Couldn't find spawn point %s", game.spawnpoint);
         }
     }
 
@@ -976,7 +976,7 @@ void spectator_respawn(edict_t *ent)
         if (*spectator_password->string &&
             strcmp(spectator_password->string, "none") &&
             strcmp(spectator_password->string, value)) {
-            gi.cprintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
+            SV_ClientPrint(ent, PRINT_HIGH, "Spectator password incorrect.\n");
             ent->client->pers.spectator = false;
             gi.WriteByte(svc_stufftext);
             gi.WriteString("spectator 0\n");
@@ -990,7 +990,7 @@ void spectator_respawn(edict_t *ent)
                 numspec++;
 
         if (numspec >= maxspectators->value) {
-            gi.cprintf(ent, PRINT_HIGH, "Server spectator limit is full.");
+            SV_ClientPrint(ent, PRINT_HIGH, "Server spectator limit is full.");
             ent->client->pers.spectator = false;
             // reset his spectator var
             gi.WriteByte(svc_stufftext);
@@ -1004,7 +1004,7 @@ void spectator_respawn(edict_t *ent)
         char *value = Info_ValueForKey(ent->client->pers.userinfo, "password");
         if (*password->string && strcmp(password->string, "none") &&
             strcmp(password->string, value)) {
-            gi.cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
+            SV_ClientPrint(ent, PRINT_HIGH, "Password incorrect.\n");
             ent->client->pers.spectator = true;
             gi.WriteByte(svc_stufftext);
             gi.WriteString("spectator 1\n");
@@ -1035,9 +1035,9 @@ void spectator_respawn(edict_t *ent)
     ent->client->respawn_framenum = level.framenum;
 
     if (ent->client->pers.spectator)
-        gi.bprintf(PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
+        SV_BroadcastPrintf(PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
     else
-        gi.bprintf(PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
+        SV_BroadcastPrintf(PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
 }
 
 //==============================================================
@@ -1225,7 +1225,7 @@ void ClientBeginDeathmatch(edict_t *ent)
         gi.multicast(ent->s.origin, MULTICAST_PVS);
     }
 
-    gi.bprintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+    SV_BroadcastPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
     // make sure all view stuff is valid
     ClientEndServerFrame(ent);
@@ -1277,7 +1277,7 @@ void ClientBegin(edict_t *ent)
             gi.WriteByte(MZ_LOGIN);
             gi.multicast(ent->s.origin, MULTICAST_PVS);
 
-            gi.bprintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+            SV_BroadcastPrintf(PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
         }
     }
 
@@ -1417,7 +1417,7 @@ qboolean ClientConnect(edict_t *ent, char *userinfo)
     ClientUserinfoChanged(ent, userinfo);
 
     if (game.maxclients > 1)
-        gi.dprintf("%s connected\n", ent->client->pers.netname);
+        Com_Printf("%s connected\n", ent->client->pers.netname);
 
     ent->svflags = 0; // make sure we start with known default
     ent->client->pers.connected = true;
@@ -1439,7 +1439,7 @@ void ClientDisconnect(edict_t *ent)
     if (!ent->client)
         return;
 
-    gi.bprintf(PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
+    SV_BroadcastPrintf(PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 
     // send effect
     if (ent->inuse) {

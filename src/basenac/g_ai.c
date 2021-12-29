@@ -348,7 +348,7 @@ void FoundTarget(edict_t *self)
     if (!self->movetarget) {
         self->goalentity = self->movetarget = self->enemy;
         HuntTarget(self);
-        gi.dprintf("%s at %s, combattarget %s not found\n", self->classname, vtos(self->s.origin), self->combattarget);
+        Com_WPrintf("%s at %s, combattarget %s not found\n", self->classname, vtos(self->s.origin), self->combattarget);
         return;
     }
 

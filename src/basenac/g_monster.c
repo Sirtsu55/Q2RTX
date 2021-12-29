@@ -525,7 +525,7 @@ bool monster_start(edict_t *self)
     if (st.item) {
         self->item = FindItemByClassname(st.item);
         if (!self->item)
-            gi.dprintf("%s at %s has bad item: %s\n", self->classname, vtos(self->s.origin), st.item);
+            Com_WPrintf("%s at %s has bad item: %s\n", self->classname, vtos(self->s.origin), st.item);
     }
 
     // randomize what frame they start on
@@ -560,7 +560,7 @@ void monster_start_go(edict_t *self)
             }
         }
         if (notcombat && self->combattarget)
-            gi.dprintf("%s at %s has target with mixed types\n", self->classname, vtos(self->s.origin));
+            Com_WPrintf("%s at %s has target with mixed types\n", self->classname, vtos(self->s.origin));
         if (fixup)
             self->target = NULL;
     }
@@ -572,7 +572,7 @@ void monster_start_go(edict_t *self)
         target = NULL;
         while ((target = G_Find(target, FOFS(targetname), self->combattarget)) != NULL) {
             if (strcmp(target->classname, "point_combat") != 0) {
-                gi.dprintf("%s at (%i %i %i) has a bad combattarget %s : %s at (%i %i %i)\n",
+                Com_WPrintf("%s at (%i %i %i) has a bad combattarget %s : %s at (%i %i %i)\n",
                            self->classname, (int)self->s.origin[0], (int)self->s.origin[1], (int)self->s.origin[2],
                            self->combattarget, target->classname, (int)target->s.origin[0], (int)target->s.origin[1],
                            (int)target->s.origin[2]);
@@ -583,7 +583,7 @@ void monster_start_go(edict_t *self)
     if (self->target) {
         self->goalentity = self->movetarget = G_PickTarget(self->target);
         if (!self->movetarget) {
-            gi.dprintf("%s can't find target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
+            Com_WPrintf("%s can't find target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
             self->target = NULL;
             self->monsterinfo.pause_framenum = INT_MAX;
             self->monsterinfo.stand(self);
@@ -614,7 +614,7 @@ void walkmonster_start_go(edict_t *self)
 
         if (self->groundentity)
             if (!M_walkmove(self, 0, 0))
-                gi.dprintf("%s in solid at %s\n", self->classname, vtos(self->s.origin));
+                Com_WPrintf("%s in solid at %s\n", self->classname, vtos(self->s.origin));
     }
 
     if (!self->yaw_speed)
@@ -637,7 +637,7 @@ void walkmonster_start(edict_t *self)
 void flymonster_start_go(edict_t *self)
 {
     if (!M_walkmove(self, 0, 0))
-        gi.dprintf("%s in solid at %s\n", self->classname, vtos(self->s.origin));
+        Com_WPrintf("%s in solid at %s\n", self->classname, vtos(self->s.origin));
 
     if (!self->yaw_speed)
         self->yaw_speed = 10;

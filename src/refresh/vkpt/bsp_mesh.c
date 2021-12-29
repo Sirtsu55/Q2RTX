@@ -1835,7 +1835,7 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 
 	if (wm->num_clusters + 1 >= MAX_LIGHT_LISTS)
 	{
-		Com_Error(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
+		Com_Errorf(ERR_FATAL, "The BSP model has too many clusters (%d)", wm->num_clusters);
 	}
 
 	wm->num_primitives_allocated = count_triangles(bsp);

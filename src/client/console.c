@@ -652,12 +652,7 @@ bypassing system console and logfiles
 */
 void Con_Printf(const char *fmt, ...)
 {
-    va_list     argptr;
-    char        msg[MAXPRINTMSG];
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAXPRINTMSG);
 
     Con_Print(msg);
 }
@@ -679,7 +674,7 @@ void Con_RegisterMedia(void)
             con.charsetImage = R_RegisterImage("conchars", IT_FONT, IF_PERMANENT | IF_SRGB, &err);
         }
         if (!con.charsetImage) {
-            Com_Error(ERR_FATAL, "Couldn't load pics/conchars.pcx: %s", Q_ErrorString(err));
+            Com_Errorf(ERR_FATAL, "Couldn't load pics/conchars.pcx: %s", Q_ErrorString(err));
         }
     }
 

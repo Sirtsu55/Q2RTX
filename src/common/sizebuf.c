@@ -50,20 +50,20 @@ void *SZ_GetSpace(sizebuf_t *buf, size_t len)
     void    *data;
 
     if (buf->cursize > buf->maxsize) {
-        Com_Error(ERR_FATAL,
+        Com_Errorf(ERR_FATAL,
                   "%s: %#x: already overflowed",
                   __func__, buf->tag);
     }
 
     if (len > buf->maxsize - buf->cursize) {
         if (len > buf->maxsize) {
-            Com_Error(ERR_FATAL,
+            Com_Errorf(ERR_FATAL,
                       "%s: %#x: %zu is > full buffer size %zu",
                       __func__, buf->tag, len, buf->maxsize);
         }
 
         if (!buf->allowoverflow) {
-            Com_Error(ERR_FATAL,
+            Com_Errorf(ERR_FATAL,
                       "%s: %#x: overflow without allowoverflow set",
                       __func__, buf->tag);
         }

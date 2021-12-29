@@ -48,7 +48,7 @@ static int PF_FindIndex(const char *name, int start, int max, const char *func)
     }
 
     if (i == max) {
-        Com_Error(ERR_DROP, "%s(%s): overflow", func, name);
+        Com_Errorf(ERR_DROP, "%s(%s): overflow", func, name);
     }
 
     PF_configstring(i + start, name);
@@ -134,33 +134,26 @@ PF_bprintf
 Sends text to all active clients.
 =================
 */
-static void PF_bprintf(int level, const char *fmt, ...)
+static void PF_bprint(client_print_type_t level, const char *message)
 {
-    va_list     argptr;
-    char        string[MAX_STRING_CHARS];
     client_t    *client;
-    size_t      len;
     int         i;
-
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(string, sizeof(string), fmt, argptr);
-    va_end(argptr);
-
-    if (len >= sizeof(string)) {
-        Com_WPrintf("%s: overflow\n", __func__);
-        return;
-    }
+    size_t      len = strlen(message);
 
     MSG_WriteByte(svc_print);
     MSG_WriteByte(level);
-    MSG_WriteData(string, len + 1);
+    MSG_WriteData(message, len + 1);
 
     // echo to console
     if (COM_DEDICATED) {
+        static char msg[MAXPRINTMSG];
+        Q_strlcpy(msg, message, sizeof(msg));
+
         // mask off high bits
         for (i = 0; i < len; i++)
-            string[i] &= 127;
-        Com_Printf("%s", string);
+            msg[i] &= 127;
+
+        Com_Print(msg);
     }
 
     FOR_EACH_CLIENT(client) {
@@ -176,21 +169,14 @@ static void PF_bprintf(int level, const char *fmt, ...)
 
 /*
 ===============
-PF_dprintf
+PF_dprint
 
 Debug print to server console.
 ===============
 */
-static void PF_dprintf(const char *fmt, ...)
+static void PF_dprint(print_type_t type, const char *message)
 {
-    char        msg[MAXPRINTMSG];
-    va_list     argptr;
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
-
-    Com_Printf("%s", msg);
+    Com_LPrint(type, message);
 }
 
 /*
@@ -200,31 +186,20 @@ PF_cprintf
 Print to a single client if the level passes.
 ===============
 */
-static void PF_cprintf(edict_t *ent, int level, const char *fmt, ...)
+static void PF_cprint(edict_t *ent, client_print_type_t level, const char *message)
 {
-    char        msg[MAX_STRING_CHARS];
-    va_list     argptr;
     int         clientNum;
-    size_t      len;
     client_t    *client;
-
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
-
-    if (len >= sizeof(msg)) {
-        Com_WPrintf("%s: overflow\n", __func__);
-        return;
-    }
+    size_t len = strlen(message);
 
     if (!ent) {
-        Com_LPrintf(level == PRINT_CHAT ? PRINT_TALK : PRINT_ALL, "%s", msg);
+        Com_WPrintf("NULL ent; Use Com_LPrint/Com_Print to print to console: %s", message);
         return;
     }
 
     clientNum = NUM_FOR_EDICT(ent) - 1;
     if (clientNum < 0 || clientNum >= sv_maxclients->integer) {
-        Com_Error(ERR_DROP, "%s to a non-client %d", __func__, clientNum);
+        Com_Errorf(ERR_DROP, "%s to a non-client %d", __func__, clientNum);
     }
 
     client = svs.client_pool + clientNum;
@@ -235,7 +210,7 @@ static void PF_cprintf(edict_t *ent, int level, const char *fmt, ...)
 
     MSG_WriteByte(svc_print);
     MSG_WriteByte(level);
-    MSG_WriteData(msg, len + 1);
+    MSG_WriteData(message, len + 1);
 
     if (level >= client->messagelevel) {
         SV_ClientAddMessage(client, MSG_RELIABLE);
@@ -251,12 +226,9 @@ PF_centerprintf
 Centerprint to a single client.
 ===============
 */
-static void PF_centerprintf(edict_t *ent, const char *fmt, ...)
+static void PF_centerprint(edict_t *ent, const char *message)
 {
-    char        msg[MAX_STRING_CHARS];
-    va_list     argptr;
     int         n;
-    size_t      len;
 
     if (!ent) {
         return;
@@ -268,38 +240,12 @@ static void PF_centerprintf(edict_t *ent, const char *fmt, ...)
         return;
     }
 
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
-
-    if (len >= sizeof(msg)) {
-        Com_WPrintf("%s: overflow\n", __func__);
-        return;
-    }
+    size_t len = strlen(message);
 
     MSG_WriteByte(svc_centerprint);
-    MSG_WriteData(msg, len + 1);
+    MSG_WriteData(message, len + 1);
 
     PF_Unicast(ent, true);
-}
-
-/*
-===============
-PF_error
-
-Abort the server with a game error
-===============
-*/
-static q_noreturn void PF_error(const char *fmt, ...)
-{
-    char        msg[MAXERRORMSG];
-    va_list     argptr;
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
-
-    Com_Error(ERR_DROP, "Game Error: %s", msg);
 }
 
 /*
@@ -341,7 +287,7 @@ static void PF_configstring(int index, const char *val)
     char *dst;
 
     if (index < 0 || index >= MAX_CONFIGSTRINGS)
-        Com_Error(ERR_DROP, "%s: bad index: %d", __func__, index);
+        Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
 
     if (sv.state == ss_dead) {
         Com_WPrintf("%s: not yet initialized\n", __func__);
@@ -355,7 +301,7 @@ static void PF_configstring(int index, const char *val)
     len = strlen(val);
     maxlen = (MAX_CONFIGSTRINGS - index) * MAX_QPATH;
     if (len >= maxlen) {
-        Com_Error(ERR_DROP,
+        Com_Errorf(ERR_DROP,
                   "%s: index %d overflowed: %zu > %zu",
                   __func__, index, len, maxlen - 1);
     }
@@ -410,7 +356,7 @@ static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
     bsp_t *bsp = sv.cm.cache;
 
     if (!bsp) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
     }
 
     leaf1 = BSP_PointLeaf(bsp->nodes, p1);
@@ -489,13 +435,13 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
     bool        force_pos;
 
     if (!edict)
-        Com_Error(ERR_DROP, "%s: edict = NULL", __func__);
+        Com_Errorf(ERR_DROP, "%s: edict = NULL", __func__);
     if (volume < 0 || volume > 1)
-        Com_Error(ERR_DROP, "%s: volume = %f", __func__, volume);
+        Com_Errorf(ERR_DROP, "%s: volume = %f", __func__, volume);
     if (attenuation < 0 || attenuation > 4)
-        Com_Error(ERR_DROP, "%s: attenuation = %f", __func__, attenuation);
+        Com_Errorf(ERR_DROP, "%s: attenuation = %f", __func__, attenuation);
     if (soundindex < 0 || soundindex >= MAX_SOUNDS)
-        Com_Error(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
+        Com_Errorf(ERR_DROP, "%s: soundindex = %d", __func__, soundindex);
 
     attenuation = min(attenuation, 255.0f / 64);
 
@@ -659,7 +605,7 @@ static void PF_AddCommandString(const char *string)
 static void PF_SetAreaPortalState(int portalnum, qboolean open)
 {
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
     }
     CM_SetAreaPortalState(&sv.cm, portalnum, open);
 }
@@ -667,7 +613,7 @@ static void PF_SetAreaPortalState(int portalnum, qboolean open)
 static qboolean PF_AreasConnected(int area1, int area2)
 {
     if (!sv.cm.cache) {
-        Com_Error(ERR_DROP, "%s: no map loaded", __func__);
+        Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
     }
     return CM_AreasConnected(&sv.cm, area1, area2);
 }
@@ -675,7 +621,7 @@ static qboolean PF_AreasConnected(int area1, int area2)
 static void *PF_TagMalloc(unsigned size, unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
     }
     if (!size) {
         return NULL;
@@ -686,7 +632,7 @@ static void *PF_TagMalloc(unsigned size, unsigned tag)
 static void PF_FreeTags(unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
     }
     Z_FreeTags(tag + TAG_MAX);
 }
@@ -793,11 +739,11 @@ void SV_InitGameProgs(void)
     // load a new game dll
     import.multicast = SV_Multicast;
     import.unicast = PF_Unicast;
-    import.bprintf = PF_bprintf;
-    import.dprintf = PF_dprintf;
-    import.cprintf = PF_cprintf;
-    import.centerprintf = PF_centerprintf;
-    import.error = PF_error;
+    import.bprint = PF_bprint;
+    import.dprint = PF_dprint;
+    import.cprint = PF_cprint;
+    import.centerprint = PF_centerprint;
+    import.error = Com_Error;
 
     import.linkentity = PF_LinkEdict;
     import.unlinkentity = PF_UnlinkEdict;
@@ -851,7 +797,7 @@ void SV_InitGameProgs(void)
     }
 
     if (ge->apiversion != GAME_API_VERSION) {
-        Com_Error(ERR_DROP, "Game library is version %d, expected %d",
+        Com_Errorf(ERR_DROP, "Game library is version %d, expected %d",
                   ge->apiversion, GAME_API_VERSION);
     }
 

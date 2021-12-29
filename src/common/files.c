@@ -436,7 +436,7 @@ static file_t *file_for_handle(qhandle_t f)
         return NULL;
 
     if (file->type < FS_FREE || file->type >= FS_BAD)
-        Com_Error(ERR_FATAL, "%s: bad file type", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad file type", __func__);
 
     return file;
 }
@@ -880,7 +880,7 @@ static int64_t open_file_write(file_t *file, const char *name)
         strcpy(mode_str, "r+");
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad mode", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad mode", __func__);
     }
 
     // open in binary mode by default
@@ -977,7 +977,7 @@ static void open_zip_file(file_t *file)
         z->zalloc = FS_zalloc;
         z->zfree = FS_zfree;
         if (inflateInit2(z, -MAX_WBITS) != Z_OK) {
-            Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
+            Com_Errorf(ERR_FATAL, "%s: inflateInit2() failed", __func__);
         }
     }
 
@@ -1593,7 +1593,7 @@ int FS_Write(const void *buf, size_t len, qhandle_t f)
         }
         break;
     default:
-        Com_Error(ERR_FATAL, "%s: bad file type", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad file type", __func__);
     }
 
     return len;
@@ -1611,7 +1611,7 @@ int64_t FS_FOpenFile(const char *name, qhandle_t *f, unsigned mode)
     int64_t ret;
 
     if (!name || !f) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Errorf(ERR_FATAL, "%s: NULL", __func__);
     }
 
     *f = 0;
@@ -1774,7 +1774,7 @@ int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t tag)
     int read;
 
     if (!path) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Errorf(ERR_FATAL, "%s: NULL", __func__);
     }
 
     if (buffer) {
@@ -1934,21 +1934,15 @@ int FS_RenameFile(const char *from, const char *to)
 FS_FPrintf
 ================
 */
-int FS_FPrintf(qhandle_t f, const char *format, ...)
+int FS_FPrintf(qhandle_t f, const char *fmt, ...)
 {
-    va_list argptr;
-    char string[MAXPRINTMSG];
-    size_t len;
+    Com_VarArgs(MAXPRINTMSG);
 
-    va_start(argptr, format);
-    len = Q_vsnprintf(string, sizeof(string), format, argptr);
-    va_end(argptr);
-
-    if (len >= sizeof(string)) {
+    if (len >= sizeof(msg)) {
         return Q_ERR_STRING_TRUNCATED;
     }
 
-    return FS_Write(string, len, f);
+    return FS_Write(msg, len, f);
 }
 
 // references pack_t instance
@@ -1965,7 +1959,7 @@ static void pack_put(pack_t *pack)
         return;
     }
     if (!pack->refcount) {
-        Com_Error(ERR_FATAL, "%s: refcount already zero", __func__);
+        Com_Errorf(ERR_FATAL, "%s: refcount already zero", __func__);
     }
     if (!--pack->refcount) {
         FS_DPrintf("Freeing packfile %s\n", pack->filename);
@@ -2405,17 +2399,13 @@ alphacmp:
 // then loads and adds pak*.pak, then anything else in alphabethical order.
 static void q_printf(2, 3) add_game_dir(unsigned mode, const char *fmt, ...)
 {
-    va_list         argptr;
     searchpath_t    *search;
     pack_t          *pack;
     listfiles_t     list;
     int             i;
     char            path[MAX_OSPATH];
-    size_t          len;
 
-    va_start(argptr, fmt);
-    len = Q_vsnprintf(fs_gamedir, sizeof(fs_gamedir), fmt, argptr);
-    va_end(argptr);
+    Com_VarArgsBuf(fs_gamedir);
 
     if (len >= sizeof(fs_gamedir)) {
         Com_EPrintf("%s: refusing oversize path\n", __func__);
@@ -3537,7 +3527,7 @@ static void fs_game_changed(cvar_t *self)
 
 		if (!FS_FileExists("pics/colormap.pcx") || !FS_FileExists("pics/conchars.pcx") || !FS_FileExists("default.cfg"))
 		{
-			Com_Error(ERR_FATAL, "No game data files detected. Please make sure that there are .pak files"
+			Com_Errorf(ERR_FATAL, "No game data files detected. Please make sure that there are .pak files"
 				" in the game directory: %s.\nReinstalling the game can fix the issue.", fs_gamedir);
 		}
 

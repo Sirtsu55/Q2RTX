@@ -592,7 +592,7 @@ static void finish_demo(int ret)
         if (ret == 0) {
             Com_Error(ERR_DISCONNECT, "Demo finished");
         } else {
-            Com_Error(ERR_DROP, "Couldn't read demo: %s", Q_ErrorString(ret));
+            Com_Errorf(ERR_DROP, "Couldn't read demo: %s", Q_ErrorString(ret));
         }
     }
 

@@ -640,7 +640,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
     } else {
         index = ITEM_INDEX(FindItem("cells"));
         if (!ent->client->pers.inventory[index]) {
-            gi.cprintf(ent, PRINT_HIGH, "No cells for power armor.\n");
+            SV_ClientPrint(ent, PRINT_HIGH, "No cells for power armor.\n");
             return;
         }
         ent->flags |= FL_POWER_ARMOR;
@@ -849,7 +849,7 @@ void droptofloor(edict_t *ent)
 
     tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
     if (tr.startsolid) {
-        gi.dprintf("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+        Com_WPrintf("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
         G_FreeEdict(ent);
         return;
     }
@@ -933,7 +933,7 @@ void PrecacheItem(gitem_t *it)
 
         len = s - start;
         if (len >= MAX_QPATH || len < 5)
-            gi.error("PrecacheItem: %s has bad precache string", it->classname);
+            Com_Errorf(ERR_DROP, "PrecacheItem: %s has bad precache string", it->classname);
         memcpy(data, start, len);
         data[len] = 0;
         if (*s)
@@ -970,7 +970,7 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     if (ent->spawnflags) {
         if (strcmp(ent->classname, "key_power_cube") != 0) {
             ent->spawnflags = 0;
-            gi.dprintf("%s at %s has invalid spawnflags set\n", ent->classname, vtos(ent->s.origin));
+            Com_WPrintf("%s at %s has invalid spawnflags set\n", ent->classname, vtos(ent->s.origin));
         }
     }
 

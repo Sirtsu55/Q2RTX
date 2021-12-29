@@ -1446,7 +1446,7 @@ void CL_ParseTEnt(void)
         break;
 
     default:
-        Com_Error(ERR_DROP, "%s: bad type", __func__);
+        Com_Errorf(ERR_DROP, "%s: bad type", __func__);
     }
 }
 

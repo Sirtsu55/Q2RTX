@@ -37,7 +37,7 @@ void Hunk_Begin(memhunk_t *hunk, size_t maxsize)
     void *buf;
 
     if (maxsize > SIZE_MAX - (pagesize - 1))
-        Com_Error(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
+        Com_Errorf(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
 
     // reserve a huge chunk of memory, but don't commit any yet
     hunk->cursize = 0;
@@ -45,7 +45,7 @@ void Hunk_Begin(memhunk_t *hunk, size_t maxsize)
     buf = mmap(NULL, hunk->maxsize, PROT_READ | PROT_WRITE,
                MAP_PRIVATE | MAP_ANON, -1, 0);
     if (buf == NULL || buf == (void *)-1)
-        Com_Error(ERR_FATAL, "%s: unable to reserve %zu bytes: %s",
+        Com_Errorf(ERR_FATAL, "%s: unable to reserve %zu bytes: %s",
                   __func__, hunk->maxsize, strerror(errno));
     hunk->base = buf;
     hunk->mapped = hunk->maxsize;
@@ -56,13 +56,13 @@ void *Hunk_Alloc(memhunk_t *hunk, size_t size)
     void *buf;
 
     if (size > SIZE_MAX - 63)
-        Com_Error(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
+        Com_Errorf(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
 
     // round to cacheline
     size = ALIGN(size, 64);
 
     if (hunk->cursize > hunk->maxsize)
-        Com_Error(ERR_FATAL, "%s: cursize > maxsize", __func__);
+        Com_Errorf(ERR_FATAL, "%s: cursize > maxsize", __func__);
 
     if (size > hunk->maxsize - hunk->cursize)
         return NULL;
@@ -77,7 +77,7 @@ void Hunk_End(memhunk_t *hunk)
     size_t newsize;
 
     if (hunk->cursize > hunk->maxsize)
-        Com_Error(ERR_FATAL, "%s: cursize > maxsize", __func__);
+        Com_Errorf(ERR_FATAL, "%s: cursize > maxsize", __func__);
 
     newsize = ALIGN(hunk->cursize, pagesize);
 
@@ -90,7 +90,7 @@ void Hunk_End(memhunk_t *hunk)
         void *buf = munmap(unmap_base, unmap_len) + (byte *)hunk->base;
 #endif
         if (buf != hunk->base)
-            Com_Error(ERR_FATAL, "%s: could not remap virtual block: %s",
+            Com_Errorf(ERR_FATAL, "%s: could not remap virtual block: %s",
                       __func__, strerror(errno));
     }
 
@@ -100,7 +100,7 @@ void Hunk_End(memhunk_t *hunk)
 void Hunk_Free(memhunk_t *hunk)
 {
     if (hunk->base && munmap(hunk->base, hunk->mapped))
-        Com_Error(ERR_FATAL, "%s: munmap failed: %s",
+        Com_Errorf(ERR_FATAL, "%s: munmap failed: %s",
                   __func__, strerror(errno));
 
     memset(hunk, 0, sizeof(*hunk));

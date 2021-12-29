@@ -512,7 +512,7 @@ static void SVC_Info(void)
     if (version != PROTOCOL_VERSION_NAC)
         return; // ignore invalid versions
 
-    len = Q_scnprintf(buffer, sizeof(buffer),
+    len = Q_snprintf(buffer, sizeof(buffer),
                       "\xff\xff\xff\xffinfo\n%16s %8s %2i/%2i\n",
                       sv_hostname->string, sv.name, SV_CountClients(),
                       sv_maxclients->integer - sv_reserved_slots->integer);

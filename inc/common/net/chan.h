@@ -78,7 +78,7 @@ extern cvar_t       *net_maxmsglen;
 
 void Netchan_Init(void);
 void Netchan_OutOfBand(netsrc_t sock, const netadr_t *adr,
-                       const char *format, ...) q_printf(3, 4);
+                       const char *fmt, ...) q_printf(3, 4);
 size_t Netchan_TransmitNextFragment(netchan_t *netchan);
 size_t Netchan_Transmit(netchan_t *netchan, size_t length, const void *data, int numpackets);
 bool Netchan_Process(netchan_t *netchan);

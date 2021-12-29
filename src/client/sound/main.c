@@ -281,7 +281,7 @@ sfx_t *S_SfxForHandle(qhandle_t hSfx)
     }
 
     if (hSfx < 1 || hSfx > num_sfx) {
-        Com_Error(ERR_DROP, "S_SfxForHandle: %d out of range", hSfx);
+        Com_Errorf(ERR_DROP, "S_SfxForHandle: %d out of range", hSfx);
     }
 
     return &known_sfx[hSfx - 1];

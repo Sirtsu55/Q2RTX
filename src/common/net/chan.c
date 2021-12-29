@@ -136,21 +136,17 @@ Sends a text message in an out-of-band datagram
 ================
 */
 void Netchan_OutOfBand(netsrc_t sock, const netadr_t *address,
-                       const char *format, ...)
+                       const char *fmt, ...)
 {
-    va_list     argptr;
     struct {
         uint32_t    header;
         char        data[MAX_PACKETLEN_DEFAULT - 4];
     } packet;
-    size_t      len;
 
     // write the packet header
     packet.header = 0xffffffff;
 
-    va_start(argptr, format);
-    len = Q_vsnprintf(packet.data, sizeof(packet.data), format, argptr);
-    va_end(argptr);
+    Com_VarArgsBuf(packet.data);
 
     if (len >= sizeof(packet.data)) {
         Com_WPrintf("%s: overflow\n", __func__);

@@ -263,17 +263,13 @@ image_t *r_charset;
 
 void Draw_Stringf(int x, int y, const char *fmt, ...)
 {
-    va_list argptr;
-    char buffer[MAX_STRING_CHARS];
     char *string;
     byte c;
     float s, t;
 
-    va_start(argptr, fmt);
-    Q_vsnprintf(buffer, sizeof(buffer), fmt, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAX_STRING_CHARS);
 
-    string = buffer;
+    string = msg;
     while (*string) {
         c = *string++;
 

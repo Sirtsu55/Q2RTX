@@ -81,10 +81,10 @@ static inline void Z_CountAlloc(zhead_t *z)
 static inline void Z_Validate(zhead_t *z, const char *func)
 {
     if (z->magic != Z_MAGIC) {
-        Com_Error(ERR_FATAL, "%s: bad magic", func);
+        Com_Errorf(ERR_FATAL, "%s: bad magic", func);
     }
     if (z->tag == TAG_FREE) {
-        Com_Error(ERR_FATAL, "%s: bad tag", func);
+        Com_Errorf(ERR_FATAL, "%s: bad tag", func);
     }
 }
 
@@ -161,7 +161,7 @@ void *Z_Realloc(void *ptr, size_t size)
     Z_Validate(z, __func__);
 
     if (size > INT_MAX) {
-        Com_Error(ERR_FATAL, "%s: bad size", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad size", __func__);
     }
 
     size += sizeof(*z);
@@ -170,14 +170,14 @@ void *Z_Realloc(void *ptr, size_t size)
     }
 
     if (z->tag == TAG_STATIC) {
-        Com_Error(ERR_FATAL, "%s: couldn't realloc static memory", __func__);
+        Com_Errorf(ERR_FATAL, "%s: couldn't realloc static memory", __func__);
     }
 
     Z_CountFree(z);
 
     z = realloc(z, size);
     if (!z) {
-        Com_Error(ERR_FATAL, "%s: couldn't realloc %zu bytes", __func__, size);
+        Com_Errorf(ERR_FATAL, "%s: couldn't realloc %zu bytes", __func__, size);
     }
 
     z->size = size;
@@ -248,17 +248,17 @@ void *Z_TagMalloc(size_t size, memtag_t tag)
     }
 
     if (tag == TAG_FREE) {
-        Com_Error(ERR_FATAL, "%s: bad tag", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
     }
 
     if (size > INT_MAX) {
-        Com_Error(ERR_FATAL, "%s: bad size", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad size", __func__);
     }
 
     size += sizeof(*z);
     z = malloc(size);
     if (!z) {
-        Com_Error(ERR_FATAL, "%s: couldn't allocate %zu bytes", __func__, size);
+        Com_Errorf(ERR_FATAL, "%s: couldn't allocate %zu bytes", __func__, size);
     }
     z->magic = Z_MAGIC;
     z->tag = tag;
@@ -306,7 +306,7 @@ void *Z_ReservedAlloc(size_t size)
     }
 
     if (size > z_reserved_total - z_reserved_inuse) {
-        Com_Error(ERR_FATAL, "%s: couldn't allocate %zu bytes", __func__, size);
+        Com_Errorf(ERR_FATAL, "%s: couldn't allocate %zu bytes", __func__, size);
     }
 
     ptr = z_reserved_data + z_reserved_inuse;

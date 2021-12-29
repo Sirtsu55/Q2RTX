@@ -98,20 +98,30 @@ typedef enum {
     PRINT_NOTICE        // print in cyan color
 } print_type_t;
 
+#define MAXPRINTMSG     4096
+#define MAXERRORMSG     1024
+
+void    Com_LPrint(print_type_t type, const char *message);
 void    Com_LPrintf(print_type_t type, const char *fmt, ...)
 q_printf(2, 3);
-void    Com_Error(error_type_t code, const char *fmt, ...)
+void    Com_Error(error_type_t type, const char *message);
+void    Com_Errorf(error_type_t code, const char *fmt, ...)
 q_noreturn q_printf(2, 3);
 
+#define Com_Print(message) Com_LPrint(PRINT_ALL, message)
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
+#define Com_WPrint(message) Com_LPrint(PRINT_WARNING, message)
 #define Com_WPrintf(...) Com_LPrintf(PRINT_WARNING, __VA_ARGS__)
+#define Com_EPrint(message) Com_LPrint(PRINT_ERROR, message)
 #define Com_EPrintf(...) Com_LPrintf(PRINT_ERROR, __VA_ARGS__)
 
 // game print flags
-#define PRINT_LOW           0       // pickup messages
-#define PRINT_MEDIUM        1       // death messages
-#define PRINT_HIGH          2       // critical messages
-#define PRINT_CHAT          3       // chat messages    
+typedef enum {
+    PRINT_LOW,       // pickup messages
+    PRINT_MEDIUM,    // death messages
+    PRINT_HIGH,      // critical messages
+    PRINT_CHAT,      // chat messages    
+} client_print_type_t;
 
 // destination class for gi.multicast()
 typedef enum {
@@ -529,11 +539,27 @@ size_t Q_strlcat(char *dst, const char *src, size_t size);
 size_t Q_concat_array(char *dest, size_t size, const char **arr);
 
 size_t Q_vsnprintf(char *dest, size_t size, const char *fmt, va_list argptr);
-size_t Q_vscnprintf(char *dest, size_t size, const char *fmt, va_list argptr);
 size_t Q_snprintf(char *dest, size_t size, const char *fmt, ...) q_printf(3, 4);
 size_t Q_scnprintf(char *dest, size_t size, const char *fmt, ...) q_printf(3, 4);
 
-char    *va(const char *format, ...) q_printf(1, 2);
+// Convenience macro to handle varargs
+#define Com_VarArgsBufz(buffer, buffer_length) \
+    va_list     argptr; \
+\
+    va_start(argptr, fmt); \
+    size_t len = Q_vsnprintf(buffer, buffer_length, fmt, argptr); \
+    va_end(argptr)
+
+// Convenience macro to handle varargs
+#define Com_VarArgsBuf(buffer) \
+    Com_VarArgsBufz(buffer, sizeof(buffer))
+
+// Convenience macro to handle varargs
+#define Com_VarArgs(buffer_length) \
+    char msg[buffer_length]; \
+    Com_VarArgsBuf(msg)
+
+char    *va(const char *fmt, ...) q_printf(1, 2);
 
 //=============================================
 

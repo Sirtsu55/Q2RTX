@@ -81,7 +81,7 @@ static void TH_DrawNumber(char *dst, int x, int y, int width, int value)
     if (width > 5)
         width = 5;
 
-    l = Q_scnprintf(num, sizeof(num), "%d", value);
+    l = Q_snprintf(num, sizeof(num), "%d", value);
     if (l > width)
         l = width;
     x += width - l;
@@ -167,7 +167,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_CLIENTS) {
-                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid client index", __func__);
             }
             ci = &cl.clientinfo[value];
 
@@ -182,11 +182,11 @@ static void TH_DrawLayoutString(char *dst, const char *s)
 
             len = strlen(ci->name);
             TH_DrawString(dst, x + 4, y, ci->name, len);
-            len = Q_scnprintf(buffer, sizeof(buffer), "Score: %i", score);
+            len = Q_snprintf(buffer, sizeof(buffer), "Score: %i", score);
             TH_DrawString(dst, x + 4, y + 1, buffer, len);
-            len = Q_scnprintf(buffer, sizeof(buffer), "Ping:  %i", ping);
+            len = Q_snprintf(buffer, sizeof(buffer), "Ping:  %i", ping);
             TH_DrawString(dst, x + 4, y + 2, buffer, len);
-            len = Q_scnprintf(buffer, sizeof(buffer), "Time:  %i", time);
+            len = Q_snprintf(buffer, sizeof(buffer), "Time:  %i", time);
             TH_DrawString(dst, x + 4, y + 3, buffer, len);
             continue;
         }
@@ -203,7 +203,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_CLIENTS) {
-                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid client index", __func__);
             }
             ci = &cl.clientinfo[value];
 
@@ -215,7 +215,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             if (ping > 999)
                 ping = 999;
 
-            len = Q_scnprintf(buffer, sizeof(buffer), "%3d %3d %-12.12s",
+            len = Q_snprintf(buffer, sizeof(buffer), "%3d %3d %-12.12s",
                               score, ping, ci->name);
             TH_DrawString(dst, x, y, buffer, len);
             continue;
@@ -234,7 +234,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
             }
             value = cl.frame.ps.stats[value];
             TH_DrawNumber(dst, x, y, width, value);
@@ -245,11 +245,11 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             index = atoi(token);
             if (index < 0 || index >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid string index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid string index", __func__);
             }
             index = cl.frame.ps.stats[index];
             if (index < 0 || index >= MAX_CONFIGSTRINGS) {
-                Com_Error(ERR_DROP, "%s: invalid string index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid string index", __func__);
             }
             len = strlen(cl.configstrings[index]);
             TH_DrawString(dst, x, y, cl.configstrings[index], len);
@@ -274,7 +274,7 @@ static void TH_DrawLayoutString(char *dst, const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
             }
             value = cl.frame.ps.stats[value];
             if (!value) {   // skip to endif

@@ -398,34 +398,28 @@ char *Com_GetLastError(void)
 
 /*
 =============
-Com_Printf
+Com_LPrint
 
 Both client and server can use this, and it will output
-to the apropriate place.
+to the appropriate place.
 =============
 */
-void Com_LPrintf(print_type_t type, const char *fmt, ...)
+void Com_LPrint(print_type_t type, const char *message)
 {
-    va_list     argptr;
-    char        msg[MAXPRINTMSG];
-    size_t      len;
-
     // may be entered recursively only once
     if (com_printEntered >= 2) {
         return;
     }
 
+    size_t len = strlen(message);
+    
     com_printEntered++;
-
-    va_start(argptr, fmt);
-    len = Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
 
     if (type == PRINT_ERROR && !com_errorEntered && len) {
         size_t errlen = min(len, sizeof(com_errorMsg) - 1);
 
         // save error msg
-        memcpy(com_errorMsg, msg, errlen);
+        memcpy(com_errorMsg, message, errlen);
         com_errorMsg[errlen] = 0;
 
         // strip trailing '\n'
@@ -435,7 +429,7 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
     }
 
     if (rd_target) {
-        Com_Redirect(msg, len);
+        Com_Redirect(message, len);
     } else {
         switch (type) {
         case PRINT_TALK:
@@ -458,13 +452,13 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
         }
 
         // graphical console
-        Con_Print(msg);
+        Con_Print(message);
 
         // debugging console
-        Sys_ConsoleOutput(msg);
+        Sys_ConsoleOutput(message);
 
 #ifdef _WIN32
-		OutputDebugStringA(msg);
+		OutputDebugStringA(message);
 #endif
 
         // remote console
@@ -472,7 +466,7 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
 
         // logfile
         if (com_logFile) {
-            logfile_write(type, msg);
+            logfile_write(type, message);
         }
 
         if (type) {
@@ -483,7 +477,6 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
     com_printEntered--;
 }
 
-
 /*
 =============
 Com_Error
@@ -492,12 +485,8 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error(error_type_t code, const char *fmt, ...)
+void Com_Error(error_type_t code, const char *message)
 {
-    char            msg[MAXERRORMSG];
-    va_list         argptr;
-    size_t          len;
-
     // may not be entered recursively
     if (com_errorEntered) {
 #ifdef _DEBUG
@@ -508,16 +497,14 @@ void Com_Error(error_type_t code, const char *fmt, ...)
         Sys_Error("recursive error after: %s", com_errorMsg);
     }
 
-    com_errorEntered = true;
+    size_t len = strlen(message);
 
-    va_start(argptr, fmt);
-    len = Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
+    com_errorEntered = true;
 
     // save error msg
     // can't print into it directly since it may
     // overlap with one of the arguments!
-    memcpy(com_errorMsg, msg, len + 1);
+    memcpy(com_errorMsg, message, len + 1);
 
     // fix up drity message buffers
     MSG_Init();

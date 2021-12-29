@@ -277,7 +277,7 @@ static void draw_percent_bar(int percent, bool paused, int framenum)
     R_DrawFill8(0, scr.hud_height, w, CHAR_HEIGHT, 4);
     R_DrawFill8(w, scr.hud_height, scr.hud_width - w, CHAR_HEIGHT, 0);
 
-    len = Q_scnprintf(buffer, sizeof(buffer), "%d%%", percent);
+    len = Q_snprintf(buffer, sizeof(buffer), "%d%%", percent);
     x = (scr.hud_width - len * CHAR_WIDTH) / 2;
     R_DrawString(x, scr.hud_height, 0, MAX_STRING_CHARS, buffer, scr.font_pic);
 
@@ -285,7 +285,7 @@ static void draw_percent_bar(int percent, bool paused, int framenum)
         int sec = framenum / 10;
         int min = sec / 60; sec %= 60;
 
-        Q_scnprintf(buffer, sizeof(buffer), "%d:%02d.%d", min, sec, framenum % 10);
+        Q_snprintf(buffer, sizeof(buffer), "%d:%02d.%d", min, sec, framenum % 10);
         R_DrawString(0, scr.hud_height, 0, MAX_STRING_CHARS, buffer, scr.font_pic);
     }
 
@@ -1367,7 +1367,7 @@ static void HUD_DrawNumber(int x, int y, int color, int width, int value)
 
     color &= 1;
 
-    l = Q_scnprintf(num, sizeof(num), "%i", value);
+    l = Q_snprintf(num, sizeof(num), "%i", value);
     if (l > width)
         l = width;
     x += 2 + DIGIT_WIDTH * (width - l);
@@ -1557,11 +1557,11 @@ static void SCR_ExecuteLayoutString(const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
             }
             index = cl.frame.ps.stats[value];
             if (index < 0 || index >= MAX_IMAGES) {
-                Com_Error(ERR_DROP, "%s: invalid pic index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid pic index", __func__);
             }
             token = cl.configstrings[CS_IMAGES + index];
             if (token[0] && cl.image_precache[index]) {
@@ -1587,7 +1587,7 @@ static void SCR_ExecuteLayoutString(const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_CLIENTS) {
-                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid client index", __func__);
             }
             ci = &cl.clientinfo[value];
 
@@ -1628,7 +1628,7 @@ static void SCR_ExecuteLayoutString(const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_CLIENTS) {
-                Com_Error(ERR_DROP, "%s: invalid client index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid client index", __func__);
             }
             ci = &cl.clientinfo[value];
 
@@ -1664,7 +1664,7 @@ static void SCR_ExecuteLayoutString(const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
             }
             value = cl.frame.ps.stats[value];
             HUD_DrawNumber(x, y, 0, width, value);
@@ -1733,11 +1733,11 @@ static void SCR_ExecuteLayoutString(const char *s)
             token = COM_Parse(&s);
             index = atoi(token);
             if (index < 0 || index >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
             }
             index = cl.frame.ps.stats[index];
             if (index < 0 || index >= MAX_CONFIGSTRINGS) {
-                Com_Error(ERR_DROP, "%s: invalid string index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid string index", __func__);
             }
             HUD_DrawString(x, y, cl.configstrings[index]);
             continue;
@@ -1771,7 +1771,7 @@ static void SCR_ExecuteLayoutString(const char *s)
             token = COM_Parse(&s);
             value = atoi(token);
             if (value < 0 || value >= MAX_STATS) {
-                Com_Error(ERR_DROP, "%s: invalid stat index", __func__);
+                Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
             }
             value = cl.frame.ps.stats[value];
             if (!value) {   // skip to endif
@@ -2019,7 +2019,7 @@ void SCR_UpdateScreen(void)
     }
 
     if (recursive > 1) {
-        Com_Error(ERR_FATAL, "%s: recursively called", __func__);
+        Com_Errorf(ERR_FATAL, "%s: recursively called", __func__);
     }
 
     recursive++;

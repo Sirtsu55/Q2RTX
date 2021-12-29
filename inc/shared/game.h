@@ -110,10 +110,10 @@ struct edict_s {
 //
 typedef struct {
     // special messages
-    void (* q_printf(2, 3) bprintf)(int printlevel, const char *fmt, ...);
-    void (* q_printf(1, 2) dprintf)(const char *fmt, ...);
-    void (* q_printf(3, 4) cprintf)(edict_t *ent, int printlevel, const char *fmt, ...);
-    void (* q_printf(2, 3) centerprintf)(edict_t *ent, const char *fmt, ...);
+    void (*bprint)(client_print_type_t printlevel, const char *message);
+    void (*dprint)(print_type_t type, const char *message);
+    void (*cprint)(edict_t *ent, client_print_type_t printlevel, const char *message);
+    void (*centerprint)(edict_t *ent, const char *message);
     void (*sound)(edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
     void (*positioned_sound)(vec3_t origin, edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
 
@@ -123,7 +123,7 @@ typedef struct {
     // they connect, and changes are sent to all connected clients.
     void (*configstring)(int num, const char *string);
 
-    void (* q_noreturn q_printf(1, 2) error)(const char *fmt, ...);
+    void (* q_noreturn error)(error_type_t type, const char *message);
 
     // the *index functions create configstrings and some internal server state
     int (*modelindex)(const char *name);

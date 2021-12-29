@@ -249,20 +249,15 @@ Sys_Error
 */
 void Sys_Error(const char *error, ...)
 {
-    va_list     argptr;
-    char        text[MAXERRORMSG];
-
     tty_shutdown_input();
 
-    va_start(argptr, error);
-    Q_vsnprintf(text, sizeof(text), error, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAXERRORMSG);
 
 #if USE_CLIENT
     SDL_ShowSimpleMessageBox(
 		    SDL_MESSAGEBOX_ERROR,
 		    PRODUCT " Fatal Error",
-		    text,
+		    msg,
 		    sdl_window);
 #endif
 
@@ -273,7 +268,7 @@ void Sys_Error(const char *error, ...)
     fprintf(stderr,
             "********************\n"
             "FATAL: %s\n"
-            "********************\n", text);
+            "********************\n", msg);
     exit(EXIT_FAILURE);
 }
 
@@ -293,7 +288,7 @@ Sys_FreeLibrary
 void Sys_FreeLibrary(void *handle)
 {
     if (handle && dlclose(handle)) {
-        Com_Error(ERR_FATAL, "dlclose failed on %p: %s", handle, dlerror());
+        Com_Errorf(ERR_FATAL, "dlclose failed on %p: %s", handle, dlerror());
     }
 }
 

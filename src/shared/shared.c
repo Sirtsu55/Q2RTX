@@ -146,7 +146,7 @@ char *COM_SkipPath(const char *pathname)
     char    *last;
 
     if (!pathname) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Errorf(ERR_FATAL, "%s: NULL", __func__);
     }
 
     last = (char *)pathname;
@@ -186,7 +186,7 @@ char *COM_FileExtension(const char *in)
     const char *last, *s;
 
     if (!in) {
-        Com_Error(ERR_FATAL, "%s: NULL", __func__);
+        Com_Errorf(ERR_FATAL, "%s: NULL", __func__);
     }
 
     for (last = s = in + strlen(in); s != in; s--) {
@@ -381,17 +381,14 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
-char *va(const char *format, ...)
+char *va(const char *fmt, ...)
 {
-    va_list         argptr;
     static char     buffers[2][0x2800];
     static int      index;
 
     index ^= 1;
 
-    va_start(argptr, format);
-    Q_vsnprintf(buffers[index], sizeof(buffers[0]), format, argptr);
-    va_end(argptr);
+    Com_VarArgsBuf(buffers[index]);
 
     return buffers[index];
 }
@@ -692,7 +689,7 @@ size_t Q_strlcat(char *dst, const char *src, size_t size)
     size_t len = strlen(dst);
 
     if (len >= size) {
-        Com_Error(ERR_FATAL, "%s: already overflowed", __func__);
+        Com_Errorf(ERR_FATAL, "%s: already overflowed", __func__);
     }
 
     return len + Q_strlcpy(dst + len, src, size - len);
@@ -743,32 +740,13 @@ size_t Q_vsnprintf(char *dest, size_t size, const char *fmt, va_list argptr)
     int ret;
 
     if (size > INT_MAX)
-        Com_Error(ERR_FATAL, "%s: bad buffer size", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad buffer size", __func__);
 
     ret = vsnprintf(dest, size, fmt, argptr);
     if (ret < 0)
-        Com_Error(ERR_FATAL, "%s: bad return value", __func__);
+        Com_Errorf(ERR_FATAL, "%s: bad return value", __func__);
 
     return ret;
-}
-
-/*
-===============
-Q_vscnprintf
-
-Returns number of characters actually written into the buffer,
-excluding trailing '\0'. If buffer size is 0, this function does nothing
-and returns 0.
-===============
-*/
-size_t Q_vscnprintf(char *dest, size_t size, const char *fmt, va_list argptr)
-{
-    if (size) {
-        size_t ret = Q_vsnprintf(dest, size, fmt, argptr);
-        return min(ret, size - 1);
-    }
-
-    return 0;
 }
 
 /*
@@ -782,14 +760,27 @@ buffer size, resulting string is truncated.
 */
 size_t Q_snprintf(char *dest, size_t size, const char *fmt, ...)
 {
-    va_list argptr;
-    size_t  ret;
+    Com_VarArgsBufz(dest, size);
+    return len;
+}
 
-    va_start(argptr, fmt);
-    ret = Q_vsnprintf(dest, size, fmt, argptr);
-    va_end(argptr);
+/*
+===============
+Q_vscnprintf
 
-    return ret;
+Returns number of characters actually written into the buffer,
+excluding trailing '\0'. If buffer size is 0, this function does nothing
+and returns 0.
+===============
+*/
+static size_t Q_vscnprintf(char *dest, size_t size, const char *fmt, va_list argptr)
+{
+    if (size) {
+        size_t ret = Q_vsnprintf(dest, size, fmt, argptr);
+        return min(ret, size - 1);
+    }
+
+    return 0;
 }
 
 /*
@@ -1279,3 +1270,26 @@ void Info_Print(const char *infostring)
     }
 }
 
+void Com_LPrintf(print_type_t type, const char *fmt, ...)
+{
+    va_list     argptr;
+    char        msg[MAXPRINTMSG];
+
+    va_start(argptr, fmt);
+    Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
+    va_end(argptr);
+
+    Com_LPrint(type, msg);
+}
+
+void Com_Errorf(error_type_t code, const char *fmt, ...)
+{
+    char            msg[MAXERRORMSG];
+    va_list         argptr;
+
+    va_start(argptr, fmt);
+    Q_vscnprintf(msg, sizeof(msg), fmt, argptr);
+    va_end(argptr);
+
+    Com_Error(code, msg);
+}

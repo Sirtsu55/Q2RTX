@@ -61,7 +61,7 @@ int CL_QueueDownload(const char *path, dltype_t type)
 
     len = strlen(path);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize quake path", __func__);
+        Com_Errorf(ERR_DROP, "%s: oversize quake path", __func__);
     }
 
     q = Z_Malloc(sizeof(*q) + len + 1);
@@ -121,10 +121,10 @@ Mark the queue entry as done, decrementing pending count.
 void CL_FinishDownload(dlqueue_t *q)
 {
     if (q->state == DL_DONE) {
-        Com_Error(ERR_DROP, "%s: already done", __func__);
+        Com_Errorf(ERR_DROP, "%s: already done", __func__);
     }
     if (!cls.download.pending) {
-        Com_Error(ERR_DROP, "%s: bad pending count", __func__);
+        Com_Errorf(ERR_DROP, "%s: bad pending count", __func__);
     }
 
     q->state = DL_DONE;
@@ -244,7 +244,7 @@ static bool start_udp_download(dlqueue_t *q)
 
     len = strlen(q->path);
     if (len >= MAX_QPATH) {
-        Com_Error(ERR_DROP, "%s: oversize quake path", __func__);
+        Com_Errorf(ERR_DROP, "%s: oversize quake path", __func__);
     }
 
     // download to a temp name, and only rename
@@ -361,7 +361,7 @@ static bool inflate_udp_download(byte *data, int size, int decompressed_size)
 
     // initialize stream if not done yet
     if (z->state == NULL && inflateInit2(z, -MAX_WBITS) != Z_OK)
-        Com_Error(ERR_FATAL, "%s: inflateInit2() failed", __func__);
+        Com_Errorf(ERR_FATAL, "%s: inflateInit2() failed", __func__);
     
     if (!size)
         return true;
@@ -410,7 +410,7 @@ void CL_HandleDownload(byte *data, int size, int percent, int decompressed_size)
     int ret;
 
     if (!q) {
-        Com_Error(ERR_DROP, "%s: no download requested", __func__);
+        Com_Errorf(ERR_DROP, "%s: no download requested", __func__);
     }
 
     // -1 size means download was aborted
@@ -876,7 +876,7 @@ void CL_RequestNextDownload(void)
         break;
 
     default:
-        Com_Error(ERR_DROP, "%s: bad precache_check\n", __func__);
+        Com_Errorf(ERR_DROP, "%s: bad precache_check\n", __func__);
     }
 }
 

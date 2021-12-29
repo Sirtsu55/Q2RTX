@@ -35,14 +35,14 @@ void Hunk_Init(void)
 void Hunk_Begin(memhunk_t *hunk, size_t maxsize)
 {
     if (maxsize > SIZE_MAX - (pagesize - 1))
-        Com_Error(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
+        Com_Errorf(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
 
     // reserve a huge chunk of memory, but don't commit any yet
     hunk->cursize = 0;
     hunk->maxsize = ALIGN(maxsize, pagesize);
     hunk->base = VirtualAlloc(NULL, hunk->maxsize, MEM_RESERVE, PAGE_NOACCESS);
     if (!hunk->base)
-        Com_Error(ERR_FATAL,
+        Com_Errorf(ERR_FATAL,
                   "VirtualAlloc reserve %zu bytes failed with error %lu",
                   hunk->maxsize, GetLastError());
 }
@@ -52,13 +52,13 @@ void *Hunk_Alloc(memhunk_t *hunk, size_t size)
     void *buf;
 
     if (size > SIZE_MAX - 63)
-        Com_Error(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
+        Com_Errorf(ERR_FATAL, "%s: size > SIZE_MAX", __func__);
 
     // round to cacheline
     size = ALIGN(size, 64);
 
     if (hunk->cursize > hunk->maxsize)
-        Com_Error(ERR_FATAL, "%s: cursize > maxsize", __func__);
+        Com_Errorf(ERR_FATAL, "%s: cursize > maxsize", __func__);
 
     if (size > hunk->maxsize - hunk->cursize)
         return NULL;
@@ -68,7 +68,7 @@ void *Hunk_Alloc(memhunk_t *hunk, size_t size)
     // commit pages as needed
     buf = VirtualAlloc(hunk->base, hunk->cursize, MEM_COMMIT, PAGE_READWRITE);
     if (!buf)
-        Com_Error(ERR_FATAL,
+        Com_Errorf(ERR_FATAL,
                   "VirtualAlloc commit %zu bytes failed with error %lu",
                   hunk->cursize, GetLastError());
 
@@ -78,7 +78,7 @@ void *Hunk_Alloc(memhunk_t *hunk, size_t size)
 void Hunk_End(memhunk_t *hunk)
 {
     if (hunk->cursize > hunk->maxsize)
-        Com_Error(ERR_FATAL, "%s: cursize > maxsize", __func__);
+        Com_Errorf(ERR_FATAL, "%s: cursize > maxsize", __func__);
 
     // for statistics
     hunk->mapped = ALIGN(hunk->cursize, pagesize);
@@ -87,7 +87,7 @@ void Hunk_End(memhunk_t *hunk)
 void Hunk_Free(memhunk_t *hunk)
 {
     if (hunk->base && !VirtualFree(hunk->base, 0, MEM_RELEASE))
-        Com_Error(ERR_FATAL, "VirtualFree failed with error %lu", GetLastError());
+        Com_Errorf(ERR_FATAL, "VirtualFree failed with error %lu", GetLastError());
 
     memset(hunk, 0, sizeof(*hunk));
 }

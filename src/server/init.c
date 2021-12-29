@@ -383,7 +383,7 @@ void SV_InitGame()
     svs.z.zfree = SV_zfree;
     if (deflateInit2(&svs.z, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
                      -MAX_WBITS, 9, Z_DEFAULT_STRATEGY) != Z_OK) {
-        Com_Error(ERR_FATAL, "%s: deflateInit2() failed", __func__);
+        Com_Errorf(ERR_FATAL, "%s: deflateInit2() failed", __func__);
     }
 
     // init game

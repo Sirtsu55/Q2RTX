@@ -845,13 +845,7 @@ Sys_Printf
 */
 void Sys_Printf(const char *fmt, ...)
 {
-    va_list     argptr;
-    char        msg[MAXPRINTMSG];
-
-    va_start(argptr, fmt);
-    Q_vsnprintf(msg, sizeof(msg), fmt, argptr);
-    va_end(argptr);
-
+    Com_VarArgs(MAXPRINTMSG);
     Sys_ConsoleOutput(msg);
 }
 #endif
@@ -861,14 +855,9 @@ void Sys_Printf(const char *fmt, ...)
 Sys_Error
 ================
 */
-void Sys_Error(const char *error, ...)
+void Sys_Error(const char *fmt, ...)
 {
-    va_list     argptr;
-    char        text[MAXERRORMSG];
-
-    va_start(argptr, error);
-    Q_vsnprintf(text, sizeof(text), error, argptr);
-    va_end(argptr);
+    Com_VarArgs(MAXERRORMSG);
 
     errorEntered = true;
 
@@ -880,7 +869,7 @@ void Sys_Error(const char *error, ...)
     Sys_SetConsoleColor(COLOR_RED);
     Sys_Printf("********************\n"
                "FATAL: %s\n"
-               "********************\n", text);
+               "********************\n", msg);
     Sys_SetConsoleColor(COLOR_NONE);
 #endif
 
@@ -894,7 +883,7 @@ void Sys_Error(const char *error, ...)
             Sleep(INFINITE);
         }
 #endif
-        MessageBoxA(NULL, text, PRODUCT " Fatal Error", MB_ICONERROR | MB_OK);
+        MessageBoxA(NULL, msg, PRODUCT " Fatal Error", MB_ICONERROR | MB_OK);
     }
 
     exit(1);
@@ -1028,7 +1017,7 @@ DLL LOADING
 void Sys_FreeLibrary(void *handle)
 {
     if (handle && !FreeLibrary(handle)) {
-        Com_Error(ERR_FATAL, "FreeLibrary failed on %p", handle);
+        Com_Errorf(ERR_FATAL, "FreeLibrary failed on %p", handle);
     }
 }
 
