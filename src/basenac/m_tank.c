@@ -717,7 +717,7 @@ void tank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 1 /*4*/; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -756,28 +756,28 @@ void SP_monster_tank(edict_t *self)
         return;
     }
 
-    self->s.modelindex = gi.modelindex("models/monsters/tank/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/tank/tris.md2");
     VectorSet(self->mins, -32, -32, -16);
     VectorSet(self->maxs, 32, 32, 72);
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
 
-    sound_pain = gi.soundindex("tank/tnkpain2.wav");
-    sound_thud = gi.soundindex("tank/tnkdeth2.wav");
-    sound_idle = gi.soundindex("tank/tnkidle1.wav");
-    sound_die = gi.soundindex("tank/death.wav");
-    sound_step = gi.soundindex("tank/step.wav");
-    sound_windup = gi.soundindex("tank/tnkatck4.wav");
-    sound_strike = gi.soundindex("tank/tnkatck5.wav");
-    sound_sight = gi.soundindex("tank/sight1.wav");
+    sound_pain = SV_SoundIndex("tank/tnkpain2.wav");
+    sound_thud = SV_SoundIndex("tank/tnkdeth2.wav");
+    sound_idle = SV_SoundIndex("tank/tnkidle1.wav");
+    sound_die = SV_SoundIndex("tank/death.wav");
+    sound_step = SV_SoundIndex("tank/step.wav");
+    sound_windup = SV_SoundIndex("tank/tnkatck4.wav");
+    sound_strike = SV_SoundIndex("tank/tnkatck5.wav");
+    sound_sight = SV_SoundIndex("tank/sight1.wav");
 
-    gi.soundindex("tank/tnkatck1.wav");
-    gi.soundindex("tank/tnkatk2a.wav");
-    gi.soundindex("tank/tnkatk2b.wav");
-    gi.soundindex("tank/tnkatk2c.wav");
-    gi.soundindex("tank/tnkatk2d.wav");
-    gi.soundindex("tank/tnkatk2e.wav");
-    gi.soundindex("tank/tnkatck3.wav");
+    SV_SoundIndex("tank/tnkatck1.wav");
+    SV_SoundIndex("tank/tnkatk2a.wav");
+    SV_SoundIndex("tank/tnkatk2b.wav");
+    SV_SoundIndex("tank/tnkatk2c.wav");
+    SV_SoundIndex("tank/tnkatk2d.wav");
+    SV_SoundIndex("tank/tnkatk2e.wav");
+    SV_SoundIndex("tank/tnkatck3.wav");
 
     if (strcmp(self->classname, "monster_tank_commander") == 0) {
         self->health = 1000;

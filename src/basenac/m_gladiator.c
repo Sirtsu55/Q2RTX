@@ -300,7 +300,7 @@ void gladiator_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -332,20 +332,20 @@ void SP_monster_gladiator(edict_t *self)
     }
 
 
-    sound_pain1 = gi.soundindex("gladiator/pain.wav");
-    sound_pain2 = gi.soundindex("gladiator/gldpain2.wav");
-    sound_die = gi.soundindex("gladiator/glddeth2.wav");
-    sound_gun = gi.soundindex("gladiator/railgun.wav");
-    sound_cleaver_swing = gi.soundindex("gladiator/melee1.wav");
-    sound_cleaver_hit = gi.soundindex("gladiator/melee2.wav");
-    sound_cleaver_miss = gi.soundindex("gladiator/melee3.wav");
-    sound_idle = gi.soundindex("gladiator/gldidle1.wav");
-    sound_search = gi.soundindex("gladiator/gldsrch1.wav");
-    sound_sight = gi.soundindex("gladiator/sight.wav");
+    sound_pain1 = SV_SoundIndex("gladiator/pain.wav");
+    sound_pain2 = SV_SoundIndex("gladiator/gldpain2.wav");
+    sound_die = SV_SoundIndex("gladiator/glddeth2.wav");
+    sound_gun = SV_SoundIndex("gladiator/railgun.wav");
+    sound_cleaver_swing = SV_SoundIndex("gladiator/melee1.wav");
+    sound_cleaver_hit = SV_SoundIndex("gladiator/melee2.wav");
+    sound_cleaver_miss = SV_SoundIndex("gladiator/melee3.wav");
+    sound_idle = SV_SoundIndex("gladiator/gldidle1.wav");
+    sound_search = SV_SoundIndex("gladiator/gldsrch1.wav");
+    sound_sight = SV_SoundIndex("gladiator/sight.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/gladiatr/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/gladiatr/tris.md2");
     VectorSet(self->mins, -32, -32, -24);
     VectorSet(self->maxs, 32, 32, 64);
 

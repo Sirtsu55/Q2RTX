@@ -105,6 +105,14 @@ struct edict_s {
 
 //===============================================================
 
+#ifdef GAME_INCLUDE
+typedef enum {
+    TAG_GAME,
+    TAG_LEVEL,
+    TAG_MAX
+} memtag_t;
+#endif
+
 //
 // functions provided by the main engine
 //
@@ -121,7 +129,8 @@ typedef struct {
     // and misc data like the sky definition and cdtrack.
     // All of the current configstrings are sent to clients when
     // they connect, and changes are sent to all connected clients.
-    void (*configstring)(int num, const char *string);
+    void (*SV_SetConfigString)(uint32_t num, const char *string);
+    size_t (*SV_GetConfigString)(uint32_t num, char *buffer, size_t len);
 
     void (* q_noreturn error)(error_type_t type, const char *message);
 
@@ -162,9 +171,10 @@ typedef struct {
     void (*WriteAngle)(float f);
 
     // managed memory allocation
-    void *(*TagMalloc)(unsigned size, unsigned tag);
-    void (*TagFree)(void *block);
-    void (*FreeTags)(unsigned tag);
+    void (*Z_Free)(void *ptr);
+    void *(*Z_Realloc)(void *ptr, size_t size);
+    void *(*Z_TagMalloc)(size_t size, memtag_t tag) q_malloc;
+    void (*Z_FreeTags)(memtag_t tag);
 
     // console variable interaction
     cvar_t *(*cvar)(const char *var_name, const char *value, int flags);
@@ -178,9 +188,7 @@ typedef struct {
 
     // add commands to the server console as if they were typed in
     // for map changing, etc
-    void (*AddCommandString)(const char *text);
-
-    void (*DebugGraph)(float value, int color);
+    void (*Cbuf_AddText)(const char *text);
 } game_import_t;
 
 //

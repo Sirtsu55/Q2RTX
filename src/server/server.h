@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared/shared.h"
 #include "shared/list.h"
-#include "shared/game.h"
 
 #include "common/bsp.h"
 #include "common/cmd.h"
@@ -35,6 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/prompt.h"
 #include "common/protocol.h"
 #include "common/zone.h"
+
+#include "shared/game.h"
 
 #include "client/client.h"
 #include "server/server.h"
@@ -406,7 +407,6 @@ extern cvar_t       *sv_hostname;
 extern cvar_t       *sv_maxclients;
 extern cvar_t       *sv_password;
 extern cvar_t       *sv_reserved_slots;
-extern cvar_t       *sv_airaccelerate;        // development tool
 extern cvar_t       *sv_qwmod;                // atu QW Physics modificator
 extern cvar_t       *sv_enforcetime;
 extern cvar_t       *sv_force_reconnect;

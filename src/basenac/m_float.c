@@ -598,21 +598,21 @@ void SP_monster_floater(edict_t *self)
         return;
     }
 
-    sound_attack2 = gi.soundindex("floater/fltatck2.wav");
-    sound_attack3 = gi.soundindex("floater/fltatck3.wav");
-    sound_death1 = gi.soundindex("floater/fltdeth1.wav");
-    sound_idle = gi.soundindex("floater/fltidle1.wav");
-    sound_pain1 = gi.soundindex("floater/fltpain1.wav");
-    sound_pain2 = gi.soundindex("floater/fltpain2.wav");
-    sound_sight = gi.soundindex("floater/fltsght1.wav");
+    sound_attack2 = SV_SoundIndex("floater/fltatck2.wav");
+    sound_attack3 = SV_SoundIndex("floater/fltatck3.wav");
+    sound_death1 = SV_SoundIndex("floater/fltdeth1.wav");
+    sound_idle = SV_SoundIndex("floater/fltidle1.wav");
+    sound_pain1 = SV_SoundIndex("floater/fltpain1.wav");
+    sound_pain2 = SV_SoundIndex("floater/fltpain2.wav");
+    sound_sight = SV_SoundIndex("floater/fltsght1.wav");
 
-    gi.soundindex("floater/fltatck1.wav");
+    SV_SoundIndex("floater/fltatck1.wav");
 
-    self->s.sound = gi.soundindex("floater/fltsrch1.wav");
+    self->s.sound = SV_SoundIndex("floater/fltsrch1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/float/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/float/tris.md2");
     VectorSet(self->mins, -24, -24, -24);
     VectorSet(self->maxs, 24, 24, 32);
 

@@ -113,7 +113,7 @@ void M_FliesOn(edict_t *self)
     if (self->waterlevel)
         return;
     self->s.effects |= EF_FLIES;
-    self->s.sound = gi.soundindex("infantry/inflies1.wav");
+    self->s.sound = SV_SoundIndex("infantry/inflies1.wav");
     self->think = M_FliesOff;
     self->nextthink = level.framenum + 60 * BASE_FRAMERATE;
 }
@@ -245,7 +245,7 @@ void M_WorldEffects(edict_t *ent)
 
     if (ent->waterlevel == 0) {
         if (ent->flags & FL_INWATER) {
-            gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+            gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
             ent->flags &= ~FL_INWATER;
         }
         return;
@@ -268,13 +268,13 @@ void M_WorldEffects(edict_t *ent)
         if (!(ent->svflags & SVF_DEADMONSTER)) {
             if (ent->watertype & CONTENTS_LAVA)
                 if (random() <= 0.5f)
-                    gi.sound(ent, CHAN_BODY, gi.soundindex("player/lava1.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/lava1.wav"), 1, ATTN_NORM, 0);
                 else
-                    gi.sound(ent, CHAN_BODY, gi.soundindex("player/lava2.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/lava2.wav"), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_SLIME)
-                gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+                gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_WATER)
-                gi.sound(ent, CHAN_BODY, gi.soundindex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+                gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
         }
 
         ent->flags |= FL_INWATER;

@@ -693,9 +693,9 @@ void SV_Physics_Toss(edict_t *ent)
         ent->waterlevel = 0;
 
     if (!wasinwater && isinwater)
-        gi.positioned_sound(old_origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
+        gi.positioned_sound(old_origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
     else if (wasinwater && !isinwater)
-        gi.positioned_sound(ent->s.origin, g_edicts, CHAN_AUTO, gi.soundindex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
+        gi.positioned_sound(ent->s.origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
 
 // move teamslaves
     for (slave = ent->teamchain; slave; slave = slave->teamchain) {
@@ -847,7 +847,7 @@ void SV_Physics_Step(edict_t *ent)
         if (ent->groundentity)
             if (!wasonground)
                 if (hitsound)
-                    gi.sound(ent, 0, gi.soundindex("world/land.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, 0, SV_SoundIndex("world/land.wav"), 1, ATTN_NORM, 0);
     }
 
 // regular thinking

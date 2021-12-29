@@ -382,7 +382,7 @@ static char *ED_NewString(const char *string)
 
     l = strlen(string) + 1;
 
-    newb = gi.TagMalloc(l, TAG_LEVEL);
+    newb = Z_TagMallocz(l, TAG_LEVEL);
 
     new_p = newb;
 
@@ -583,7 +583,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 
     SaveClientData();
 
-    gi.FreeTags(TAG_LEVEL);
+    Z_FreeTags(TAG_LEVEL);
 
     memset(&level, 0, sizeof(level));
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
@@ -860,169 +860,169 @@ void SP_worldspawn(edict_t *ent)
     // make some data visible to the server
 
     if (ent->message && ent->message[0]) {
-        gi.configstring(CS_NAME, ent->message);
+        SV_SetConfigString(CS_NAME, ent->message);
         Q_strlcpy(level.level_name, ent->message, sizeof(level.level_name));
     } else
         Q_strlcpy(level.level_name, level.mapname, sizeof(level.level_name));
 
     if (st.sky && st.sky[0])
-        gi.configstring(CS_SKY, st.sky);
+        SV_SetConfigString(CS_SKY, st.sky);
     else
-        gi.configstring(CS_SKY, "unit1_");
+        SV_SetConfigString(CS_SKY, "unit1_");
 
-    gi.configstring(CS_SKYROTATE, va("%f", st.skyrotate));
+    SV_SetConfigString(CS_SKYROTATE, va("%f", st.skyrotate));
 
-    gi.configstring(CS_SKYAXIS, va("%f %f %f",
+    SV_SetConfigString(CS_SKYAXIS, va("%f %f %f",
                                    st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]));
 
-    gi.configstring(CS_CDTRACK, va("%i", ent->sounds));
+    SV_SetConfigString(CS_CDTRACK, va("%i", ent->sounds));
 
-    gi.configstring(CS_MAXCLIENTS, va("%i", (int)(maxclients->value)));
+    SV_SetConfigString(CS_MAXCLIENTS, va("%i", (int)(maxclients->value)));
 
     // status bar program
     if (deathmatch->value)
-        gi.configstring(CS_STATUSBAR, dm_statusbar);
+        SV_SetConfigString(CS_STATUSBAR, dm_statusbar);
     else
-        gi.configstring(CS_STATUSBAR, single_statusbar);
+        SV_SetConfigString(CS_STATUSBAR, single_statusbar);
 
     //---------------
 
 
     // help icon for statusbar
-    gi.imageindex("i_help");
-    level.pic_health = gi.imageindex("i_health");
-    gi.imageindex("help");
-    gi.imageindex("field_3");
+    SV_ImageIndex("i_help");
+    level.pic_health = SV_ImageIndex("i_health");
+    SV_ImageIndex("help");
+    SV_ImageIndex("field_3");
 
     if (!st.gravity)
         gi.cvar_set("sv_gravity", "800");
     else
         gi.cvar_set("sv_gravity", st.gravity);
 
-    snd_fry = gi.soundindex("player/fry.wav");  // standing in lava / slime
+    snd_fry = SV_SoundIndex("player/fry.wav");  // standing in lava / slime
 
     PrecacheItem(FindItem("Axe"));
 
-    gi.soundindex("player/lava1.wav");
-    gi.soundindex("player/lava2.wav");
+    SV_SoundIndex("player/lava1.wav");
+    SV_SoundIndex("player/lava2.wav");
 
-    gi.soundindex("misc/pc_up.wav");
-    gi.soundindex("misc/talk1.wav");
+    SV_SoundIndex("misc/pc_up.wav");
+    SV_SoundIndex("misc/talk1.wav");
 
-    gi.soundindex("misc/udeath.wav");
+    SV_SoundIndex("misc/udeath.wav");
 
     // gibs
-    gi.soundindex("items/respawn1.wav");
+    SV_SoundIndex("items/respawn1.wav");
 
     // sexed sounds
-    gi.soundindex("*death1.wav");
-    gi.soundindex("*death2.wav");
-    gi.soundindex("*death3.wav");
-    gi.soundindex("*death4.wav");
-    gi.soundindex("*fall1.wav");
-    gi.soundindex("*fall2.wav");
-    gi.soundindex("*gurp1.wav");        // drowning damage
-    gi.soundindex("*gurp2.wav");
-    gi.soundindex("*jump1.wav");        // player jump
-    gi.soundindex("*pain25_1.wav");
-    gi.soundindex("*pain25_2.wav");
-    gi.soundindex("*pain50_1.wav");
-    gi.soundindex("*pain50_2.wav");
-    gi.soundindex("*pain75_1.wav");
-    gi.soundindex("*pain75_2.wav");
-    gi.soundindex("*pain100_1.wav");
-    gi.soundindex("*pain100_2.wav");
+    SV_SoundIndex("*death1.wav");
+    SV_SoundIndex("*death2.wav");
+    SV_SoundIndex("*death3.wav");
+    SV_SoundIndex("*death4.wav");
+    SV_SoundIndex("*fall1.wav");
+    SV_SoundIndex("*fall2.wav");
+    SV_SoundIndex("*gurp1.wav");        // drowning damage
+    SV_SoundIndex("*gurp2.wav");
+    SV_SoundIndex("*jump1.wav");        // player jump
+    SV_SoundIndex("*pain25_1.wav");
+    SV_SoundIndex("*pain25_2.wav");
+    SV_SoundIndex("*pain50_1.wav");
+    SV_SoundIndex("*pain50_2.wav");
+    SV_SoundIndex("*pain75_1.wav");
+    SV_SoundIndex("*pain75_2.wav");
+    SV_SoundIndex("*pain100_1.wav");
+    SV_SoundIndex("*pain100_2.wav");
 
     // sexed models
     // THIS ORDER MUST MATCH THE DEFINES IN g_local.h
-    // you can add more, max 15
-    gi.modelindex("#w_blaster.md2");
-    gi.modelindex("#w_shotgun.md2");
-    gi.modelindex("#w_sshotgun.md2");
-    gi.modelindex("#w_machinegun.md2");
-    gi.modelindex("#w_chaingun.md2");
-    gi.modelindex("#a_grenades.md2");
-    gi.modelindex("#w_glauncher.md2");
-    gi.modelindex("#w_rlauncher.md2");
-    gi.modelindex("#w_hyperblaster.md2");
-    gi.modelindex("#w_railgun.md2");
-    gi.modelindex("#w_bfg.md2");
+    // you can add more, max 21
+    SV_ModelIndex("#w_blaster.md2");
+    SV_ModelIndex("#w_shotgun.md2");
+    SV_ModelIndex("#w_sshotgun.md2");
+    SV_ModelIndex("#w_machinegun.md2");
+    SV_ModelIndex("#w_chaingun.md2");
+    SV_ModelIndex("#a_grenades.md2");
+    SV_ModelIndex("#w_glauncher.md2");
+    SV_ModelIndex("#w_rlauncher.md2");
+    SV_ModelIndex("#w_hyperblaster.md2");
+    SV_ModelIndex("#w_railgun.md2");
+    SV_ModelIndex("#w_bfg.md2");
 
     //-------------------
 
-    gi.soundindex("player/gasp1.wav");      // gasping for air
-    gi.soundindex("player/gasp2.wav");      // head breaking surface, not gasping
+    SV_SoundIndex("player/gasp1.wav");      // gasping for air
+    SV_SoundIndex("player/gasp2.wav");      // head breaking surface, not gasping
 
-    gi.soundindex("player/watr_in.wav");    // feet hitting water
-    gi.soundindex("player/watr_out.wav");   // feet leaving water
+    SV_SoundIndex("player/watr_in.wav");    // feet hitting water
+    SV_SoundIndex("player/watr_out.wav");   // feet leaving water
 
-    gi.soundindex("player/watr_un.wav");    // head going underwater
+    SV_SoundIndex("player/watr_un.wav");    // head going underwater
 
-    gi.soundindex("player/u_breath1.wav");
-    gi.soundindex("player/u_breath2.wav");
+    SV_SoundIndex("player/u_breath1.wav");
+    SV_SoundIndex("player/u_breath2.wav");
 
-    gi.soundindex("items/pkup.wav");        // bonus item pickup
-    gi.soundindex("world/land.wav");        // landing thud
-    gi.soundindex("misc/h2ohit1.wav");      // landing splash
+    SV_SoundIndex("items/pkup.wav");        // bonus item pickup
+    SV_SoundIndex("world/land.wav");        // landing thud
+    SV_SoundIndex("misc/h2ohit1.wav");      // landing splash
 
-    gi.soundindex("items/damage.wav");
-    gi.soundindex("items/protect.wav");
-    gi.soundindex("items/protect4.wav");
-    gi.soundindex("weapons/noammo.wav");
+    SV_SoundIndex("items/damage.wav");
+    SV_SoundIndex("items/protect.wav");
+    SV_SoundIndex("items/protect4.wav");
+    SV_SoundIndex("weapons/noammo.wav");
 
-    gi.soundindex("infantry/inflies1.wav");
+    SV_SoundIndex("infantry/inflies1.wav");
 
-    sm_meat_index = gi.modelindex("models/objects/gibs/sm_meat/tris.md2");
-    gi.modelindex("models/objects/gibs/arm/tris.md2");
-    gi.modelindex("models/objects/gibs/bone/tris.md2");
-    gi.modelindex("models/objects/gibs/bone2/tris.md2");
-    gi.modelindex("models/objects/gibs/chest/tris.md2");
-    gi.modelindex("models/objects/gibs/skull/tris.md2");
-    gi.modelindex("models/objects/gibs/head2/tris.md2");
+    sm_meat_index = SV_ModelIndex("models/objects/gibs/sm_meat/tris.md2");
+    SV_ModelIndex("models/objects/gibs/arm/tris.md2");
+    SV_ModelIndex("models/objects/gibs/bone/tris.md2");
+    SV_ModelIndex("models/objects/gibs/bone2/tris.md2");
+    SV_ModelIndex("models/objects/gibs/chest/tris.md2");
+    SV_ModelIndex("models/objects/gibs/skull/tris.md2");
+    SV_ModelIndex("models/objects/gibs/head2/tris.md2");
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.
 //
 
     // 0 normal
-    gi.configstring(CS_LIGHTS + 0, "m");
+    SV_SetConfigString(CS_LIGHTS + 0, "m");
 
     // 1 FLICKER (first variety)
-    gi.configstring(CS_LIGHTS + 1, "mmnmmommommnonmmonqnmmo");
+    SV_SetConfigString(CS_LIGHTS + 1, "mmnmmommommnonmmonqnmmo");
 
     // 2 SLOW STRONG PULSE
-    gi.configstring(CS_LIGHTS + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
+    SV_SetConfigString(CS_LIGHTS + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
 
     // 3 CANDLE (first variety)
-    gi.configstring(CS_LIGHTS + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
+    SV_SetConfigString(CS_LIGHTS + 3, "mmmmmaaaaammmmmaaaaaabcdefgabcdefg");
 
     // 4 FAST STROBE
-    gi.configstring(CS_LIGHTS + 4, "mamamamamama");
+    SV_SetConfigString(CS_LIGHTS + 4, "mamamamamama");
 
     // 5 GENTLE PULSE 1
-    gi.configstring(CS_LIGHTS + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
+    SV_SetConfigString(CS_LIGHTS + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
 
     // 6 FLICKER (second variety)
-    gi.configstring(CS_LIGHTS + 6, "nmonqnmomnmomomno");
+    SV_SetConfigString(CS_LIGHTS + 6, "nmonqnmomnmomomno");
 
     // 7 CANDLE (second variety)
-    gi.configstring(CS_LIGHTS + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
+    SV_SetConfigString(CS_LIGHTS + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
 
     // 8 CANDLE (third variety)
-    gi.configstring(CS_LIGHTS + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
+    SV_SetConfigString(CS_LIGHTS + 8, "mmmaaammmaaammmabcdefaaaammmmabcdefmmmaaaa");
 
     // 9 SLOW STROBE (fourth variety)
-    gi.configstring(CS_LIGHTS + 9, "aaaaaaaazzzzzzzz");
+    SV_SetConfigString(CS_LIGHTS + 9, "aaaaaaaazzzzzzzz");
 
     // 10 FLUORESCENT FLICKER
-    gi.configstring(CS_LIGHTS + 10, "mmamammmmammamamaaamammma");
+    SV_SetConfigString(CS_LIGHTS + 10, "mmamammmmammamamaaamammma");
 
     // 11 SLOW PULSE NOT FADE TO BLACK
-    gi.configstring(CS_LIGHTS + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
+    SV_SetConfigString(CS_LIGHTS + 11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
 
     // styles 32-62 are assigned by the light program for switchable lights
 
     // 63 testing
-    gi.configstring(CS_LIGHTS + 63, "a");
+    SV_SetConfigString(CS_LIGHTS + 63, "a");
 }
 

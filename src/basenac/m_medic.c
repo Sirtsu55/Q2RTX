@@ -402,7 +402,7 @@ void medic_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -690,22 +690,22 @@ void SP_monster_medic(edict_t *self)
         return;
     }
 
-    sound_idle1 = gi.soundindex("medic/idle.wav");
-    sound_pain1 = gi.soundindex("medic/medpain1.wav");
-    sound_pain2 = gi.soundindex("medic/medpain2.wav");
-    sound_die = gi.soundindex("medic/meddeth1.wav");
-    sound_sight = gi.soundindex("medic/medsght1.wav");
-    sound_search = gi.soundindex("medic/medsrch1.wav");
-    sound_hook_launch = gi.soundindex("medic/medatck2.wav");
-    sound_hook_hit = gi.soundindex("medic/medatck3.wav");
-    sound_hook_heal = gi.soundindex("medic/medatck4.wav");
-    sound_hook_retract = gi.soundindex("medic/medatck5.wav");
+    sound_idle1 = SV_SoundIndex("medic/idle.wav");
+    sound_pain1 = SV_SoundIndex("medic/medpain1.wav");
+    sound_pain2 = SV_SoundIndex("medic/medpain2.wav");
+    sound_die = SV_SoundIndex("medic/meddeth1.wav");
+    sound_sight = SV_SoundIndex("medic/medsght1.wav");
+    sound_search = SV_SoundIndex("medic/medsrch1.wav");
+    sound_hook_launch = SV_SoundIndex("medic/medatck2.wav");
+    sound_hook_hit = SV_SoundIndex("medic/medatck3.wav");
+    sound_hook_heal = SV_SoundIndex("medic/medatck4.wav");
+    sound_hook_retract = SV_SoundIndex("medic/medatck5.wav");
 
-    gi.soundindex("medic/medatck1.wav");
+    SV_SoundIndex("medic/medatck1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/medic/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/medic/tris.md2");
     VectorSet(self->mins, -24, -24, -24);
     VectorSet(self->maxs, 24, 24, 32);
 

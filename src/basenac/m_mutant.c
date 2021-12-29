@@ -548,7 +548,7 @@ void mutant_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     int     n;
 
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -586,23 +586,23 @@ void SP_monster_mutant(edict_t *self)
         return;
     }
 
-    sound_swing = gi.soundindex("mutant/mutatck1.wav");
-    sound_hit = gi.soundindex("mutant/mutatck2.wav");
-    sound_hit2 = gi.soundindex("mutant/mutatck3.wav");
-    sound_death = gi.soundindex("mutant/mutdeth1.wav");
-    sound_idle = gi.soundindex("mutant/mutidle1.wav");
-    sound_pain1 = gi.soundindex("mutant/mutpain1.wav");
-    sound_pain2 = gi.soundindex("mutant/mutpain2.wav");
-    sound_sight = gi.soundindex("mutant/mutsght1.wav");
-    sound_search = gi.soundindex("mutant/mutsrch1.wav");
-    sound_step1 = gi.soundindex("mutant/step1.wav");
-    sound_step2 = gi.soundindex("mutant/step2.wav");
-    sound_step3 = gi.soundindex("mutant/step3.wav");
-    sound_thud = gi.soundindex("mutant/thud1.wav");
+    sound_swing = SV_SoundIndex("mutant/mutatck1.wav");
+    sound_hit = SV_SoundIndex("mutant/mutatck2.wav");
+    sound_hit2 = SV_SoundIndex("mutant/mutatck3.wav");
+    sound_death = SV_SoundIndex("mutant/mutdeth1.wav");
+    sound_idle = SV_SoundIndex("mutant/mutidle1.wav");
+    sound_pain1 = SV_SoundIndex("mutant/mutpain1.wav");
+    sound_pain2 = SV_SoundIndex("mutant/mutpain2.wav");
+    sound_sight = SV_SoundIndex("mutant/mutsght1.wav");
+    sound_search = SV_SoundIndex("mutant/mutsrch1.wav");
+    sound_step1 = SV_SoundIndex("mutant/step1.wav");
+    sound_step2 = SV_SoundIndex("mutant/step2.wav");
+    sound_step3 = SV_SoundIndex("mutant/step3.wav");
+    sound_thud = SV_SoundIndex("mutant/thud1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/mutant/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/mutant/tris.md2");
     VectorSet(self->mins, -32, -32, -24);
     VectorSet(self->maxs, 32, 32, 48);
 

@@ -523,7 +523,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
     if (self->health < -40) {
         // gib
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_BODY, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
@@ -554,7 +554,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
                     self->client->anim_end = FRAME_death308;
                     break;
                 }
-            gi.sound(self, CHAN_VOICE, gi.soundindex(va("*death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_NORM, 0);
+            gi.sound(self, CHAN_VOICE, SV_SoundIndex(va("*death%i.wav", (Q_rand() % 4) + 1)), 1, ATTN_NORM, 0);
         }
     }
 
@@ -882,7 +882,7 @@ void body_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
     int n;
 
     if (self->health < -40) {
-        gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_BODY, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         self->s.origin[2] -= 48;
@@ -957,7 +957,7 @@ void respawn(edict_t *self)
     }
 
     // restart the entire server
-    gi.AddCommandString("pushmenu loadgame\n");
+    Cbuf_AddText("pushmenu loadgame\n");
 }
 
 /*
@@ -1148,7 +1148,7 @@ void PutClientInServer(edict_t *ent)
             client->ps.fov = 160;
     }
 
-    client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
+    client->ps.gunindex = SV_ModelIndex(client->pers.weapon->view_model);
 
     // clear entity state values
     ent->s.effects = 0;
@@ -1323,7 +1323,7 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo)
     playernum = ent - g_edicts - 1;
 
     // combine name and skin into a configstring
-    gi.configstring(CS_PLAYERSKINS + playernum, va("%s\\%s", ent->client->pers.netname, s));
+    SV_SetConfigString(CS_PLAYERSKINS + playernum, va("%s\\%s", ent->client->pers.netname, s));
 
     // fov
     if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV)) {
@@ -1459,10 +1459,6 @@ void ClientDisconnect(edict_t *ent)
     ent->inuse = false;
     ent->classname = "disconnected";
     ent->client->pers.connected = false;
-
-    // FIXME: don't break skins on corpses, etc
-    //playernum = ent-g_edicts-1;
-    //gi.configstring (CS_PLAYERSKINS+playernum, "");
 }
 
 
@@ -1573,7 +1569,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
         VectorCopy(ucmd->angles, client->resp.cmd_angles);
 
         if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0)) {
-            gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, (int) Q_rand_uniform(10) - 5);
+            gi.sound(ent, CHAN_VOICE, SV_SoundIndex("*jump1.wav"), 1, ATTN_NORM, (int) Q_rand_uniform(10) - 5);
             PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
         }
 

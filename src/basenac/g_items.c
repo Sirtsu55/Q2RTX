@@ -315,7 +315,7 @@ void Use_Quad(edict_t *ent, gitem_t *item)
     else
         ent->client->quad_framenum = level.framenum + timeout;
 
-    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
+    gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
@@ -330,7 +330,7 @@ void Use_Breather(edict_t *ent, gitem_t *item)
     else
         ent->client->breather_framenum = level.framenum + 300;
 
-//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
+//  gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -345,7 +345,7 @@ void Use_Envirosuit(edict_t *ent, gitem_t *item)
     else
         ent->client->enviro_framenum = level.framenum + 300;
 
-//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
+//  gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -360,7 +360,7 @@ void    Use_Invulnerability(edict_t *ent, gitem_t *item)
     else
         ent->client->invincible_framenum = level.framenum + 300;
 
-    gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect.wav"), 1, ATTN_NORM, 0);
+    gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/protect.wav"), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
@@ -371,7 +371,7 @@ void    Use_Silencer(edict_t *ent, gitem_t *item)
     ValidateSelectedItem(ent);
     ent->client->silencer_shots += 30;
 
-//  gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM);
+//  gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -636,7 +636,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
 
     if (ent->flags & FL_POWER_ARMOR) {
         ent->flags &= ~FL_POWER_ARMOR;
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
+        gi.sound(ent, CHAN_AUTO, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
     } else {
         index = ITEM_INDEX(FindItem("cells"));
         if (!ent->client->pers.inventory[index]) {
@@ -644,7 +644,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
             return;
         }
         ent->flags |= FL_POWER_ARMOR;
-        gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM, 0);
+        gi.sound(ent, CHAN_AUTO, SV_SoundIndex("misc/power1.wav"), 1, ATTN_NORM, 0);
     }
 }
 
@@ -699,7 +699,7 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
         other->client->bonus_alpha = 0.25f;
 
         // show icon and name on status bar
-        other->client->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(ent->item->icon);
+        other->client->ps.stats[STAT_PICKUP_ICON] = SV_ImageIndex(ent->item->icon);
         other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(ent->item);
         other->client->pickup_msg_framenum = level.framenum + 3.0f * BASE_FRAMERATE;
 
@@ -709,15 +709,15 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
         if (ent->item->pickup == Pickup_Health) {
             if (ent->count == 2)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/s_health.wav"), 1, ATTN_NORM, 0);
             else if (ent->count == 10)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/n_health.wav"), 1, ATTN_NORM, 0);
             else if (ent->count == 25)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/l_health.wav"), 1, ATTN_NORM, 0);
             else // (ent->count == 100)
-                gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
+                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/m_health.wav"), 1, ATTN_NORM, 0);
         } else if (ent->item->pickup_sound) {
-            gi.sound(other, CHAN_ITEM, gi.soundindex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
+            gi.sound(other, CHAN_ITEM, SV_SoundIndex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
         }
     }
 
@@ -906,13 +906,13 @@ void PrecacheItem(gitem_t *it)
         return;
 
     if (it->pickup_sound)
-        gi.soundindex(it->pickup_sound);
+        SV_SoundIndex(it->pickup_sound);
     if (it->world_model)
-        gi.modelindex(it->world_model);
+        SV_ModelIndex(it->world_model);
     if (it->view_model)
-        gi.modelindex(it->view_model);
+        SV_ModelIndex(it->view_model);
     if (it->icon)
-        gi.imageindex(it->icon);
+        SV_ImageIndex(it->icon);
 
     // parse everything for its ammo
     if (it->ammo && it->ammo[0]) {
@@ -942,14 +942,13 @@ void PrecacheItem(gitem_t *it)
         // determine type based on extension
         if (!strcmp(data + len - 3, "md2") ||
             !strcmp(data + len - 3, "md3") ||
-            !strcmp(data + len - 3, "iqm"))
-            gi.modelindex(data);
-        else if (!strcmp(data + len - 3, "sp2"))
-            gi.modelindex(data);
+            !strcmp(data + len - 3, "iqm") ||
+            !strcmp(data + len - 3, "sp2"))
+            SV_ModelIndex(data);
         else if (!strcmp(data + len - 3, "wav"))
-            gi.soundindex(data);
+            SV_SoundIndex(data);
         else if (!strcmp(data + len - 3, "pcx"))
-            gi.imageindex(data);
+            SV_ImageIndex(data);
     }
 }
 
@@ -1018,7 +1017,7 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     ent->s.effects = item->world_model_flags;
     ent->s.renderfx = RF_GLOW;
     if (ent->model)
-        gi.modelindex(ent->model);
+        SV_ModelIndex(ent->model);
 }
 
 //======================================================================
@@ -1925,7 +1924,7 @@ void SP_item_health(edict_t *self)
     self->model = "models/items/healing/medium/tris.md2";
     self->count = 10;
     SpawnItem(self, FindItem("Health"));
-    gi.soundindex("items/n_health.wav");
+    SV_SoundIndex("items/n_health.wav");
 }
 
 /*QUAKED item_health_small (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1941,7 +1940,7 @@ void SP_item_health_small(edict_t *self)
     self->count = 2;
     SpawnItem(self, FindItem("Health"));
     self->style = HEALTH_IGNORE_MAX;
-    gi.soundindex("items/s_health.wav");
+    SV_SoundIndex("items/s_health.wav");
 }
 
 /*QUAKED item_health_large (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1956,7 +1955,7 @@ void SP_item_health_large(edict_t *self)
     self->model = "models/items/healing/large/tris.md2";
     self->count = 25;
     SpawnItem(self, FindItem("Health"));
-    gi.soundindex("items/l_health.wav");
+    SV_SoundIndex("items/l_health.wav");
 }
 
 /*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1971,7 +1970,7 @@ void SP_item_health_mega(edict_t *self)
     self->model = "models/items/mega_h/tris.md2";
     self->count = 100;
     SpawnItem(self, FindItem("Health"));
-    gi.soundindex("items/m_health.wav");
+    SV_SoundIndex("items/m_health.wav");
     self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
 }
 
@@ -1997,7 +1996,7 @@ void SetItemNames(void)
 
     for (i = 0 ; i < game.num_items ; i++) {
         it = &itemlist[i];
-        gi.configstring(CS_ITEMS + i, it->pickup_name);
+        SV_SetConfigString(CS_ITEMS + i, it->pickup_name);
     }
 
     jacket_armor_index = ITEM_INDEX(FindItem("Jacket Armor"));

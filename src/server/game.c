@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 game_export_t    *ge;
 
-static void PF_configstring(int index, const char *val);
+static void PF_SetConfigString(uint32_t index, const char *val);
 
 /*
 ================
@@ -51,7 +51,11 @@ static int PF_FindIndex(const char *name, int start, int max, const char *func)
         Com_Errorf(ERR_DROP, "%s(%s): overflow", func, name);
     }
 
-    PF_configstring(i + start, name);
+    if (sv.state != ss_loading) {
+        Com_WPrintf("%s: indexed %s at runtime\n", func, name);
+    }
+
+    PF_SetConfigString(i + start, name);
 
     return i;
 }
@@ -280,7 +284,7 @@ PF_configstring
 If game is actively running, broadcasts configstring change.
 ===============
 */
-static void PF_configstring(int index, const char *val)
+static void PF_SetConfigString(uint32_t index, const char *val)
 {
     size_t len, maxlen;
     client_t *client;
@@ -297,7 +301,7 @@ static void PF_configstring(int index, const char *val)
     if (!val)
         val = "";
 
-    // error out entirely if it exceedes array bounds
+    // error out entirely if it exceeds array bounds
     len = strlen(val);
     maxlen = (MAX_CONFIGSTRINGS - index) * MAX_QPATH;
     if (len >= maxlen) {
@@ -342,6 +346,14 @@ static void PF_configstring(int index, const char *val)
     }
 
     SZ_Clear(&msg_write);
+}
+
+static size_t PF_GetConfigString(uint32_t index, char *buffer, size_t len)
+{
+    if (index < 0 || index >= MAX_CONFIGSTRINGS)
+        Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
+
+    return Q_strlcpy(buffer, sv.configstrings[index], len);
 }
 
 static void PF_WriteFloat(float f)
@@ -597,7 +609,7 @@ static cvar_t *PF_cvar(const char *name, const char *value, int flags)
     return Cvar_Get(name, value, flags | CVAR_GAME);
 }
 
-static void PF_AddCommandString(const char *string)
+static void PF_Cbuf_AddText(const char *string)
 {
     Cbuf_AddText(&cmd_buffer, string);
 }
@@ -618,7 +630,7 @@ static qboolean PF_AreasConnected(int area1, int area2)
     return CM_AreasConnected(&sv.cm, area1, area2);
 }
 
-static void *PF_TagMalloc(unsigned size, unsigned tag)
+static void *PF_TagMalloc(size_t size, memtag_t tag)
 {
     if (tag + TAG_MAX < tag) {
         Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
@@ -629,16 +641,12 @@ static void *PF_TagMalloc(unsigned size, unsigned tag)
     return memset(Z_TagMalloc(size, tag + TAG_MAX), 0, size);
 }
 
-static void PF_FreeTags(unsigned tag)
+static void PF_FreeTags(memtag_t tag)
 {
     if (tag + TAG_MAX < tag) {
         Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
     }
     Z_FreeTags(tag + TAG_MAX);
-}
-
-static void PF_DebugGraph(float value, int color)
-{
 }
 
 //==============================================
@@ -759,7 +767,9 @@ void SV_InitGameProgs(void)
     import.soundindex = PF_SoundIndex;
     import.imageindex = PF_ImageIndex;
 
-    import.configstring = PF_configstring;
+    import.SV_SetConfigString = PF_SetConfigString;
+    import.SV_GetConfigString = PF_GetConfigString;
+
     import.sound = PF_StartSound;
     import.positioned_sound = SV_StartSound;
 
@@ -773,9 +783,10 @@ void SV_InitGameProgs(void)
     import.WriteDir = MSG_WriteDir;
     import.WriteAngle = MSG_WriteAngle;
 
-    import.TagMalloc = PF_TagMalloc;
-    import.TagFree = Z_Free;
-    import.FreeTags = PF_FreeTags;
+    import.Z_Free = Z_Free;
+    import.Z_Realloc = Z_Realloc;
+    import.Z_TagMalloc = PF_TagMalloc;
+    import.Z_FreeTags = PF_FreeTags;
 
     import.cvar = PF_cvar;
     import.cvar_set = Cvar_UserSet;
@@ -785,9 +796,8 @@ void SV_InitGameProgs(void)
     import.argv = Cmd_Argv;
     // original Cmd_Args() did actually return raw arguments
     import.args = Cmd_RawArgs;
-    import.AddCommandString = PF_AddCommandString;
+    import.Cbuf_AddText = PF_Cbuf_AddText;
 
-    import.DebugGraph = PF_DebugGraph;
     import.SetAreaPortalState = PF_SetAreaPortalState;
     import.AreasConnected = PF_AreasConnected;
 

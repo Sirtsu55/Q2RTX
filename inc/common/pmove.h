@@ -30,9 +30,6 @@ Common between server and client so prediction matches
 */
 
 typedef struct {
-    bool        qwmode;
-    bool        airaccelerate;
-    bool        flyhack;
     float       speedmult;
     float       watermult;
     float       maxspeed;
@@ -44,6 +41,5 @@ typedef struct {
 void Pmove(pmove_t *pmove, pmoveParams_t *params);
 
 void PmoveInit(pmoveParams_t *pmp);
-void PmoveEnableQW(pmoveParams_t *pmp);
 
 #endif // PMOVE_H

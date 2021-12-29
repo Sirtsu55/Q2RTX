@@ -158,16 +158,16 @@ void Cmd_Give_f(edict_t *ent)
         return;
     }
 
-    name = gi.args();
+    name = Cmd_Args();
 
     if (Q_stricmp(name, "all") == 0)
         give_all = true;
     else
         give_all = false;
 
-    if (give_all || Q_stricmp(gi.argv(1), "health") == 0) {
-        if (gi.argc() == 3)
-            ent->health = atoi(gi.argv(2));
+    if (give_all || Q_stricmp(Cmd_Argv(1), "health") == 0) {
+        if (Cmd_Argc() == 3)
+            ent->health = atoi(Cmd_Argv(2));
         else
             ent->health = ent->max_health;
         if (!give_all)
@@ -244,7 +244,7 @@ void Cmd_Give_f(edict_t *ent)
 
     it = FindItem(name);
     if (!it) {
-        name = gi.argv(1);
+        name = Cmd_Argv(1);
         it = FindItem(name);
         if (!it) {
             SV_ClientPrint(ent, PRINT_HIGH, "unknown item\n");
@@ -260,8 +260,8 @@ void Cmd_Give_f(edict_t *ent)
     index = ITEM_INDEX(it);
 
     if (it->flags & IT_AMMO) {
-        if (gi.argc() == 3)
-            ent->client->pers.inventory[index] = atoi(gi.argv(2));
+        if (Cmd_Argc() == 3)
+            ent->client->pers.inventory[index] = atoi(Cmd_Argv(2));
         else
             ent->client->pers.inventory[index] += it->quantity;
     } else {
@@ -360,7 +360,7 @@ void Cmd_Use_f(edict_t *ent)
     gitem_t     *it;
     char        *s;
 
-    s = gi.args();
+    s = Cmd_Args();
     it = FindItem(s);
     if (!it) {
         SV_ClientPrintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -393,7 +393,7 @@ void Cmd_Drop_f(edict_t *ent)
     gitem_t     *it;
     char        *s;
 
-    s = gi.args();
+    s = Cmd_Args();
     it = FindItem(s);
     if (!it) {
         SV_ClientPrintf(ent, PRINT_HIGH, "unknown item: %s\n", s);
@@ -682,7 +682,7 @@ void Cmd_Wave_f(edict_t *ent)
 {
     int     i;
 
-    i = atoi(gi.argv(1));
+    i = atoi(Cmd_Argv(1));
 
     // can't wave when ducked
     if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -736,7 +736,7 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
     char    text[2048];
     gclient_t *cl;
 
-    if (gi.argc() < 2 && !arg0)
+    if (Cmd_Argc() < 2 && !arg0)
         return;
 
     if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
@@ -748,11 +748,11 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
         Q_snprintf(text, sizeof(text), "%s: ", ent->client->pers.netname);
 
     if (arg0) {
-        strcat(text, gi.argv(0));
+        strcat(text, Cmd_Argv(0));
         strcat(text, " ");
-        strcat(text, gi.args());
+        strcat(text, Cmd_Args());
     } else {
-        p = gi.args();
+        p = Cmd_Args();
 
         if (*p == '"') {
             p++;
@@ -850,7 +850,7 @@ void ClientCommand(edict_t *ent)
     if (!ent->client)
         return;     // not fully in game yet
 
-    cmd = gi.argv(0);
+    cmd = Cmd_Argv(0);
 
     if (Q_stricmp(cmd, "players") == 0) {
         Cmd_Players_f(ent);

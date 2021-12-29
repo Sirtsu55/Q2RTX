@@ -163,12 +163,6 @@ void SV_SpawnServer(mapcmd_t *cmd)
     Q_strlcpy(sv.name, cmd->server, sizeof(sv.name));
     Q_strlcpy(sv.mapcmd, cmd->buffer, sizeof(sv.mapcmd));
 
-    if (Cvar_VariableInteger("deathmatch")) {
-        sprintf(sv.configstrings[CS_AIRACCEL], "%d", sv_airaccelerate->integer);
-    } else {
-        strcpy(sv.configstrings[CS_AIRACCEL], "0");
-    }
-
     resolve_masters();
 
     if (cmd->state == ss_game) {

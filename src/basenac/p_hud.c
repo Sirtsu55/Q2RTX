@@ -368,7 +368,7 @@ void G_SetStats(edict_t *ent)
         ent->client->ps.stats[STAT_AMMO] = 0;
     } else {
         item = &itemlist[ent->client->ammo_index];
-        ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex(item->icon);
+        ent->client->ps.stats[STAT_AMMO_ICON] = SV_ImageIndex(item->icon);
         ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
     }
 
@@ -381,7 +381,7 @@ void G_SetStats(edict_t *ent)
         if (cells == 0) {
             // ran out of cells for power armor
             ent->flags &= ~FL_POWER_ARMOR;
-            gi.sound(ent, CHAN_ITEM, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
+            gi.sound(ent, CHAN_ITEM, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
             power_armor_type = 0;;
         }
     }
@@ -389,11 +389,11 @@ void G_SetStats(edict_t *ent)
     index = ArmorIndex(ent);
     if (power_armor_type && (!index || (level.framenum & 8))) {
         // flash between power armor and other armor icon
-        ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex("i_powershield");
+        ent->client->ps.stats[STAT_ARMOR_ICON] = SV_ImageIndex("i_powershield");
         ent->client->ps.stats[STAT_ARMOR] = cells;
     } else if (index) {
         item = GetItemByIndex(index);
-        ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex(item->icon);
+        ent->client->ps.stats[STAT_ARMOR_ICON] = SV_ImageIndex(item->icon);
         ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
     } else {
         ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
@@ -412,16 +412,16 @@ void G_SetStats(edict_t *ent)
     // timers
     //
     if (ent->client->quad_framenum > level.framenum) {
-        ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_quad");
+        ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_quad");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum) / 10;
     } else if (ent->client->invincible_framenum > level.framenum) {
-        ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_invulnerability");
+        ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_invulnerability");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum) / 10;
     } else if (ent->client->enviro_framenum > level.framenum) {
-        ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_envirosuit");
+        ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_envirosuit");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum) / 10;
     } else if (ent->client->breather_framenum > level.framenum) {
-        ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex("p_rebreather");
+        ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_rebreather");
         ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum) / 10;
     } else {
         ent->client->ps.stats[STAT_TIMER_ICON] = 0;
@@ -434,7 +434,7 @@ void G_SetStats(edict_t *ent)
     if (ent->client->pers.selected_item == -1)
         ent->client->ps.stats[STAT_SELECTED_ICON] = 0;
     else
-        ent->client->ps.stats[STAT_SELECTED_ICON] = gi.imageindex(itemlist[ent->client->pers.selected_item].icon);
+        ent->client->ps.stats[STAT_SELECTED_ICON] = SV_ImageIndex(itemlist[ent->client->pers.selected_item].icon);
 
     ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
 
@@ -465,10 +465,10 @@ void G_SetStats(edict_t *ent)
     // help icon / current weapon if not shown
     //
     if (ent->client->pers.helpchanged && (level.framenum & 8))
-        ent->client->ps.stats[STAT_HELPICON] = gi.imageindex("i_help");
+        ent->client->ps.stats[STAT_HELPICON] = SV_ImageIndex("i_help");
     else if ((ent->client->pers.hand == CENTER_HANDED || ent->client->ps.fov > 91)
              && ent->client->pers.weapon)
-        ent->client->ps.stats[STAT_HELPICON] = gi.imageindex(ent->client->pers.weapon->icon);
+        ent->client->ps.stats[STAT_HELPICON] = SV_ImageIndex(ent->client->pers.weapon->icon);
     else
         ent->client->ps.stats[STAT_HELPICON] = 0;
 

@@ -321,7 +321,7 @@ void flipper_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 2; n++)
@@ -350,18 +350,18 @@ void SP_monster_flipper(edict_t *self)
         return;
     }
 
-    sound_pain1     = gi.soundindex("flipper/flppain1.wav");
-    sound_pain2     = gi.soundindex("flipper/flppain2.wav");
-    sound_death     = gi.soundindex("flipper/flpdeth1.wav");
-    sound_chomp     = gi.soundindex("flipper/flpatck1.wav");
-    sound_attack    = gi.soundindex("flipper/flpatck2.wav");
-    sound_idle      = gi.soundindex("flipper/flpidle1.wav");
-    sound_search    = gi.soundindex("flipper/flpsrch1.wav");
-    sound_sight     = gi.soundindex("flipper/flpsght1.wav");
+    sound_pain1     = SV_SoundIndex("flipper/flppain1.wav");
+    sound_pain2     = SV_SoundIndex("flipper/flppain2.wav");
+    sound_death     = SV_SoundIndex("flipper/flpdeth1.wav");
+    sound_chomp     = SV_SoundIndex("flipper/flpatck1.wav");
+    sound_attack    = SV_SoundIndex("flipper/flpatck2.wav");
+    sound_idle      = SV_SoundIndex("flipper/flpidle1.wav");
+    sound_search    = SV_SoundIndex("flipper/flpsrch1.wav");
+    sound_sight     = SV_SoundIndex("flipper/flpsght1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/flipper/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/flipper/tris.md2");
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 32);
 

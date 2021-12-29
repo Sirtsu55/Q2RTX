@@ -428,7 +428,7 @@ static void CL_ParseGamestate(void)
 static void CL_ParseServerData(void)
 {
     char    levelname[MAX_QPATH];
-    int     i, protocol, attractloop q_unused;
+    int     protocol, attractloop q_unused;
 
     Cbuf_Execute(&cl_cmdbuf);          // make sure any stuffed commands are done
 
@@ -476,15 +476,6 @@ static void CL_ParseServerData(void)
 
     // setup default pmove parameters
     PmoveInit(&cl.pmp);
-
-    i = MSG_ReadByte(); //atu QWMod
-    if (i) {
-        Com_DPrintf("Q2PRO QW mode enabled\n");
-        PmoveEnableQW(&cl.pmp);
-    }
-    cl.pmp.speedmult = 2;
-    cl.pmp.flyhack = true; // fly hack is unconditionally enabled
-    cl.pmp.flyfriction = 4;
 
     if (cl.clientNum == -1) {
         SCR_PlayCinematic(levelname);

@@ -84,7 +84,6 @@ void ReadLevel(const char *filename);
 void InitGame(void);
 void G_RunFrame(void);
 
-
 //===================================================================
 
 
@@ -92,8 +91,8 @@ void ShutdownGame(void)
 {
     Com_Print("==== ShutdownGame ====\n");
 
-    gi.FreeTags(TAG_LEVEL);
-    gi.FreeTags(TAG_GAME);
+    Z_FreeTags(TAG_LEVEL);
+    Z_FreeTags(TAG_GAME);
 }
 
 /*
@@ -174,13 +173,13 @@ void InitGame(void)
     // initialize all entities for this game
     game.maxentities = maxentities->value;
     clamp(game.maxentities, (int)maxclients->value + 1, MAX_EDICTS);
-    g_edicts = gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
+    g_edicts = Z_TagMallocz(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
     // initialize all clients for this game
     game.maxclients = maxclients->value;
-    game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
+    game.clients = Z_TagMallocz(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
     globals.num_edicts = game.maxclients + 1;
 }
 
@@ -264,6 +263,88 @@ void Com_LPrint(print_type_t type, const char *message)
 void Com_Error(error_type_t type, const char *message)
 {
     gi.error(type, message);
+}
+
+void Z_Free(void *ptr)
+{
+    gi.Z_Free(ptr);
+}
+
+void *Z_Realloc(void *ptr, size_t size)
+{
+    return gi.Z_Realloc(ptr, size);
+}
+
+void *Z_TagMalloc(size_t size, memtag_t tag)
+{
+    return gi.Z_TagMalloc(size, tag);
+}
+
+void *Z_TagMallocz(size_t size, memtag_t tag) q_malloc
+{
+    return memset(gi.Z_TagMalloc(size, tag), 0, size);
+}
+
+char *Z_TagCopyString(const char *in, memtag_t tag) q_malloc
+{
+    size_t len;
+
+    if (!in) {
+        return NULL;
+    }
+
+    len = strlen(in) + 1;
+    return memcpy(Z_TagMalloc(len, tag), in, len);
+}
+
+void Z_FreeTags(memtag_t tag)
+{
+    gi.Z_FreeTags(tag);
+}
+
+int Cmd_Argc(void)
+{
+    return gi.argc();
+}
+
+char *Cmd_Argv(int arg)
+{
+    return gi.argv(arg);
+}
+
+char *Cmd_Args(void)
+{
+    return gi.args();
+}
+
+void Cbuf_AddText(const char *text)
+{
+    gi.Cbuf_AddText(text);
+}
+
+void SV_SetConfigString(uint32_t num, const char *string)
+{
+    gi.SV_SetConfigString(num, string);
+}
+
+size_t SV_GetConfigString(uint32_t num, char *buffer, size_t len)
+{
+    return gi.SV_GetConfigString(num, buffer, len);
+}
+
+int SV_ModelIndex(const char *name)
+{
+    return gi.modelindex(name);
+}
+
+int SV_SoundIndex(const char *name)
+{
+    return gi.soundindex(name);
+}
+
+int SV_ImageIndex(const char *name)
+{
+    return gi.imageindex(name);
 }
 
 //======================================================================
@@ -442,10 +523,9 @@ void ExitLevel(void)
 {
     int     i;
     edict_t *ent;
-    char    command [256];
 
-    Q_snprintf(command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
-    gi.AddCommandString(command);
+    Cbuf_AddText(va("gamemap \"%s\"\n", level.changemap));
+
     level.changemap = NULL;
     level.exitintermission = 0;
     level.intermission_framenum = 0;

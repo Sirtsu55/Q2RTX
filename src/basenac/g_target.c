@@ -87,7 +87,7 @@ void SP_target_speaker(edict_t *ent)
         Q_snprintf(buffer, sizeof(buffer), "%s.wav", st.noise);
     else
         Q_strlcpy(buffer, st.noise, sizeof(buffer));
-    ent->noise_index = gi.soundindex(buffer);
+    ent->noise_index = SV_SoundIndex(buffer);
 
     if (!ent->volume)
         ent->volume = 1.0f;
@@ -167,7 +167,7 @@ void SP_target_secret(edict_t *ent)
     ent->use = use_target_secret;
     if (!st.noise)
         st.noise = "misc/secret.wav";
-    ent->noise_index = gi.soundindex(st.noise);
+    ent->noise_index = SV_SoundIndex(st.noise);
     ent->svflags = SVF_NOCLIENT;
     level.total_secrets++;
     // map bug hack
@@ -188,7 +188,7 @@ void use_target_goal(edict_t *ent, edict_t *other, edict_t *activator)
     level.found_goals++;
 
     if (level.found_goals == level.total_goals)
-        gi.configstring(CS_CDTRACK, "0");
+        SV_SetConfigString(CS_CDTRACK, "0");
 
     G_UseTargets(ent, activator);
     G_FreeEdict(ent);
@@ -205,7 +205,7 @@ void SP_target_goal(edict_t *ent)
     ent->use = use_target_goal;
     if (!st.noise)
         st.noise = "misc/secret.wav";
-    ent->noise_index = gi.soundindex(st.noise);
+    ent->noise_index = SV_SoundIndex(st.noise);
     ent->svflags = SVF_NOCLIENT;
     level.total_goals++;
 }
@@ -423,7 +423,7 @@ void SP_target_blaster(edict_t *self)
 {
     self->use = use_target_blaster;
     G_SetMovedir(self->s.angles, self->movedir);
-    self->noise_index = gi.soundindex("weapons/laser2.wav");
+    self->noise_index = SV_SoundIndex("weapons/laser2.wav");
 
     if (!self->dmg)
         self->dmg = 15;
@@ -642,7 +642,7 @@ void target_lightramp_think(edict_t *self)
 
     style[0] = 'a' + self->movedir[0] + diff * self->movedir[2];
     style[1] = 0;
-    gi.configstring(CS_LIGHTS + self->enemy->style, style);
+    SV_SetConfigString(CS_LIGHTS + self->enemy->style, style);
 
     if (diff < self->speed) {
         self->nextthink = level.framenum + 1;
@@ -773,5 +773,5 @@ void SP_target_earthquake(edict_t *self)
     self->think = target_earthquake_think;
     self->use = target_earthquake_use;
 
-    self->noise_index = gi.soundindex("world/quake.wav");
+    self->noise_index = SV_SoundIndex("world/quake.wav");
 }

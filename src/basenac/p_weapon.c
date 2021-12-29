@@ -217,7 +217,7 @@ void ChangeWeapon(edict_t *ent)
 
     ent->client->weaponstate = WEAPON_ACTIVATING;
     ent->client->ps.gunframe = 0;
-    ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
+    ent->client->ps.gunindex = SV_ModelIndex(ent->client->pers.weapon->view_model);
 
     ent->client->anim_priority = ANIM_PAIN;
     if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
@@ -419,7 +419,7 @@ void Weapon_Axe(edict_t *ent)
                 if (tr.ent && tr.ent->takedamage)
                 {
                     T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
-                    gi.sound(ent, CHAN_AUTO, gi.soundindex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
                 }
                 else if (!(tr.surface->flags & SURF_SKY))
                 {
@@ -532,7 +532,7 @@ void Weapon_Perforator(edict_t *ent)
                 ent->client->weaponstate = WEAPON_FIRING;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -563,7 +563,7 @@ ready_noammo:
         }
     case WEAPON_FIRING:
 
-        ent->client->weapon_sound = gi.soundindex("misc/lasfly.wav");
+        ent->client->weapon_sound = SV_SoundIndex("misc/lasfly.wav");
         if ((ent->client->buttons | ent->client->latched_buttons) & BUTTON_ATTACK) {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
 
@@ -592,7 +592,7 @@ ready_noammo:
                 }
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -725,7 +725,7 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
                     ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -1020,7 +1020,7 @@ void Weapon_Thunderbolt(edict_t *ent)
                 ent->client->weaponstate = WEAPON_FIRING;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -1076,7 +1076,7 @@ ready_noammo:
                     ent->client->pers.inventory[ent->client->ammo_index]--;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);

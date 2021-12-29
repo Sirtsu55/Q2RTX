@@ -327,7 +327,7 @@ void gunner_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -563,20 +563,20 @@ void SP_monster_gunner(edict_t *self)
         return;
     }
 
-    sound_death = gi.soundindex("gunner/death1.wav");
-    sound_pain = gi.soundindex("gunner/gunpain2.wav");
-    sound_pain2 = gi.soundindex("gunner/gunpain1.wav");
-    sound_idle = gi.soundindex("gunner/gunidle1.wav");
-    sound_open = gi.soundindex("gunner/gunatck1.wav");
-    sound_search = gi.soundindex("gunner/gunsrch1.wav");
-    sound_sight = gi.soundindex("gunner/sight1.wav");
+    sound_death = SV_SoundIndex("gunner/death1.wav");
+    sound_pain = SV_SoundIndex("gunner/gunpain2.wav");
+    sound_pain2 = SV_SoundIndex("gunner/gunpain1.wav");
+    sound_idle = SV_SoundIndex("gunner/gunidle1.wav");
+    sound_open = SV_SoundIndex("gunner/gunatck1.wav");
+    sound_search = SV_SoundIndex("gunner/gunsrch1.wav");
+    sound_sight = SV_SoundIndex("gunner/sight1.wav");
 
-    gi.soundindex("gunner/gunatck2.wav");
-    gi.soundindex("gunner/gunatck3.wav");
+    SV_SoundIndex("gunner/gunatck2.wav");
+    SV_SoundIndex("gunner/gunatck3.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/gunner/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/gunner/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
 

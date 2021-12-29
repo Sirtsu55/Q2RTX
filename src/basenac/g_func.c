@@ -540,9 +540,9 @@ void SP_func_plat(edict_t *ent)
     VectorCopy(ent->pos2, ent->moveinfo.end_origin);
     VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
 
-    ent->moveinfo.sound_start = gi.soundindex("plats/pt1_strt.wav");
-    ent->moveinfo.sound_middle = gi.soundindex("plats/pt1_mid.wav");
-    ent->moveinfo.sound_end = gi.soundindex("plats/pt1_end.wav");
+    ent->moveinfo.sound_start = SV_SoundIndex("plats/pt1_strt.wav");
+    ent->moveinfo.sound_middle = SV_SoundIndex("plats/pt1_mid.wav");
+    ent->moveinfo.sound_end = SV_SoundIndex("plats/pt1_end.wav");
 }
 
 //====================================================================
@@ -734,7 +734,7 @@ void SP_func_button(edict_t *ent)
     gi.setmodel(ent, ent->model);
 
     if (ent->sounds != 1)
-        ent->moveinfo.sound_start = gi.soundindex("switches/butn2.wav");
+        ent->moveinfo.sound_start = SV_SoundIndex("switches/butn2.wav");
 
     if (!ent->speed)
         ent->speed = 40;
@@ -1072,7 +1072,7 @@ void door_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
     self->touch_debounce_framenum = level.framenum + 5.0f * BASE_FRAMERATE;
 
     SV_CenterPrint(other, "%s");
-    gi.sound(other, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+    gi.sound(other, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
 }
 
 void SP_func_door(edict_t *ent)
@@ -1080,9 +1080,9 @@ void SP_func_door(edict_t *ent)
     vec3_t  abs_movedir;
 
     if (ent->sounds != 1) {
-        ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
-        ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
-        ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
+        ent->moveinfo.sound_start = SV_SoundIndex("doors/dr1_strt.wav");
+        ent->moveinfo.sound_middle = SV_SoundIndex("doors/dr1_mid.wav");
+        ent->moveinfo.sound_end = SV_SoundIndex("doors/dr1_end.wav");
     }
 
     G_SetMovedir(ent->s.angles, ent->movedir);
@@ -1132,7 +1132,7 @@ void SP_func_door(edict_t *ent)
         ent->die = door_killed;
         ent->max_health = ent->health;
     } else if (ent->targetname && ent->message) {
-        gi.soundindex("misc/talk.wav");
+        SV_SoundIndex("misc/talk.wav");
         ent->touch = door_touch;
     }
 
@@ -1239,9 +1239,9 @@ void SP_func_door_rotating(edict_t *ent)
         ent->dmg = 2;
 
     if (ent->sounds != 1) {
-        ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
-        ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
-        ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
+        ent->moveinfo.sound_start = SV_SoundIndex("doors/dr1_strt.wav");
+        ent->moveinfo.sound_middle = SV_SoundIndex("doors/dr1_mid.wav");
+        ent->moveinfo.sound_end = SV_SoundIndex("doors/dr1_end.wav");
     }
 
     // if it starts open, switch the positions
@@ -1259,7 +1259,7 @@ void SP_func_door_rotating(edict_t *ent)
     }
 
     if (ent->targetname && ent->message) {
-        gi.soundindex("misc/talk.wav");
+        SV_SoundIndex("misc/talk.wav");
         ent->touch = door_touch;
     }
 
@@ -1319,13 +1319,13 @@ void SP_func_water(edict_t *self)
         break;
 
     case 1: // water
-        self->moveinfo.sound_start = gi.soundindex("world/mov_watr.wav");
-        self->moveinfo.sound_end = gi.soundindex("world/stp_watr.wav");
+        self->moveinfo.sound_start = SV_SoundIndex("world/mov_watr.wav");
+        self->moveinfo.sound_end = SV_SoundIndex("world/stp_watr.wav");
         break;
 
     case 2: // lava
-        self->moveinfo.sound_start = gi.soundindex("world/mov_watr.wav");
-        self->moveinfo.sound_end = gi.soundindex("world/stp_watr.wav");
+        self->moveinfo.sound_start = SV_SoundIndex("world/mov_watr.wav");
+        self->moveinfo.sound_end = SV_SoundIndex("world/stp_watr.wav");
         break;
     }
 
@@ -1575,7 +1575,7 @@ void SP_func_train(edict_t *self)
     gi.setmodel(self, self->model);
 
     if (st.noise)
-        self->moveinfo.sound_middle = gi.soundindex(st.noise);
+        self->moveinfo.sound_middle = SV_SoundIndex(st.noise);
 
     if (!self->speed)
         self->speed = 100;
@@ -1859,9 +1859,9 @@ void SP_func_door_secret(edict_t *ent)
     float   width;
     float   length;
 
-    ent->moveinfo.sound_start = gi.soundindex("doors/dr1_strt.wav");
-    ent->moveinfo.sound_middle = gi.soundindex("doors/dr1_mid.wav");
-    ent->moveinfo.sound_end = gi.soundindex("doors/dr1_end.wav");
+    ent->moveinfo.sound_start = SV_SoundIndex("doors/dr1_strt.wav");
+    ent->moveinfo.sound_middle = SV_SoundIndex("doors/dr1_mid.wav");
+    ent->moveinfo.sound_end = SV_SoundIndex("doors/dr1_end.wav");
 
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
@@ -1906,7 +1906,7 @@ void SP_func_door_secret(edict_t *ent)
         ent->die = door_killed;
         ent->max_health = ent->health;
     } else if (ent->targetname && ent->message) {
-        gi.soundindex("misc/talk.wav");
+        SV_SoundIndex("misc/talk.wav");
         ent->touch = door_touch;
     }
 

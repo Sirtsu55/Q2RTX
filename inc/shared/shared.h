@@ -104,7 +104,7 @@ typedef enum {
 void    Com_LPrint(print_type_t type, const char *message);
 void    Com_LPrintf(print_type_t type, const char *fmt, ...)
 q_printf(2, 3);
-void    Com_Error(error_type_t type, const char *message);
+void    Com_Error(error_type_t type, const char *message) q_noreturn;
 void    Com_Errorf(error_type_t code, const char *fmt, ...)
 q_noreturn q_printf(2, 3);
 
@@ -1455,7 +1455,6 @@ typedef enum {
 #define CS_SKYROTATE        4
 #define CS_STATUSBAR        5       // display program string
 
-#define CS_AIRACCEL         29      // air acceleration control
 #define CS_MAXCLIENTS       30
 #define CS_MAPCHECKSUM      31      // for catching cheater maps
 
@@ -1468,10 +1467,17 @@ typedef enum {
 #define CS_GENERAL          (CS_PLAYERSKINS+MAX_CLIENTS)
 #define MAX_CONFIGSTRINGS   (CS_GENERAL+MAX_GENERAL)
 
-// Some mods actually exploit CS_STATUSBAR to take space up to CS_AIRACCEL
-#define CS_SIZE(cs) \
-    ((cs) >= CS_STATUSBAR && (cs) < CS_AIRACCEL ? \
-      MAX_QPATH * (CS_AIRACCEL - (cs)) : MAX_QPATH)
+// CS_STATUSBAR and CS_GENERAL are allowed to overflow
+static inline size_t CS_SIZE(uint32_t cs)
+{
+    if (cs >= CS_STATUSBAR && cs < CS_MAXCLIENTS) {
+        return MAX_QPATH * (CS_MAXCLIENTS - cs);
+    } else if (cs >= CS_GENERAL && cs < MAX_CONFIGSTRINGS) {
+        return MAX_QPATH * (MAX_CONFIGSTRINGS - cs);
+    }
+    
+    return MAX_QPATH;
+}
 
 
 //==============================================

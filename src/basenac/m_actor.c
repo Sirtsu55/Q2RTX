@@ -417,7 +417,7 @@ void SP_misc_actor(edict_t *self)
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("players/male/tris.md2");
+    self->s.modelindex = SV_ModelIndex("players/male/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
 
@@ -495,7 +495,7 @@ void target_actor_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
         if (other->groundentity) {
             other->groundentity = NULL;
             other->velocity[2] = self->movedir[2];
-            gi.sound(other, CHAN_VOICE, gi.soundindex("player/male/jump1.wav"), 1, ATTN_NORM, 0);
+            gi.sound(other, CHAN_VOICE, SV_SoundIndex("player/male/jump1.wav"), 1, ATTN_NORM, 0);
         }
     }
 

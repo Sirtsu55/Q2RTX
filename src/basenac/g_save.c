@@ -642,7 +642,7 @@ static char *read_string(FILE *f)
         Com_Errorf(ERR_DROP, "%s: bad length", __func__);
     }
 
-    s = gi.TagMalloc(len + 1, TAG_LEVEL);
+    s = Z_TagMalloc(len + 1, TAG_LEVEL);
     read_data(s, len, f);
     s[len] = 0;
 
@@ -833,7 +833,7 @@ void ReadGame(const char *filename)
     FILE    *f;
     int     i;
 
-    gi.FreeTags(TAG_GAME);
+    Z_FreeTags(TAG_GAME);
 
     f = fopen(filename, "rb");
     if (!f)
@@ -863,11 +863,11 @@ void ReadGame(const char *filename)
         Com_Error(ERR_DROP, "Savegame has bad maxentities");
     }
 
-    g_edicts = gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
+    g_edicts = Z_TagMallocz(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
     globals.edicts = g_edicts;
     globals.max_edicts = game.maxentities;
 
-    game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
+    game.clients = Z_TagMallocz(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
     for (i = 0; i < game.maxclients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
     }
@@ -940,7 +940,7 @@ void ReadLevel(const char *filename)
 
     // free any dynamic memory allocated by loading the level
     // base state
-    gi.FreeTags(TAG_LEVEL);
+    Z_FreeTags(TAG_LEVEL);
 
     f = fopen(filename, "rb");
     if (!f)
@@ -1010,10 +1010,10 @@ void ReadLevel(const char *filename)
 
         if (ent->think == func_clock_think || ent->use == func_clock_use) {
             char *msg = ent->message;
-            ent->message = gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
+            ent->message = Z_TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
             if (msg) {
                 Q_strlcpy(ent->message, msg, CLOCK_MESSAGE_SIZE);
-                gi.TagFree(msg);
+                Z_Free(msg);
             }
         }
     }

@@ -58,10 +58,10 @@ void SP_monster_boss3_stand(edict_t *self)
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
     self->model = "models/monsters/boss3/rider/tris.md2";
-    self->s.modelindex = gi.modelindex(self->model);
+    self->s.modelindex = SV_ModelIndex(self->model);
     self->s.frame = FRAME_stand201;
 
-    gi.soundindex("misc/bigtele.wav");
+    SV_SoundIndex("misc/bigtele.wav");
 
     VectorSet(self->mins, -32, -32, 0);
     VectorSet(self->maxs, 32, 32, 90);

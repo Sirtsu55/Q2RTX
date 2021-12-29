@@ -553,23 +553,23 @@ void SP_monster_flyer(edict_t *self)
         self->target = NULL;
     }
 
-    sound_sight = gi.soundindex("flyer/flysght1.wav");
-    sound_idle = gi.soundindex("flyer/flysrch1.wav");
-    sound_pain1 = gi.soundindex("flyer/flypain1.wav");
-    sound_pain2 = gi.soundindex("flyer/flypain2.wav");
-    sound_slash = gi.soundindex("flyer/flyatck2.wav");
-    sound_sproing = gi.soundindex("flyer/flyatck1.wav");
-    sound_die = gi.soundindex("flyer/flydeth1.wav");
+    sound_sight = SV_SoundIndex("flyer/flysght1.wav");
+    sound_idle = SV_SoundIndex("flyer/flysrch1.wav");
+    sound_pain1 = SV_SoundIndex("flyer/flypain1.wav");
+    sound_pain2 = SV_SoundIndex("flyer/flypain2.wav");
+    sound_slash = SV_SoundIndex("flyer/flyatck2.wav");
+    sound_sproing = SV_SoundIndex("flyer/flyatck1.wav");
+    sound_die = SV_SoundIndex("flyer/flydeth1.wav");
 
-    gi.soundindex("flyer/flyatck3.wav");
+    SV_SoundIndex("flyer/flyatck3.wav");
 
-    self->s.modelindex = gi.modelindex("models/monsters/flyer/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/flyer/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
 
-    self->s.sound = gi.soundindex("flyer/flyidle1.wav");
+    self->s.sound = SV_SoundIndex("flyer/flyidle1.wav");
 
     self->health = 50;
     self->mass = 50;

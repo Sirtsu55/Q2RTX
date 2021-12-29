@@ -496,7 +496,7 @@ void boss2_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     self->s.sound = 0;
     // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -603,17 +603,17 @@ void SP_monster_boss2(edict_t *self)
         return;
     }
 
-    sound_pain1 = gi.soundindex("bosshovr/bhvpain1.wav");
-    sound_pain2 = gi.soundindex("bosshovr/bhvpain2.wav");
-    sound_pain3 = gi.soundindex("bosshovr/bhvpain3.wav");
-    sound_death = gi.soundindex("bosshovr/bhvdeth1.wav");
-    sound_search1 = gi.soundindex("bosshovr/bhvunqv1.wav");
+    sound_pain1 = SV_SoundIndex("bosshovr/bhvpain1.wav");
+    sound_pain2 = SV_SoundIndex("bosshovr/bhvpain2.wav");
+    sound_pain3 = SV_SoundIndex("bosshovr/bhvpain3.wav");
+    sound_death = SV_SoundIndex("bosshovr/bhvdeth1.wav");
+    sound_search1 = SV_SoundIndex("bosshovr/bhvunqv1.wav");
 
-    self->s.sound = gi.soundindex("bosshovr/bhvengn1.wav");
+    self->s.sound = SV_SoundIndex("bosshovr/bhvengn1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/boss2/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/boss2/tris.md2");
     VectorSet(self->mins, -56, -56, 0);
     VectorSet(self->maxs, 56, 56, 80);
 

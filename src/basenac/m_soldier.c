@@ -1100,7 +1100,7 @@ void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 3; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowGib(self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
@@ -1151,17 +1151,17 @@ void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 void SP_monster_soldier_x(edict_t *self)
 {
 
-    self->s.modelindex = gi.modelindex("models/monsters/soldier/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/soldier/tris.md2");
     self->monsterinfo.scale = MODEL_SCALE;
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
 
-    sound_idle =    gi.soundindex("soldier/solidle1.wav");
-    sound_sight1 =  gi.soundindex("soldier/solsght1.wav");
-    sound_sight2 =  gi.soundindex("soldier/solsrch1.wav");
-    sound_cock =    gi.soundindex("infantry/infatck3.wav");
+    sound_idle =    SV_SoundIndex("soldier/solidle1.wav");
+    sound_sight1 =  SV_SoundIndex("soldier/solsght1.wav");
+    sound_sight2 =  SV_SoundIndex("soldier/solsrch1.wav");
+    sound_cock =    SV_SoundIndex("infantry/infatck3.wav");
 
     self->mass = 100;
 
@@ -1195,11 +1195,11 @@ void SP_monster_soldier_light(edict_t *self)
 
     SP_monster_soldier_x(self);
 
-    sound_pain_light = gi.soundindex("soldier/solpain2.wav");
-    sound_death_light = gi.soundindex("soldier/soldeth2.wav");
-    gi.modelindex("models/objects/laser/tris.md2");
-    gi.soundindex("misc/lasfly.wav");
-    gi.soundindex("soldier/solatck2.wav");
+    sound_pain_light = SV_SoundIndex("soldier/solpain2.wav");
+    sound_death_light = SV_SoundIndex("soldier/soldeth2.wav");
+    SV_ModelIndex("models/objects/laser/tris.md2");
+    SV_SoundIndex("misc/lasfly.wav");
+    SV_SoundIndex("soldier/solatck2.wav");
 
     self->s.skinnum = 0;
     self->health = 20;
@@ -1217,9 +1217,9 @@ void SP_monster_soldier(edict_t *self)
 
     SP_monster_soldier_x(self);
 
-    sound_pain = gi.soundindex("soldier/solpain1.wav");
-    sound_death = gi.soundindex("soldier/soldeth1.wav");
-    gi.soundindex("soldier/solatck1.wav");
+    sound_pain = SV_SoundIndex("soldier/solpain1.wav");
+    sound_death = SV_SoundIndex("soldier/soldeth1.wav");
+    SV_SoundIndex("soldier/solatck1.wav");
 
     self->s.skinnum = 2;
     self->health = 30;
@@ -1237,9 +1237,9 @@ void SP_monster_soldier_ss(edict_t *self)
 
     SP_monster_soldier_x(self);
 
-    sound_pain_ss = gi.soundindex("soldier/solpain3.wav");
-    sound_death_ss = gi.soundindex("soldier/soldeth3.wav");
-    gi.soundindex("soldier/solatck3.wav");
+    sound_pain_ss = SV_SoundIndex("soldier/solpain3.wav");
+    sound_death_ss = SV_SoundIndex("soldier/soldeth3.wav");
+    SV_SoundIndex("soldier/solatck3.wav");
 
     self->s.skinnum = 4;
     self->health = 40;

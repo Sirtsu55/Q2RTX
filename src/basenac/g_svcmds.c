@@ -157,7 +157,7 @@ void SVCmd_AddIP_f(void)
 {
     int     i;
 
-    if (gi.argc() < 3) {
+    if (Cmd_Argc() < 3) {
         Com_Print("Usage:  addip <ip-mask>\n");
         return;
     }
@@ -173,7 +173,7 @@ void SVCmd_AddIP_f(void)
         numipfilters++;
     }
 
-    if (!StringToFilter(gi.argv(2), &ipfilters[i]))
+    if (!StringToFilter(Cmd_Argv(2), &ipfilters[i]))
         ipfilters[i].compare = 0xffffffff;
 }
 
@@ -187,12 +187,12 @@ void SVCmd_RemoveIP_f(void)
     ipfilter_t  f;
     int         i, j;
 
-    if (gi.argc() < 3) {
+    if (Cmd_Argc() < 3) {
         Com_Print("Usage:  sv removeip <ip-mask>\n");
         return;
     }
 
-    if (!StringToFilter(gi.argv(2), &f))
+    if (!StringToFilter(Cmd_Argv(2), &f))
         return;
 
     for (i = 0 ; i < numipfilters ; i++)
@@ -204,7 +204,7 @@ void SVCmd_RemoveIP_f(void)
             Com_Print("Removed.\n");
             return;
         }
-    Com_Printf("Didn't find %s.\n", gi.argv(2));
+    Com_Printf("Didn't find %s.\n", Cmd_Argv(2));
 }
 
 /*
@@ -287,7 +287,7 @@ void    ServerCommand(void)
 {
     char    *cmd;
 
-    cmd = gi.argv(1);
+    cmd = Cmd_Argv(1);
     if (Q_stricmp(cmd, "test") == 0)
         Svcmd_Test_f();
     else if (Q_stricmp(cmd, "addip") == 0)

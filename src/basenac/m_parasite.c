@@ -453,7 +453,7 @@ void parasite_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -488,19 +488,19 @@ void SP_monster_parasite(edict_t *self)
         return;
     }
 
-    sound_pain1 = gi.soundindex("parasite/parpain1.wav");
-    sound_pain2 = gi.soundindex("parasite/parpain2.wav");
-    sound_die = gi.soundindex("parasite/pardeth1.wav");
-    sound_launch = gi.soundindex("parasite/paratck1.wav");
-    sound_impact = gi.soundindex("parasite/paratck2.wav");
-    sound_suck = gi.soundindex("parasite/paratck3.wav");
-    sound_reelin = gi.soundindex("parasite/paratck4.wav");
-    sound_sight = gi.soundindex("parasite/parsght1.wav");
-    sound_tap = gi.soundindex("parasite/paridle1.wav");
-    sound_scratch = gi.soundindex("parasite/paridle2.wav");
-    sound_search = gi.soundindex("parasite/parsrch1.wav");
+    sound_pain1 = SV_SoundIndex("parasite/parpain1.wav");
+    sound_pain2 = SV_SoundIndex("parasite/parpain2.wav");
+    sound_die = SV_SoundIndex("parasite/pardeth1.wav");
+    sound_launch = SV_SoundIndex("parasite/paratck1.wav");
+    sound_impact = SV_SoundIndex("parasite/paratck2.wav");
+    sound_suck = SV_SoundIndex("parasite/paratck3.wav");
+    sound_reelin = SV_SoundIndex("parasite/paratck4.wav");
+    sound_sight = SV_SoundIndex("parasite/parsght1.wav");
+    sound_tap = SV_SoundIndex("parasite/paridle1.wav");
+    sound_scratch = SV_SoundIndex("parasite/paridle2.wav");
+    sound_search = SV_SoundIndex("parasite/parsrch1.wav");
 
-    self->s.modelindex = gi.modelindex("models/monsters/parasite/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/parasite/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 24);
     self->movetype = MOVETYPE_STEP;

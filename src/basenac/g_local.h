@@ -74,10 +74,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define FRAMETIME       BASE_FRAMETIME_S
 
-// memory tags to allow dynamic memory to be cleaned up
-#define TAG_GAME    765     // clear when unloading the dll
-#define TAG_LEVEL   766     // clear when loading a new level
-
 
 #define MELEE_DISTANCE  80
 
@@ -439,7 +435,6 @@ typedef struct {
 
 extern  game_locals_t   game;
 extern  level_locals_t  level;
-extern  game_import_t   gi;
 extern  game_export_t   globals;
 extern  spawn_temp_t    st;
 
@@ -622,8 +617,6 @@ void    G_FreeEdict(edict_t *e);
 
 void    G_TouchTriggers(edict_t *ent);
 void    G_TouchSolids(edict_t *ent);
-
-char    *G_CopyString(char *in);
 
 float   *tv(float x, float y, float z);
 char    *vtos(vec3_t v);
@@ -1097,6 +1090,8 @@ struct edict_s {
     monsterinfo_t   monsterinfo;
 };
 
+extern game_import_t   gi;
+
 // API wrappers
 
 void SV_CenterPrint(edict_t *ent, const char *message);
@@ -1105,3 +1100,23 @@ void SV_BroadcastPrint(client_print_type_t level, const char *message);
 void SV_BroadcastPrintf(client_print_type_t level, const char *fmt, ...);
 void SV_ClientPrint(edict_t *ent, client_print_type_t level, const char *message);
 void SV_ClientPrintf(edict_t *ent, client_print_type_t level, const char *fmt, ...);
+
+int SV_ModelIndex(const char *name);
+int SV_SoundIndex(const char *name);
+int SV_ImageIndex(const char *name);
+
+int Cmd_Argc(void);
+char *Cmd_Argv(int arg);
+char *Cmd_Args(void);
+
+void Cbuf_AddText(const char *text);
+
+void Z_Free(void *ptr);
+void *Z_Realloc(void *ptr, size_t size);
+void *Z_TagMalloc(size_t size, memtag_t tag) q_malloc;
+void *Z_TagMallocz(size_t size, memtag_t tag) q_malloc;
+char *Z_TagCopyString(const char *in, memtag_t tag) q_malloc;
+void Z_FreeTags(memtag_t tag);
+
+void SV_SetConfigString(uint32_t num, const char *string);
+size_t SV_GetConfigString(uint32_t num, char *buffer, size_t len);

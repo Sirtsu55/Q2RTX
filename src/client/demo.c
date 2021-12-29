@@ -394,8 +394,6 @@ static void CL_Record_f(void)
     MSG_WriteString(cl.gamedir);
     MSG_WriteShort(cl.clientNum);
     MSG_WriteString(cl.configstrings[CS_NAME]);
-    
-    MSG_WriteByte(cl.pmp.qwmode);
 
     // configstrings
     for (i = 0; i < MAX_CONFIGSTRINGS; i++) {

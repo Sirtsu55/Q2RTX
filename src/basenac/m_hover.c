@@ -518,7 +518,7 @@ void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 2; n++)
@@ -550,21 +550,21 @@ void SP_monster_hover(edict_t *self)
         return;
     }
 
-    sound_pain1 = gi.soundindex("hover/hovpain1.wav");
-    sound_pain2 = gi.soundindex("hover/hovpain2.wav");
-    sound_death1 = gi.soundindex("hover/hovdeth1.wav");
-    sound_death2 = gi.soundindex("hover/hovdeth2.wav");
-    sound_sight = gi.soundindex("hover/hovsght1.wav");
-    sound_search1 = gi.soundindex("hover/hovsrch1.wav");
-    sound_search2 = gi.soundindex("hover/hovsrch2.wav");
+    sound_pain1 = SV_SoundIndex("hover/hovpain1.wav");
+    sound_pain2 = SV_SoundIndex("hover/hovpain2.wav");
+    sound_death1 = SV_SoundIndex("hover/hovdeth1.wav");
+    sound_death2 = SV_SoundIndex("hover/hovdeth2.wav");
+    sound_sight = SV_SoundIndex("hover/hovsght1.wav");
+    sound_search1 = SV_SoundIndex("hover/hovsrch1.wav");
+    sound_search2 = SV_SoundIndex("hover/hovsrch2.wav");
 
-    gi.soundindex("hover/hovatck1.wav");
+    SV_SoundIndex("hover/hovatck1.wav");
 
-    self->s.sound = gi.soundindex("hover/hovidle1.wav");
+    self->s.sound = SV_SoundIndex("hover/hovidle1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/hover/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/hover/tris.md2");
     VectorSet(self->mins, -24, -24, -24);
     VectorSet(self->maxs, 24, 24, 32);
 

@@ -509,7 +509,7 @@ void jorg_attack(edict_t *self)
 {
     if (random() <= 0.75f) {
         gi.sound(self, CHAN_VOICE, sound_attack1, 1, ATTN_NORM, 0);
-        self->s.sound = gi.soundindex("boss3/w_loop.wav");
+        self->s.sound = SV_SoundIndex("boss3/w_loop.wav");
         self->monsterinfo.currentmove = &jorg_move_start_attack1;
     } else {
         gi.sound(self, CHAN_VOICE, sound_attack2, 1, ATTN_NORM, 0);
@@ -645,27 +645,27 @@ void SP_monster_jorg(edict_t *self)
         return;
     }
 
-    sound_pain1 = gi.soundindex("boss3/bs3pain1.wav");
-    sound_pain2 = gi.soundindex("boss3/bs3pain2.wav");
-    sound_pain3 = gi.soundindex("boss3/bs3pain3.wav");
-    sound_death = gi.soundindex("boss3/bs3deth1.wav");
-    sound_attack1 = gi.soundindex("boss3/bs3atck1.wav");
-    sound_attack2 = gi.soundindex("boss3/bs3atck2.wav");
-    sound_search1 = gi.soundindex("boss3/bs3srch1.wav");
-    sound_search2 = gi.soundindex("boss3/bs3srch2.wav");
-    sound_search3 = gi.soundindex("boss3/bs3srch3.wav");
-    sound_idle = gi.soundindex("boss3/bs3idle1.wav");
-    sound_step_left = gi.soundindex("boss3/step1.wav");
-    sound_step_right = gi.soundindex("boss3/step2.wav");
-    sound_firegun = gi.soundindex("boss3/xfire.wav");
-    sound_death_hit = gi.soundindex("boss3/d_hit.wav");
+    sound_pain1 = SV_SoundIndex("boss3/bs3pain1.wav");
+    sound_pain2 = SV_SoundIndex("boss3/bs3pain2.wav");
+    sound_pain3 = SV_SoundIndex("boss3/bs3pain3.wav");
+    sound_death = SV_SoundIndex("boss3/bs3deth1.wav");
+    sound_attack1 = SV_SoundIndex("boss3/bs3atck1.wav");
+    sound_attack2 = SV_SoundIndex("boss3/bs3atck2.wav");
+    sound_search1 = SV_SoundIndex("boss3/bs3srch1.wav");
+    sound_search2 = SV_SoundIndex("boss3/bs3srch2.wav");
+    sound_search3 = SV_SoundIndex("boss3/bs3srch3.wav");
+    sound_idle = SV_SoundIndex("boss3/bs3idle1.wav");
+    sound_step_left = SV_SoundIndex("boss3/step1.wav");
+    sound_step_right = SV_SoundIndex("boss3/step2.wav");
+    sound_firegun = SV_SoundIndex("boss3/xfire.wav");
+    sound_death_hit = SV_SoundIndex("boss3/d_hit.wav");
 
     MakronPrecache();
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/boss3/rider/tris.md2");
-    self->s.modelindex2 = gi.modelindex("models/monsters/boss3/jorg/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/boss3/rider/tris.md2");
+    self->s.modelindex2 = SV_ModelIndex("models/monsters/boss3/jorg/tris.md2");
     VectorSet(self->mins, -80, -80, 0);
     VectorSet(self->maxs, 80, 80, 140);
 

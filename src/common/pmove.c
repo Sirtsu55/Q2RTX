@@ -548,10 +548,7 @@ static void PM_AirMove(void)
         PM_StepSlideMove();
     } else {
         // not on ground, so little effect on velocity
-        if (pmp->airaccelerate)
-            PM_AirAccelerate(wishdir, wishspeed, pm_accelerate);
-        else
-            PM_Accelerate(wishdir, wishspeed, 1);
+         PM_AirAccelerate(wishdir, wishspeed, pm_accelerate);
         // add gravity
         pml.velocity[2] -= pm->s.gravity * pml.frametime;
         PM_StepSlideMove();
@@ -790,11 +787,7 @@ static void PM_FlyMove(void)
 
     currentspeed = DotProduct(pml.velocity, wishdir);
     addspeed = wishspeed - currentspeed;
-    if (addspeed <= 0) {
-        if (!pmp->flyhack) {
-            return; // original buggy behaviour
-        }
-    } else {
+    if (addspeed > 0) {
         accelspeed = pm_accelerate * pml.frametime * wishspeed;
         if (accelspeed > addspeed)
             accelspeed = addspeed;
@@ -1154,22 +1147,11 @@ void PmoveInit(pmoveParams_t *pmp)
     // set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
 
-    pmp->speedmult = 1;
-    pmp->watermult = 0.5f;
-    pmp->maxspeed = 300;
-    pmp->friction = 6;
-    pmp->waterfriction = 1;
+    pmp->speedmult = 2;
     pmp->flyfriction = 9;
-}
 
-void PmoveEnableQW(pmoveParams_t *pmp)
-{
-    pmp->qwmode = true;
     pmp->watermult = 0.7f;
     pmp->maxspeed = 320;
-    //pmp->upspeed = (sv_qwmod->integer > 1) ? 310 : 350;
     pmp->friction = 4;
     pmp->waterfriction = 4;
-    pmp->airaccelerate = true;
 }
-

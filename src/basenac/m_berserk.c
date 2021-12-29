@@ -370,7 +370,7 @@ void berserk_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
     int     n;
 
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -404,14 +404,14 @@ void SP_monster_berserk(edict_t *self)
     }
 
     // pre-caches
-    sound_pain  = gi.soundindex("berserk/berpain2.wav");
-    sound_die   = gi.soundindex("berserk/berdeth2.wav");
-    sound_idle  = gi.soundindex("berserk/beridle1.wav");
-    sound_punch = gi.soundindex("berserk/attack.wav");
-    sound_search = gi.soundindex("berserk/bersrch1.wav");
-    sound_sight = gi.soundindex("berserk/sight.wav");
+    sound_pain  = SV_SoundIndex("berserk/berpain2.wav");
+    sound_die   = SV_SoundIndex("berserk/berdeth2.wav");
+    sound_idle  = SV_SoundIndex("berserk/beridle1.wav");
+    sound_punch = SV_SoundIndex("berserk/attack.wav");
+    sound_search = SV_SoundIndex("berserk/bersrch1.wav");
+    sound_sight = SV_SoundIndex("berserk/sight.wav");
 
-    self->s.modelindex = gi.modelindex("models/monsters/berserk/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/berserk/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
     self->movetype = MOVETYPE_STEP;

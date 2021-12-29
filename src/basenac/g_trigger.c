@@ -109,11 +109,11 @@ void trigger_enable(edict_t *self, edict_t *other, edict_t *activator)
 void SP_trigger_multiple(edict_t *ent)
 {
     if (ent->sounds == 1)
-        ent->noise_index = gi.soundindex("misc/secret.wav");
+        ent->noise_index = SV_SoundIndex("misc/secret.wav");
     else if (ent->sounds == 2)
-        ent->noise_index = gi.soundindex("misc/talk.wav");
+        ent->noise_index = SV_SoundIndex("misc/talk.wav");
     else if (ent->sounds == 3)
-        ent->noise_index = gi.soundindex("misc/trigger1.wav");
+        ent->noise_index = SV_SoundIndex("misc/trigger1.wav");
 
     if (!ent->wait)
         ent->wait = 0.2f;
@@ -211,11 +211,11 @@ void trigger_key_use(edict_t *self, edict_t *other, edict_t *activator)
             return;
         self->touch_debounce_framenum = level.framenum + 5.0f * BASE_FRAMERATE;
         SV_CenterPrintf(activator, "You need the %s", self->item->pickup_name);
-        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keytry.wav"), 1, ATTN_NORM, 0);
+        gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/keytry.wav"), 1, ATTN_NORM, 0);
         return;
     }
 
-    gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
+    gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
     if (coop->value) {
         int     player;
         edict_t *ent;
@@ -274,8 +274,8 @@ void SP_trigger_key(edict_t *self)
         return;
     }
 
-    gi.soundindex("misc/keytry.wav");
-    gi.soundindex("misc/keyuse.wav");
+    SV_SoundIndex("misc/keytry.wav");
+    SV_SoundIndex("misc/keyuse.wav");
 
     self->use = trigger_key_use;
 }
@@ -307,14 +307,14 @@ void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
     if (self->count) {
         if (!(self->spawnflags & 1)) {
             SV_CenterPrintf(activator, "%i more to go...", self->count);
-            gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
         }
         return;
     }
 
     if (!(self->spawnflags & 1)) {
         SV_CenterPrint(activator, "Sequence completed!");
-        gi.sound(activator, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+        gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
     }
     self->activator = activator;
     multi_trigger(self);
@@ -390,7 +390,7 @@ Pushes the player
 void SP_trigger_push(edict_t *self)
 {
     InitTrigger(self);
-    windsound = gi.soundindex("misc/windfly.wav");
+    windsound = SV_SoundIndex("misc/windfly.wav");
     self->touch = trigger_push_touch;
     if (!self->speed)
         self->speed = 1000;
@@ -462,7 +462,7 @@ void SP_trigger_hurt(edict_t *self)
 {
     InitTrigger(self);
 
-    self->noise_index = gi.soundindex("world/electro.wav");
+    self->noise_index = SV_SoundIndex("world/electro.wav");
     self->touch = hurt_touch;
 
     if (!self->dmg)

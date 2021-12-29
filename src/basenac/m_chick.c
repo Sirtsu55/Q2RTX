@@ -340,7 +340,7 @@ void chick_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -598,25 +598,25 @@ void SP_monster_chick(edict_t *self)
         return;
     }
 
-    sound_missile_prelaunch = gi.soundindex("chick/chkatck1.wav");
-    sound_missile_launch    = gi.soundindex("chick/chkatck2.wav");
-    sound_melee_swing       = gi.soundindex("chick/chkatck3.wav");
-    sound_melee_hit         = gi.soundindex("chick/chkatck4.wav");
-    sound_missile_reload    = gi.soundindex("chick/chkatck5.wav");
-    sound_death1            = gi.soundindex("chick/chkdeth1.wav");
-    sound_death2            = gi.soundindex("chick/chkdeth2.wav");
-    sound_fall_down         = gi.soundindex("chick/chkfall1.wav");
-    sound_idle1             = gi.soundindex("chick/chkidle1.wav");
-    sound_idle2             = gi.soundindex("chick/chkidle2.wav");
-    sound_pain1             = gi.soundindex("chick/chkpain1.wav");
-    sound_pain2             = gi.soundindex("chick/chkpain2.wav");
-    sound_pain3             = gi.soundindex("chick/chkpain3.wav");
-    sound_sight             = gi.soundindex("chick/chksght1.wav");
-    sound_search            = gi.soundindex("chick/chksrch1.wav");
+    sound_missile_prelaunch = SV_SoundIndex("chick/chkatck1.wav");
+    sound_missile_launch    = SV_SoundIndex("chick/chkatck2.wav");
+    sound_melee_swing       = SV_SoundIndex("chick/chkatck3.wav");
+    sound_melee_hit         = SV_SoundIndex("chick/chkatck4.wav");
+    sound_missile_reload    = SV_SoundIndex("chick/chkatck5.wav");
+    sound_death1            = SV_SoundIndex("chick/chkdeth1.wav");
+    sound_death2            = SV_SoundIndex("chick/chkdeth2.wav");
+    sound_fall_down         = SV_SoundIndex("chick/chkfall1.wav");
+    sound_idle1             = SV_SoundIndex("chick/chkidle1.wav");
+    sound_idle2             = SV_SoundIndex("chick/chkidle2.wav");
+    sound_pain1             = SV_SoundIndex("chick/chkpain1.wav");
+    sound_pain2             = SV_SoundIndex("chick/chkpain2.wav");
+    sound_pain3             = SV_SoundIndex("chick/chkpain3.wav");
+    sound_sight             = SV_SoundIndex("chick/chksght1.wav");
+    sound_search            = SV_SoundIndex("chick/chksrch1.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/bitch/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/bitch/tris.md2");
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 56);
 

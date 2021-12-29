@@ -566,7 +566,7 @@ void brain_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -597,24 +597,24 @@ void SP_monster_brain(edict_t *self) {
         return;
     }
 
-    sound_chest_open = gi.soundindex("brain/brnatck1.wav");
-    sound_tentacles_extend = gi.soundindex("brain/brnatck2.wav");
-    sound_tentacles_retract = gi.soundindex("brain/brnatck3.wav");
-    sound_death = gi.soundindex("brain/brndeth1.wav");
-    sound_idle1 = gi.soundindex("brain/brnidle1.wav");
-    sound_idle2 = gi.soundindex("brain/brnidle2.wav");
-    sound_idle3 = gi.soundindex("brain/brnlens1.wav");
-    sound_pain1 = gi.soundindex("brain/brnpain1.wav");
-    sound_pain2 = gi.soundindex("brain/brnpain2.wav");
-    sound_sight = gi.soundindex("brain/brnsght1.wav");
-    sound_search = gi.soundindex("brain/brnsrch1.wav");
-    sound_melee1 = gi.soundindex("brain/melee1.wav");
-    sound_melee2 = gi.soundindex("brain/melee2.wav");
-    sound_melee3 = gi.soundindex("brain/melee3.wav");
+    sound_chest_open = SV_SoundIndex("brain/brnatck1.wav");
+    sound_tentacles_extend = SV_SoundIndex("brain/brnatck2.wav");
+    sound_tentacles_retract = SV_SoundIndex("brain/brnatck3.wav");
+    sound_death = SV_SoundIndex("brain/brndeth1.wav");
+    sound_idle1 = SV_SoundIndex("brain/brnidle1.wav");
+    sound_idle2 = SV_SoundIndex("brain/brnidle2.wav");
+    sound_idle3 = SV_SoundIndex("brain/brnlens1.wav");
+    sound_pain1 = SV_SoundIndex("brain/brnpain1.wav");
+    sound_pain2 = SV_SoundIndex("brain/brnpain2.wav");
+    sound_sight = SV_SoundIndex("brain/brnsght1.wav");
+    sound_search = SV_SoundIndex("brain/brnsrch1.wav");
+    sound_melee1 = SV_SoundIndex("brain/melee1.wav");
+    sound_melee2 = SV_SoundIndex("brain/melee2.wav");
+    sound_melee3 = SV_SoundIndex("brain/melee3.wav");
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/brain/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/brain/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
 

@@ -108,7 +108,7 @@ void gib_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
     self->touch = NULL;
 
     if (plane) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
 
         vectoangles(plane->normal, normal_angles);
         AngleVectors(normal_angles, NULL, right, NULL);
@@ -474,7 +474,7 @@ void SP_viewthing(edict_t *ent)
     ent->s.renderfx = RF_FRAMELERP;
     VectorSet(ent->mins, -16, -16, -24);
     VectorSet(ent->maxs, 16, 16, 32);
-    ent->s.modelindex = gi.modelindex("models/objects/banner/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/objects/banner/tris.md2");
     gi.linkentity(ent);
     ent->nextthink = level.framenum + 0.5f * BASE_FRAMERATE;
     ent->think = TH_viewthing;
@@ -514,10 +514,10 @@ Default _cone value is 10 (used to set size of light for spotlights)
 void light_use(edict_t *self, edict_t *other, edict_t *activator)
 {
     if (self->spawnflags & START_OFF) {
-        gi.configstring(CS_LIGHTS + self->style, "m");
+        SV_SetConfigString(CS_LIGHTS + self->style, "m");
         self->spawnflags &= ~START_OFF;
     } else {
-        gi.configstring(CS_LIGHTS + self->style, "a");
+        SV_SetConfigString(CS_LIGHTS + self->style, "a");
         self->spawnflags |= START_OFF;
     }
 }
@@ -533,9 +533,9 @@ void SP_light(edict_t *self)
     if (self->style >= 32) {
         self->use = light_use;
         if (self->spawnflags & START_OFF)
-            gi.configstring(CS_LIGHTS + self->style, "a");
+            SV_SetConfigString(CS_LIGHTS + self->style, "a");
         else
-            gi.configstring(CS_LIGHTS + self->style, "m");
+            SV_SetConfigString(CS_LIGHTS + self->style, "m");
     }
 }
 
@@ -778,8 +778,8 @@ void SP_func_explosive(edict_t *self)
 
     self->movetype = MOVETYPE_PUSH;
 
-    gi.modelindex("models/objects/debris1/tris.md2");
-    gi.modelindex("models/objects/debris2/tris.md2");
+    SV_ModelIndex("models/objects/debris1/tris.md2");
+    SV_ModelIndex("models/objects/debris2/tris.md2");
 
     gi.setmodel(self, self->model);
 
@@ -923,15 +923,15 @@ void SP_misc_explobox(edict_t *self)
         return;
     }
 
-    gi.modelindex("models/objects/debris1/tris.md2");
-    gi.modelindex("models/objects/debris2/tris.md2");
-    gi.modelindex("models/objects/debris3/tris.md2");
+    SV_ModelIndex("models/objects/debris1/tris.md2");
+    SV_ModelIndex("models/objects/debris2/tris.md2");
+    SV_ModelIndex("models/objects/debris3/tris.md2");
 
     self->solid = SOLID_BBOX;
     self->movetype = MOVETYPE_STEP;
 
     self->model = "models/objects/barrels/tris.md2";
-    self->s.modelindex = gi.modelindex(self->model);
+    self->s.modelindex = SV_ModelIndex(self->model);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 40);
 
@@ -989,7 +989,7 @@ void SP_misc_blackhole(edict_t *ent)
     ent->solid = SOLID_NOT;
     VectorSet(ent->mins, -64, -64, 0);
     VectorSet(ent->maxs, 64, 64, 8);
-    ent->s.modelindex = gi.modelindex("models/objects/black/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/objects/black/tris.md2");
     ent->s.renderfx = RF_TRANSLUCENT;
     ent->use = misc_blackhole_use;
     ent->think = misc_blackhole_think;
@@ -1016,7 +1016,7 @@ void SP_misc_eastertank(edict_t *ent)
     ent->solid = SOLID_BBOX;
     VectorSet(ent->mins, -32, -32, -16);
     VectorSet(ent->maxs, 32, 32, 32);
-    ent->s.modelindex = gi.modelindex("models/monsters/tank/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/monsters/tank/tris.md2");
     ent->s.frame = 254;
     ent->think = misc_eastertank_think;
     ent->nextthink = level.framenum + 2;
@@ -1043,7 +1043,7 @@ void SP_misc_easterchick(edict_t *ent)
     ent->solid = SOLID_BBOX;
     VectorSet(ent->mins, -32, -32, 0);
     VectorSet(ent->maxs, 32, 32, 32);
-    ent->s.modelindex = gi.modelindex("models/monsters/bitch/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/monsters/bitch/tris.md2");
     ent->s.frame = 208;
     ent->think = misc_easterchick_think;
     ent->nextthink = level.framenum + 2;
@@ -1070,7 +1070,7 @@ void SP_misc_easterchick2(edict_t *ent)
     ent->solid = SOLID_BBOX;
     VectorSet(ent->mins, -32, -32, 0);
     VectorSet(ent->maxs, 32, 32, 32);
-    ent->s.modelindex = gi.modelindex("models/monsters/bitch/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/monsters/bitch/tris.md2");
     ent->s.frame = 248;
     ent->think = misc_easterchick2_think;
     ent->nextthink = level.framenum + 2;
@@ -1091,14 +1091,14 @@ void commander_body_think(edict_t *self)
         self->nextthink = 0;
 
     if (self->s.frame == 22)
-        gi.sound(self, CHAN_BODY, gi.soundindex("tank/thud.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_BODY, SV_SoundIndex("tank/thud.wav"), 1, ATTN_NORM, 0);
 }
 
 void commander_body_use(edict_t *self, edict_t *other, edict_t *activator)
 {
     self->think = commander_body_think;
     self->nextthink = level.framenum + 1;
-    gi.sound(self, CHAN_BODY, gi.soundindex("tank/pain.wav"), 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, SV_SoundIndex("tank/pain.wav"), 1, ATTN_NORM, 0);
 }
 
 void commander_body_drop(edict_t *self)
@@ -1112,7 +1112,7 @@ void SP_monster_commander_body(edict_t *self)
     self->movetype = MOVETYPE_NONE;
     self->solid = SOLID_BBOX;
     self->model = "models/monsters/commandr/tris.md2";
-    self->s.modelindex = gi.modelindex(self->model);
+    self->s.modelindex = SV_ModelIndex(self->model);
     VectorSet(self->mins, -32, -32, 0);
     VectorSet(self->maxs, 32, 32, 48);
     self->use = commander_body_use;
@@ -1121,8 +1121,8 @@ void SP_monster_commander_body(edict_t *self)
     self->s.renderfx |= RF_FRAMELERP;
     gi.linkentity(self);
 
-    gi.soundindex("tank/thud.wav");
-    gi.soundindex("tank/pain.wav");
+    SV_SoundIndex("tank/thud.wav");
+    SV_SoundIndex("tank/pain.wav");
 
     self->think = commander_body_drop;
     self->nextthink = level.framenum + 5;
@@ -1143,7 +1143,7 @@ void SP_misc_banner(edict_t *ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_NOT;
-    ent->s.modelindex = gi.modelindex("models/objects/banner/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/objects/banner/tris.md2");
     ent->s.frame = Q_rand() % 16;
     gi.linkentity(ent);
 
@@ -1161,7 +1161,7 @@ void misc_deadsoldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, 
     if (self->health > -80)
         return;
 
-    gi.sound(self, CHAN_BODY, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+    gi.sound(self, CHAN_BODY, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
     for (n = 0; n < 4; n++)
         ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
     ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
@@ -1177,7 +1177,7 @@ void SP_misc_deadsoldier(edict_t *ent)
 
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    ent->s.modelindex = gi.modelindex("models/deadbods/dude/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/deadbods/dude/tris.md2");
 
     // Defaults to frame 0
     if (ent->spawnflags & 2)
@@ -1235,7 +1235,7 @@ void SP_misc_viper(edict_t *ent)
 
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_NOT;
-    ent->s.modelindex = gi.modelindex("models/ships/viper/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/ships/viper/tris.md2");
     VectorSet(ent->mins, -16, -16, 0);
     VectorSet(ent->maxs, 16, 16, 32);
 
@@ -1258,7 +1258,7 @@ void SP_misc_bigviper(edict_t *ent)
     ent->solid = SOLID_BBOX;
     VectorSet(ent->mins, -176, -120, -24);
     VectorSet(ent->maxs, 176, 120, 72);
-    ent->s.modelindex = gi.modelindex("models/ships/bigviper/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/ships/bigviper/tris.md2");
     gi.linkentity(ent);
 }
 
@@ -1321,7 +1321,7 @@ void SP_misc_viper_bomb(edict_t *self)
     VectorSet(self->mins, -8, -8, -8);
     VectorSet(self->maxs, 8, 8, 8);
 
-    self->s.modelindex = gi.modelindex("models/objects/bomb/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/objects/bomb/tris.md2");
 
     if (!self->dmg)
         self->dmg = 1000;
@@ -1364,7 +1364,7 @@ void SP_misc_strogg_ship(edict_t *ent)
 
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_NOT;
-    ent->s.modelindex = gi.modelindex("models/ships/strogg1/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/ships/strogg1/tris.md2");
     VectorSet(ent->mins, -16, -16, 0);
     VectorSet(ent->maxs, 16, 16, 32);
 
@@ -1400,7 +1400,7 @@ void SP_misc_satellite_dish(edict_t *ent)
     ent->solid = SOLID_BBOX;
     VectorSet(ent->mins, -64, -64, 0);
     VectorSet(ent->maxs, 64, 64, 128);
-    ent->s.modelindex = gi.modelindex("models/objects/satellite/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/objects/satellite/tris.md2");
     ent->use = misc_satellite_dish_use;
     gi.linkentity(ent);
 }
@@ -1412,7 +1412,7 @@ void SP_light_mine1(edict_t *ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    ent->s.modelindex = gi.modelindex("models/objects/minelite/light1/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/objects/minelite/light1/tris.md2");
     gi.linkentity(ent);
 }
 
@@ -1423,7 +1423,7 @@ void SP_light_mine2(edict_t *ent)
 {
     ent->movetype = MOVETYPE_NONE;
     ent->solid = SOLID_BBOX;
-    ent->s.modelindex = gi.modelindex("models/objects/minelite/light2/tris.md2");
+    ent->s.modelindex = SV_ModelIndex("models/objects/minelite/light2/tris.md2");
     gi.linkentity(ent);
 }
 
@@ -1686,7 +1686,7 @@ void SP_func_clock(edict_t *self)
 
     func_clock_reset(self);
 
-    self->message = gi.TagMalloc(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
+    self->message = Z_TagMallocz(CLOCK_MESSAGE_SIZE, TAG_LEVEL);
 
     self->think = func_clock_think;
 
@@ -1755,7 +1755,7 @@ void SP_misc_teleporter(edict_t *ent)
     gi.setmodel(ent, "models/objects/dmspot/tris.md2");
     ent->s.skinnum = 1;
     ent->s.effects = EF_TELEPORTER;
-    ent->s.sound = gi.soundindex("world/amb10.wav");
+    ent->s.sound = SV_SoundIndex("world/amb10.wav");
     ent->solid = SOLID_BBOX;
 
     VectorSet(ent->mins, -32, -32, -24);

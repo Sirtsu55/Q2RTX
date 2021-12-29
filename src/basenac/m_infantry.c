@@ -368,7 +368,7 @@ void infantry_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, gi.soundindex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -530,24 +530,24 @@ void SP_monster_infantry(edict_t *self)
         return;
     }
 
-    sound_pain1 = gi.soundindex("infantry/infpain1.wav");
-    sound_pain2 = gi.soundindex("infantry/infpain2.wav");
-    sound_die1 = gi.soundindex("infantry/infdeth1.wav");
-    sound_die2 = gi.soundindex("infantry/infdeth2.wav");
+    sound_pain1 = SV_SoundIndex("infantry/infpain1.wav");
+    sound_pain2 = SV_SoundIndex("infantry/infpain2.wav");
+    sound_die1 = SV_SoundIndex("infantry/infdeth1.wav");
+    sound_die2 = SV_SoundIndex("infantry/infdeth2.wav");
 
-    sound_gunshot = gi.soundindex("infantry/infatck1.wav");
-    sound_weapon_cock = gi.soundindex("infantry/infatck3.wav");
-    sound_punch_swing = gi.soundindex("infantry/infatck2.wav");
-    sound_punch_hit = gi.soundindex("infantry/melee2.wav");
+    sound_gunshot = SV_SoundIndex("infantry/infatck1.wav");
+    sound_weapon_cock = SV_SoundIndex("infantry/infatck3.wav");
+    sound_punch_swing = SV_SoundIndex("infantry/infatck2.wav");
+    sound_punch_hit = SV_SoundIndex("infantry/melee2.wav");
 
-    sound_sight = gi.soundindex("infantry/infsght1.wav");
-    sound_search = gi.soundindex("infantry/infsrch1.wav");
-    sound_idle = gi.soundindex("infantry/infidle1.wav");
+    sound_sight = SV_SoundIndex("infantry/infsght1.wav");
+    sound_search = SV_SoundIndex("infantry/infsrch1.wav");
+    sound_idle = SV_SoundIndex("infantry/infidle1.wav");
 
 
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
-    self->s.modelindex = gi.modelindex("models/monsters/infantry/tris.md2");
+    self->s.modelindex = SV_ModelIndex("models/monsters/infantry/tris.md2");
     VectorSet(self->mins, -16, -16, -24);
     VectorSet(self->maxs, 16, 16, 32);
 
