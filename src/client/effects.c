@@ -2009,18 +2009,12 @@ static void CL_RunParticleBounce(cparticle_t *p, vec3_t next_origin)
 	}
 
     if (tr.fraction != 1) {
-	    // reflect the velocity on the trace plane
-	    float dot = DotProduct( p->vel, tr.plane.normal );
-	    VectorMA( p->vel, -2*dot, tr.plane.normal, p->vel );
 
-	    VectorScale(p->vel, p->bounce, p->vel);
-	    // check for stop
-	    if ( tr.plane.normal[2] > 0.2 && VectorLength(p->vel) <= 24.f ) {
+        if (ClipVelocity(p->vel, tr.plane.normal, p->vel, p->bounce)) {
 		    VectorCopy(tr.endpos, p->org);
-		    return;
-	    }
-
-	    VectorAdd(p->org, tr.plane.normal, p->org);
+        } else {
+    	    VectorAdd(p->org, tr.plane.normal, p->org);
+        }
     }
 }
 

@@ -279,23 +279,27 @@ void UnionBounds(vec3_t a[2], vec3_t b[2], vec3_t c[2]);
 ==================
 ClipVelocity
 
-Slide off of the impacting object
-returns the blocked flags (1 = floor, 2 = step / wall)
+Slide off of the impacting object.
+Returns true if the object has stopped.
 ==================
 */
-static inline void ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+static inline bool ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out, float overbounce)
 {
-	float backoff = DotProduct(in, normal);
+	// reflect the velocity on the trace plane
+	float dot = DotProduct(in, normal);
+	VectorMA( in, -2*dot, normal, out );
 
-	if (backoff < 0.f) {
-		backoff *= overbounce;
-	} else {
-		backoff /= overbounce;
+    if (overbounce != 1.f) {
+    	VectorScale(out, overbounce, out);
+    }
+
+	// check for stop
+	if (normal[2] > 0.2f && VectorLength(out) <= 40.f) {
+        VectorClear(out);
+		return true;
 	}
 
-    for (int i = 0; i < 3; i++) {
-        out[i] = in[i] - (normal[i] * backoff);
-    }
+	return false;
 }
 
 static inline void AnglesToAxis(vec3_t angles, vec3_t axis[3])

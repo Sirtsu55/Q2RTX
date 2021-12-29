@@ -208,7 +208,7 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
 
         time_left -= time_left * trace.fraction;
 
-        // cliped to another plane
+        // clipped to another plane
         if (numplanes >= MAX_CLIP_PLANES) {
             // this shouldn't really happen
             VectorClear(ent->velocity);
@@ -662,20 +662,17 @@ void SV_Physics_Toss(edict_t *ent)
 
     if (trace.fraction < 1) {
         if (ent->movetype == MOVETYPE_BOUNCE)
-            backoff = 1.5f;
+            backoff = 0.5f;
         else
             backoff = 1;
 
-        ClipVelocity(ent->velocity, trace.plane.normal, ent->velocity, backoff);
-
-        // stop if on ground
-        if (trace.plane.normal[2] > 0.7f) {
-            if (ent->velocity[2] < 60 || ent->movetype != MOVETYPE_BOUNCE) {
-                ent->groundentity = trace.ent;
-                ent->groundentity_linkcount = trace.ent->linkcount;
-                VectorClear(ent->velocity);
-                VectorClear(ent->avelocity);
-            }
+        if (ClipVelocity(ent->velocity, trace.plane.normal, ent->velocity, backoff)) {
+            ent->groundentity = trace.ent;
+            ent->groundentity_linkcount = trace.ent->linkcount;
+            VectorCopy(trace.endpos, ent->s.origin);
+            VectorClear(ent->avelocity);
+        } else {
+            VectorAdd(ent->s.origin, trace.plane.normal, ent->s.origin);
         }
 
 //      if (ent->touch)
