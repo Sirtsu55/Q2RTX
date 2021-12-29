@@ -39,6 +39,7 @@ music/
 *.tmp
 *.wal
 *.wav
+*.bak
 
 q2config.cfg
 save
