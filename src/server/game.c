@@ -577,16 +577,6 @@ void PF_Pmove(pmove_t *pm)
     }
 }
 
-static cvar_t *PF_cvar(const char *name, const char *value, int flags)
-{
-    if (flags & CVAR_EXTENDED_MASK) {
-        Com_WPrintf("Game attemped to set extended flags on '%s', masked out.\n", name);
-        flags &= ~CVAR_EXTENDED_MASK;
-    }
-
-    return Cvar_Get(name, value, flags | CVAR_GAME);
-}
-
 static void PF_Cbuf_AddText(const char *string)
 {
     Cbuf_AddText(&cmd_buffer, string);
@@ -700,7 +690,12 @@ static void PF_WriteData(const void *data, size_t len)
 
 static void PF_Cvar_Get(cvarRef_t *cvar, const char *var_name, const char *value, int flags)
 {
-    cvar_t *handle = Cvar_Get(var_name, value, (flags & CVAR_EXTENDED_MASK) | CVAR_GAME);
+    if (flags & CVAR_EXTENDED_MASK) {
+        Com_WPrintf("Game attemped to set extended flags on '%s', masked out.\n", var_name);
+        flags &= ~CVAR_EXTENDED_MASK;
+    }
+
+    cvar_t *handle = Cvar_Get(var_name, value, flags | CVAR_GAME);
 
     if (cvar) {
         memset(cvar, 0, sizeof(*cvar));
