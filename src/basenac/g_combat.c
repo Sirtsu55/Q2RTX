@@ -36,7 +36,7 @@ bool CanDamage(edict_t *targ, edict_t *inflictor)
     if (targ->movetype == MOVETYPE_PUSH) {
         VectorAdd(targ->absmin, targ->absmax, dest);
         VectorScale(dest, 0.5f, dest);
-        trace = gi.trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
+        trace = SV_Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
         if (trace.fraction == 1.0f)
             return true;
         if (trace.ent == targ)
@@ -44,35 +44,35 @@ bool CanDamage(edict_t *targ, edict_t *inflictor)
         return false;
     }
 
-    trace = gi.trace(inflictor->s.origin, vec3_origin, vec3_origin, targ->s.origin, inflictor, MASK_SOLID);
+    trace = SV_Trace(inflictor->s.origin, vec3_origin, vec3_origin, targ->s.origin, inflictor, MASK_SOLID);
     if (trace.fraction == 1.0f)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] += 15.0f;
     dest[1] += 15.0f;
-    trace = gi.trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
+    trace = SV_Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
     if (trace.fraction == 1.0f)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] += 15.0f;
     dest[1] -= 15.0f;
-    trace = gi.trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
+    trace = SV_Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
     if (trace.fraction == 1.0f)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] -= 15.0f;
     dest[1] += 15.0f;
-    trace = gi.trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
+    trace = SV_Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
     if (trace.fraction == 1.0f)
         return true;
 
     VectorCopy(targ->s.origin, dest);
     dest[0] -= 15.0f;
     dest[1] -= 15.0f;
-    trace = gi.trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
+    trace = SV_Trace(inflictor->s.origin, vec3_origin, vec3_origin, dest, inflictor, MASK_SOLID);
     if (trace.fraction == 1.0f)
         return true;
 
@@ -97,7 +97,7 @@ void Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, ve
 //      targ->svflags |= SVF_DEADMONSTER;   // now treat as a different content type
         if (!(targ->monsterinfo.aiflags & AI_GOOD_GUY)) {
             level.killed_monsters++;
-            if (coop->value && attacker->client)
+            if (coop.integer && attacker->client)
                 attacker->client->resp.score++;
             // medics won't heal monsters that they kill themselves
             if (strcmp(attacker->classname, "monster_medic") == 0)
@@ -129,12 +129,12 @@ void SpawnDamage(int type, vec3_t origin, vec3_t normal, int damage)
 {
     if (damage > 255)
         damage = 255;
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(type);
-//  gi.WriteByte (damage);
-    gi.WritePosition(origin);
-    gi.WriteDir(normal);
-    gi.multicast(origin, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(type);
+//  SV_WriteByte (damage);
+    SV_WritePos(origin);
+    SV_WriteDir(normal);
+    SV_Multicast(origin, MULTICAST_PVS, false);
 }
 
 
@@ -373,7 +373,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
         return;
 
     // easy mode takes half damage
-    if (skill->value == 0 && deathmatch->value == 0 && targ->client) {
+    if (skill.integer == 0 && deathmatch.integer == 0 && targ->client) {
         damage *= 0.5f;
         if (!damage)
             damage = 1;
@@ -382,9 +382,9 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
     // friendly fire avoidance
     // if enabled you can't hurt teammates (but you can hurt yourself)
     // knockback still occurs
-    if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || (coop->value && targ->client))) {
+    if ((targ != attacker) && ((deathmatch.integer && (dmflags.integer & (DF_MODELTEAMS | DF_SKINTEAMS))) || (coop.integer && targ->client))) {
         if (OnSameTeam(targ, attacker)) {
-            if ((int)(dmflags->value) & DF_NO_FRIENDLY_FIRE)
+            if (dmflags.integer & DF_NO_FRIENDLY_FIRE)
                 damage = 0;
             else
                 mod |= MOD_FRIENDLY_FIRE;
@@ -441,7 +441,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
     // check for invincibility
     if ((client && client->invincible_framenum > level.framenum) && !(dflags & DAMAGE_NO_PROTECTION)) {
         if (targ->pain_debounce_framenum < level.framenum) {
-            gi.sound(targ, CHAN_ITEM, SV_SoundIndex("items/protect4.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(targ, CHAN_ITEM, SV_SoundIndex("items/protect4.wav"), 1, ATTN_NORM, 0);
             targ->pain_debounce_framenum = level.framenum + 2 * BASE_FRAMERATE;
         }
         take = 0;
@@ -487,7 +487,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
         if (!(targ->monsterinfo.aiflags & AI_DUCKED) && (take)) {
             targ->pain(targ, attacker, knockback, take);
             // nightmare mode monsters don't go into pain frames often
-            if (skill->value == 3)
+            if (skill.integer == 3)
                 targ->pain_debounce_framenum = level.framenum + 5 * BASE_FRAMERATE;
         }
     } else if (client) {

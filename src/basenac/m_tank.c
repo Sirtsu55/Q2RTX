@@ -46,28 +46,28 @@ static int  sound_strike;
 
 void tank_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 
 void tank_footstep(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_BODY, sound_step, 1, ATTN_NORM, 0);
 }
 
 void tank_thud(edict_t *self)
 {
-    gi.sound(self, CHAN_BODY, sound_thud, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_BODY, sound_thud, 1, ATTN_NORM, 0);
 }
 
 void tank_windup(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_windup, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_windup, 1, ATTN_NORM, 0);
 }
 
 void tank_idle(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
 
@@ -285,7 +285,7 @@ void tank_pain(edict_t *self, edict_t *other, float kick, int damage)
             return;
 
     // If hard or nightmare, don't go into pain while attacking
-    if (skill->value >= 2) {
+    if (skill.integer >= 2) {
         if ((self->s.frame >= FRAME_attak301) && (self->s.frame <= FRAME_attak330))
             return;
         if ((self->s.frame >= FRAME_attak101) && (self->s.frame <= FRAME_attak116))
@@ -293,9 +293,9 @@ void tank_pain(edict_t *self, edict_t *other, float kick, int damage)
     }
 
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
-    gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     if (damage <= 30)
@@ -338,7 +338,7 @@ void TankBlaster(edict_t *self)
 
 void TankStrike(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_strike, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_strike, 1, ATTN_NORM, 0);
 }
 
 void TankRocket(edict_t *self)
@@ -443,7 +443,7 @@ mmove_t tank_move_attack_post_blast = {FRAME_attak117, FRAME_attak122, tank_fram
 
 void tank_reattack_blaster(edict_t *self)
 {
-    if (skill->value >= 2)
+    if (skill.integer >= 2)
         if (visible(self, self->enemy))
             if (self->enemy->health > 0)
                 if (random() <= 0.6f) {
@@ -607,7 +607,7 @@ mmove_t tank_move_attack_chain = {FRAME_attak401, FRAME_attak429, tank_frames_at
 void tank_refire_rocket(edict_t *self)
 {
     // Only on hard or nightmare
-    if (skill->value >= 2)
+    if (skill.integer >= 2)
         if (self->enemy->health > 0)
             if (visible(self, self->enemy))
                 if (random() <= 0.4f) {
@@ -672,7 +672,7 @@ void tank_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 mframe_t tank_frames_death1 [] = {
@@ -717,7 +717,7 @@ void tank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 1 /*4*/; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -732,7 +732,7 @@ void tank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
 
@@ -751,7 +751,7 @@ void tank_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 */
 void SP_monster_tank(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -800,7 +800,7 @@ void SP_monster_tank(edict_t *self)
     self->monsterinfo.sight = tank_sight;
     self->monsterinfo.idle = tank_idle;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     self->monsterinfo.currentmove = &tank_move_stand;
     self->monsterinfo.scale = MODEL_SCALE;

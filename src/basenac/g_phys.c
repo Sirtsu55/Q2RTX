@@ -53,7 +53,7 @@ edict_t *SV_TestEntityPosition(edict_t *ent)
         mask = ent->clipmask;
     else
         mask = MASK_SOLID;
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
+    trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
 
     if (trace.startsolid)
         return g_edicts;
@@ -74,9 +74,8 @@ void SV_CheckVelocity(edict_t *ent)
 //
     float len = VectorLength(ent->velocity);
 
-    if (len > sv_maxvelocity->value) {
-        VectorScale(ent->velocity, 1.0f / len, ent->velocity);
-        VectorScale(ent->velocity, sv_maxvelocity->value, ent->velocity);
+    if (len > sv_maxvelocity.value) {
+        VectorScale(ent->velocity, (1.0f / len) * sv_maxvelocity.value, ent->velocity);
     }
 }
 
@@ -167,7 +166,7 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
         for (i = 0 ; i < 3 ; i++)
             end[i] = ent->s.origin[i] + time_left * ent->velocity[i];
 
-        trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
+        trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
 
         if (trace.allsolid) {
             // entity is trapped in another solid
@@ -270,7 +269,7 @@ SV_AddGravity
 */
 void SV_AddGravity(edict_t *ent)
 {
-    ent->velocity[2] -= ent->gravity * sv_gravity->value * FRAMETIME;
+    ent->velocity[2] -= ent->gravity * sv_gravity.value * FRAMETIME;
 }
 
 /*
@@ -304,10 +303,10 @@ retry:
     else
         mask = MASK_SOLID;
 
-    trace = gi.trace(start, ent->mins, ent->maxs, end, ent, mask);
+    trace = SV_Trace(start, ent->mins, ent->maxs, end, ent, mask);
 
     VectorCopy(trace.endpos, ent->s.origin);
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 
     if (trace.fraction != 1.0f) {
         SV_Impact(ent, &trace);
@@ -316,7 +315,7 @@ retry:
         if (!trace.ent->inuse && ent->inuse) {
             // move the pusher back and try again
             VectorCopy(start, ent->s.origin);
-            gi.linkentity(ent);
+            SV_LinkEntity(ent);
             goto retry;
         }
     }
@@ -390,7 +389,7 @@ bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 // move the pusher to it's final position
     VectorAdd(pusher->s.origin, move, pusher->s.origin);
     VectorAdd(pusher->s.angles, amove, pusher->s.angles);
-    gi.linkentity(pusher);
+    SV_LinkEntity(pusher);
 
 // see if any solid entities are inside the final position
     check = g_edicts + 1;
@@ -458,7 +457,7 @@ bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
             block = SV_TestEntityPosition(check);
             if (!block) {
                 // pushed ok
-                gi.linkentity(check);
+                SV_LinkEntity(check);
                 // impact?
                 continue;
             }
@@ -488,7 +487,7 @@ bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
                 p->ent->client->ps.pmove.delta_angles[YAW] = p->deltayaw;
             }
 #endif
-            gi.linkentity(p->ent);
+            SV_LinkEntity(p->ent);
         }
         return false;
     }
@@ -593,7 +592,7 @@ void SV_Physics_Noclip(edict_t *ent)
     VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
     VectorMA(ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 /*
@@ -664,7 +663,7 @@ void SV_Physics_Toss(edict_t *ent)
         if (ent->movetype == MOVETYPE_BOUNCE)
             backoff = 0.5f;
         else
-            backoff = 1;
+            backoff = 0.25f;
 
         if (ClipVelocity(ent->velocity, trace.plane.normal, ent->velocity, backoff)) {
             ent->groundentity = trace.ent;
@@ -681,7 +680,7 @@ void SV_Physics_Toss(edict_t *ent)
 
 // check for water transition
     wasinwater = (ent->watertype & MASK_WATER);
-    ent->watertype = gi.pointcontents(ent->s.origin);
+    ent->watertype = SV_PointContents(ent->s.origin);
     isinwater = ent->watertype & MASK_WATER;
 
     if (isinwater)
@@ -690,14 +689,14 @@ void SV_Physics_Toss(edict_t *ent)
         ent->waterlevel = 0;
 
     if (!wasinwater && isinwater)
-        gi.positioned_sound(old_origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
+        SV_PositionedSound(old_origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
     else if (wasinwater && !isinwater)
-        gi.positioned_sound(ent->s.origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
+        SV_PositionedSound(ent->s.origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
 
 // move teamslaves
     for (slave = ent->teamchain; slave; slave = slave->teamchain) {
         VectorCopy(ent->s.origin, slave->s.origin);
-        gi.linkentity(slave);
+        SV_LinkEntity(slave);
     }
 }
 
@@ -779,7 +778,7 @@ void SV_Physics_Step(edict_t *ent)
     if (! wasonground)
         if (!(ent->flags & FL_FLY))
             if (!((ent->flags & FL_SWIM) && (ent->waterlevel > 2))) {
-                if (ent->velocity[2] < sv_gravity->value * -0.1f)
+                if (ent->velocity[2] < sv_gravity.value * -0.1f)
                     hitsound = true;
                 if (ent->waterlevel == 0)
                     SV_AddGravity(ent);
@@ -836,7 +835,7 @@ void SV_Physics_Step(edict_t *ent)
             mask = MASK_SOLID;
         SV_FlyMove(ent, FRAMETIME, mask);
 
-        gi.linkentity(ent);
+        SV_LinkEntity(ent);
         G_TouchTriggers(ent);
         if (!ent->inuse)
             return;
@@ -844,7 +843,7 @@ void SV_Physics_Step(edict_t *ent)
         if (ent->groundentity)
             if (!wasonground)
                 if (hitsound)
-                    gi.sound(ent, 0, SV_SoundIndex("world/land.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, 0, SV_SoundIndex("world/land.wav"), 1, ATTN_NORM, 0);
     }
 
 // regular thinking

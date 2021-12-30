@@ -801,7 +801,7 @@ A single player death will automatically restore from the
 last save position.
 ============
 */
-void WriteGame(const char *filename, qboolean autosave)
+void WriteGame(const char *filename, bool autosave)
 {
     FILE    *f;
     int     i;
@@ -854,7 +854,10 @@ void ReadGame(const char *filename)
     read_fields(f, gamefields, &game);
 
     // should agree with server's version
-    if (game.maxclients != (int)maxclients->value) {
+    cvarRef_t maxclients;
+    Cvar_Get(&maxclients, "maxclients", NULL, 0);
+
+    if (game.maxclients != maxclients.integer) {
         fclose(f);
         Com_Error(ERR_DROP, "Savegame has bad maxclients");
     }
@@ -948,7 +951,7 @@ void ReadLevel(const char *filename)
 
     // wipe all the entities
     memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
-    globals.num_edicts = maxclients->value + 1;
+    globals.num_edicts = game.maxclients + 1;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -984,13 +987,13 @@ void ReadLevel(const char *filename)
 
         // let the server rebuild world links for this ent
         memset(&ent->area, 0, sizeof(ent->area));
-        gi.linkentity(ent);
+        SV_LinkEntity(ent);
     }
 
     fclose(f);
 
     // mark all clients as unconnected
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < game.maxclients ; i++) {
         ent = &g_edicts[i + 1];
         ent->client = game.clients + i;
         ent->client->pers.connected = false;

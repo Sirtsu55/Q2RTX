@@ -40,15 +40,15 @@ static int  sound_search2;
 
 void hover_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void hover_search(edict_t *self)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_search1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_search2, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_search2, 1, ATTN_NORM, 0);
 }
 
 
@@ -475,19 +475,19 @@ void hover_pain(edict_t *self, edict_t *other, float kick, int damage)
 
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     if (damage <= 25) {
         if (random() < 0.5f) {
-            gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+            SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
             self->monsterinfo.currentmove = &hover_move_pain3;
         } else {
-            gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+            SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
             self->monsterinfo.currentmove = &hover_move_pain2;
         }
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &hover_move_pain1;
     }
 }
@@ -509,7 +509,7 @@ void hover_dead(edict_t *self)
     self->think = hover_deadthink;
     self->nextthink = level.framenum + 1;
     self->timestamp = level.framenum + 15 * BASE_FRAMERATE;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
@@ -518,7 +518,7 @@ void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 2; n++)
@@ -533,9 +533,9 @@ void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 
 // regular death
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_death2, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_death2, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.currentmove = &hover_move_death1;
@@ -545,7 +545,7 @@ void hover_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 */
 void SP_monster_hover(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -583,7 +583,7 @@ void SP_monster_hover(edict_t *self)
     self->monsterinfo.sight = hover_sight;
     self->monsterinfo.search = hover_search;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     self->monsterinfo.currentmove = &hover_move_stand;
     self->monsterinfo.scale = MODEL_SCALE;

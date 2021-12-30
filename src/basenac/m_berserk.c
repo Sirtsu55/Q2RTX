@@ -36,12 +36,12 @@ static int sound_search;
 
 void berserk_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void berserk_search(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
 }
 
 
@@ -92,7 +92,7 @@ void berserk_fidget(edict_t *self)
         return;
 
     self->monsterinfo.currentmove = &berserk_move_stand_fidget;
-    gi.sound(self, CHAN_WEAPON, sound_idle, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_idle, 1, ATTN_IDLE, 0);
 }
 
 
@@ -170,7 +170,7 @@ void berserk_attack_spike(edict_t *self)
 
 void berserk_swing(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_punch, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_punch, 1, ATTN_NORM, 0);
 }
 
 mframe_t berserk_frames_attack_spike [] = {
@@ -310,9 +310,9 @@ void berserk_pain(edict_t *self, edict_t *other, float kick, int damage)
         return;
 
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
-    gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     if ((damage < 20) || (random() < 0.5f))
@@ -329,7 +329,7 @@ void berserk_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 
@@ -370,7 +370,7 @@ void berserk_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
     int     n;
 
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -383,7 +383,7 @@ void berserk_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
     if (self->deadflag == DEAD_DEAD)
         return;
 
-    gi.sound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
 
@@ -398,7 +398,7 @@ void berserk_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 */
 void SP_monster_berserk(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -436,7 +436,7 @@ void SP_monster_berserk(edict_t *self)
     self->monsterinfo.currentmove = &berserk_move_stand;
     self->monsterinfo.scale = MODEL_SCALE;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     walkmonster_start(self);
 }

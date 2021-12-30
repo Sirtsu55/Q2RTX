@@ -29,7 +29,7 @@ INTERMISSION
 
 void MoveClientToIntermission(edict_t *ent)
 {
-    if (deathmatch->value || coop->value)
+    if (deathmatch.integer || coop.integer)
         ent->client->showscores = true;
     VectorSnapCoord(level.intermission_origin, ent->s.origin);
     VectorCopy(ent->s.origin, ent->client->ps.pmove.origin);
@@ -58,9 +58,9 @@ void MoveClientToIntermission(edict_t *ent)
 
     // add the layout
 
-    if (deathmatch->value || coop->value) {
+    if (deathmatch.integer || coop.integer) {
         DeathmatchScoreboardMessage(ent, NULL);
-        gi.unicast(ent, true);
+        SV_Unicast(ent, true);
     }
 
 }
@@ -76,7 +76,7 @@ void BeginIntermission(edict_t *targ)
     game.autosaved = false;
 
     // respawn any dead clients
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < game.maxclients ; i++) {
         client = g_edicts + 1 + i;
         if (!client->inuse)
             continue;
@@ -88,8 +88,8 @@ void BeginIntermission(edict_t *targ)
     level.changemap = targ->map;
 
     if (strstr(level.changemap, "*")) {
-        if (coop->value) {
-            for (i = 0 ; i < maxclients->value ; i++) {
+        if (coop.integer) {
+            for (i = 0 ; i < game.maxclients ; i++) {
                 client = g_edicts + 1 + i;
                 if (!client->inuse)
                     continue;
@@ -101,7 +101,7 @@ void BeginIntermission(edict_t *targ)
             }
         }
     } else {
-        if (!deathmatch->value) {
+        if (!deathmatch.integer) {
             level.exitintermission = 1;     // go immediately to the next level
             return;
         }
@@ -130,7 +130,7 @@ void BeginIntermission(edict_t *targ)
     VectorCopy(ent->s.angles, level.intermission_angle);
 
     // move all clients to the intermission point
-    for (i = 0 ; i < maxclients->value ; i++) {
+    for (i = 0 ; i < game.maxclients ; i++) {
         client = g_edicts + 1 + i;
         if (!client->inuse)
             continue;
@@ -223,8 +223,8 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
         stringlength += j;
     }
 
-    gi.WriteByte(svc_layout);
-    gi.WriteString(string);
+    SV_WriteByte(svc_layout);
+    SV_WriteString(string);
 }
 
 
@@ -239,7 +239,7 @@ Note that it isn't that hard to overflow the 1400 byte message limit!
 void DeathmatchScoreboard(edict_t *ent)
 {
     DeathmatchScoreboardMessage(ent, ent->enemy);
-    gi.unicast(ent, true);
+    SV_Unicast(ent, true);
 }
 
 
@@ -255,7 +255,7 @@ void Cmd_Score_f(edict_t *ent)
     ent->client->showinventory = false;
     ent->client->showhelp = false;
 
-    if (!deathmatch->value && !coop->value)
+    if (!deathmatch.integer && !coop.integer)
         return;
 
     if (ent->client->showscores) {
@@ -280,11 +280,11 @@ void HelpComputer(edict_t *ent)
     char    string[1024];
     char    *sk;
 
-    if (skill->value == 0)
+    if (skill.integer == 0)
         sk = "easy";
-    else if (skill->value == 1)
+    else if (skill.integer == 1)
         sk = "medium";
-    else if (skill->value == 2)
+    else if (skill.integer == 2)
         sk = "hard";
     else
         sk = "hard+";
@@ -306,9 +306,9 @@ void HelpComputer(edict_t *ent)
                level.found_goals, level.total_goals,
                level.found_secrets, level.total_secrets);
 
-    gi.WriteByte(svc_layout);
-    gi.WriteString(string);
-    gi.unicast(ent, true);
+    SV_WriteByte(svc_layout);
+    SV_WriteString(string);
+    SV_Unicast(ent, true);
 }
 
 
@@ -322,7 +322,7 @@ Display the current help message
 void Cmd_Help_f(edict_t *ent)
 {
     // this is for backwards compatability
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         Cmd_Score_f(ent);
         return;
     }
@@ -381,7 +381,7 @@ void G_SetStats(edict_t *ent)
         if (cells == 0) {
             // ran out of cells for power armor
             ent->flags &= ~FL_POWER_ARMOR;
-            gi.sound(ent, CHAN_ITEM, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
             power_armor_type = 0;;
         }
     }
@@ -443,7 +443,7 @@ void G_SetStats(edict_t *ent)
     //
     ent->client->ps.stats[STAT_LAYOUTS] = 0;
 
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         if (ent->client->pers.health <= 0 || level.intermission_framenum
             || ent->client->showscores)
             ent->client->ps.stats[STAT_LAYOUTS] |= 1;
@@ -485,7 +485,7 @@ void G_CheckChaseStats(edict_t *ent)
     int i;
     gclient_t *cl;
 
-    for (i = 1; i <= maxclients->value; i++) {
+    for (i = 1; i <= game.maxclients; i++) {
         cl = g_edicts[i].client;
         if (!g_edicts[i].inuse || cl->chase_target != ent)
             continue;

@@ -82,7 +82,7 @@ PF_Unicast
 Sends the contents of the mutlicast buffer to a single client.
 ===============
 */
-static void PF_Unicast(edict_t *ent, qboolean reliable)
+static void PF_Unicast(edict_t *ent, bool reliable)
 {
     client_t    *client;
     int         cmd, flags, clientNum;
@@ -254,27 +254,22 @@ static void PF_centerprint(edict_t *ent, const char *message)
 
 /*
 =================
-PF_setmodel
-
-Also sets mins and maxs for inline bmodels
+SV_SetBrushModel
 =================
 */
-static void PF_setmodel(edict_t *ent, const char *name)
+static void SV_SetBrushModel(edict_t *ent, const char *name)
 {
-    mmodel_t    *mod;
+    if (!ent || !name || name[0] != '*')
+        Com_Errorf(ERR_DROP, "%s: must be called with a valid entity & a valid brush model", __func__);
 
-    if (!ent || !name)
-        Com_Error(ERR_DROP, "PF_setmodel: NULL");
+    mmodel_t *mod = CM_InlineModel(&sv.cm, name);
 
+    if (!mod)
+        Com_Errorf(ERR_DROP, "%s: invalid brush model %s", __func__, name);
+
+    VectorCopy(mod->mins, ent->mins);
+    VectorCopy(mod->maxs, ent->maxs);
     ent->s.modelindex = PF_ModelIndex(name);
-
-// if it is an inline model, get the size information for it
-    if (name[0] == '*') {
-        mod = CM_InlineModel(&sv.cm, name);
-        VectorCopy(mod->mins, ent->mins);
-        VectorCopy(mod->maxs, ent->maxs);
-        PF_LinkEdict(ent);
-    }
 }
 
 /*
@@ -361,7 +356,7 @@ static void PF_WriteFloat(float f)
     Com_Error(ERR_DROP, "PF_WriteFloat not implemented");
 }
 
-static qboolean PF_inVIS(vec3_t p1, vec3_t p2, int vis)
+static bool PF_inVIS(vec3_t p1, vec3_t p2, int vis)
 {
     mleaf_t *leaf1, *leaf2;
     byte mask[VIS_MAX_BYTES];
@@ -391,7 +386,7 @@ PF_inPVS
 Also checks portalareas so that doors block sight
 =================
 */
-static qboolean PF_inPVS(vec3_t p1, vec3_t p2)
+static bool PF_inPVS(vec3_t p1, vec3_t p2)
 {
     return PF_inVIS(p1, p2, DVIS_PVS);
 }
@@ -403,7 +398,7 @@ PF_inPHS
 Also checks portalareas so that doors block sound
 =================
 */
-static qboolean PF_inPHS(vec3_t p1, vec3_t p2)
+static bool PF_inPHS(vec3_t p1, vec3_t p2)
 {
     return PF_inVIS(p1, p2, DVIS_PHS);
 }
@@ -509,17 +504,9 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
     // multicast if force sending origin
     if (force_pos) {
         if (channel & CHAN_NO_PHS_ADD) {
-            if (channel & CHAN_RELIABLE) {
-                SV_Multicast(NULL, MULTICAST_ALL_R);
-            } else {
-                SV_Multicast(NULL, MULTICAST_ALL);
-            }
+            SV_Multicast(NULL, MULTICAST_ALL, channel & CHAN_RELIABLE);
         } else {
-            if (channel & CHAN_RELIABLE) {
-                SV_Multicast(origin, MULTICAST_PHS_R);
-            } else {
-                SV_Multicast(origin, MULTICAST_PHS);
-            }
+            SV_Multicast(origin, MULTICAST_PHS, channel & CHAN_RELIABLE);
         }
         return;
     }
@@ -581,15 +568,6 @@ static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
     SZ_Clear(&msg_write);
 }
 
-static void PF_StartSound(edict_t *entity, int channel,
-                          int soundindex, float volume,
-                          float attenuation, int pitch_shift)
-{
-    if (!entity)
-        return;
-    SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, pitch_shift);
-}
-
 void PF_Pmove(pmove_t *pm)
 {
     if (sv_client) {
@@ -614,7 +592,7 @@ static void PF_Cbuf_AddText(const char *string)
     Cbuf_AddText(&cmd_buffer, string);
 }
 
-static void PF_SetAreaPortalState(int portalnum, qboolean open)
+static void PF_SetAreaPortalState(int portalnum, bool open)
 {
     if (!sv.cm.cache) {
         Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
@@ -622,7 +600,15 @@ static void PF_SetAreaPortalState(int portalnum, qboolean open)
     CM_SetAreaPortalState(&sv.cm, portalnum, open);
 }
 
-static qboolean PF_AreasConnected(int area1, int area2)
+static bool PF_GetAreaPortalState(int portalnum)
+{
+    if (!sv.cm.cache) {
+        Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
+    }
+    return CM_GetAreaPortalState(&sv.cm, portalnum);
+}
+
+static bool PF_AreasConnected(int area1, int area2)
 {
     if (!sv.cm.cache) {
         Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
@@ -707,6 +693,73 @@ static void *SV_LoadGameLibrary(const char *game, const char *prefix)
     return _SV_LoadGameLibrary(path);
 }
 
+static void PF_WriteData(const void *data, size_t len)
+{
+    MSG_WriteData(data, len);
+}
+
+static void PF_Cvar_Get(cvarRef_t *cvar, const char *var_name, const char *value, int flags)
+{
+    cvar_t *handle = Cvar_Get(var_name, value, (flags & CVAR_EXTENDED_MASK) | CVAR_GAME);
+
+    if (cvar) {
+        memset(cvar, 0, sizeof(*cvar));
+    }
+
+    if (!handle || !cvar) {
+        return;
+    }
+
+    cvar->handle = handle;
+    cvar->name = var_name;
+    cvar->flags = flags;
+    cvar->integer = cvar->handle->integer;
+    cvar->value = cvar->handle->value;
+    if (cvar->handle->latched_string) {
+        Q_strlcpy(cvar->latched_string, cvar->handle->latched_string, sizeof(cvar->latched_string));
+    } else {
+        cvar->latched_string[0] = '\0';
+    }
+    Q_strlcpy(cvar->string, cvar->handle->string, sizeof(cvar->string));
+    cvar->modified_count = cvar->handle->modified_count;
+}
+
+static bool PF_Cvar_Update(cvarRef_t *cvar)
+{
+    if (cvar->handle->modified_count == cvar->modified_count) {
+        return false;
+    }
+
+    cvar->integer = cvar->handle->integer;
+    cvar->value = cvar->handle->value;
+    if (cvar->handle->latched_string) {
+        Q_strlcpy(cvar->latched_string, cvar->handle->latched_string, sizeof(cvar->latched_string));
+    } else {
+        cvar->latched_string[0] = '\0';
+    }
+    Q_strlcpy(cvar->string, cvar->handle->string, sizeof(cvar->string));
+    cvar->modified_count = cvar->handle->modified_count;
+    return true;
+}
+
+static void PF_Cvar_SetString(cvarRef_t *cvar, const char *value, bool force)
+{
+    Cvar_SetByVar(cvar->handle, value, force ? FROM_CODE : FROM_CONSOLE);
+    PF_Cvar_Update(cvar);
+}
+
+static void PF_Cvar_SetInteger(cvarRef_t *cvar, int value, bool force)
+{
+    Cvar_SetInteger(cvar->handle, value, force ? FROM_CODE : FROM_CONSOLE);
+    PF_Cvar_Update(cvar);
+}
+
+static void PF_Cvar_SetFloat(cvarRef_t *cvar, float value, bool force)
+{
+    Cvar_SetValue(cvar->handle, value, force ? FROM_CODE : FROM_CONSOLE);
+    PF_Cvar_Update(cvar);
+}
+
 /*
 ===============
 SV_InitGameProgs
@@ -755,10 +808,10 @@ void SV_InitGameProgs(void)
 
     import.linkentity = PF_LinkEdict;
     import.unlinkentity = PF_UnlinkEdict;
-    import.BoxEdicts = SV_AreaEdicts;
+    import.SV_AreaEdicts = SV_AreaEdicts;
     import.trace = SV_Trace;
     import.pointcontents = SV_PointContents;
-    import.setmodel = PF_setmodel;
+    import.SV_SetBrushModel = SV_SetBrushModel;
     import.inPVS = PF_inPVS;
     import.inPHS = PF_inPHS;
     import.Pmove = PF_Pmove;
@@ -770,35 +823,38 @@ void SV_InitGameProgs(void)
     import.SV_SetConfigString = PF_SetConfigString;
     import.SV_GetConfigString = PF_GetConfigString;
 
-    import.sound = PF_StartSound;
-    import.positioned_sound = SV_StartSound;
+    import.SV_StartSound = SV_StartSound;
 
     import.WriteChar = MSG_WriteChar;
     import.WriteByte = MSG_WriteByte;
     import.WriteShort = MSG_WriteShort;
     import.WriteLong = MSG_WriteLong;
-    import.WriteFloat = PF_WriteFloat;
     import.WriteString = MSG_WriteString;
-    import.WritePosition = MSG_WritePos;
+    import.WritePos = MSG_WritePos;
     import.WriteDir = MSG_WriteDir;
     import.WriteAngle = MSG_WriteAngle;
+    import.WriteAngle16 = MSG_WriteAngle16;
+    import.WriteData = PF_WriteData;
 
     import.Z_Free = Z_Free;
     import.Z_Realloc = Z_Realloc;
     import.Z_TagMalloc = PF_TagMalloc;
     import.Z_FreeTags = PF_FreeTags;
 
-    import.cvar = PF_cvar;
-    import.cvar_set = Cvar_UserSet;
-    import.cvar_forceset = Cvar_Set;
+    import.Cvar_Get = PF_Cvar_Get;
+    import.Cvar_Update = PF_Cvar_Update;
+    import.Cvar_SetString = PF_Cvar_SetString;
+    import.Cvar_SetInteger = PF_Cvar_SetInteger;
+    import.Cvar_SetFloat = PF_Cvar_SetFloat;
 
     import.argc = Cmd_Argc;
     import.argv = Cmd_Argv;
     // original Cmd_Args() did actually return raw arguments
     import.args = Cmd_RawArgs;
     import.Cbuf_AddText = PF_Cbuf_AddText;
-
-    import.SetAreaPortalState = PF_SetAreaPortalState;
+    
+    import.SV_SetAreaPortalState = PF_SetAreaPortalState;
+    import.SV_GetAreaPortalState = PF_GetAreaPortalState;
     import.AreasConnected = PF_AreasConnected;
 
     ge = entry(&import);

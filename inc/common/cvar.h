@@ -50,6 +50,29 @@ interface from being ambiguous.
 #define CVAR_NOARCHIVEMASK  (CVAR_NOSET | CVAR_CHEAT | CVAR_PRIVATE | CVAR_ROM)
 #define CVAR_EXTENDED_MASK  (~31)
 
+struct cvar_s;
+
+typedef void (*xchanged_t)(struct cvar_s *);
+
+// nothing outside the cvar.*() functions should modify these fields!
+typedef struct cvar_s {
+    char        *name;
+    char        *string;
+    char        *latched_string;    // for CVAR_LATCH vars
+    int         flags;
+    bool        modified;
+    float       value;
+    struct cvar_s *next;
+
+// ------ new stuff ------
+    int         modified_count;   // set each time the cvar is changed
+    int         integer;
+    char        *default_string;
+    xchanged_t      changed;
+    xgenerator_t    generator;
+    struct cvar_s   *hashNext;
+} cvar_t;
+
 extern cvar_t   *cvar_vars;
 extern int      cvar_modified;
 

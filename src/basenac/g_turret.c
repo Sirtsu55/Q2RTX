@@ -85,9 +85,9 @@ void turret_breach_fire(edict_t *self)
     VectorMA(start, self->move_origin[2], u, start);
 
     damage = 100 + random() * 50;
-    speed = 550 + 50 * skill->value;
+    speed = 550 + 50 * skill.integer;
     fire_rocket(self->teammaster->owner, start, f, damage, speed, 150, damage);
-    gi.positioned_sound(start, self, CHAN_WEAPON, SV_SoundIndex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
+    SV_PositionedSound(start, self, CHAN_WEAPON, SV_SoundIndex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
 }
 
 void turret_breach_think(edict_t *self)
@@ -210,9 +210,7 @@ void turret_breach_finish_init(edict_t *self)
 
 void SP_turret_breach(edict_t *self)
 {
-    self->solid = SOLID_BSP;
     self->movetype = MOVETYPE_PUSH;
-    gi.setmodel(self, self->model);
 
     if (!self->speed)
         self->speed = 50;
@@ -238,7 +236,9 @@ void SP_turret_breach(edict_t *self)
 
     self->think = turret_breach_finish_init;
     self->nextthink = level.framenum + 1;
-    gi.linkentity(self);
+    self->solid = SOLID_BSP;
+    SV_SetBrushModel(self, self->model);
+    SV_LinkEntity(self);
 }
 
 
@@ -249,11 +249,11 @@ MUST be teamed with a turret_breach.
 
 void SP_turret_base(edict_t *self)
 {
-    self->solid = SOLID_BSP;
     self->movetype = MOVETYPE_PUSH;
-    gi.setmodel(self, self->model);
     self->blocked = turret_blocked;
-    gi.linkentity(self);
+    self->solid = SOLID_BSP;
+    SV_SetBrushModel(self, self->model);
+    SV_LinkEntity(self);
 }
 
 
@@ -326,7 +326,7 @@ void turret_driver_think(edict_t *self)
     if (level.framenum < self->monsterinfo.attack_finished)
         return;
 
-    reaction_time = (3 - skill->value) * 1.0f * BASE_FRAMERATE;
+    reaction_time = (3 - skill.integer) * 1.0f * BASE_FRAMERATE;
     if ((level.framenum - self->monsterinfo.trail_framenum) < reaction_time)
         return;
 
@@ -370,7 +370,7 @@ void turret_driver_link(edict_t *self)
 
 void SP_turret_driver(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -410,5 +410,5 @@ void SP_turret_driver(edict_t *self)
     self->think = turret_driver_link;
     self->nextthink = level.framenum + 1;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }

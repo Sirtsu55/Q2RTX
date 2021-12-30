@@ -38,17 +38,17 @@ static int  sound_sight;
 
 void gunner_idlesound(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
 void gunner_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void gunner_search(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
 }
 
 
@@ -281,11 +281,11 @@ void gunner_pain(edict_t *self, edict_t *other, float kick, int damage)
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
 
     if (Q_rand() & 1)
-        gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     if (damage <= 10)
@@ -303,7 +303,7 @@ void gunner_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 mframe_t gunner_frames_death [] = {
@@ -327,7 +327,7 @@ void gunner_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -341,7 +341,7 @@ void gunner_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.currentmove = &gunner_move_death;
@@ -353,7 +353,7 @@ void gunner_duck_down(edict_t *self)
     if (self->monsterinfo.aiflags & AI_DUCKED)
         return;
     self->monsterinfo.aiflags |= AI_DUCKED;
-    if (skill->value >= 2) {
+    if (skill.integer >= 2) {
         if (random() > 0.5f)
             GunnerGrenade(self);
     }
@@ -361,7 +361,7 @@ void gunner_duck_down(edict_t *self)
     self->maxs[2] -= 32;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.pause_framenum = level.framenum + 1 * BASE_FRAMERATE;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void gunner_duck_hold(edict_t *self)
@@ -377,7 +377,7 @@ void gunner_duck_up(edict_t *self)
     self->monsterinfo.aiflags &= ~AI_DUCKED;
     self->maxs[2] += 32;
     self->takedamage = DAMAGE_AIM;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 mframe_t gunner_frames_duck [] = {
@@ -406,7 +406,7 @@ void gunner_dodge(edict_t *self, edict_t *attacker, float eta)
 
 void gunner_opengun(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_open, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_open, 1, ATTN_IDLE, 0);
 }
 
 void GunnerFire(edict_t *self)
@@ -558,7 +558,7 @@ void gunner_refire_chain(edict_t *self)
 */
 void SP_monster_gunner(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -596,7 +596,7 @@ void SP_monster_gunner(edict_t *self)
     self->monsterinfo.sight = gunner_sight;
     self->monsterinfo.search = gunner_search;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     self->monsterinfo.currentmove = &gunner_move_stand;
     self->monsterinfo.scale = MODEL_SCALE;

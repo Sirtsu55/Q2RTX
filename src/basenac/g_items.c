@@ -129,7 +129,7 @@ void DoRespawn(edict_t *ent)
 
     ent->svflags &= ~SVF_NOCLIENT;
     ent->solid = SOLID_TRIGGER;
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 
     // send an effect
     ent->s.event = EV_ITEM_RESPAWN;
@@ -142,7 +142,7 @@ void SetRespawn(edict_t *ent, float delay)
     ent->solid = SOLID_NOT;
     ent->nextthink = level.framenum + delay * BASE_FRAMERATE;
     ent->think = DoRespawn;
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 
@@ -153,18 +153,18 @@ bool Pickup_Powerup(edict_t *ent, edict_t *other)
     int     quantity;
 
     quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
-    if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
+    if ((skill.integer == 1 && quantity >= 2) || (skill.integer >= 2 && quantity >= 1))
         return false;
 
-    if ((coop->value) && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
+    if (coop.integer && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
         return false;
 
     other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         if (!(ent->spawnflags & DROPPED_ITEM))
             SetRespawn(ent, ent->item->quantity);
-        if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))) {
+        if ((dmflags.integer & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))) {
             if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
                 quad_drop_timeout_hack = ent->nextthink - level.framenum;
             ent->item->use(other, ent->item);
@@ -186,13 +186,13 @@ void Drop_General(edict_t *ent, gitem_t *item)
 
 bool Pickup_Adrenaline(edict_t *ent, edict_t *other)
 {
-    if (!deathmatch->value)
+    if (!deathmatch.integer)
         other->max_health += 1;
 
     if (other->health < other->max_health)
         other->health = other->max_health;
 
-    if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
         SetRespawn(ent, ent->item->quantity);
 
     return true;
@@ -202,7 +202,7 @@ bool Pickup_AncientHead(edict_t *ent, edict_t *other)
 {
     other->max_health += 2;
 
-    if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
         SetRespawn(ent, ent->item->quantity);
 
     return true;
@@ -236,7 +236,7 @@ bool Pickup_Bandolier(edict_t *ent, edict_t *other)
             other->client->pers.inventory[index] = other->client->pers.max_shells;
     }
 
-    if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
         SetRespawn(ent, ent->item->quantity);
 
     return true;
@@ -288,7 +288,7 @@ bool Pickup_Pack(edict_t *ent, edict_t *other)
             other->client->pers.inventory[index] = other->client->pers.max_rockets;
     }
 
-    if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
         SetRespawn(ent, ent->item->quantity);
 
     return true;
@@ -315,7 +315,7 @@ void Use_Quad(edict_t *ent, gitem_t *item)
     else
         ent->client->quad_framenum = level.framenum + timeout;
 
-    gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
@@ -330,7 +330,7 @@ void Use_Breather(edict_t *ent, gitem_t *item)
     else
         ent->client->breather_framenum = level.framenum + 300;
 
-//  gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
+//  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -345,7 +345,7 @@ void Use_Envirosuit(edict_t *ent, gitem_t *item)
     else
         ent->client->enviro_framenum = level.framenum + 300;
 
-//  gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
+//  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
@@ -360,7 +360,7 @@ void    Use_Invulnerability(edict_t *ent, gitem_t *item)
     else
         ent->client->invincible_framenum = level.framenum + 300;
 
-    gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/protect.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/protect.wav"), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
@@ -371,14 +371,14 @@ void    Use_Silencer(edict_t *ent, gitem_t *item)
     ValidateSelectedItem(ent);
     ent->client->silencer_shots += 30;
 
-//  gi.sound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
+//  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
 
 //======================================================================
 
 bool Pickup_Key(edict_t *ent, edict_t *other)
 {
-    if (coop->value) {
+    if (coop.integer) {
         if (strcmp(ent->classname, "key_power_cube") == 0) {
             if (other->client->pers.power_cubes & ((ent->spawnflags & 0x0000ff00) >> 8))
                 return false;
@@ -436,7 +436,7 @@ bool Pickup_Ammo(edict_t *ent, edict_t *other)
     bool        weapon;
 
     weapon = (ent->item->flags & IT_WEAPON);
-    if ((weapon) && ((int)dmflags->value & DF_INFINITE_AMMO))
+    if (weapon && (dmflags.integer & DF_INFINITE_AMMO))
         count = 1000;
     else if (ent->count)
         count = ent->count;
@@ -449,11 +449,11 @@ bool Pickup_Ammo(edict_t *ent, edict_t *other)
         return false;
 
     if (weapon && !oldcount) {
-        if (other->client->pers.weapon != ent->item && (!deathmatch->value || other->client->pers.weapon == FindItem("axe")))
+        if (other->client->pers.weapon != ent->item && (!deathmatch.integer || other->client->pers.weapon == FindItem("axe")))
             other->client->newweapon = ent->item;
     }
 
-    if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
+    if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && deathmatch.integer)
         SetRespawn(ent, 30);
     return true;
 }
@@ -485,7 +485,7 @@ void MegaHealth_think(edict_t *self)
         return;
     }
 
-    if (!(self->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(self->spawnflags & DROPPED_ITEM) && deathmatch.integer)
         SetRespawn(self, 20);
     else
         G_FreeEdict(self);
@@ -512,7 +512,7 @@ bool Pickup_Health(edict_t *ent, edict_t *other)
         ent->svflags |= SVF_NOCLIENT;
         ent->solid = SOLID_NOT;
     } else {
-        if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+        if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
             SetRespawn(ent, 30);
     }
 
@@ -605,7 +605,7 @@ bool Pickup_Armor(edict_t *ent, edict_t *other)
         }
     }
 
-    if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
         SetRespawn(ent, 20);
 
     return true;
@@ -636,7 +636,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
 
     if (ent->flags & FL_POWER_ARMOR) {
         ent->flags &= ~FL_POWER_ARMOR;
-        gi.sound(ent, CHAN_AUTO, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
     } else {
         index = ITEM_INDEX(FindItem("cells"));
         if (!ent->client->pers.inventory[index]) {
@@ -644,7 +644,7 @@ void Use_PowerArmor(edict_t *ent, gitem_t *item)
             return;
         }
         ent->flags |= FL_POWER_ARMOR;
-        gi.sound(ent, CHAN_AUTO, SV_SoundIndex("misc/power1.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("misc/power1.wav"), 1, ATTN_NORM, 0);
     }
 }
 
@@ -656,7 +656,7 @@ bool Pickup_PowerArmor(edict_t *ent, edict_t *other)
 
     other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         if (!(ent->spawnflags & DROPPED_ITEM))
             SetRespawn(ent, ent->item->quantity);
         // auto-use for DM only if we didn't already have one
@@ -709,15 +709,15 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
         if (ent->item->pickup == Pickup_Health) {
             if (ent->count == 2)
-                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/s_health.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/s_health.wav"), 1, ATTN_NORM, 0);
             else if (ent->count == 10)
-                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/n_health.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/n_health.wav"), 1, ATTN_NORM, 0);
             else if (ent->count == 25)
-                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/l_health.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/l_health.wav"), 1, ATTN_NORM, 0);
             else // (ent->count == 100)
-                gi.sound(other, CHAN_ITEM, SV_SoundIndex("items/m_health.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/m_health.wav"), 1, ATTN_NORM, 0);
         } else if (ent->item->pickup_sound) {
-            gi.sound(other, CHAN_ITEM, SV_SoundIndex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
+            SV_StartSound(other, CHAN_ITEM, SV_SoundIndex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
         }
     }
 
@@ -729,7 +729,7 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
     if (!taken)
         return;
 
-    if (!((coop->value) && (ent->item->flags & IT_STAY_COOP)) || (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))) {
+    if (!(coop.integer && (ent->item->flags & IT_STAY_COOP)) || (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))) {
         if (ent->flags & FL_RESPAWN)
             ent->flags &= ~FL_RESPAWN;
         else
@@ -750,7 +750,7 @@ void drop_temp_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *
 void drop_make_touchable(edict_t *ent)
 {
     ent->touch = Touch_Item;
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         ent->nextthink = level.framenum + 29 * BASE_FRAMERATE;
         ent->think = G_FreeEdict;
     }
@@ -771,7 +771,7 @@ edict_t *Drop_Item(edict_t *ent, gitem_t *item)
     dropped->s.renderfx = RF_GLOW;
     VectorSet(dropped->mins, -15, -15, -15);
     VectorSet(dropped->maxs, 15, 15, 15);
-    gi.setmodel(dropped, dropped->item->world_model);
+    dropped->s.modelindex = SV_ModelIndex(dropped->item->world_model);
     dropped->solid = SOLID_TRIGGER;
     dropped->movetype = MOVETYPE_TOSS;
     dropped->touch = drop_temp_touch;
@@ -783,7 +783,7 @@ edict_t *Drop_Item(edict_t *ent, gitem_t *item)
         AngleVectors(ent->client->v_angle, forward, right, NULL);
         VectorSet(offset, 24, 0, -16);
         G_ProjectSource(ent->s.origin, offset, forward, right, dropped->s.origin);
-        trace = gi.trace(ent->s.origin, dropped->mins, dropped->maxs,
+        trace = SV_Trace(ent->s.origin, dropped->mins, dropped->maxs,
                          dropped->s.origin, ent, CONTENTS_SOLID);
         VectorCopy(trace.endpos, dropped->s.origin);
     } else {
@@ -797,7 +797,7 @@ edict_t *Drop_Item(edict_t *ent, gitem_t *item)
     dropped->think = drop_make_touchable;
     dropped->nextthink = level.framenum + 1 * BASE_FRAMERATE;
 
-    gi.linkentity(dropped);
+    SV_LinkEntity(dropped);
 
     return dropped;
 }
@@ -815,7 +815,7 @@ void Use_Item(edict_t *ent, edict_t *other, edict_t *activator)
         ent->touch = Touch_Item;
     }
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 //======================================================================
@@ -837,9 +837,9 @@ void droptofloor(edict_t *ent)
     VectorCopy(v, ent->maxs);
 
     if (ent->model)
-        gi.setmodel(ent, ent->model);
+        ent->s.modelindex = SV_ModelIndex(ent->model);
     else
-        gi.setmodel(ent, ent->item->world_model);
+        ent->s.modelindex = SV_ModelIndex(ent->item->world_model);
     ent->solid = SOLID_TRIGGER;
     ent->movetype = MOVETYPE_TOSS;
     ent->touch = Touch_Item;
@@ -847,7 +847,7 @@ void droptofloor(edict_t *ent)
     v = tv(0, 0, -128);
     VectorAdd(ent->s.origin, v, dest);
 
-    tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+    tr = SV_Trace(ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
     if (tr.startsolid) {
         Com_WPrintf("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
         G_FreeEdict(ent);
@@ -882,7 +882,7 @@ void droptofloor(edict_t *ent)
         ent->use = Use_Item;
     }
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 
@@ -974,26 +974,26 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     }
 
     // some items will be prevented in deathmatch
-    if (deathmatch->value) {
-        if ((int)dmflags->value & DF_NO_ARMOR) {
+    if (deathmatch.integer) {
+        if (dmflags.integer & DF_NO_ARMOR) {
             if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor) {
                 G_FreeEdict(ent);
                 return;
             }
         }
-        if ((int)dmflags->value & DF_NO_ITEMS) {
+        if (dmflags.integer & DF_NO_ITEMS) {
             if (item->pickup == Pickup_Powerup) {
                 G_FreeEdict(ent);
                 return;
             }
         }
-        if ((int)dmflags->value & DF_NO_HEALTH) {
+        if (dmflags.integer & DF_NO_HEALTH) {
             if (item->pickup == Pickup_Health || item->pickup == Pickup_Adrenaline || item->pickup == Pickup_AncientHead) {
                 G_FreeEdict(ent);
                 return;
             }
         }
-        if ((int)dmflags->value & DF_INFINITE_AMMO) {
+        if (dmflags.integer & DF_INFINITE_AMMO) {
             if ((item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_bfg") == 0)) {
                 G_FreeEdict(ent);
                 return;
@@ -1001,13 +1001,13 @@ void SpawnItem(edict_t *ent, gitem_t *item)
         }
     }
 
-    if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0)) {
+    if (coop.integer && (strcmp(ent->classname, "key_power_cube") == 0)) {
         ent->spawnflags |= (1 << (8 + level.power_cubes));
         level.power_cubes++;
     }
 
     // don't let them drop items that stay in a coop game
-    if ((coop->value) && (item->flags & IT_STAY_COOP)) {
+    if (coop.integer && (item->flags & IT_STAY_COOP)) {
         item->drop = NULL;
     }
 
@@ -1916,7 +1916,7 @@ gitem_t itemlist[] = {
 */
 void SP_item_health(edict_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
         G_FreeEdict(self);
         return;
     }
@@ -1931,7 +1931,7 @@ void SP_item_health(edict_t *self)
 */
 void SP_item_health_small(edict_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
         G_FreeEdict(self);
         return;
     }
@@ -1947,7 +1947,7 @@ void SP_item_health_small(edict_t *self)
 */
 void SP_item_health_large(edict_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
         G_FreeEdict(self);
         return;
     }
@@ -1962,7 +1962,7 @@ void SP_item_health_large(edict_t *self)
 */
 void SP_item_health_mega(edict_t *self)
 {
-    if (deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH)) {
+    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
         G_FreeEdict(self);
         return;
     }

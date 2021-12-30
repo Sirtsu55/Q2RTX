@@ -38,12 +38,12 @@ static int  sound_sight;
 
 void floater_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void floater_idle(edict_t *self)
 {
-    gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
 
@@ -501,7 +501,7 @@ void floater_walk(edict_t *self)
 void floater_wham(edict_t *self)
 {
     static  vec3_t  aim = {MELEE_DISTANCE, 0, 0};
-    gi.sound(self, CHAN_WEAPON, sound_attack3, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_attack3, 1, ATTN_NORM, 0);
     fire_hit(self, aim, 5 + Q_rand() % 6, -50);
 }
 
@@ -520,16 +520,16 @@ void floater_zap(edict_t *self)
     G_ProjectSource(self->s.origin, offset, forward, right, origin);
 //  G_ProjectSource (self->s.origin, monster_flash_offset[flash_number], forward, right, origin);
 
-    gi.sound(self, CHAN_WEAPON, sound_attack2, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_attack2, 1, ATTN_NORM, 0);
 
     //FIXME use the flash, Luke
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_SPLASH);
-    gi.WriteByte(32);
-    gi.WritePosition(origin);
-    gi.WriteDir(dir);
-    gi.WriteByte(1);    //sparks
-    gi.multicast(origin, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(TE_SPLASH);
+    SV_WriteByte(32);
+    SV_WritePos(origin);
+    SV_WriteDir(dir);
+    SV_WriteByte(1);    //sparks
+    SV_Multicast(origin, MULTICAST_PVS, false);
 
     T_Damage(self->enemy, self, self, dir, self->enemy->s.origin, vec3_origin, 5 + Q_rand() % 6, -10, DAMAGE_ENERGY, MOD_UNKNOWN);
 }
@@ -560,15 +560,15 @@ void floater_pain(edict_t *self, edict_t *other, float kick, int damage)
         return;
 
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     n = (Q_rand() + 1) % 3;
     if (n == 0) {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &floater_move_pain1;
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
         self->monsterinfo.currentmove = &floater_move_pain2;
     }
 }
@@ -580,12 +580,12 @@ void floater_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void floater_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-    gi.sound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_death1, 1, ATTN_NORM, 0);
     BecomeExplosion1(self);
 }
 
@@ -593,7 +593,7 @@ void floater_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 */
 void SP_monster_floater(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -632,7 +632,7 @@ void SP_monster_floater(edict_t *self)
     self->monsterinfo.sight = floater_sight;
     self->monsterinfo.idle = floater_idle;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     if (random() <= 0.5f)
         self->monsterinfo.currentmove = &floater_move_stand1;

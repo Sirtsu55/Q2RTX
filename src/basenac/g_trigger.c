@@ -25,8 +25,9 @@ void InitTrigger(edict_t *self)
 
     self->solid = SOLID_TRIGGER;
     self->movetype = MOVETYPE_NONE;
-    gi.setmodel(self, self->model);
     self->svflags = SVF_NOCLIENT;
+    SV_SetBrushModel(self, self->model);
+    SV_LinkEntity(self);
 }
 
 
@@ -103,7 +104,7 @@ void trigger_enable(edict_t *self, edict_t *other, edict_t *activator)
 {
     self->solid = SOLID_TRIGGER;
     self->use = Use_Multi;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void SP_trigger_multiple(edict_t *ent)
@@ -121,7 +122,6 @@ void SP_trigger_multiple(edict_t *ent)
     ent->movetype = MOVETYPE_NONE;
     ent->svflags |= SVF_NOCLIENT;
 
-
     if (ent->spawnflags & 4) {
         ent->solid = SOLID_NOT;
         ent->use = trigger_enable;
@@ -133,8 +133,8 @@ void SP_trigger_multiple(edict_t *ent)
     if (!VectorEmpty(ent->s.angles))
         G_SetMovedir(ent->s.angles, ent->movedir);
 
-    gi.setmodel(ent, ent->model);
-    gi.linkentity(ent);
+    SV_SetBrushModel(ent, ent->model);
+    SV_LinkEntity(ent);
 }
 
 
@@ -211,12 +211,12 @@ void trigger_key_use(edict_t *self, edict_t *other, edict_t *activator)
             return;
         self->touch_debounce_framenum = level.framenum + 5.0f * BASE_FRAMERATE;
         SV_CenterPrintf(activator, "You need the %s", self->item->pickup_name);
-        gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/keytry.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/keytry.wav"), 1, ATTN_NORM, 0);
         return;
     }
 
-    gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
-    if (coop->value) {
+    SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
+    if (coop.integer) {
         int     player;
         edict_t *ent;
 
@@ -307,14 +307,14 @@ void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
     if (self->count) {
         if (!(self->spawnflags & 1)) {
             SV_CenterPrintf(activator, "%i more to go...", self->count);
-            gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
         }
         return;
     }
 
     if (!(self->spawnflags & 1)) {
         SV_CenterPrint(activator, "Sequence completed!");
-        gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
     }
     self->activator = activator;
     multi_trigger(self);
@@ -374,7 +374,7 @@ void trigger_push_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
             VectorCopy(other->velocity, other->client->oldvelocity);
             if (other->fly_sound_debounce_framenum < level.framenum) {
                 other->fly_sound_debounce_framenum = level.framenum + 1.5f * BASE_FRAMERATE;
-                gi.sound(other, CHAN_AUTO, windsound, 1, ATTN_NORM, 0);
+                SV_StartSound(other, CHAN_AUTO, windsound, 1, ATTN_NORM, 0);
             }
         }
     }
@@ -394,7 +394,7 @@ void SP_trigger_push(edict_t *self)
     self->touch = trigger_push_touch;
     if (!self->speed)
         self->speed = 1000;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 
@@ -424,7 +424,7 @@ void hurt_use(edict_t *self, edict_t *other, edict_t *activator)
         self->solid = SOLID_TRIGGER;
     else
         self->solid = SOLID_NOT;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     if (!(self->spawnflags & 2))
         self->use = NULL;
@@ -448,7 +448,7 @@ void hurt_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 
     if (!(self->spawnflags & 4)) {
         if ((level.framenum % 10) == 0)
-            gi.sound(other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
+            SV_StartSound(other, CHAN_AUTO, self->noise_index, 1, ATTN_NORM, 0);
     }
 
     if (self->spawnflags & 8)
@@ -476,7 +476,7 @@ void SP_trigger_hurt(edict_t *self)
     if (self->spawnflags & 2)
         self->use = hurt_use;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 

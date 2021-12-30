@@ -52,32 +52,32 @@ void parasite_refidget(edict_t *self);
 
 void parasite_launch(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_launch, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_launch, 1, ATTN_NORM, 0);
 }
 
 void parasite_reel_in(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_reelin, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_reelin, 1, ATTN_NORM, 0);
 }
 
 void parasite_sight(edict_t *self, edict_t *other)
 {
-    gi.sound(self, CHAN_WEAPON, sound_sight, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_sight, 1, ATTN_NORM, 0);
 }
 
 void parasite_tap(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_tap, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_tap, 1, ATTN_IDLE, 0);
 }
 
 void parasite_scratch(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_scratch, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_scratch, 1, ATTN_IDLE, 0);
 }
 
 void parasite_search(edict_t *self)
 {
-    gi.sound(self, CHAN_WEAPON, sound_search, 1, ATTN_IDLE, 0);
+    SV_StartSound(self, CHAN_WEAPON, sound_search, 1, ATTN_IDLE, 0);
 }
 
 
@@ -269,13 +269,13 @@ void parasite_pain(edict_t *self, edict_t *other, float kick, int damage)
 
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 
     self->monsterinfo.currentmove = &parasite_move_pain1;
 }
@@ -321,25 +321,25 @@ void parasite_drain_attack(edict_t *self)
     }
     VectorCopy(self->enemy->s.origin, end);
 
-    tr = gi.trace(start, NULL, NULL, end, self, MASK_SHOT);
+    tr = SV_Trace(start, NULL, NULL, end, self, MASK_SHOT);
     if (tr.ent != self->enemy)
         return;
 
     if (self->s.frame == FRAME_drain03) {
         damage = 5;
-        gi.sound(self->enemy, CHAN_AUTO, sound_impact, 1, ATTN_NORM, 0);
+        SV_StartSound(self->enemy, CHAN_AUTO, sound_impact, 1, ATTN_NORM, 0);
     } else {
         if (self->s.frame == FRAME_drain04)
-            gi.sound(self, CHAN_WEAPON, sound_suck, 1, ATTN_NORM, 0);
+            SV_StartSound(self, CHAN_WEAPON, sound_suck, 1, ATTN_NORM, 0);
         damage = 2;
     }
 
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_PARASITE_ATTACK);
-    gi.WriteShort(self - g_edicts);
-    gi.WritePosition(start);
-    gi.WritePosition(end);
-    gi.multicast(self->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(TE_PARASITE_ATTACK);
+    SV_WriteShort(self - g_edicts);
+    SV_WritePos(start);
+    SV_WritePos(end);
+    SV_Multicast(self->s.origin, MULTICAST_PVS, false);
 
     VectorSubtract(start, end, dir);
     T_Damage(self->enemy, self, self, dir, self->enemy->s.origin, vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK, MOD_UNKNOWN);
@@ -433,7 +433,7 @@ void parasite_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 mframe_t parasite_frames_death [] = {
@@ -453,7 +453,7 @@ void parasite_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -467,7 +467,7 @@ void parasite_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
         return;
 
 // regular death
-    gi.sound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.currentmove = &parasite_move_death;
@@ -483,7 +483,7 @@ End Death Stuff
 */
 void SP_monster_parasite(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -520,7 +520,7 @@ void SP_monster_parasite(edict_t *self)
     self->monsterinfo.sight = parasite_sight;
     self->monsterinfo.idle = parasite_idle;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     self->monsterinfo.currentmove = &parasite_move_stand;
     self->monsterinfo.scale = MODEL_SCALE;

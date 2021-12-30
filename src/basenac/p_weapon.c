@@ -78,7 +78,7 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
         }
     }
 
-    if (deathmatch->value)
+    if (deathmatch.integer)
         return;
 
     if (who->flags & FL_NOTARGET)
@@ -117,7 +117,7 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
     VectorSubtract(where, noise->maxs, noise->absmin);
     VectorAdd(where, noise->maxs, noise->absmax);
     noise->last_sound_framenum = level.framenum;
-    gi.linkentity(noise);
+    SV_LinkEntity(noise);
 }
 
 
@@ -128,7 +128,7 @@ bool Pickup_Weapon(edict_t *ent, edict_t *other)
 
     index = ITEM_INDEX(ent->item);
 
-    if ((((int)(dmflags->value) & DF_WEAPONS_STAY) || coop->value)
+    if (((dmflags.integer & DF_WEAPONS_STAY) || coop.integer)
         && other->client->pers.inventory[index]) {
         if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
             return false;   // leave the weapon for others to pickup
@@ -143,26 +143,26 @@ bool Pickup_Weapon(edict_t *ent, edict_t *other)
     if (!(ent->spawnflags & DROPPED_ITEM)) {
         // give them some ammo with it
         ammo = FindItem(ent->item->ammo);
-        if ((int)dmflags->value & DF_INFINITE_AMMO)
+        if (dmflags.integer & DF_INFINITE_AMMO)
             Add_Ammo(other, ammo, 1000);
         else
             Add_Ammo(other, ammo, ammo->quantity);
 
         if (!(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
-            if (deathmatch->value) {
-                if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+            if (deathmatch.integer) {
+                if (dmflags.integer & DF_WEAPONS_STAY)
                     ent->flags |= FL_RESPAWN;
                 else
                     SetRespawn(ent, 30);
             }
-            if (coop->value)
+            if (coop.integer)
                 ent->flags |= FL_RESPAWN;
         }
     }
 
     if (other->client->pers.weapon != ent->item &&
         (other->client->pers.inventory[index] == 1) &&
-        (!deathmatch->value || other->client->pers.weapon == FindItem("Axe")))
+        (!deathmatch.integer || other->client->pers.weapon == FindItem("Axe")))
         other->client->newweapon = ent->item;
 
     return true;
@@ -293,7 +293,7 @@ void Use_Weapon(edict_t *ent, gitem_t *item)
     if (item == ent->client->pers.weapon)
         return;
 
-    if (item->ammo && !g_select_empty->value && !(item->flags & IT_AMMO)) {
+    if (item->ammo && !g_select_empty.integer && !(item->flags & IT_AMMO)) {
         ammo_item = FindItem(item->ammo);
         ammo_index = ITEM_INDEX(ammo_item);
 
@@ -321,7 +321,7 @@ void Drop_Weapon(edict_t *ent, gitem_t *item)
 {
     int     index;
 
-    if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+    if (dmflags.integer & DF_WEAPONS_STAY)
         return;
 
     index = ITEM_INDEX(item);
@@ -409,25 +409,25 @@ void Weapon_Axe(edict_t *ent)
             P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
             VectorMA(start, 48.f, forward, end);
             
-            trace_t tr = gi.trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
+            trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
 
             if (tr.fraction == 1.f)
-                tr = gi.trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+                tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
 
             if (tr.fraction < 1.f)
             {
                 if (tr.ent && tr.ent->takedamage)
                 {
                     T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
-                    gi.sound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
                 }
                 else if (!(tr.surface->flags & SURF_SKY))
                 {
-                    gi.WriteByte(svc_temp_entity);
-                    gi.WriteByte(TE_GUNSHOT);
-                    gi.WritePosition(tr.endpos);
-                    gi.WriteDir(tr.plane.normal);
-                    gi.multicast(tr.endpos, MULTICAST_PVS);
+                    SV_WriteByte(svc_temp_entity);
+                    SV_WriteByte(TE_GUNSHOT);
+                    SV_WritePos(tr.endpos);
+                    SV_WriteDir(tr.plane.normal);
+                    SV_Multicast(tr.endpos, MULTICAST_PVS, false);
                 }
 
                 ent->client->axe_attack = false;
@@ -492,10 +492,10 @@ static void weapon_perforator_fire(edict_t *ent)
 
     fire_nail(ent, start, forward, 12, 2000);
 
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_HYPERBLASTER | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_HYPERBLASTER | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void Weapon_Perforator(edict_t *ent)
@@ -532,7 +532,7 @@ void Weapon_Perforator(edict_t *ent)
                 ent->client->weaponstate = WEAPON_FIRING;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -587,12 +587,12 @@ ready_noammo:
                         ent->client->anim_end = FRAME_attack8;
                     }
 
-                    if (!((int)dmflags->value & DF_INFINITE_AMMO))
+                    if (!(dmflags.integer & DF_INFINITE_AMMO))
                         ent->client->pers.inventory[ent->client->ammo_index]--;
                 }
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -658,16 +658,16 @@ void weapon_shotgun_fire(edict_t *ent)
         kick *= 4;
     }
 
-    if (deathmatch->value)
+    if (deathmatch.integer)
         fire_shotgun(ent, start, forward, damage, kick, 200, 200, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
     else
         fire_shotgun(ent, start, forward, damage, kick, 200, 200, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
     // send muzzle flash
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_SHOTGUN | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 enum {
@@ -721,11 +721,11 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
 
                 PlayerNoise(ent, ent->s.origin, PNOISE_WEAPON);
 
-                if (!((int)dmflags->value & DF_INFINITE_AMMO))
+                if (!(dmflags.integer & DF_INFINITE_AMMO))
                     ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -786,7 +786,7 @@ void weapon_supershotgun_fire(edict_t *ent)
     VectorSet(offset, 0, 10, ent->viewheight);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-    if (deathmatch->value)
+    if (deathmatch.integer)
         fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
     else
         fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
@@ -794,16 +794,16 @@ void weapon_supershotgun_fire(edict_t *ent)
     VectorSet(offset, 0, -10, ent->viewheight);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-    if (deathmatch->value)
+    if (deathmatch.integer)
         fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
     else
         fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
     // send muzzle flash
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_SHOTGUN | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void Weapon_SuperShotgun(edict_t *ent)
@@ -840,10 +840,10 @@ void weapon_nailgun_fire(edict_t *ent)
     fire_nail(ent, start, forward, 12, 2000);
 
     // send muzzle flash
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_SHOTGUN | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void Weapon_Nailgun(edict_t *ent)
@@ -880,10 +880,10 @@ void weapon_grenadelauncher_fire(edict_t *ent)
     fire_grenade(ent, start, forward, 100, 800, 2.5f, 75);
 
     // send muzzle flash
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_SHOTGUN | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void Weapon_GrenadeLauncher(edict_t *ent)
@@ -920,10 +920,10 @@ void weapon_rocketlauncher_fire(edict_t *ent)
     fire_rocket(ent, start, forward, 100, 800, 120, 75);
 
     // send muzzle flash
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_SHOTGUN | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void Weapon_RocketLauncher(edict_t *ent)
@@ -957,7 +957,7 @@ void weapon_thunderbolt_fire(edict_t *ent)
     VectorSet(offset, 0, 0, ent->viewheight);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-    if (gi.pointcontents(start) & MASK_WATER) {
+    if (SV_PointContents(start) & MASK_WATER) {
         T_RadiusDamage(ent, ent, 9999, NULL, 9999, MOD_RAILGUN);
         return;
     }
@@ -965,24 +965,24 @@ void weapon_thunderbolt_fire(edict_t *ent)
     vec3_t end;
     VectorMA(start, 8192, forward, end);
 
-    trace_t tr = gi.trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+    trace_t tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
 
     if (tr.ent->takedamage)
         T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 7, 15, DAMAGE_ENERGY, MOD_RAILGUN);
 
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_LIGHTNING);
-    gi.WriteShort(ent->s.number);
-    gi.WriteShort(-1);
-    gi.WritePosition(start);
-    gi.WritePosition(tr.endpos);
-    gi.multicast(tr.endpos, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(TE_LIGHTNING);
+    SV_WriteShort(ent->s.number);
+    SV_WriteShort(-1);
+    SV_WritePos(start);
+    SV_WritePos(tr.endpos);
+    SV_Multicast(tr.endpos, MULTICAST_PVS, false);
 
     // send muzzle flash
-    gi.WriteByte(svc_muzzleflash);
-    gi.WriteShort(ent - g_edicts);
-    gi.WriteByte(MZ_SHOTGUN | is_silenced);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash);
+    SV_WriteShort(ent - g_edicts);
+    SV_WriteByte(MZ_SHOTGUN | is_silenced);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void Weapon_Thunderbolt(edict_t *ent)
@@ -1020,7 +1020,7 @@ void Weapon_Thunderbolt(edict_t *ent)
                 ent->client->weaponstate = WEAPON_FIRING;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);
@@ -1072,11 +1072,11 @@ ready_noammo:
                     ent->client->anim_end = FRAME_attack8;
                 }
 
-                if (!((int)dmflags->value & DF_INFINITE_AMMO))
+                if (!(dmflags.integer & DF_INFINITE_AMMO))
                     ent->client->pers.inventory[ent->client->ammo_index]--;
             } else {
                 if (level.framenum >= ent->pain_debounce_framenum) {
-                    gi.sound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
                     ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
                 }
                 NoAmmoWeaponChange(ent);

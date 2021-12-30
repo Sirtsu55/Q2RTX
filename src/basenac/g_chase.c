@@ -57,7 +57,7 @@ void UpdateChaseCam(edict_t *ent)
     if (!targ->groundentity)
         o[2] += 16;
 
-    trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+    trace = SV_Trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
 
     VectorCopy(trace.endpos, goal);
 
@@ -66,7 +66,7 @@ void UpdateChaseCam(edict_t *ent)
     // pad for floors and ceilings
     VectorCopy(goal, o);
     o[2] += 6;
-    trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+    trace = SV_Trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
     if (trace.fraction < 1) {
         VectorCopy(trace.endpos, goal);
         goal[2] -= 6;
@@ -74,7 +74,7 @@ void UpdateChaseCam(edict_t *ent)
 
     VectorCopy(goal, o);
     o[2] -= 6;
-    trace = gi.trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
+    trace = SV_Trace(goal, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
     if (trace.fraction < 1) {
         VectorCopy(trace.endpos, goal);
         goal[2] += 6;
@@ -99,7 +99,7 @@ void UpdateChaseCam(edict_t *ent)
 
     ent->viewheight = 0;
     ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 void ChaseNext(edict_t *ent)
@@ -113,7 +113,7 @@ void ChaseNext(edict_t *ent)
     i = ent->client->chase_target - g_edicts;
     do {
         i++;
-        if (i > maxclients->value)
+        if (i > game.maxclients)
             i = 1;
         e = g_edicts + i;
         if (!e->inuse)
@@ -138,7 +138,7 @@ void ChasePrev(edict_t *ent)
     do {
         i--;
         if (i < 1)
-            i = maxclients->value;
+            i = game.maxclients;
         e = g_edicts + i;
         if (!e->inuse)
             continue;
@@ -155,7 +155,7 @@ void GetChaseTarget(edict_t *ent)
     int i;
     edict_t *other;
 
-    for (i = 1; i <= maxclients->value; i++) {
+    for (i = 1; i <= game.maxclients; i++) {
         other = g_edicts + i;
         if (other->inuse && !other->client->resp.spectator) {
             ent->client->chase_target = other;

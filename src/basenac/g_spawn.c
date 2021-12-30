@@ -571,15 +571,11 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     int         inhibit;
     char        *com_token;
     int         i;
-    float       skill_level;
 
-    skill_level = floor(skill->value);
-    if (skill_level < 0)
-        skill_level = 0;
-    if (skill_level > 3)
-        skill_level = 3;
-    if (skill->value != skill_level)
-        gi.cvar_forceset("skill", va("%f", skill_level));
+    int skill_level = skill.integer;
+    clamp(skill_level, 0, 3);
+    if (skill.integer != skill_level)
+        Cvar_Set(&skill, skill_level, true);
 
     SaveClientData();
 
@@ -619,12 +615,12 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
 
         // remove things (except the world) from different skill levels or deathmatch
         if (ent != g_edicts) {
-			if (nomonsters->value && (strstr(ent->classname, "monster") || strstr(ent->classname, "misc_deadsoldier") || strstr(ent->classname, "misc_insane"))) {
+			if (nomonsters.integer && (strstr(ent->classname, "monster") || strstr(ent->classname, "misc_deadsoldier") || strstr(ent->classname, "misc_insane"))) {
 				G_FreeEdict(ent);
 				inhibit++;
 				continue;
 			}
-            if (deathmatch->value) {
+            if (deathmatch.integer) {
                 if (ent->spawnflags & SPAWNFLAG_NOT_DEATHMATCH) {
                     G_FreeEdict(ent);
                     inhibit++;
@@ -632,9 +628,9 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
                 }
             } else {
                 if ( /* ((coop->value) && (ent->spawnflags & SPAWNFLAG_NOT_COOP)) || */
-                    ((skill->value == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
-                    ((skill->value == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
-                    (((skill->value == 2) || (skill->value == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
+                    ((skill.integer == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
+                    ((skill.integer == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
+                    (((skill.integer == 2) || (skill.integer == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
                 ) {
                     G_FreeEdict(ent);
                     inhibit++;
@@ -877,10 +873,10 @@ void SP_worldspawn(edict_t *ent)
 
     SV_SetConfigString(CS_CDTRACK, va("%i", ent->sounds));
 
-    SV_SetConfigString(CS_MAXCLIENTS, va("%i", (int)(maxclients->value)));
+    SV_SetConfigString(CS_MAXCLIENTS, va("%i", game.maxclients));
 
     // status bar program
-    if (deathmatch->value)
+    if (deathmatch.integer)
         SV_SetConfigString(CS_STATUSBAR, dm_statusbar);
     else
         SV_SetConfigString(CS_STATUSBAR, single_statusbar);
@@ -895,9 +891,9 @@ void SP_worldspawn(edict_t *ent)
     SV_ImageIndex("field_3");
 
     if (!st.gravity)
-        gi.cvar_set("sv_gravity", "800");
+        Cvar_Set(&sv_gravity, 800, false);
     else
-        gi.cvar_set("sv_gravity", st.gravity);
+        Cvar_Set(&sv_gravity, st.gravity, false);
 
     snd_fry = SV_SoundIndex("player/fry.wav");  // standing in lava / slime
 

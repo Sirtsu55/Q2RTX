@@ -42,15 +42,15 @@ static int  sound_cock;
 void soldier_idle(edict_t *self)
 {
     if (random() > 0.8f)
-        gi.sound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_IDLE, 0);
 }
 
 void soldier_cock(edict_t *self)
 {
     if (self->s.frame == FRAME_stand322)
-        gi.sound(self, CHAN_WEAPON, sound_cock, 1, ATTN_IDLE, 0);
+        SV_StartSound(self, CHAN_WEAPON, sound_cock, 1, ATTN_IDLE, 0);
     else
-        gi.sound(self, CHAN_WEAPON, sound_cock, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_WEAPON, sound_cock, 1, ATTN_NORM, 0);
 }
 
 
@@ -407,18 +407,18 @@ void soldier_pain(edict_t *self, edict_t *other, float kick, int damage)
 
     n = self->s.skinnum | 1;
     if (n == 1)
-        gi.sound(self, CHAN_VOICE, sound_pain_light, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain_light, 1, ATTN_NORM, 0);
     else if (n == 3)
-        gi.sound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_pain_ss, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain_ss, 1, ATTN_NORM, 0);
 
     if (self->velocity[2] > 100) {
         self->monsterinfo.currentmove = &soldier_move_pain4;
         return;
     }
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
     r = random();
@@ -511,7 +511,7 @@ void soldier_attack1_refire1(edict_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill.integer == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
         self->monsterinfo.nextframe = FRAME_attak102;
     else
         self->monsterinfo.nextframe = FRAME_attak110;
@@ -525,7 +525,7 @@ void soldier_attack1_refire2(edict_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill.integer == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
         self->monsterinfo.nextframe = FRAME_attak102;
 }
 
@@ -560,7 +560,7 @@ void soldier_attack2_refire1(edict_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill.integer == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
         self->monsterinfo.nextframe = FRAME_attak204;
     else
         self->monsterinfo.nextframe = FRAME_attak216;
@@ -574,7 +574,7 @@ void soldier_attack2_refire2(edict_t *self)
     if (self->enemy->health <= 0)
         return;
 
-    if (((skill->value == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
+    if (((skill.integer == 3) && (random() < 0.5f)) || (range(self, self->enemy) == RANGE_MELEE))
         self->monsterinfo.nextframe = FRAME_attak204;
 }
 
@@ -610,7 +610,7 @@ void soldier_duck_down(edict_t *self)
     self->maxs[2] -= 32;
     self->takedamage = DAMAGE_YES;
     self->monsterinfo.pause_framenum = level.framenum + 1 * BASE_FRAMERATE;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void soldier_duck_up(edict_t *self)
@@ -618,7 +618,7 @@ void soldier_duck_up(edict_t *self)
     self->monsterinfo.aiflags &= ~AI_DUCKED;
     self->maxs[2] += 32;
     self->takedamage = DAMAGE_AIM;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void soldier_fire3(edict_t *self)
@@ -714,7 +714,7 @@ void soldier_attack6_refire(edict_t *self)
     if (range(self, self->enemy) < RANGE_MID)
         return;
 
-    if (skill->value == 3)
+    if (skill.integer == 3)
         self->monsterinfo.nextframe = FRAME_runs03;
 }
 
@@ -756,11 +756,11 @@ void soldier_attack(edict_t *self)
 void soldier_sight(edict_t *self, edict_t *other)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
     else
-        gi.sound(self, CHAN_VOICE, sound_sight2, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_sight2, 1, ATTN_NORM, 0);
 
-    if ((skill->value > 0) && (range(self, self->enemy) >= RANGE_MID)) {
+    if ((skill.integer > 0) && (range(self, self->enemy) >= RANGE_MID)) {
         if (random() > 0.5f)
             self->monsterinfo.currentmove = &soldier_move_attack6;
     }
@@ -798,7 +798,7 @@ void soldier_dodge(edict_t *self, edict_t *attacker, float eta)
     if (!self->enemy)
         self->enemy = attacker;
 
-    if (skill->value == 0) {
+    if (skill.integer == 0) {
         self->monsterinfo.currentmove = &soldier_move_duck;
         return;
     }
@@ -806,7 +806,7 @@ void soldier_dodge(edict_t *self, edict_t *attacker, float eta)
     self->monsterinfo.pause_framenum = level.framenum + (eta + 0.3f) * BASE_FRAMERATE;
     r = random();
 
-    if (skill->value == 1) {
+    if (skill.integer == 1) {
         if (r > 0.33f)
             self->monsterinfo.currentmove = &soldier_move_duck;
         else
@@ -814,7 +814,7 @@ void soldier_dodge(edict_t *self, edict_t *attacker, float eta)
         return;
     }
 
-    if (skill->value >= 2) {
+    if (skill.integer >= 2) {
         if (r > 0.66f)
             self->monsterinfo.currentmove = &soldier_move_duck;
         else
@@ -847,7 +847,7 @@ void soldier_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 mframe_t soldier_frames_death1 [] = {
@@ -1100,7 +1100,7 @@ void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
         for (n = 0; n < 3; n++)
             ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
         ThrowGib(self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
@@ -1118,11 +1118,11 @@ void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
     self->s.skinnum |= 1;
 
     if (self->s.skinnum == 1)
-        gi.sound(self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_death_light, 1, ATTN_NORM, 0);
     else if (self->s.skinnum == 3)
-        gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
     else // (self->s.skinnum == 5)
-        gi.sound(self, CHAN_VOICE, sound_death_ss, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_death_ss, 1, ATTN_NORM, 0);
 
     if (fabsf((self->s.origin[2] + self->viewheight) - point[2]) <= 4) {
         // head shot
@@ -1176,7 +1176,7 @@ void SP_monster_soldier_x(edict_t *self)
     self->monsterinfo.melee = NULL;
     self->monsterinfo.sight = soldier_sight;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     self->monsterinfo.stand(self);
 
@@ -1188,7 +1188,7 @@ void SP_monster_soldier_x(edict_t *self)
 */
 void SP_monster_soldier_light(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -1210,7 +1210,7 @@ void SP_monster_soldier_light(edict_t *self)
 */
 void SP_monster_soldier(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -1230,7 +1230,7 @@ void SP_monster_soldier(edict_t *self)
 */
 void SP_monster_soldier_ss(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }

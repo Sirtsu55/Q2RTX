@@ -28,10 +28,10 @@ boss3
 
 void Use_Boss3(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_BOSSTPORT);
-    gi.WritePosition(ent->s.origin);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(TE_BOSSTPORT);
+    SV_WritePos(ent->s.origin);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
     G_FreeEdict(ent);
 }
 
@@ -50,7 +50,7 @@ Just stands and cycles in one place until targeted, then teleports away.
 */
 void SP_monster_boss3_stand(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -69,5 +69,5 @@ void SP_monster_boss3_stand(edict_t *self)
     self->use = Use_Boss3;
     self->think = Think_Boss3Stand;
     self->nextthink = level.framenum + 1;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }

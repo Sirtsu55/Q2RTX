@@ -336,7 +336,7 @@ void plat_hit_top(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_end)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+            SV_StartSound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         ent->s.sound = 0;
     }
     ent->moveinfo.state = STATE_TOP;
@@ -349,7 +349,7 @@ void plat_hit_bottom(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_end)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+            SV_StartSound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         ent->s.sound = 0;
     }
     ent->moveinfo.state = STATE_BOTTOM;
@@ -359,7 +359,7 @@ void plat_go_down(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_start)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+            SV_StartSound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         ent->s.sound = ent->moveinfo.sound_middle;
     }
     ent->moveinfo.state = STATE_DOWN;
@@ -370,7 +370,7 @@ void plat_go_up(edict_t *ent)
 {
     if (!(ent->flags & FL_TEAMSLAVE)) {
         if (ent->moveinfo.sound_start)
-            gi.sound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+            SV_StartSound(ent, CHAN_NO_PHS_ADD + CHAN_VOICE, ent->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         ent->s.sound = ent->moveinfo.sound_middle;
     }
     ent->moveinfo.state = STATE_UP;
@@ -459,7 +459,7 @@ void plat_spawn_inside_trigger(edict_t *ent)
     VectorCopy(tmin, trigger->mins);
     VectorCopy(tmax, trigger->maxs);
 
-    gi.linkentity(trigger);
+    SV_LinkEntity(trigger);
 }
 
 
@@ -486,7 +486,7 @@ void SP_func_plat(edict_t *ent)
     ent->solid = SOLID_BSP;
     ent->movetype = MOVETYPE_PUSH;
 
-    gi.setmodel(ent, ent->model);
+    SV_SetBrushModel(ent, ent->model);
 
     ent->blocked = plat_blocked;
 
@@ -527,7 +527,6 @@ void SP_func_plat(edict_t *ent)
         ent->moveinfo.state = STATE_UP;
     } else {
         VectorCopy(ent->pos2, ent->s.origin);
-        gi.linkentity(ent);
         ent->moveinfo.state = STATE_BOTTOM;
     }
 
@@ -543,6 +542,8 @@ void SP_func_plat(edict_t *ent)
     ent->moveinfo.sound_start = SV_SoundIndex("plats/pt1_strt.wav");
     ent->moveinfo.sound_middle = SV_SoundIndex("plats/pt1_mid.wav");
     ent->moveinfo.sound_end = SV_SoundIndex("plats/pt1_end.wav");
+
+    SV_LinkEntity(ent);
 }
 
 //====================================================================
@@ -624,8 +625,8 @@ void SP_func_rotating(edict_t *ent)
     if (ent->spawnflags & 128)
         ent->s.effects |= EF_ANIM_ALLFAST;
 
-    gi.setmodel(ent, ent->model);
-    gi.linkentity(ent);
+    SV_SetBrushModel(ent, ent->model);
+    SV_LinkEntity(ent);
 }
 
 /*
@@ -693,7 +694,7 @@ void button_fire(edict_t *self)
 
     self->moveinfo.state = STATE_UP;
     if (self->moveinfo.sound_start && !(self->flags & FL_TEAMSLAVE))
-        gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+        SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
     Move_Calc(self, self->moveinfo.end_origin, button_wait);
 }
 
@@ -731,7 +732,7 @@ void SP_func_button(edict_t *ent)
     G_SetMovedir(ent->s.angles, ent->movedir);
     ent->movetype = MOVETYPE_STOP;
     ent->solid = SOLID_BSP;
-    gi.setmodel(ent, ent->model);
+    SV_SetBrushModel(ent, ent->model);
 
     if (ent->sounds != 1)
         ent->moveinfo.sound_start = SV_SoundIndex("switches/butn2.wav");
@@ -776,7 +777,7 @@ void SP_func_button(edict_t *ent)
     VectorCopy(ent->pos2, ent->moveinfo.end_origin);
     VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 /*
@@ -819,7 +820,7 @@ void door_use_areaportals(edict_t *self, bool open)
 
     while ((t = G_Find(t, FOFS(targetname), self->target))) {
         if (Q_stricmp(t->classname, "func_areaportal") == 0) {
-            gi.SetAreaPortalState(t->style, open);
+            SV_SetAreaPortalState(t->style, open);
         }
     }
 }
@@ -830,7 +831,7 @@ void door_hit_top(edict_t *self)
 {
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_end)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+            SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         self->s.sound = 0;
     }
     self->moveinfo.state = STATE_TOP;
@@ -846,7 +847,7 @@ void door_hit_bottom(edict_t *self)
 {
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_end)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+            SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
         self->s.sound = 0;
     }
     self->moveinfo.state = STATE_BOTTOM;
@@ -857,7 +858,7 @@ void door_go_down(edict_t *self)
 {
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+            SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         self->s.sound = self->moveinfo.sound_middle;
     }
     if (self->max_health) {
@@ -886,7 +887,7 @@ void door_go_up(edict_t *self, edict_t *activator)
 
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+            SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         self->s.sound = self->moveinfo.sound_middle;
     }
     self->moveinfo.state = STATE_UP;
@@ -1011,7 +1012,7 @@ void Think_SpawnDoorTrigger(edict_t *ent)
     other->solid = SOLID_TRIGGER;
     other->movetype = MOVETYPE_NONE;
     other->touch = Touch_DoorTrigger;
-    gi.linkentity(other);
+    SV_LinkEntity(other);
 
     if (ent->spawnflags & DOOR_START_OPEN)
         door_use_areaportals(ent, true);
@@ -1072,7 +1073,7 @@ void door_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
     self->touch_debounce_framenum = level.framenum + 5.0f * BASE_FRAMERATE;
 
     SV_CenterPrint(other, "%s");
-    gi.sound(other, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(other, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
 }
 
 void SP_func_door(edict_t *ent)
@@ -1088,14 +1089,14 @@ void SP_func_door(edict_t *ent)
     G_SetMovedir(ent->s.angles, ent->movedir);
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
-    gi.setmodel(ent, ent->model);
+    SV_SetBrushModel(ent, ent->model);
 
     ent->blocked = door_blocked;
     ent->use = door_use;
 
     if (!ent->speed)
         ent->speed = 100;
-    if (deathmatch->value)
+    if (deathmatch.integer)
         ent->speed *= 2;
 
     if (!ent->accel)
@@ -1154,7 +1155,7 @@ void SP_func_door(edict_t *ent)
     if (!ent->team)
         ent->teammaster = ent;
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 
     ent->nextthink = level.framenum + 1;
     if (ent->health || ent->targetname)
@@ -1221,7 +1222,7 @@ void SP_func_door_rotating(edict_t *ent)
 
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
-    gi.setmodel(ent, ent->model);
+    SV_SetBrushModel(ent, ent->model);
 
     ent->blocked = door_blocked;
     ent->use = door_use;
@@ -1280,7 +1281,7 @@ void SP_func_door_rotating(edict_t *ent)
     if (!ent->team)
         ent->teammaster = ent;
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 
     ent->nextthink = level.framenum + 1;
     if (ent->health || ent->targetname)
@@ -1312,7 +1313,7 @@ void SP_func_water(edict_t *self)
     G_SetMovedir(self->s.angles, self->movedir);
     self->movetype = MOVETYPE_PUSH;
     self->solid = SOLID_BSP;
-    gi.setmodel(self, self->model);
+    SV_SetBrushModel(self, self->model);
 
     switch (self->sounds) {
     default:
@@ -1366,7 +1367,7 @@ void SP_func_water(edict_t *self)
 
     self->classname = "func_door";
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 
@@ -1436,7 +1437,7 @@ void train_wait(edict_t *self)
 
         if (!(self->flags & FL_TEAMSLAVE)) {
             if (self->moveinfo.sound_end)
-                gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
+                SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_end, 1, ATTN_STATIC, 0);
             self->s.sound = 0;
         }
     } else {
@@ -1476,7 +1477,7 @@ again:
         VectorSubtract(ent->s.origin, self->mins, self->s.origin);
         VectorCopy(self->s.origin, self->s.old_origin);
         self->s.event = EV_OTHER_TELEPORT;
-        gi.linkentity(self);
+        SV_LinkEntity(self);
         goto again;
     }
 
@@ -1485,7 +1486,7 @@ again:
 
     if (!(self->flags & FL_TEAMSLAVE)) {
         if (self->moveinfo.sound_start)
-            gi.sound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
+            SV_StartSound(self, CHAN_NO_PHS_ADD + CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
         self->s.sound = self->moveinfo.sound_middle;
     }
 
@@ -1528,7 +1529,7 @@ void func_train_find(edict_t *self)
     self->target = ent->target;
 
     VectorSubtract(ent->s.origin, self->mins, self->s.origin);
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     // if not triggered, start immediately
     if (!self->targetname)
@@ -1572,7 +1573,7 @@ void SP_func_train(edict_t *self)
             self->dmg = 100;
     }
     self->solid = SOLID_BSP;
-    gi.setmodel(self, self->model);
+    SV_SetBrushModel(self, self->model);
 
     if (st.noise)
         self->moveinfo.sound_middle = SV_SoundIndex(st.noise);
@@ -1585,7 +1586,7 @@ void SP_func_train(edict_t *self)
 
     self->use = train_use;
 
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     if (self->target) {
         // start trains on the second frame, to make sure their targets have had
@@ -1743,9 +1744,9 @@ void SP_func_conveyor(edict_t *self)
 
     self->use = func_conveyor_use;
 
-    gi.setmodel(self, self->model);
+    SV_SetBrushModel(self, self->model);
     self->solid = SOLID_BSP;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 
@@ -1865,7 +1866,7 @@ void SP_func_door_secret(edict_t *ent)
 
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
-    gi.setmodel(ent, ent->model);
+    SV_SetBrushModel(ent, ent->model);
 
     ent->blocked = door_secret_blocked;
     ent->use = door_secret_use;
@@ -1912,7 +1913,7 @@ void SP_func_door_secret(edict_t *ent)
 
     ent->classname = "func_door";
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 
@@ -1926,8 +1927,9 @@ void use_killbox(edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_killbox(edict_t *ent)
 {
-    gi.setmodel(ent, ent->model);
+    SV_SetBrushModel(ent, ent->model);
     ent->use = use_killbox;
     ent->svflags = SVF_NOCLIENT;
+    SV_LinkEntity(ent);
 }
 

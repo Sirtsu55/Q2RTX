@@ -77,7 +77,7 @@ struct gclient_s {
 struct edict_s {
     entity_state_t  s;
     struct gclient_s    *client;
-    qboolean    inuse;
+    bool    inuse;
     int         linkcount;
 
     // FIXME: move these fields to a server private sv_entity_t
@@ -122,8 +122,7 @@ typedef struct {
     void (*dprint)(print_type_t type, const char *message);
     void (*cprint)(edict_t *ent, client_print_type_t printlevel, const char *message);
     void (*centerprint)(edict_t *ent, const char *message);
-    void (*sound)(edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
-    void (*positioned_sound)(vec3_t origin, edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
+    void (*SV_StartSound)(vec3_t origin, edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
 
     // config strings hold all the index strings, the lightstyles,
     // and misc data like the sky definition and cdtrack.
@@ -139,36 +138,38 @@ typedef struct {
     int (*soundindex)(const char *name);
     int (*imageindex)(const char *name);
 
-    void (*setmodel)(edict_t *ent, const char *name);
+    void (*SV_SetBrushModel)(edict_t *ent, const char *name);
 
     // collision detection
-    trace_t (* q_gameabi trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
+    void (*trace)(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
     int (*pointcontents)(vec3_t point);
-    qboolean (*inPVS)(vec3_t p1, vec3_t p2);
-    qboolean (*inPHS)(vec3_t p1, vec3_t p2);
-    void (*SetAreaPortalState)(int portalnum, qboolean open);
-    qboolean (*AreasConnected)(int area1, int area2);
+    bool (*inPVS)(vec3_t p1, vec3_t p2);
+    bool (*inPHS)(vec3_t p1, vec3_t p2);
+    void (*SV_SetAreaPortalState)(int portalnum, bool open);
+    bool (*SV_GetAreaPortalState)(int portalnum);
+    bool (*AreasConnected)(int area1, int area2);
 
     // an entity will never be sent to a client or used for collision
     // if it is not passed to linkentity.  If the size, position, or
     // solidity changes, it must be relinked.
     void (*linkentity)(edict_t *ent);
     void (*unlinkentity)(edict_t *ent);     // call before removing an interactive edict
-    int (*BoxEdicts)(vec3_t mins, vec3_t maxs, edict_t **list, int maxcount, int areatype);
+    size_t (*SV_AreaEdicts)(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
     void (*Pmove)(pmove_t *pmove);          // player movement code common with client prediction
 
     // network messaging
-    void (*multicast)(vec3_t origin, multicast_t to);
-    void (*unicast)(edict_t *ent, qboolean reliable);
+    void (*multicast)(vec3_t origin, multicast_t to, bool reliable);
+    void (*unicast)(edict_t *ent, bool reliable);
     void (*WriteChar)(int c);
     void (*WriteByte)(int c);
     void (*WriteShort)(int c);
     void (*WriteLong)(int c);
-    void (*WriteFloat)(float f);
     void (*WriteString)(const char *s);
-    void (*WritePosition)(const vec3_t pos);    // some fractional bits
-    void (*WriteDir)(const vec3_t pos);         // single byte encoded, very coarse
+    void (*WritePos)(const vec3_t pos);
+    void (*WriteDir)(const vec3_t pos);
     void (*WriteAngle)(float f);
+    void (*WriteAngle16)(float f);
+    void (*WriteData)(const void *data, size_t len);
 
     // managed memory allocation
     void (*Z_Free)(void *ptr);
@@ -177,9 +178,11 @@ typedef struct {
     void (*Z_FreeTags)(memtag_t tag);
 
     // console variable interaction
-    cvar_t *(*cvar)(const char *var_name, const char *value, int flags);
-    cvar_t *(*cvar_set)(const char *var_name, const char *value);
-    cvar_t *(*cvar_forceset)(const char *var_name, const char *value);
+    void (*Cvar_Get)(cvarRef_t *cvar, const char *var_name, const char *value, int flags);
+    bool (*Cvar_Update)(cvarRef_t *cvar);
+    void (*Cvar_SetString)(cvarRef_t *cvar, const char *value, bool force);
+    void (*Cvar_SetInteger)(cvarRef_t *cvar, int value, bool force);
+    void (*Cvar_SetFloat)(cvarRef_t *cvar, float value, bool force);
 
     // ClientCommand and ServerCommand parameter access
     int (*argc)(void);
@@ -210,7 +213,7 @@ typedef struct {
     // about the world state and the clients.
     // WriteGame is called every time a level is exited.
     // ReadGame is called on a loadgame.
-    void (*WriteGame)(const char *filename, qboolean autosave);
+    void (*WriteGame)(const char *filename, bool autosave);
     void (*ReadGame)(const char *filename);
 
     // ReadLevel is called after the default map information has been
@@ -218,7 +221,7 @@ typedef struct {
     void (*WriteLevel)(const char *filename);
     void (*ReadLevel)(const char *filename);
 
-    qboolean (*ClientConnect)(edict_t *ent, char *userinfo);
+    bool (*ClientConnect)(edict_t *ent, char *userinfo);
     void (*ClientBegin)(edict_t *ent);
     void (*ClientUserinfoChanged)(edict_t *ent, char *userinfo);
     void (*ClientDisconnect)(edict_t *ent);

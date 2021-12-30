@@ -48,7 +48,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define q_countof(a)        (sizeof(a) / sizeof(a[0]))
 
 typedef unsigned char byte;
-typedef enum { qfalse, qtrue } qboolean;    // ABI compat only, don't use
 typedef int qhandle_t;
 
 #ifndef NULL
@@ -123,14 +122,11 @@ typedef enum {
     PRINT_CHAT,      // chat messages    
 } client_print_type_t;
 
-// destination class for gi.multicast()
+// destination class for SV_Multicast()
 typedef enum {
     MULTICAST_ALL,
     MULTICAST_PHS,
-    MULTICAST_PVS,
-    MULTICAST_ALL_R,
-    MULTICAST_PHS_R,
-    MULTICAST_PVS_R
+    MULTICAST_PVS
 } multicast_t;
 
 /*
@@ -663,9 +659,7 @@ CVARS (console variables)
 ==========================================================
 */
 
-#ifndef CVAR
-#define CVAR
-
+// Cvar flags accessible to game
 #define CVAR_ARCHIVE    1   // set to cause it to be saved to vars.rc
 #define CVAR_USERINFO   2   // added to userinfo  when changed
 #define CVAR_SERVERINFO 4   // added to serverinfo when changed
@@ -673,31 +667,21 @@ CVARS (console variables)
                             // but can be set from the command line
 #define CVAR_LATCH      16  // save changes until server restart
 
-struct cvar_s;
-struct genctx_s;
+typedef struct cvar_s cvar_t;
 
-typedef void (*xchanged_t)(struct cvar_s *);
-typedef void (*xgenerator_t)(struct genctx_s *);
-
-// nothing outside the cvar.*() functions should modify these fields!
-typedef struct cvar_s {
-    char        *name;
-    char        *string;
-    char        *latched_string;    // for CVAR_LATCH vars
+// "safe" cvar wrapper for the game library
+// need to do something about the handle, though.
+typedef struct {
+    cvar_t      *handle;
+    const char  *name;
+    char        string[MAX_INFO_STRING];
+    char        latched_string[MAX_INFO_STRING];
     int         flags;
-    qboolean    modified;   // set each time the cvar is changed
+    int         modified_count;
     float       value;
-    struct cvar_s *next;
-
-// ------ new stuff ------
     int         integer;
-    char        *default_string;
-    xchanged_t      changed;
-    xgenerator_t    generator;
-    struct cvar_s   *hashNext;
-} cvar_t;
-
-#endif      // CVAR
+    char        default_string[MAX_INFO_STRING];
+} cvarRef_t;
 
 /*
 ==============================================================
@@ -769,7 +753,7 @@ COLLISION DETECTION
 #define MASK_CURRENT            (CONTENTS_CURRENT_0|CONTENTS_CURRENT_90|CONTENTS_CURRENT_180|CONTENTS_CURRENT_270|CONTENTS_CURRENT_UP|CONTENTS_CURRENT_DOWN)
 
 
-// gi.BoxEdicts() can return a list of either solid or trigger entities
+// SV_AreaEdicts() can return a list of either solid or trigger entities
 // FIXME: eliminate AREA_ distinction?
 #define AREA_SOLID      1
 #define AREA_TRIGGERS   2
@@ -806,8 +790,8 @@ typedef struct csurface_s {
 
 // a trace is returned when a box is swept through the world
 typedef struct {
-    qboolean    allsolid;   // if true, plane is not valid
-    qboolean    startsolid; // if true, the initial point was in a solid area
+    bool    allsolid;   // if true, plane is not valid
+    bool    startsolid; // if true, the initial point was in a solid area
     float       fraction;   // time completed, 1.0 = didn't hit anything
     vec3_t      endpos;     // final position
     cplane_t    plane;      // surface normal at impact
@@ -876,7 +860,7 @@ typedef struct {
 
     // command (in)
     usercmd_t       cmd;
-    qboolean        snapinitial;    // if s has been changed outside pmove
+    bool        snapinitial;    // if s has been changed outside pmove
 
     // results (out)
     int         numtouch;
@@ -896,7 +880,7 @@ typedef struct {
     vec3_t      gunangles;
 
     // callbacks to test the world
-    trace_t     (* q_gameabi trace)(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
+    void        (*trace)(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
     int         (*pointcontents)(vec3_t point);
 } pmove_t;
 
@@ -1520,7 +1504,7 @@ typedef struct entity_state_s {
     int     renderfx;
     int     solid;          // for client side prediction, 8*(bits 0-4) is x/y radius
                             // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
-                            // gi.linkentity sets this properly
+                            // SV_LinkEntity sets this properly
     int     sound;          // for looping sounds, to guarantee shutoff
     int     event;          // impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they

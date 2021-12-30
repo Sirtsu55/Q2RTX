@@ -74,6 +74,7 @@ mleaf_t     *CM_PointLeaf(cm_t *cm, vec3_t p);
 byte        *CM_FatPVS(cm_t *cm, byte *mask, const vec3_t org, int vis);
 
 void        CM_SetAreaPortalState(cm_t *cm, int portalnum, bool open);
+bool        CM_GetAreaPortalState(cm_t *cm, int portalnum);
 bool        CM_AreasConnected(cm_t *cm, int area1, int area2);
 
 int         CM_WriteAreaBits(cm_t *cm, byte *buffer, int area);

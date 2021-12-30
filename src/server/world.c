@@ -44,7 +44,7 @@ static int          sv_numareanodes;
 
 static float    *area_mins, *area_maxs;
 static edict_t  **area_list;
-static int      area_count, area_maxcount;
+static size_t   area_count, area_maxcount;
 static int      area_type;
 
 /*
@@ -358,8 +358,8 @@ static void SV_AreaEdicts_r(areanode_t *node)
 SV_AreaEdicts
 ================
 */
-int SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list,
-                  int maxcount, int areatype)
+size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list,
+                     size_t maxcount, int areatype)
 {
     area_mins = mins;
     area_maxs = maxs;
@@ -497,11 +497,9 @@ Moves the given mins/maxs volume through the world from start to end.
 Passedict and edicts owned by passedict are explicitly not checked.
 ==================
 */
-trace_t q_gameabi SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
-                           edict_t *passedict, int contentmask)
+void SV_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+              edict_t *passedict, int contentmask)
 {
-    trace_t     trace;
-
     if (!sv.cm.cache) {
         Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
     }
@@ -512,14 +510,14 @@ trace_t q_gameabi SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
         maxs = vec3_origin;
 
     // clip to world
-    CM_BoxTrace(&trace, start, end, mins, maxs, sv.cm.cache->nodes, contentmask);
-    trace.ent = ge->edicts;
-    if (trace.fraction == 0) {
-        return trace;   // blocked by the world
-    }
+    CM_BoxTrace(tr, start, end, mins, maxs, sv.cm.cache->nodes, contentmask);
 
-    // clip to other solid entities
-    SV_ClipMoveToEntities(start, mins, maxs, end, passedict, contentmask, &trace);
-    return trace;
+    tr->ent = ge->edicts;
+
+    if (tr->fraction != 0.f) {
+        // not blocked by the world
+        // clip to other solid entities
+        SV_ClipMoveToEntities(start, mins, maxs, end, passedict, contentmask, tr);
+    }
 }
 

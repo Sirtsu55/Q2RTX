@@ -124,7 +124,7 @@ static void PM_StepSlideMove_(void)
         for (i = 0; i < 3; i++)
             end[i] = pml.origin[i] + time_left * pml.velocity[i];
 
-        trace = pm->trace(pml.origin, pm->mins, pm->maxs, end);
+        pm->trace(&trace, pml.origin, pm->mins, pm->maxs, end);
 
         if (trace.allsolid) {
             // entity is trapped in another solid
@@ -225,7 +225,7 @@ static void PM_StepSlideMove(void)
     VectorCopy(start_o, up);
     up[2] += STEPSIZE;
 
-    trace = pm->trace(up, pm->mins, pm->maxs, up);
+    pm->trace(&trace, up, pm->mins, pm->maxs, up);
     if (trace.allsolid)
         return;     // can't step up
 
@@ -245,7 +245,7 @@ static void PM_StepSlideMove(void)
         down[2] -= STEPSIZE;
     }
 
-    trace = pm->trace(pml.origin, pm->mins, pm->maxs, down);
+    pm->trace(&trace, pml.origin, pm->mins, pm->maxs, down);
     if (!trace.allsolid)
         VectorCopy(trace.endpos, pml.origin);
 
@@ -579,7 +579,7 @@ static void PM_CategorizePosition(void)
         pm->s.pm_flags &= ~PMF_ON_GROUND;
         pm->groundentity = NULL;
     } else {
-        trace = pm->trace(pml.origin, pm->mins, pm->maxs, point);
+        pm->trace(&trace, pml.origin, pm->mins, pm->maxs, point);
         pml.groundplane = trace.plane;
         pml.groundsurface = trace.surface;
         pml.groundcontents = trace.contents;
@@ -700,7 +700,7 @@ static void PM_CheckSpecialMovement(void)
     VectorNormalize(flatforward);
 
     VectorMA(pml.origin, 1, flatforward, spot);
-    trace = pm->trace(pml.origin, pm->mins, pm->maxs, spot);
+    pm->trace(&trace, pml.origin, pm->mins, pm->maxs, spot);
     if ((trace.fraction < 1) && (trace.contents & CONTENTS_LADDER))
         pml.ladder = true;
 
@@ -836,7 +836,7 @@ static void PM_CheckDuck(void)
         if (pm->s.pm_flags & PMF_DUCKED) {
             // try to stand up
             pm->maxs[2] = 32;
-            trace = pm->trace(pml.origin, pm->mins, pm->maxs, pml.origin);
+            pm->trace(&trace, pml.origin, pm->mins, pm->maxs, pml.origin);
             if (!trace.allsolid)
                 pm->s.pm_flags &= ~PMF_DUCKED;
         }
@@ -881,7 +881,7 @@ static bool PM_GoodPosition(void)
     if (pm->s.pm_type == PM_SPECTATOR)
         return true;
 
-    trace = pm->trace(pm->s.origin, pm->mins, pm->maxs, pm->s.origin);
+    pm->trace(&trace, pm->s.origin, pm->mins, pm->maxs, pm->s.origin);
 
     return !trace.allsolid;
 }

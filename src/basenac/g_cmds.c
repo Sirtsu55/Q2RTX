@@ -34,7 +34,7 @@ char *ClientTeam(edict_t *ent)
     if (!p)
         return value;
 
-    if ((int)(dmflags->value) & DF_MODELTEAMS) {
+    if (dmflags.integer & DF_MODELTEAMS) {
         *p = 0;
         return value;
     }
@@ -48,7 +48,7 @@ bool OnSameTeam(edict_t *ent1, edict_t *ent2)
     char    ent1Team [512];
     char    ent2Team [512];
 
-    if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
+    if (!(dmflags.integer & (DF_MODELTEAMS | DF_SKINTEAMS)))
         return false;
 
     strcpy(ent1Team, ClientTeam(ent1));
@@ -153,7 +153,7 @@ void Cmd_Give_f(edict_t *ent)
     bool        give_all;
     edict_t     *it_ent;
 
-    if ((deathmatch->value || coop->value) && !sv_cheats->value) {
+    if ((deathmatch.integer || coop.integer) && !sv_cheats.integer) {
         SV_ClientPrint(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
@@ -286,7 +286,7 @@ argv(0) god
 */
 void Cmd_God_f(edict_t *ent)
 {
-    if ((deathmatch->value || coop->value) && !sv_cheats->value) {
+    if ((deathmatch.integer || coop.integer) && !sv_cheats.integer) {
         SV_ClientPrint(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
@@ -310,7 +310,7 @@ argv(0) notarget
 */
 void Cmd_Notarget_f(edict_t *ent)
 {
-    if ((deathmatch->value || coop->value) && !sv_cheats->value) {
+    if ((deathmatch.integer || coop.integer) && !sv_cheats.integer) {
         SV_ClientPrint(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
@@ -332,7 +332,7 @@ argv(0) noclip
 */
 void Cmd_Noclip_f(edict_t *ent)
 {
-    if ((deathmatch->value || coop->value) && !sv_cheats->value) {
+    if ((deathmatch.integer || coop.integer) && !sv_cheats.integer) {
         SV_ClientPrint(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
         return;
     }
@@ -435,11 +435,11 @@ void Cmd_Inven_f(edict_t *ent)
 
     cl->showinventory = true;
 
-    gi.WriteByte(svc_inventory);
+    SV_WriteByte(svc_inventory);
     for (i = 0 ; i < MAX_ITEMS ; i++) {
-        gi.WriteShort(cl->pers.inventory[i]);
+        SV_WriteShort(cl->pers.inventory[i]);
     }
-    gi.unicast(ent, true);
+    SV_Unicast(ent, true);
 }
 
 /*
@@ -646,7 +646,7 @@ void Cmd_Players_f(edict_t *ent)
     int     index[256];
 
     count = 0;
-    for (i = 0 ; i < maxclients->value ; i++)
+    for (i = 0 ; i < game.maxclients; i++)
         if (game.clients[i].pers.connected) {
             index[count] = i;
             count++;
@@ -739,7 +739,7 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
     if (Cmd_Argc() < 2 && !arg0)
         return;
 
-    if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
+    if (!(dmflags.integer & (DF_MODELTEAMS | DF_SKINTEAMS)))
         team = false;
 
     if (team)
@@ -767,7 +767,7 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
 
     strcat(text, "\n");
 
-    if (flood_msgs->value) {
+    if (flood_msgs.integer) {
         cl = ent->client;
 
         if (level.time < cl->flood_locktill) {
@@ -775,14 +775,14 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
                        (int)(cl->flood_locktill - level.time));
             return;
         }
-        i = cl->flood_whenhead - flood_msgs->value + 1;
+        i = cl->flood_whenhead - flood_msgs.integer + 1;
         if (i < 0)
             i = (sizeof(cl->flood_when) / sizeof(cl->flood_when[0])) + i;
         if (cl->flood_when[i] &&
-            level.time - cl->flood_when[i] < flood_persecond->value) {
-            cl->flood_locktill = level.time + flood_waitdelay->value;
+            level.time - cl->flood_when[i] < flood_persecond.integer) {
+            cl->flood_locktill = level.time + flood_waitdelay.integer;
             SV_ClientPrintf(ent, PRINT_CHAT, "Flood protection:  You can't talk for %d seconds.\n",
-                       (int)flood_waitdelay->value);
+                       flood_waitdelay.integer);
             return;
         }
         cl->flood_whenhead = (cl->flood_whenhead + 1) %
@@ -790,7 +790,7 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
         cl->flood_when[cl->flood_whenhead] = level.time;
     }
 
-    if (dedicated->value)
+    if (dedicated.integer)
         Com_LPrint(PRINT_TALK, text);
 
     for (j = 1; j <= game.maxclients; j++) {
@@ -816,7 +816,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 
     // connect time, ping, score, name
     *text = 0;
-    for (i = 0, e2 = g_edicts + 1; i < maxclients->value; i++, e2++) {
+    for (i = 0, e2 = g_edicts + 1; i < game.maxclients; i++, e2++) {
         if (!e2->inuse)
             continue;
 

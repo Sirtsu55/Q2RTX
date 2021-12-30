@@ -30,70 +30,70 @@ void monster_fire_bullet(edict_t *self, vec3_t start, vec3_t dir, int damage, in
 {
     fire_bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 void monster_fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int flashtype)
 {
     fire_shotgun(self, start, aimdir, damage, kick, hspread, vspread, count, MOD_UNKNOWN);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 void monster_fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype, int effect)
 {
     fire_blaster(self, start, dir, damage, speed, effect, false);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 void monster_fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int flashtype)
 {
     fire_grenade(self, start, aimdir, damage, speed, 2.5f, damage + 40);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 void monster_fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int flashtype)
 {
     fire_rocket(self, start, dir, damage, speed, damage + 20, damage);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 void monster_fire_railgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int flashtype)
 {
     fire_rail(self, start, aimdir, damage, kick);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 void monster_fire_bfg(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, int kick, float damage_radius, int flashtype)
 {
     fire_bfg(self, start, aimdir, damage, speed, damage_radius);
 
-    gi.WriteByte(svc_muzzleflash2);
-    gi.WriteShort(self - g_edicts);
-    gi.WriteByte(flashtype);
-    gi.multicast(start, MULTICAST_PVS);
+    SV_WriteByte(svc_muzzleflash2);
+    SV_WriteShort(self - g_edicts);
+    SV_WriteByte(flashtype);
+    SV_Multicast(start, MULTICAST_PVS, false);
 }
 
 
@@ -154,7 +154,7 @@ void M_CheckGround(edict_t *ent)
     point[1] = ent->s.origin[1];
     point[2] = ent->s.origin[2] - 0.25f;
 
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, point, ent, MASK_MONSTERSOLID);
+    trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, point, ent, MASK_MONSTERSOLID);
 
     // check steepness
     if (trace.plane.normal[2] < 0.7f && !trace.startsolid) {
@@ -186,7 +186,7 @@ void M_CatagorizePosition(edict_t *ent)
     point[0] = ent->s.origin[0];
     point[1] = ent->s.origin[1];
     point[2] = ent->s.origin[2] + ent->mins[2] + 1;
-    cont = gi.pointcontents(point);
+    cont = SV_PointContents(point);
 
     if (!(cont & MASK_WATER)) {
         ent->waterlevel = 0;
@@ -197,13 +197,13 @@ void M_CatagorizePosition(edict_t *ent)
     ent->watertype = cont;
     ent->waterlevel = 1;
     point[2] += 26;
-    cont = gi.pointcontents(point);
+    cont = SV_PointContents(point);
     if (!(cont & MASK_WATER))
         return;
 
     ent->waterlevel = 2;
     point[2] += 22;
-    cont = gi.pointcontents(point);
+    cont = SV_PointContents(point);
     if (cont & MASK_WATER)
         ent->waterlevel = 3;
 }
@@ -245,7 +245,7 @@ void M_WorldEffects(edict_t *ent)
 
     if (ent->waterlevel == 0) {
         if (ent->flags & FL_INWATER) {
-            gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
             ent->flags &= ~FL_INWATER;
         }
         return;
@@ -268,13 +268,13 @@ void M_WorldEffects(edict_t *ent)
         if (!(ent->svflags & SVF_DEADMONSTER)) {
             if (ent->watertype & CONTENTS_LAVA)
                 if (random() <= 0.5f)
-                    gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/lava1.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/lava1.wav"), 1, ATTN_NORM, 0);
                 else
-                    gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/lava2.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/lava2.wav"), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_SLIME)
-                gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_WATER)
-                gi.sound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
         }
 
         ent->flags |= FL_INWATER;
@@ -292,14 +292,14 @@ void M_droptofloor(edict_t *ent)
     VectorCopy(ent->s.origin, end);
     end[2] -= 256;
 
-    trace = gi.trace(ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
+    trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
 
     if (trace.fraction == 1 || trace.allsolid)
         return;
 
     VectorCopy(trace.endpos, ent->s.origin);
 
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
     M_CheckGround(ent);
     M_CatagorizePosition(ent);
 }
@@ -428,7 +428,7 @@ void monster_triggered_spawn(edict_t *self)
     self->movetype = MOVETYPE_STEP;
     self->svflags &= ~SVF_NOCLIENT;
     self->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     monster_start_go(self);
 
@@ -491,7 +491,7 @@ void monster_death_use(edict_t *self)
 
 bool monster_start(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return false;
     }

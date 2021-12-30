@@ -20,8 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 
 bool FindTarget(edict_t *self);
-extern cvar_t   *maxclients;
-
 bool ai_checkattack(edict_t *self, float dist);
 
 bool        enemy_vis;
@@ -275,7 +273,7 @@ bool visible(edict_t *self, edict_t *other)
     spot1[2] += self->viewheight;
     VectorCopy(other->s.origin, spot2);
     spot2[2] += other->viewheight;
-    trace = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, MASK_OPAQUE);
+    trace = SV_Trace(spot1, vec3_origin, vec3_origin, spot2, self, MASK_OPAQUE);
 
     if (trace.fraction == 1.0f)
         return true;
@@ -494,7 +492,7 @@ bool FindTarget(edict_t *self)
             if (!visible(self, client))
                 return false;
         } else {
-            if (!gi.inPHS(self->s.origin, client->s.origin))
+            if (!SV_InPHS(self->s.origin, client->s.origin))
                 return false;
         }
 
@@ -506,7 +504,7 @@ bool FindTarget(edict_t *self)
 
         // check area portals - if they are different and not connected then we can't hear it
         if (client->areanum != self->areanum)
-            if (!gi.AreasConnected(self->areanum, client->areanum))
+            if (!SV_AreasConnected(self->areanum, client->areanum))
                 return false;
 
         self->ideal_yaw = vectoyaw(temp);
@@ -563,7 +561,7 @@ bool M_CheckAttack(edict_t *self)
         VectorCopy(self->enemy->s.origin, spot2);
         spot2[2] += self->enemy->viewheight;
 
-        tr = gi.trace(spot1, NULL, NULL, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
+        tr = SV_Trace(spot1, NULL, NULL, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA | CONTENTS_WINDOW);
 
         // do we have a clear shot?
         if (tr.ent != self->enemy)
@@ -573,7 +571,7 @@ bool M_CheckAttack(edict_t *self)
     // melee attack
     if (enemy_range == RANGE_MELEE) {
         // don't always melee in easy mode
-        if (skill->value == 0 && (Q_rand() & 3))
+        if (skill.integer == 0 && (Q_rand() & 3))
             return false;
         if (self->monsterinfo.melee)
             self->monsterinfo.attack_state = AS_MELEE;
@@ -604,9 +602,9 @@ bool M_CheckAttack(edict_t *self)
         return false;
     }
 
-    if (skill->value == 0)
+    if (skill.integer == 0)
         chance *= 0.5f;
-    else if (skill->value >= 2)
+    else if (skill.integer >= 2)
         chance *= 2;
 
     if (random() < chance) {
@@ -870,7 +868,7 @@ void ai_run(edict_t *self, float dist)
     }
 
     // coop will change to another enemy if visible
-    if (coop->value) {
+    if (coop.integer) {
         // FIXME: insane guys get mad with this, which causes crashes!
         if (FindTarget(self))
             return;
@@ -940,7 +938,7 @@ void ai_run(edict_t *self, float dist)
     if (new) {
 //      gi.dprintf("checking for course correction\n");
 
-        tr = gi.trace(self->s.origin, self->mins, self->maxs, self->monsterinfo.last_sighting, self, MASK_PLAYERSOLID);
+        tr = SV_Trace(self->s.origin, self->mins, self->maxs, self->monsterinfo.last_sighting, self, MASK_PLAYERSOLID);
         if (tr.fraction < 1) {
             VectorSubtract(self->goalentity->s.origin, self->s.origin, v);
             d1 = VectorLength(v);
@@ -951,12 +949,12 @@ void ai_run(edict_t *self, float dist)
 
             VectorSet(v, d2, -16, 0);
             G_ProjectSource(self->s.origin, v, v_forward, v_right, left_target);
-            tr = gi.trace(self->s.origin, self->mins, self->maxs, left_target, self, MASK_PLAYERSOLID);
+            tr = SV_Trace(self->s.origin, self->mins, self->maxs, left_target, self, MASK_PLAYERSOLID);
             left = tr.fraction;
 
             VectorSet(v, d2, 16, 0);
             G_ProjectSource(self->s.origin, v, v_forward, v_right, right_target);
-            tr = gi.trace(self->s.origin, self->mins, self->maxs, right_target, self, MASK_PLAYERSOLID);
+            tr = SV_Trace(self->s.origin, self->mins, self->maxs, right_target, self, MASK_PLAYERSOLID);
             right = tr.fraction;
 
             center = (d1 * center) / d2;

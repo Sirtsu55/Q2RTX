@@ -797,6 +797,7 @@ static void FloodAreaConnections(cm_t *cm)
 void CM_SetAreaPortalState(cm_t *cm, int portalnum, bool open)
 {
     if (!cm->cache) {
+        Com_EPrintf("%s: BSP not ready\n", __func__);
         return;
     }
 
@@ -813,6 +814,27 @@ void CM_SetAreaPortalState(cm_t *cm, int portalnum, bool open)
 
     cm->portalopen[portalnum] = open;
     FloodAreaConnections(cm);
+}
+
+bool CM_GetAreaPortalState(cm_t *cm, int portalnum)
+{
+    if (!cm->cache) {
+        Com_EPrintf("%s: BSP not ready\n", __func__);
+        return false;
+    }
+
+    if (portalnum < 0 || portalnum >= MAX_MAP_AREAPORTALS) {
+        Com_EPrintf("%s: portalnum %d is out of range\n", __func__, portalnum);
+        return false;
+    }
+
+    // ignore areaportals not referenced by areas
+    if (portalnum > cm->cache->lastareaportal) {
+        Com_DPrintf("%s: portalnum %d is not in use\n", __func__, portalnum);
+        return false;
+    }
+
+    return cm->portalopen[portalnum];
 }
 
 bool CM_AreasConnected(cm_t *cm, int area1, int area2)

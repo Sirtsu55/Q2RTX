@@ -192,9 +192,9 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
     if ((ent->message) && !(activator->svflags & SVF_MONSTER)) {
         SV_CenterPrint(activator, ent->message);
         if (ent->noise_index)
-            gi.sound(activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
+            SV_StartSound(activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
         else
-            gi.sound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
     }
 
 //
@@ -410,10 +410,10 @@ Marks the edict as free
 */
 void G_FreeEdict(edict_t *ed)
 {
-    gi.unlinkentity(ed);        // unlink from world
+    SV_UnlinkEntity(ed);        // unlink from world
 
-    if ((ed - g_edicts) <= (maxclients->value + BODY_QUEUE_SIZE)) {
-//      gi.dprintf("tried to free special edict\n");
+    if ((ed - g_edicts) <= (game.maxclients + BODY_QUEUE_SIZE)) {
+        Com_WPrint("tried to free special edict\n");
         return;
     }
 
@@ -439,8 +439,8 @@ void    G_TouchTriggers(edict_t *ent)
     if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
         return;
 
-    num = gi.BoxEdicts(ent->absmin, ent->absmax, touch
-                       , MAX_EDICTS, AREA_TRIGGERS);
+    num = SV_AreaEdicts(ent->absmin, ent->absmax, touch
+                        , MAX_EDICTS, AREA_TRIGGERS);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
@@ -467,8 +467,8 @@ void    G_TouchSolids(edict_t *ent)
     int         i, num;
     edict_t     *touch[MAX_EDICTS], *hit;
 
-    num = gi.BoxEdicts(ent->absmin, ent->absmax, touch
-                       , MAX_EDICTS, AREA_SOLID);
+    num = SV_AreaEdicts(ent->absmin, ent->absmax, touch
+                        , MAX_EDICTS, AREA_SOLID);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
@@ -507,7 +507,7 @@ bool KillBox(edict_t *ent)
     trace_t     tr;
 
     while (1) {
-        tr = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
+        tr = SV_Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
         if (!tr.ent)
             break;
 

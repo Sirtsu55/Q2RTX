@@ -23,10 +23,10 @@ Fire an origin based temp entity event to the clients.
 */
 void Use_Target_Tent(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(ent->style);
-    gi.WritePosition(ent->s.origin);
-    gi.multicast(ent->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(ent->style);
+    SV_WritePos(ent->s.origin);
+    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 }
 
 void SP_target_temp_entity(edict_t *ent)
@@ -71,7 +71,7 @@ void Use_Target_Speaker(edict_t *ent, edict_t *other, edict_t *activator)
             chan = CHAN_VOICE;
         // use a positioned_sound, because this entity won't normally be
         // sent to any clients because it is invisible
-        gi.positioned_sound(ent->s.origin, ent, chan, ent->noise_index, ent->volume, ent->attenuation, 0);
+        SV_PositionedSound(ent->s.origin, ent, chan, ent->noise_index, ent->volume, ent->attenuation, 0);
     }
 }
 
@@ -105,7 +105,7 @@ void SP_target_speaker(edict_t *ent)
 
     // must link the entity so we get areas and clusters so
     // the server can determine who to send updates to
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
 }
 
 
@@ -126,7 +126,7 @@ When fired, the "message" key becomes the current personal computer string, and 
 */
 void SP_target_help(edict_t *ent)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         // auto-remove for deathmatch
         G_FreeEdict(ent);
         return;
@@ -148,7 +148,7 @@ These are single use targets.
 */
 void use_target_secret(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.sound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM, 0);
+    SV_StartSound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM, 0);
 
     level.found_secrets++;
 
@@ -158,7 +158,7 @@ void use_target_secret(edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_secret(edict_t *ent)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         // auto-remove for deathmatch
         G_FreeEdict(ent);
         return;
@@ -183,7 +183,7 @@ These are single use targets.
 */
 void use_target_goal(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    gi.sound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM, 0);
+    SV_StartSound(ent, CHAN_VOICE, ent->noise_index, 1, ATTN_NORM, 0);
 
     level.found_goals++;
 
@@ -196,7 +196,7 @@ void use_target_goal(edict_t *ent, edict_t *other, edict_t *activator)
 
 void SP_target_goal(edict_t *ent)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         // auto-remove for deathmatch
         G_FreeEdict(ent);
         return;
@@ -223,10 +223,10 @@ void target_explosion_explode(edict_t *self)
 {
     float       save;
 
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_EXPLOSION1);
-    gi.WritePosition(self->s.origin);
-    gi.multicast(self->s.origin, MULTICAST_PHS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(TE_EXPLOSION1);
+    SV_WritePos(self->s.origin);
+    SV_Multicast(self->s.origin, MULTICAST_PHS, false);
 
     T_RadiusDamage(self, self->activator, self->dmg, NULL, self->dmg + 40, MOD_EXPLOSIVE);
 
@@ -266,19 +266,19 @@ void use_target_changelevel(edict_t *self, edict_t *other, edict_t *activator)
     if (level.intermission_framenum)
         return;     // already activated
 
-    if (!deathmatch->value && !coop->value) {
+    if (!deathmatch.integer && !coop.integer) {
         if (g_edicts[1].health <= 0)
             return;
     }
 
     // if noexit, do a ton of damage to other
-    if (deathmatch->value && !((int)dmflags->value & DF_ALLOW_EXIT) && other != world) {
+    if (deathmatch.integer && !(dmflags.integer & DF_ALLOW_EXIT) && other != world) {
         T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, 0, MOD_EXIT);
         return;
     }
 
     // if multiplayer, let everyone know who hit the exit
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         if (activator && activator->client)
             SV_BroadcastPrintf(PRINT_HIGH, "%s exited the level.\n", activator->client->pers.netname);
     }
@@ -327,13 +327,13 @@ Set "sounds" to one of the following:
 
 void use_target_splash(edict_t *self, edict_t *other, edict_t *activator)
 {
-    gi.WriteByte(svc_temp_entity);
-    gi.WriteByte(TE_SPLASH);
-    gi.WriteByte(self->count);
-    gi.WritePosition(self->s.origin);
-    gi.WriteDir(self->movedir);
-    gi.WriteByte(self->sounds);
-    gi.multicast(self->s.origin, MULTICAST_PVS);
+    SV_WriteByte(svc_temp_entity);
+    SV_WriteByte(TE_SPLASH);
+    SV_WriteByte(self->count);
+    SV_WritePos(self->s.origin);
+    SV_WriteDir(self->movedir);
+    SV_WriteByte(self->sounds);
+    SV_Multicast(self->s.origin, MULTICAST_PVS, false);
 
     if (self->dmg)
         T_RadiusDamage(self, activator, self->dmg, NULL, self->dmg + 40, MOD_SPLASH);
@@ -376,9 +376,9 @@ void use_target_spawner(edict_t *self, edict_t *other, edict_t *activator)
     VectorCopy(self->s.origin, ent->s.origin);
     VectorCopy(self->s.angles, ent->s.angles);
     ED_CallSpawn(ent);
-    gi.unlinkentity(ent);
+    SV_UnlinkEntity(ent);
     KillBox(ent);
-    gi.linkentity(ent);
+    SV_LinkEntity(ent);
     if (self->speed)
         VectorCopy(self->movedir, ent->velocity);
 }
@@ -416,7 +416,7 @@ void use_target_blaster(edict_t *self, edict_t *other, edict_t *activator)
 #endif
 
     fire_blaster(self, self->s.origin, self->movedir, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
-    gi.sound(self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
 }
 
 void SP_target_blaster(edict_t *self)
@@ -510,7 +510,7 @@ void target_laser_think(edict_t *self)
     VectorCopy(self->s.origin, start);
     VectorMA(start, 2048, self->movedir, end);
     while (1) {
-        tr = gi.trace(start, NULL, NULL, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
+        tr = SV_Trace(start, NULL, NULL, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
 
         if (!tr.ent)
             break;
@@ -523,13 +523,13 @@ void target_laser_think(edict_t *self)
         if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client)) {
             if (self->spawnflags & 0x80000000) {
                 self->spawnflags &= ~0x80000000;
-                gi.WriteByte(svc_temp_entity);
-                gi.WriteByte(TE_LASER_SPARKS);
-                gi.WriteByte(count);
-                gi.WritePosition(tr.endpos);
-                gi.WriteDir(tr.plane.normal);
-                gi.WriteByte(self->s.skinnum);
-                gi.multicast(tr.endpos, MULTICAST_PVS);
+                SV_WriteByte(svc_temp_entity);
+                SV_WriteByte(TE_LASER_SPARKS);
+                SV_WriteByte(count);
+                SV_WritePos(tr.endpos);
+                SV_WriteDir(tr.plane.normal);
+                SV_WriteByte(self->s.skinnum);
+                SV_Multicast(tr.endpos, MULTICAST_PVS, false);
             }
             break;
         }
@@ -613,7 +613,7 @@ void target_laser_start(edict_t *self)
 
     VectorSet(self->mins, -8, -8, -8);
     VectorSet(self->maxs, 8, 8, 8);
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     if (self->spawnflags & 1)
         target_laser_on(self);
@@ -693,7 +693,7 @@ void SP_target_lightramp(edict_t *self)
         return;
     }
 
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -728,7 +728,7 @@ void target_earthquake_think(edict_t *self)
     edict_t *e;
 
     if (self->last_move_framenum < level.framenum) {
-        gi.positioned_sound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0f, ATTN_NONE, 0);
+        SV_PositionedSound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0f, ATTN_NONE, 0);
         self->last_move_framenum = level.framenum + 0.5f * BASE_FRAMERATE;
     }
 

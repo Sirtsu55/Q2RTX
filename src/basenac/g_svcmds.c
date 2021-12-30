@@ -142,9 +142,9 @@ bool SV_FilterPacket(char *from)
 
     for (i = 0 ; i < numipfilters ; i++)
         if ((in & ipfilters[i].mask) == ipfilters[i].compare)
-            return (int)filterban->value;
+            return filterban.integer;
 
-    return (int)!filterban->value;
+    return !filterban.integer;
 }
 
 
@@ -242,14 +242,13 @@ void SVCmd_WriteIP_f(void)
         unsigned u32;
     } b;
     int     i;
-    cvar_t  *game;
+    cvarRef_t game;
+    Cvar_Get(&game, "game", NULL, 0);
 
-    game = gi.cvar("game", "", 0);
-
-    if (!*game->string)
+    if (!game.string[0])
         len = Q_snprintf(name, sizeof(name), "%s/listip.cfg", GAMEVERSION);
     else
-        len = Q_snprintf(name, sizeof(name), "%s/listip.cfg", game->string);
+        len = Q_snprintf(name, sizeof(name), "%s/listip.cfg", game.string[0]);
 
     if (len >= sizeof(name)) {
         Com_Print("File name too long\n");
@@ -264,7 +263,7 @@ void SVCmd_WriteIP_f(void)
         return;
     }
 
-    fprintf(f, "set filterban %d\n", (int)filterban->value);
+    fprintf(f, "set filterban %d\n", filterban.integer);
 
     for (i = 0 ; i < numipfilters ; i++) {
         b.u32 = ipfilters[i].compare;

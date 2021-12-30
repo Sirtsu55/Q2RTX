@@ -497,45 +497,43 @@ extern  edict_t         *g_edicts;
 #define random()    frand()
 #define crandom()   crand()
 
-extern  cvar_t  *maxentities;
-extern  cvar_t  *deathmatch;
-extern  cvar_t  *coop;
-extern  cvar_t  *dmflags;
-extern  cvar_t  *skill;
-extern  cvar_t  *fraglimit;
-extern  cvar_t  *timelimit;
-extern  cvar_t  *password;
-extern  cvar_t  *spectator_password;
-extern  cvar_t  *needpass;
-extern  cvar_t  *g_select_empty;
-extern  cvar_t  *dedicated;
-extern  cvar_t  *nomonsters;
+extern  cvarRef_t  deathmatch;
+extern  cvarRef_t  coop;
+extern  cvarRef_t  dmflags;
+extern  cvarRef_t  skill;
+extern  cvarRef_t  fraglimit;
+extern  cvarRef_t  timelimit;
+extern  cvarRef_t  password;
+extern  cvarRef_t  spectator_password;
+extern  cvarRef_t  needpass;
+extern  cvarRef_t  g_select_empty;
+extern  cvarRef_t  dedicated;
+extern  cvarRef_t  nomonsters;
 
-extern  cvar_t  *filterban;
+extern  cvarRef_t  filterban;
 
-extern  cvar_t  *sv_gravity;
-extern  cvar_t  *sv_maxvelocity;
+extern  cvarRef_t  sv_gravity;
+extern  cvarRef_t  sv_maxvelocity;
 
-extern  cvar_t  *sv_rollspeed;
-extern  cvar_t  *sv_rollangle;
+extern  cvarRef_t  sv_rollspeed;
+extern  cvarRef_t  sv_rollangle;
 
-extern  cvar_t  *run_pitch;
-extern  cvar_t  *run_roll;
-extern  cvar_t  *bob_up;
-extern  cvar_t  *bob_pitch;
-extern  cvar_t  *bob_roll;
+extern  cvarRef_t  run_pitch;
+extern  cvarRef_t  run_roll;
+extern  cvarRef_t  bob_up;
+extern  cvarRef_t  bob_pitch;
+extern  cvarRef_t  bob_roll;
 
-extern  cvar_t  *sv_cheats;
-extern  cvar_t  *maxclients;
-extern  cvar_t  *maxspectators;
+extern  cvarRef_t  sv_cheats;
+extern  cvarRef_t  maxspectators;
 
-extern  cvar_t  *flood_msgs;
-extern  cvar_t  *flood_persecond;
-extern  cvar_t  *flood_waitdelay;
+extern  cvarRef_t  flood_msgs;
+extern  cvarRef_t  flood_persecond;
+extern  cvarRef_t  flood_waitdelay;
 
-extern  cvar_t  *sv_maplist;
+extern  cvarRef_t  sv_maplist;
 
-extern  cvar_t  *sv_features;
+extern  cvarRef_t  sv_features;
 
 #define world   (&g_edicts[0])
 
@@ -949,7 +947,7 @@ struct edict_s {
                                     // of gclient_s to be a player_state_t
                                     // but the rest of it is opaque
 
-    qboolean    inuse;
+    bool    inuse;
     int         linkcount;
 
     // FIXME: move these fields to a server private sv_entity_t
@@ -1090,8 +1088,6 @@ struct edict_s {
     monsterinfo_t   monsterinfo;
 };
 
-extern game_import_t   gi;
-
 // API wrappers
 
 void SV_CenterPrint(edict_t *ent, const char *message);
@@ -1100,10 +1096,29 @@ void SV_BroadcastPrint(client_print_type_t level, const char *message);
 void SV_BroadcastPrintf(client_print_type_t level, const char *fmt, ...);
 void SV_ClientPrint(edict_t *ent, client_print_type_t level, const char *message);
 void SV_ClientPrintf(edict_t *ent, client_print_type_t level, const char *fmt, ...);
+void SV_StartSound(edict_t *entity, int channel,
+                   int soundindex, float volume,
+                   float attenuation, int pitch_shift);
+void SV_PositionedSound(vec3_t origin, edict_t *entity, int channel,
+                        int soundindex, float volume,
+                        float attenuation, int pitch_shift);
 
 int SV_ModelIndex(const char *name);
 int SV_SoundIndex(const char *name);
 int SV_ImageIndex(const char *name);
+
+bool SV_InPVS(vec3_t p1, vec3_t p2);
+bool SV_InPHS(vec3_t p1, vec3_t p2);
+void SV_SetAreaPortalState(int portalnum, bool open);
+bool SV_GetAreaPortalState(int portalnum);
+bool SV_AreasConnected(int area1, int area2);
+void SV_SetBrushModel(edict_t *ent, const char *model);
+void SV_LinkEntity(edict_t *ent);
+void SV_UnlinkEntity(edict_t *ent);
+trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+                 edict_t *passedict, int contentmask);
+int SV_PointContents(vec3_t p);
+size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
 
 int Cmd_Argc(void);
 char *Cmd_Argv(int arg);
@@ -1120,3 +1135,32 @@ void Z_FreeTags(memtag_t tag);
 
 void SV_SetConfigString(uint32_t num, const char *string);
 size_t SV_GetConfigString(uint32_t num, char *buffer, size_t len);
+
+void SV_Multicast(vec3_t origin, multicast_t to, bool reliable);
+void SV_Unicast(edict_t *ent, bool reliable);
+void SV_WriteChar(int c);
+void SV_WriteByte(int c);
+void SV_WriteShort(int c);
+void SV_WriteLong(int c);
+void SV_WriteString(const char *s);
+void SV_WritePos(const vec3_t pos);
+void SV_WriteDir(const vec3_t pos);
+void SV_WriteAngle(float f);
+void SV_WriteAngle16(float f);
+void SV_WriteData(const void *data, size_t len);
+
+void Pm_Move(pmove_t *pm);
+
+void Cvar_Get(cvarRef_t *cvar, const char *var_name, const char *value, int flags);
+bool Cvar_Update(cvarRef_t *cvar);
+void Cvar_SetString(cvarRef_t *cvar, const char *value, bool force);
+void Cvar_SetInteger(cvarRef_t *cvar, int value, bool force);
+void Cvar_SetFloat(cvarRef_t *cvar, float value, bool force);
+
+#define Cvar_Set(cvar, X, force) \
+_Generic((X), \
+    default: Cvar_SetInteger, \
+    float: Cvar_SetFloat, \
+    const char *: Cvar_SetString, \
+    char *: Cvar_SetString \
+)(cvar, X, force)

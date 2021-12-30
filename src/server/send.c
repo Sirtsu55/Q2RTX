@@ -221,7 +221,7 @@ MULTICAST_PVS    send to clients potentially visible from org
 MULTICAST_PHS    send to clients potentially hearable from org
 =================
 */
-void SV_Multicast(vec3_t origin, multicast_t to)
+void SV_Multicast(vec3_t origin, multicast_t to, bool reliable)
 {
     client_t    *client;
     byte        mask[VIS_MAX_BYTES];
@@ -233,23 +233,18 @@ void SV_Multicast(vec3_t origin, multicast_t to)
         Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
     }
 
-    switch (to) {
-    case MULTICAST_ALL_R:
+    if (reliable) {
         flags |= MSG_RELIABLE;
-        // intentional fallthrough
+    }
+
+    switch (to) {
     case MULTICAST_ALL:
         break;
-    case MULTICAST_PHS_R:
-        flags |= MSG_RELIABLE;
-        // intentional fallthrough
     case MULTICAST_PHS:
         leaf1 = CM_PointLeaf(&sv.cm, origin);
         leafnum = leaf1 - sv.cm.cache->leafs;
         BSP_ClusterVis(sv.cm.cache, mask, leaf1->cluster, DVIS_PHS);
         break;
-    case MULTICAST_PVS_R:
-        flags |= MSG_RELIABLE;
-        // intentional fallthrough
     case MULTICAST_PVS:
         leaf1 = CM_PointLeaf(&sv.cm, origin);
         leafnum = leaf1 - sv.cm.cache->leafs;

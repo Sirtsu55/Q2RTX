@@ -39,7 +39,7 @@ static int  sound_search1;
 void boss2_search(edict_t *self)
 {
     if (random() < 0.5f)
-        gi.sound(self, CHAN_VOICE, sound_search1, 1, ATTN_NONE, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_search1, 1, ATTN_NONE, 0);
 }
 
 void boss2_run(edict_t *self);
@@ -462,13 +462,13 @@ void boss2_pain(edict_t *self, edict_t *other, float kick, int damage)
     self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
 // American wanted these at no attenuation
     if (damage < 10) {
-        gi.sound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NONE, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain3, 1, ATTN_NONE, 0);
         self->monsterinfo.currentmove = &boss2_move_pain_light;
     } else if (damage < 30) {
-        gi.sound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NONE, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NONE, 0);
         self->monsterinfo.currentmove = &boss2_move_pain_light;
     } else {
-        gi.sound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NONE, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NONE, 0);
         self->monsterinfo.currentmove = &boss2_move_pain_heavy;
     }
 }
@@ -480,12 +480,12 @@ void boss2_dead(edict_t *self)
     self->movetype = MOVETYPE_TOSS;
     self->svflags |= SVF_DEADMONSTER;
     self->nextthink = 0;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 }
 
 void boss2_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-    gi.sound(self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_death, 1, ATTN_NONE, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_NO;
     self->count = 0;
@@ -496,7 +496,7 @@ void boss2_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     self->s.sound = 0;
     // check for gib
     if (self->health <= self->gib_health) {
-        gi.sound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM);
         for (n = 0; n < 2; n++)
             ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
@@ -531,7 +531,7 @@ bool Boss2_CheckAttack(edict_t *self)
         VectorCopy(self->enemy->s.origin, spot2);
         spot2[2] += self->enemy->viewheight;
 
-        tr = gi.trace(spot1, NULL, NULL, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA);
+        tr = SV_Trace(spot1, NULL, NULL, spot2, self, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_SLIME | CONTENTS_LAVA);
 
         // do we have a clear shot?
         if (tr.ent != self->enemy)
@@ -598,7 +598,7 @@ bool Boss2_CheckAttack(edict_t *self)
 */
 void SP_monster_boss2(edict_t *self)
 {
-    if (deathmatch->value) {
+    if (deathmatch.integer) {
         G_FreeEdict(self);
         return;
     }
@@ -632,7 +632,7 @@ void SP_monster_boss2(edict_t *self)
     self->monsterinfo.attack = boss2_attack;
     self->monsterinfo.search = boss2_search;
     self->monsterinfo.checkattack = Boss2_CheckAttack;
-    gi.linkentity(self);
+    SV_LinkEntity(self);
 
     self->monsterinfo.currentmove = &boss2_move_stand;
     self->monsterinfo.scale = MODEL_SCALE;

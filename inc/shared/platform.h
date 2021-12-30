@@ -119,12 +119,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define q_offsetof(t, m)    ((size_t)&((t *)0)->m)
 #endif
 
-#if USE_GAME_ABI_HACK
-#define q_gameabi           __attribute__((callee_pop_aggregate_return(0)))
-#else
-#define q_gameabi
-#endif
-
 #ifdef _WIN32
 #define q_exported          __attribute__((dllexport))
 #else
@@ -144,8 +138,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define q_likely(x)         !!(x)
 #define q_unlikely(x)       !!(x)
 #define q_offsetof(t, m)    ((size_t)&((t *)0)->m)
-
-#define q_gameabi
 
 #ifdef _WIN32
 #define q_exported          __declspec(dllexport)
