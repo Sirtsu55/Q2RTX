@@ -386,7 +386,7 @@ object of mins/maxs size.
 */
 mnode_t *SV_HullForEntity(edict_t *ent)
 {
-    if ((ent->solid == SOLID_BSP || ent->solid == SOLID_TRIGGER) && ent->s.modelindex < sv.cm.cache->nummodels) {
+    if (ent->solid == SOLID_BSP || ent->solid == SOLID_TRIGGER) {
         int i = ent->s.modelindex - 1;
 
         // explicit hulls in the BSP model
