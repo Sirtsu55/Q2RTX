@@ -107,7 +107,7 @@ void SP_info_player_start(edict_t *self)
     if (Q_stricmp(level.mapname, "security") == 0) {
         // invoke one of our gross, ugly, disgusting hacks
         self->think = SP_CreateCoopSpots;
-        self->nextthink = level.framenum + 1;
+        self->nextthink = level.time + 1;
     }
 }
 
@@ -150,7 +150,7 @@ void SP_info_player_coop(edict_t *self)
         (Q_stricmp(level.mapname, "strike") == 0)) {
         // invoke one of our gross, ugly, disgusting hacks
         self->think = SP_FixCoopSpots;
-        self->nextthink = level.framenum + 1;
+        self->nextthink = level.time + 1;
     }
 }
 
@@ -408,7 +408,7 @@ void TossClientWeapon(edict_t *self)
     if (!(dmflags.integer & DF_QUAD_DROP))
         quad = false;
     else
-        quad = (self->client->quad_framenum > (level.framenum + 10));
+        quad = (self->client->quad_time > (level.time + 1000));
 
     if (item && quad)
         spread = 22.5f;
@@ -429,7 +429,7 @@ void TossClientWeapon(edict_t *self)
         drop->spawnflags |= DROPPED_PLAYER_ITEM;
 
         drop->touch = Touch_Item;
-        drop->nextthink = self->client->quad_framenum;
+        drop->nextthink = self->client->quad_time;
         drop->think = G_FreeEdict;
     }
 }
@@ -497,7 +497,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     self->svflags |= SVF_DEADMONSTER;
 
     if (!self->deadflag) {
-        self->client->respawn_framenum = level.framenum + 1.0f * BASE_FRAMERATE;
+        self->client->respawn_time = level.time + 1000;
         LookAtKiller(self, inflictor, attacker);
         self->client->ps.pmove.pm_type = PM_DEAD;
         ClientObituary(self, inflictor, attacker);
@@ -515,10 +515,10 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     }
 
     // remove powerups
-    self->client->quad_framenum = 0;
-    self->client->invincible_framenum = 0;
-    self->client->breather_framenum = 0;
-    self->client->enviro_framenum = 0;
+    self->client->quad_time = 0;
+    self->client->invincible_time = 0;
+    self->client->breather_time = 0;
+    self->client->enviro_time = 0;
     self->flags &= ~FL_POWER_ARMOR;
 
     if (self->health < -40) {
@@ -599,7 +599,7 @@ void InitClientPersistant(gclient_t *client)
 void InitClientResp(gclient_t *client)
 {
     memset(&client->resp, 0, sizeof(client->resp));
-    client->resp.enterframe = level.framenum;
+    client->resp.entertime = level.time;
     client->resp.coop_respawn = client->pers;
 }
 
@@ -951,7 +951,7 @@ void respawn(edict_t *self)
         self->client->ps.pmove.pm_flags = PMF_TIME_TELEPORT;
         self->client->ps.pmove.pm_time = 14;
 
-        self->client->respawn_framenum = level.framenum;
+        self->client->respawn_time = level.time;
 
         return;
     }
@@ -1032,7 +1032,7 @@ void spectator_respawn(edict_t *ent)
         ent->client->ps.pmove.pm_time = 14;
     }
 
-    ent->client->respawn_framenum = level.framenum;
+    ent->client->respawn_time = level.time;
 
     if (ent->client->pers.spectator)
         SV_BroadcastPrintf(PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
@@ -1119,7 +1119,7 @@ void PutClientInServer(edict_t *ent)
     ent->mass = 200;
     ent->solid = SOLID_BBOX;
     ent->deadflag = DEAD_NO;
-    ent->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE;
+    ent->air_finished_time = level.time + 12000;
     ent->clipmask = MASK_PLAYERSOLID;
     ent->model = "players/male/tris.md2";
     ent->pain = player_pain;
@@ -1215,7 +1215,7 @@ void ClientBeginDeathmatch(edict_t *ent)
     // locate ent at a spawn point
     PutClientInServer(ent);
 
-    if (level.intermission_framenum) {
+    if (level.intermission_time) {
         MoveClientToIntermission(ent);
     } else {
         // send effect
@@ -1267,7 +1267,7 @@ void ClientBegin(edict_t *ent)
         PutClientInServer(ent);
     }
 
-    if (level.intermission_framenum) {
+    if (level.intermission_time) {
         MoveClientToIntermission(ent);
     } else {
         // send effect if in a multiplayer game
@@ -1493,10 +1493,10 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
     level.current_entity = ent;
     client = ent->client;
 
-    if (level.intermission_framenum) {
+    if (level.intermission_time) {
         client->ps.pmove.pm_type = PM_FREEZE;
         // can exit intermission after five seconds
-        if (level.framenum > level.intermission_framenum + 5.0f * BASE_FRAMERATE
+        if (level.time > level.intermission_time + 5000
             && (ucmd->buttons & BUTTON_ANY))
             level.exitintermission = true;
         return;
@@ -1652,14 +1652,14 @@ void ClientBeginServerFrame(edict_t *ent)
     gclient_t   *client;
     int         buttonMask;
 
-    if (level.intermission_framenum)
+    if (level.intermission_time)
         return;
 
     client = ent->client;
 
     if (deathmatch.integer &&
         client->pers.spectator != client->resp.spectator &&
-        (level.framenum - client->respawn_framenum) >= 5 * BASE_FRAMERATE) {
+        (level.time - client->respawn_time) >= 5000) {
         spectator_respawn(ent);
         return;
     }
@@ -1672,7 +1672,7 @@ void ClientBeginServerFrame(edict_t *ent)
 
     if (ent->deadflag) {
         // wait for any button just going down
-        if (level.framenum > client->respawn_framenum) {
+        if (level.time > client->respawn_time) {
             // in deathmatch, only wait for attack button
             if (deathmatch.integer)
                 buttonMask = BUTTON_ATTACK;

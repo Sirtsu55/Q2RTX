@@ -45,7 +45,7 @@ static int  power_shield_index;
 #define HEALTH_TIMED        2
 
 void Use_Quad(edict_t *ent, gitem_t *item);
-static int  quad_drop_timeout_hack;
+static gtime_t quad_drop_timeout_hack_ms;
 
 //======================================================================
 
@@ -140,7 +140,7 @@ void SetRespawn(edict_t *ent, float delay)
     ent->flags |= FL_RESPAWN;
     ent->svflags |= SVF_NOCLIENT;
     ent->solid = SOLID_NOT;
-    ent->nextthink = level.framenum + delay * BASE_FRAMERATE;
+    ent->nextthink = level.time + G_SecToMs(delay);
     ent->think = DoRespawn;
     SV_LinkEntity(ent);
 }
@@ -166,7 +166,7 @@ bool Pickup_Powerup(edict_t *ent, edict_t *other)
             SetRespawn(ent, ent->item->quantity);
         if ((dmflags.integer & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))) {
             if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
-                quad_drop_timeout_hack = ent->nextthink - level.framenum;
+                quad_drop_timeout_hack_ms = ent->nextthink - level.time;
             ent->item->use(other, ent->item);
         }
     }
@@ -298,22 +298,22 @@ bool Pickup_Pack(edict_t *ent, edict_t *other)
 
 void Use_Quad(edict_t *ent, gitem_t *item)
 {
-    int     timeout;
+    gtime_t timeout;
 
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
     ValidateSelectedItem(ent);
 
-    if (quad_drop_timeout_hack) {
-        timeout = quad_drop_timeout_hack;
-        quad_drop_timeout_hack = 0;
+    if (quad_drop_timeout_hack_ms) {
+        timeout = quad_drop_timeout_hack_ms;
+        quad_drop_timeout_hack_ms = 0;
     } else {
-        timeout = 300;
+        timeout = 30000;
     }
 
-    if (ent->client->quad_framenum > level.framenum)
-        ent->client->quad_framenum += timeout;
+    if (ent->client->quad_time > level.time)
+        ent->client->quad_time += timeout;
     else
-        ent->client->quad_framenum = level.framenum + timeout;
+        ent->client->quad_time = level.time + timeout;
 
     SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM, 0);
 }
@@ -325,10 +325,10 @@ void Use_Breather(edict_t *ent, gitem_t *item)
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
     ValidateSelectedItem(ent);
 
-    if (ent->client->breather_framenum > level.framenum)
-        ent->client->breather_framenum += 300;
+    if (ent->client->breather_time > level.time)
+        ent->client->breather_time += 30000;
     else
-        ent->client->breather_framenum = level.framenum + 300;
+        ent->client->breather_time = level.time + 30000;
 
 //  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
@@ -340,10 +340,10 @@ void Use_Envirosuit(edict_t *ent, gitem_t *item)
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
     ValidateSelectedItem(ent);
 
-    if (ent->client->enviro_framenum > level.framenum)
-        ent->client->enviro_framenum += 300;
+    if (ent->client->enviro_time > level.time)
+        ent->client->enviro_time += 30000;
     else
-        ent->client->enviro_framenum = level.framenum + 300;
+        ent->client->enviro_time = level.time + 30000;
 
 //  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
 }
@@ -355,10 +355,10 @@ void    Use_Invulnerability(edict_t *ent, gitem_t *item)
     ent->client->pers.inventory[ITEM_INDEX(item)]--;
     ValidateSelectedItem(ent);
 
-    if (ent->client->invincible_framenum > level.framenum)
-        ent->client->invincible_framenum += 300;
+    if (ent->client->invincible_time > level.time)
+        ent->client->invincible_time += 30000;
     else
-        ent->client->invincible_framenum = level.framenum + 300;
+        ent->client->invincible_time = level.time + 30000;
 
     SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/protect.wav"), 1, ATTN_NORM, 0);
 }
@@ -480,7 +480,7 @@ void Drop_Ammo(edict_t *ent, gitem_t *item)
 void MegaHealth_think(edict_t *self)
 {
     if (self->owner->health > self->owner->max_health) {
-        self->nextthink = level.framenum + 1 * BASE_FRAMERATE;
+        self->nextthink = level.time + 1000;
         self->owner->health -= 1;
         return;
     }
@@ -506,7 +506,7 @@ bool Pickup_Health(edict_t *ent, edict_t *other)
 
     if (ent->style & HEALTH_TIMED) {
         ent->think = MegaHealth_think;
-        ent->nextthink = level.framenum + 5 * BASE_FRAMERATE;
+        ent->nextthink = level.time + 5000;
         ent->owner = other;
         ent->flags |= FL_RESPAWN;
         ent->svflags |= SVF_NOCLIENT;
@@ -701,7 +701,7 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
         // show icon and name on status bar
         other->client->ps.stats[STAT_PICKUP_ICON] = SV_ImageIndex(ent->item->icon);
         other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(ent->item);
-        other->client->pickup_msg_framenum = level.framenum + 3.0f * BASE_FRAMERATE;
+        other->client->pickup_msg_time = level.time + 3000;
 
         // change selected item
         if (ent->item->use)
@@ -751,7 +751,7 @@ void drop_make_touchable(edict_t *ent)
 {
     ent->touch = Touch_Item;
     if (deathmatch.integer) {
-        ent->nextthink = level.framenum + 29 * BASE_FRAMERATE;
+        ent->nextthink = level.time + G_SecToMs(29);
         ent->think = G_FreeEdict;
     }
 }
@@ -795,7 +795,7 @@ edict_t *Drop_Item(edict_t *ent, gitem_t *item)
     dropped->velocity[2] = 300;
 
     dropped->think = drop_make_touchable;
-    dropped->nextthink = level.framenum + 1 * BASE_FRAMERATE;
+    dropped->nextthink = level.time + 1000;
 
     SV_LinkEntity(dropped);
 
@@ -864,7 +864,7 @@ void droptofloor(edict_t *ent)
         ent->svflags |= SVF_NOCLIENT;
         ent->solid = SOLID_NOT;
         if (ent == ent->teammaster) {
-            ent->nextthink = level.framenum + 1;
+            ent->nextthink = level.time + 1;
             ent->think = DoRespawn;
         }
     }
@@ -1012,7 +1012,7 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     }
 
     ent->item = item;
-    ent->nextthink = level.framenum + 2;    // items start after other solids
+    ent->nextthink = level.time + G_FramesToMs(2);    // items start after other solids
     ent->think = droptofloor;
     ent->s.effects = item->world_model_flags;
     ent->s.renderfx = RF_GLOW;

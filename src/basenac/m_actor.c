@@ -85,7 +85,7 @@ void actor_stand(edict_t *self)
     self->monsterinfo.currentmove = &actor_move_stand;
 
     // randomize on startup
-    if (level.time < 1.0f)
+    if (level.time < 1000)
         self->s.frame = self->monsterinfo.currentmove->firstframe + (Q_rand() % (self->monsterinfo.currentmove->lastframe - self->monsterinfo.currentmove->firstframe + 1));
 }
 
@@ -129,7 +129,7 @@ mmove_t actor_move_run = {FRAME_run02, FRAME_run07, actor_frames_run, NULL};
 
 void actor_run(edict_t *self)
 {
-    if ((level.framenum < self->pain_debounce_framenum) && (!self->enemy)) {
+    if ((level.time < self->pain_debounce_time) && (!self->enemy)) {
         if (self->movetarget)
             actor_walk(self);
         else
@@ -220,10 +220,10 @@ void actor_pain(edict_t *self, edict_t *other, float kick, int damage)
     if (self->health < (self->max_health / 2))
         self->s.skinnum = 1;
 
-    if (level.framenum < self->pain_debounce_framenum)
+    if (level.time < self->pain_debounce_time)
         return;
 
-    self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
+    self->pain_debounce_time = level.time + 3000;
 //  SV_StartSound (self, CHAN_VOICE, actor.sound_pain, 1, ATTN_NORM);
 
     if ((other->client) && (random() < 0.4f)) {
@@ -349,7 +349,7 @@ void actor_fire(edict_t *self)
 {
     actorMachineGun(self);
 
-    if (level.framenum >= self->monsterinfo.pause_framenum)
+    if (level.time >= self->monsterinfo.pause_time)
         self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
     else
         self->monsterinfo.aiflags |= AI_HOLD_FRAME;
@@ -369,7 +369,7 @@ void actor_attack(edict_t *self)
 
     self->monsterinfo.currentmove = &actor_move_attack;
     n = (Q_rand() & 15) + 3 + 7;
-    self->monsterinfo.pause_framenum = level.framenum + n;
+    self->monsterinfo.pause_time = level.time + G_FramesToMs(n);
 }
 
 
@@ -381,7 +381,7 @@ void actor_use(edict_t *self, edict_t *other, edict_t *activator)
     if ((!self->movetarget) || (strcmp(self->movetarget->classname, "target_actor") != 0)) {
         Com_WPrintf("%s has bad target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
         self->target = NULL;
-        self->monsterinfo.pause_framenum = INT_MAX;
+        self->monsterinfo.pause_time = INT64_MAX;
         self->monsterinfo.stand(self);
         return;
     }
@@ -530,7 +530,7 @@ void target_actor_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
         other->goalentity = other->movetarget;
 
     if (!other->movetarget && !other->enemy) {
-        other->monsterinfo.pause_framenum = INT_MAX;
+        other->monsterinfo.pause_time = INT64_MAX;
         other->monsterinfo.stand(other);
     } else if (other->movetarget == other->goalentity) {
         VectorSubtract(other->movetarget->s.origin, other->s.origin, v);

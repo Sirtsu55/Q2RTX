@@ -83,7 +83,7 @@ void P_DamageFeedback(edict_t *player)
     client->ps.stats[STAT_FLASHES] = 0;
     if (client->damage_blood)
         client->ps.stats[STAT_FLASHES] |= 1;
-    if (client->damage_armor && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum))
+    if (client->damage_armor && !(player->flags & FL_GODMODE) && (client->invincible_time <= level.time))
         client->ps.stats[STAT_FLASHES] |= 2;
 
     // total points of damage shot at the player this frame
@@ -123,9 +123,9 @@ void P_DamageFeedback(edict_t *player)
         count = 10; // always make a visible effect
 
     // play an apropriate pain sound
-    if ((level.framenum > player->pain_debounce_framenum) && !(player->flags & FL_GODMODE) && (client->invincible_framenum <= level.framenum)) {
+    if ((level.time > player->pain_debounce_time) && !(player->flags & FL_GODMODE) && (client->invincible_time <= level.time)) {
         r = 1 + (Q_rand() & 1);
-        player->pain_debounce_framenum = level.framenum + 0.7f * BASE_FRAMERATE;
+        player->pain_debounce_time = level.time + 700;
         if (player->health < 25)
             l = 25;
         else if (player->health < 50)
@@ -238,7 +238,7 @@ void SV_CalcViewOffset(edict_t *ent)
 
         // add angles based on damage kick
 
-        ratio = (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
+        ratio = (float) (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
         if (ratio < 0) {
             ratio = 0;
             ent->client->v_dmg_pitch = 0;
@@ -249,7 +249,7 @@ void SV_CalcViewOffset(edict_t *ent)
 
         // add pitch based on fall kick
 
-        ratio = (ent->client->fall_time - level.time) / FALL_TIME;
+        ratio = (float) (ent->client->fall_time - level.time) / FALL_TIME;
         if (ratio < 0)
             ratio = 0;
         angles[PITCH] += ratio * ent->client->fall_value;
@@ -288,7 +288,7 @@ void SV_CalcViewOffset(edict_t *ent)
 
     // add fall height
 
-    ratio = (ent->client->fall_time - level.time) / FALL_TIME;
+    ratio = (float) (ent->client->fall_time - level.time) / FALL_TIME;
     if (ratio < 0)
         ratio = 0;
     v[2] -= ratio * ent->client->fall_value * 0.4f;
@@ -376,29 +376,29 @@ void SV_CalcBlend(edict_t *ent)
         SV_AddBlend(0.5f, 0.3f, 0.2f, 0.4f, ent->client->ps.blend);
 
     // add for powerups
-    if (ent->client->quad_framenum > level.framenum) {
-        remaining = ent->client->quad_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
+    if (ent->client->quad_time > level.time) {
+        remaining = ent->client->quad_time - level.time;
+        if (remaining == 3000)    // beginning to fade
             SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage2.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
+        if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(0, 0, 1, 0.08f, ent->client->ps.blend);
-    } else if (ent->client->invincible_framenum > level.framenum) {
-        remaining = ent->client->invincible_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
+    } else if (ent->client->invincible_time > level.time) {
+        remaining = ent->client->invincible_time - level.time;
+        if (remaining == 3000)    // beginning to fade
             SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/protect2.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
+        if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(1, 1, 0, 0.08f, ent->client->ps.blend);
-    } else if (ent->client->enviro_framenum > level.framenum) {
-        remaining = ent->client->enviro_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
+    } else if (ent->client->enviro_time > level.time) {
+        remaining = ent->client->enviro_time - level.time;
+        if (remaining == 3000)    // beginning to fade
             SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/airout.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
+        if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(0, 1, 0, 0.08f, ent->client->ps.blend);
-    } else if (ent->client->breather_framenum > level.framenum) {
-        remaining = ent->client->breather_framenum - level.framenum;
-        if (remaining == 30)    // beginning to fade
+    } else if (ent->client->breather_time > level.time) {
+        remaining = ent->client->breather_time - level.time;
+        if (remaining == 3000)    // beginning to fade
             SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/airout.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 30 || (remaining & 4))
+        if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(0.4f, 1, 0.4f, 0.04f, ent->client->ps.blend);
     }
 
@@ -476,7 +476,7 @@ void P_FallingDamage(edict_t *ent)
             else
                 ent->s.event = EV_FALL;
         }
-        ent->pain_debounce_framenum = level.framenum;   // no normal pain sound
+        ent->pain_debounce_time = level.time;   // no normal pain sound
         damage = (delta - 30) / 2;
         if (damage < 1)
             damage = 1;
@@ -504,7 +504,7 @@ void P_WorldEffects(void)
     int         waterlevel, old_waterlevel;
 
     if (current_player->movetype == MOVETYPE_NOCLIP) {
-        current_player->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE; // don't need air
+        current_player->air_finished_time = level.time + 12000; // don't need air
         return;
     }
 
@@ -512,8 +512,8 @@ void P_WorldEffects(void)
     old_waterlevel = current_client->old_waterlevel;
     current_client->old_waterlevel = waterlevel;
 
-    breather = current_client->breather_framenum > level.framenum;
-    envirosuit = current_client->enviro_framenum > level.framenum;
+    breather = current_client->breather_time > level.time;
+    envirosuit = current_client->enviro_time > level.time;
 
     //
     // if just entered a water volume, play a sound
@@ -529,7 +529,7 @@ void P_WorldEffects(void)
         current_player->flags |= FL_INWATER;
 
         // clear damage_debounce, so the pain sound will play immediately
-        current_player->damage_debounce_framenum = level.framenum - 1 * BASE_FRAMERATE;
+        current_player->damage_debounce_time = level.time - 1000;
     }
 
     //
@@ -552,11 +552,11 @@ void P_WorldEffects(void)
     // check for head just coming out of water
     //
     if (old_waterlevel == 3 && waterlevel != 3) {
-        if (current_player->air_finished_framenum < level.framenum) {
+        if (current_player->air_finished_time < level.time) {
             // gasp for air
             SV_StartSound(current_player, CHAN_VOICE, SV_SoundIndex("player/gasp1.wav"), 1, ATTN_NORM, 0);
             PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-        } else  if (current_player->air_finished_framenum < level.framenum + 11 * BASE_FRAMERATE) {
+        } else  if (current_player->air_finished_time < level.time + 11000) {
             // just break surface
             SV_StartSound(current_player, CHAN_VOICE, SV_SoundIndex("player/gasp2.wav"), 1, ATTN_NORM, 0);
         }
@@ -568,9 +568,9 @@ void P_WorldEffects(void)
     if (waterlevel == 3) {
         // breather or envirosuit give air
         if (breather || envirosuit) {
-            current_player->air_finished_framenum = level.framenum + 10 * BASE_FRAMERATE;
+            current_player->air_finished_time = level.time + 10000;
 
-            if (((int)(current_client->breather_framenum - level.framenum) % 25) == 0) {
+            if (((current_client->breather_time - level.time) % 2500) == 0) {
                 if (!current_client->breather_sound)
                     SV_StartSound(current_player, CHAN_AUTO, SV_SoundIndex("player/u_breath1.wav"), 1, ATTN_NORM, 0);
                 else
@@ -582,11 +582,11 @@ void P_WorldEffects(void)
         }
 
         // if out of air, start drowning
-        if (current_player->air_finished_framenum < level.framenum) {
+        if (current_player->air_finished_time < level.time) {
             // drown!
-            if (current_player->client->next_drown_framenum < level.framenum
+            if (current_player->client->next_drown_time < level.time
                 && current_player->health > 0) {
-                current_player->client->next_drown_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                current_player->client->next_drown_time = level.time + 1000;
 
                 // take more damage the longer underwater
                 current_player->dmg += 2;
@@ -601,13 +601,13 @@ void P_WorldEffects(void)
                 else
                     SV_StartSound(current_player, CHAN_VOICE, SV_SoundIndex("*gurp2.wav"), 1, ATTN_NORM, 0);
 
-                current_player->pain_debounce_framenum = level.framenum;
+                current_player->pain_debounce_time = level.time;
 
                 T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
             }
         }
     } else {
-        current_player->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE;
+        current_player->air_finished_time = level.time + 12000;
         current_player->dmg = 2;
     }
 
@@ -617,13 +617,13 @@ void P_WorldEffects(void)
     if (waterlevel && (current_player->watertype & (CONTENTS_LAVA | CONTENTS_SLIME))) {
         if (current_player->watertype & CONTENTS_LAVA) {
             if (current_player->health > 0
-                && current_player->pain_debounce_framenum <= level.framenum
-                && current_client->invincible_framenum < level.framenum) {
+                && current_player->pain_debounce_time <= level.time
+                && current_client->invincible_time < level.time) {
                 if (Q_rand() & 1)
                     SV_StartSound(current_player, CHAN_VOICE, SV_SoundIndex("player/burn1.wav"), 1, ATTN_NORM, 0);
                 else
                     SV_StartSound(current_player, CHAN_VOICE, SV_SoundIndex("player/burn2.wav"), 1, ATTN_NORM, 0);
-                current_player->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                current_player->pain_debounce_time = level.time + 1000;
             }
 
             if (envirosuit) // take 1/3 damage with envirosuit
@@ -655,10 +655,10 @@ void G_SetClientEffects(edict_t *ent)
     ent->s.effects = 0;
     ent->s.renderfx = 0;
 
-    if (ent->health <= 0 || level.intermission_framenum)
+    if (ent->health <= 0 || level.intermission_time)
         return;
 
-    if (ent->powerarmor_framenum > level.framenum) {
+    if (ent->powerarmor_time > level.time) {
         pa_type = PowerArmorType(ent);
         if (pa_type == POWER_ARMOR_SCREEN) {
             ent->s.effects |= EF_POWERSCREEN;
@@ -668,15 +668,15 @@ void G_SetClientEffects(edict_t *ent)
         }
     }
 
-    if (ent->client->quad_framenum > level.framenum) {
-        remaining = ent->client->quad_framenum - level.framenum;
-        if (remaining > 30 || (remaining & 4))
+    if (ent->client->quad_time > level.time) {
+        remaining = ent->client->quad_time - level.time;
+        if (remaining > 3000 || (remaining % 500) == 0)
             ent->s.effects |= EF_QUAD;
     }
 
-    if (ent->client->invincible_framenum > level.framenum) {
-        remaining = ent->client->invincible_framenum - level.framenum;
-        if (remaining > 30 || (remaining & 4))
+    if (ent->client->invincible_time > level.time) {
+        remaining = ent->client->invincible_time - level.time;
+        if (remaining > 3000 || (remaining % 500) == 0)
             ent->s.effects |= EF_PENT;
     }
 
@@ -719,7 +719,7 @@ void G_SetClientSound(edict_t *ent)
     }
 
     // help beep (no more than ONE time - that's annoying enough)
-    if (ent->client->pers.helpchanged && ent->client->pers.helpchanged <= 1 && !(level.framenum & 63)) {
+    if (ent->client->pers.helpchanged && ent->client->pers.helpchanged <= 1 && !(level.time % 10000)) {
         ent->client->pers.helpchanged++;
         SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
     }
@@ -859,7 +859,7 @@ void ClientEndServerFrame(edict_t *ent)
     // If the end of unit layout is displayed, don't give
     // the player any normal movement attributes
     //
-    if (level.intermission_framenum) {
+    if (level.intermission_time) {
         // FIXME: add view drifting here?
         current_client->ps.blend[3] = 0;
         current_client->ps.fov = 90;
@@ -952,7 +952,7 @@ void ClientEndServerFrame(edict_t *ent)
     VectorClear(ent->client->kick_angles);
 
     // if the scoreboard is up, update it
-    if (ent->client->showscores && !(level.framenum & 31)) {
+    if (ent->client->showscores && !(level.time % 3000)) {
         DeathmatchScoreboardMessage(ent, ent->enemy);
         SV_Unicast(ent, false);
     }

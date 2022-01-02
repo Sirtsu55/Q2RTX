@@ -88,12 +88,10 @@ Runs thinking code for this frame if necessary
 */
 bool SV_RunThink(edict_t *ent)
 {
-    int     thinktime;
-
-    thinktime = ent->nextthink;
+    gtime_t thinktime = ent->nextthink;
     if (thinktime <= 0)
         return true;
-    if (thinktime > level.framenum)
+    if (thinktime > level.time)
         return true;
 
     ent->nextthink = 0;
@@ -269,7 +267,7 @@ SV_AddGravity
 */
 void SV_AddGravity(edict_t *ent)
 {
-    ent->velocity[2] -= ent->gravity * sv_gravity.value * FRAMETIME;
+    ent->velocity[2] -= ent->gravity * sv_gravity.value * BASE_FRAMETIME_S;
 }
 
 /*
@@ -525,8 +523,8 @@ void SV_Physics_Pusher(edict_t *ent)
     for (part = ent ; part ; part = part->teamchain) {
         if (!VectorEmpty(part->velocity) || !VectorEmpty(part->avelocity)) {
             // object is moving
-            VectorScale(part->velocity, FRAMETIME, move);
-            VectorScale(part->avelocity, FRAMETIME, amove);
+            VectorScale(part->velocity, BASE_FRAMETIME_S, move);
+            VectorScale(part->avelocity, BASE_FRAMETIME_S, amove);
 
             if (!SV_Push(part, move, amove))
                 break;  // move was blocked
@@ -539,7 +537,7 @@ void SV_Physics_Pusher(edict_t *ent)
         // the move failed, bump all nextthink times and back out moves
         for (mv = ent ; mv ; mv = mv->teamchain) {
             if (mv->nextthink > 0)
-                mv->nextthink += FRAMETIME;
+                mv->nextthink += BASE_FRAMETIME;
         }
 
         // if the pusher has a "blocked" function, call it
@@ -589,8 +587,8 @@ void SV_Physics_Noclip(edict_t *ent)
     if (!ent->inuse)
         return;
 
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
-    VectorMA(ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
+    VectorMA(ent->s.angles, BASE_FRAMETIME_S, ent->avelocity, ent->s.angles);
+    VectorMA(ent->s.origin, BASE_FRAMETIME_S, ent->velocity, ent->s.origin);
 
     SV_LinkEntity(ent);
 }
@@ -651,10 +649,10 @@ void SV_Physics_Toss(edict_t *ent)
         SV_AddGravity(ent);
 
 // move angles
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
+    VectorMA(ent->s.angles, BASE_FRAMETIME_S, ent->avelocity, ent->s.angles);
 
 // move origin
-    VectorScale(ent->velocity, FRAMETIME, move);
+    VectorScale(ent->velocity, BASE_FRAMETIME_S, move);
     trace = SV_PushEntity(ent, move);
     if (!ent->inuse)
         return;
@@ -731,8 +729,8 @@ void SV_AddRotationalFriction(edict_t *ent)
     int     n;
     float   adjustment;
 
-    VectorMA(ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
-    adjustment = FRAMETIME * sv_stopspeed * sv_friction;
+    VectorMA(ent->s.angles, BASE_FRAMETIME_S, ent->avelocity, ent->s.angles);
+    adjustment = BASE_FRAMETIME_S * sv_stopspeed * sv_friction;
     for (n = 0; n < 3; n++) {
         if (ent->avelocity[n] > 0) {
             ent->avelocity[n] -= adjustment;
@@ -789,7 +787,7 @@ void SV_Physics_Step(edict_t *ent)
         speed = fabsf(ent->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
         friction = sv_friction / 3;
-        newspeed = speed - (FRAMETIME * control * friction);
+        newspeed = speed - (BASE_FRAMETIME_S * control * friction);
         if (newspeed < 0)
             newspeed = 0;
         newspeed /= speed;
@@ -800,7 +798,7 @@ void SV_Physics_Step(edict_t *ent)
     if ((ent->flags & FL_SWIM) && (ent->velocity[2] != 0)) {
         speed = fabsf(ent->velocity[2]);
         control = speed < sv_stopspeed ? sv_stopspeed : speed;
-        newspeed = speed - (FRAMETIME * control * sv_waterfriction * ent->waterlevel);
+        newspeed = speed - (BASE_FRAMETIME_S * control * sv_waterfriction * ent->waterlevel);
         if (newspeed < 0)
             newspeed = 0;
         newspeed /= speed;
@@ -818,7 +816,7 @@ void SV_Physics_Step(edict_t *ent)
                     friction = sv_friction;
 
                     control = speed < sv_stopspeed ? sv_stopspeed : speed;
-                    newspeed = speed - FRAMETIME * control * friction;
+                    newspeed = speed - BASE_FRAMETIME_S * control * friction;
 
                     if (newspeed < 0)
                         newspeed = 0;
@@ -833,7 +831,7 @@ void SV_Physics_Step(edict_t *ent)
             mask = MASK_MONSTERSOLID;
         else
             mask = MASK_SOLID;
-        SV_FlyMove(ent, FRAMETIME, mask);
+        SV_FlyMove(ent, BASE_FRAMETIME_S, mask);
 
         SV_LinkEntity(ent);
         G_TouchTriggers(ent);

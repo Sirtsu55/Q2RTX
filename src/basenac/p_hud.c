@@ -40,12 +40,10 @@ void MoveClientToIntermission(edict_t *ent)
     ent->client->ps.rdflags &= ~RDF_UNDERWATER;
 
     // clean up powerup info
-    ent->client->quad_framenum = 0;
-    ent->client->invincible_framenum = 0;
-    ent->client->breather_framenum = 0;
-    ent->client->enviro_framenum = 0;
-    ent->client->grenade_blew_up = false;
-    ent->client->grenade_framenum = 0;
+    ent->client->quad_time = 0;
+    ent->client->invincible_time = 0;
+    ent->client->breather_time = 0;
+    ent->client->enviro_time = 0;
 
     ent->viewheight = 0;
     ent->s.modelindex = 0;
@@ -70,7 +68,7 @@ void BeginIntermission(edict_t *targ)
     int     i, n;
     edict_t *ent, *client;
 
-    if (level.intermission_framenum)
+    if (level.intermission_time)
         return;     // already activated
 
     game.autosaved = false;
@@ -84,7 +82,7 @@ void BeginIntermission(edict_t *targ)
             respawn(client);
     }
 
-    level.intermission_framenum = level.framenum;
+    level.intermission_time = level.time;
     level.changemap = targ->map;
 
     if (strstr(level.changemap, "*")) {
@@ -215,7 +213,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
         // send the layout
         Q_snprintf(entry, sizeof(entry),
                    "client %i %i %i %i %i %i ",
-                   x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe) / 600);
+                   x, y, sorted[i], cl->resp.score, cl->ping, (int) G_MsToMin(level.time - cl->resp.entertime));
         j = strlen(entry);
         if (stringlength + j > 1024)
             break;
@@ -387,7 +385,7 @@ void G_SetStats(edict_t *ent)
     }
 
     index = ArmorIndex(ent);
-    if (power_armor_type && (!index || (level.framenum & 8))) {
+    if (power_armor_type && (!index || (level.time % 1000) > 500)) {
         // flash between power armor and other armor icon
         ent->client->ps.stats[STAT_ARMOR_ICON] = SV_ImageIndex("i_powershield");
         ent->client->ps.stats[STAT_ARMOR] = cells;
@@ -403,7 +401,7 @@ void G_SetStats(edict_t *ent)
     //
     // pickup message
     //
-    if (level.framenum > ent->client->pickup_msg_framenum) {
+    if (level.time > ent->client->pickup_msg_time) {
         ent->client->ps.stats[STAT_PICKUP_ICON] = 0;
         ent->client->ps.stats[STAT_PICKUP_STRING] = 0;
     }
@@ -411,18 +409,18 @@ void G_SetStats(edict_t *ent)
     //
     // timers
     //
-    if (ent->client->quad_framenum > level.framenum) {
+    if (ent->client->quad_time > level.time) {
         ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_quad");
-        ent->client->ps.stats[STAT_TIMER] = (ent->client->quad_framenum - level.framenum) / 10;
-    } else if (ent->client->invincible_framenum > level.framenum) {
+        ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->quad_time - level.time);
+    } else if (ent->client->invincible_time > level.time) {
         ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_invulnerability");
-        ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum) / 10;
-    } else if (ent->client->enviro_framenum > level.framenum) {
+        ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->invincible_time - level.time);
+    } else if (ent->client->enviro_time > level.time) {
         ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_envirosuit");
-        ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum) / 10;
-    } else if (ent->client->breather_framenum > level.framenum) {
+        ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->enviro_time - level.time);
+    } else if (ent->client->breather_time > level.time) {
         ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_rebreather");
-        ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum) / 10;
+        ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->breather_time - level.time);
     } else {
         ent->client->ps.stats[STAT_TIMER_ICON] = 0;
         ent->client->ps.stats[STAT_TIMER] = 0;
@@ -444,7 +442,7 @@ void G_SetStats(edict_t *ent)
     ent->client->ps.stats[STAT_LAYOUTS] = 0;
 
     if (deathmatch.integer) {
-        if (ent->client->pers.health <= 0 || level.intermission_framenum
+        if (ent->client->pers.health <= 0 || level.intermission_time
             || ent->client->showscores)
             ent->client->ps.stats[STAT_LAYOUTS] |= 1;
         if (ent->client->showinventory && ent->client->pers.health > 0)
@@ -464,7 +462,7 @@ void G_SetStats(edict_t *ent)
     //
     // help icon / current weapon if not shown
     //
-    if (ent->client->pers.helpchanged && (level.framenum & 8))
+    if (ent->client->pers.helpchanged && (level.time % 1000) > 500)
         ent->client->ps.stats[STAT_HELPICON] = SV_ImageIndex("i_help");
     else if ((ent->client->pers.hand == CENTER_HANDED || ent->client->ps.fov > 91)
              && ent->client->pers.weapon)
@@ -510,7 +508,7 @@ void G_SetSpectatorStats(edict_t *ent)
 
     // layouts are independant in spectator
     cl->ps.stats[STAT_LAYOUTS] = 0;
-    if (cl->pers.health <= 0 || level.intermission_framenum || cl->showscores)
+    if (cl->pers.health <= 0 || level.intermission_time || cl->showscores)
         cl->ps.stats[STAT_LAYOUTS] |= 1;
     if (cl->showinventory && cl->pers.health > 0)
         cl->ps.stats[STAT_LAYOUTS] |= 2;

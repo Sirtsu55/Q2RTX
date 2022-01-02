@@ -541,7 +541,7 @@ void makron_pain(edict_t *self, edict_t *other, float kick, int damage)
     if (self->health < (self->max_health / 2))
         self->s.skinnum = 1;
 
-    if (level.framenum < self->pain_debounce_framenum)
+    if (level.time < self->pain_debounce_time)
         return;
 
     // Lessen the chance of him going into his pain frames
@@ -549,7 +549,7 @@ void makron_pain(edict_t *self, edict_t *other, float kick, int damage)
         if (random() < 0.2f)
             return;
 
-    self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
+    self->pain_debounce_time = level.time + 3000;
     if (skill.integer == 3)
         return;     // no pain anims in nightmare
 
@@ -602,10 +602,10 @@ Makron Torso. This needs to be spawned in
 void makron_torso_think(edict_t *self)
 {
     if (++self->s.frame < 365)
-        self->nextthink = level.framenum + 1;
+        self->nextthink = level.time + 100;
     else {
         self->s.frame = 346;
-        self->nextthink = level.framenum + 1;
+        self->nextthink = level.time + 100;
     }
 }
 
@@ -618,7 +618,7 @@ void makron_torso(edict_t *ent)
     ent->s.frame = 346;
     ent->s.modelindex = SV_ModelIndex("models/monsters/boss3/rider/tris.md2");
     ent->think = makron_torso_think;
-    ent->nextthink = level.framenum + 2;
+    ent->nextthink = level.time + 200;
     ent->s.sound = SV_SoundIndex("makron/spine.wav");
     SV_LinkEntity(ent);
 }
@@ -719,7 +719,7 @@ bool Makron_CheckAttack(edict_t *self)
     if (!self->monsterinfo.attack)
         return false;
 
-    if (level.framenum < self->monsterinfo.attack_finished)
+    if (level.time < self->monsterinfo.attack_finished_time)
         return false;
 
     if (enemy_range == RANGE_FAR)
@@ -739,7 +739,7 @@ bool Makron_CheckAttack(edict_t *self)
 
     if (random() < chance) {
         self->monsterinfo.attack_state = AS_MISSILE;
-        self->monsterinfo.attack_finished = level.framenum + 2 * random() * BASE_FRAMERATE;
+        self->monsterinfo.attack_finished_time = level.time + G_SecToMs(2 * random());
         return true;
     }
 
@@ -858,7 +858,7 @@ void MakronToss(edict_t *self)
     edict_t *ent;
 
     ent = G_Spawn();
-    ent->nextthink = level.framenum + 0.8f * BASE_FRAMERATE;
+    ent->nextthink = level.time + 800;
     ent->think = MakronSpawn;
     ent->target = self->target;
     VectorCopy(self->s.origin, ent->s.origin);

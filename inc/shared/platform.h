@@ -95,6 +95,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define R_OK    4
 #endif
 
+#define q_resolve_field(TYPE, MEMBER) (((TYPE *)0)->MEMBER)
+
 #ifdef __GNUC__
 
 #if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
@@ -116,7 +118,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if __GNUC__ >= 4
 #define q_offsetof(t, m)    __builtin_offsetof(t, m)
 #else
-#define q_offsetof(t, m)    ((size_t)&((t *)0)->m)
+#define q_offsetof(t, m)    ((size_t)&(q_resolve_field(t,m)))
 #endif
 
 #ifdef _WIN32
@@ -137,7 +139,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define q_likely(x)         !!(x)
 #define q_unlikely(x)       !!(x)
-#define q_offsetof(t, m)    ((size_t)&((t *)0)->m)
+#define q_offsetof(t, m)    ((size_t)&(q_resolve_field(t,m)))
 
 #ifdef _WIN32
 #define q_exported          __declspec(dllexport)

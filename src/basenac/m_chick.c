@@ -256,10 +256,10 @@ void chick_pain(edict_t *self, edict_t *other, float kick, int damage)
     if (self->health < (self->max_health / 2))
         self->s.skinnum = 1;
 
-    if (level.framenum < self->pain_debounce_framenum)
+    if (level.time < self->pain_debounce_time)
         return;
 
-    self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
+    self->pain_debounce_time = level.time + 3000;
 
     r = random();
     if (r < 0.33f)
@@ -375,13 +375,13 @@ void chick_duck_down(edict_t *self)
     self->monsterinfo.aiflags |= AI_DUCKED;
     self->maxs[2] -= 32;
     self->takedamage = DAMAGE_YES;
-    self->monsterinfo.pause_framenum = level.framenum + 1 * BASE_FRAMERATE;
+    self->monsterinfo.pause_time = level.time + 1000;
     SV_LinkEntity(self);
 }
 
 void chick_duck_hold(edict_t *self)
 {
-    if (level.framenum >= self->monsterinfo.pause_framenum)
+    if (level.time >= self->monsterinfo.pause_time)
         self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
     else
         self->monsterinfo.aiflags |= AI_HOLD_FRAME;

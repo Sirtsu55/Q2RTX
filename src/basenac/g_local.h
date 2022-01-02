@@ -42,10 +42,42 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 //==================================================================
 
-// view pitching times
-#define DAMAGE_TIME     0.5f
-#define FALL_TIME       0.3f
+// 64-bit milliseconds
+typedef int64_t gtime_t;
 
+static inline gtime_t G_SecToMs(float sec)
+{
+    return sec * 1000;
+}
+
+static inline float G_MsToSec(gtime_t millis)
+{
+    return millis / 1000.f;
+}
+
+static inline gtime_t G_MinToMs(float min)
+{
+    return (min * 60) * 1000;
+}
+
+static inline float G_MsToMin(gtime_t millis)
+{
+    return (millis / 1000.f) / 60.f;
+}
+
+static inline gtime_t G_FramesToMs(int frames)
+{
+    return frames * BASE_FRAMETIME;
+}
+
+static inline float G_MsToFrames(gtime_t ms)
+{
+    return ms / BASE_FRAMETIME;
+}
+
+// view pitching times
+#define DAMAGE_TIME     500
+#define FALL_TIME       300
 
 // edict->spawnflags
 // these are set with checkboxes on each entity in the map editor
@@ -69,11 +101,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FL_TEAMSLAVE            0x00000400  // not the first on the team
 #define FL_NO_KNOCKBACK         0x00000800
 #define FL_POWER_ARMOR          0x00001000  // power armor (if any) is active
+#define FL_ACCELERATE           0x00002000  // accelerative movement (plats, etc)
 #define FL_RESPAWN              0x80000000  // used for item respawning
 
-
 #define FRAMETIME       BASE_FRAMETIME_S
-
 
 #define MELEE_DISTANCE  80
 
@@ -251,8 +282,6 @@ typedef struct gitem_s {
     char        *precaches;     // string of all models, sounds, and images this item will use
 } gitem_t;
 
-
-
 //
 // this structure is left intact through an entire game
 // it should be initialized at dll load time, and read/written to
@@ -290,14 +319,14 @@ typedef struct {
 //
 typedef struct {
     int         framenum;
-    float       time;
+    gtime_t     time;
 
     char        level_name[MAX_QPATH];  // the descriptive name (Outer Base, etc)
     char        mapname[MAX_QPATH];     // the server name (base1, etc)
     char        nextmap[MAX_QPATH];     // go here when fraglimit is hit
 
     // intermission state
-    int         intermission_framenum;  // time the intermission was started
+    gtime_t     intermission_time;  // time the intermission was started
     char        *changemap;
     int         exitintermission;
     vec3_t      intermission_origin;
@@ -306,11 +335,11 @@ typedef struct {
     edict_t     *sight_client;  // changed once each frame for coop games
 
     edict_t     *sight_entity;
-    int         sight_entity_framenum;
+    gtime_t     sight_entity_time;
     edict_t     *sound_entity;
-    int         sound_entity_framenum;
+    gtime_t     sound_entity_time;
     edict_t     *sound2_entity;
-    int         sound2_entity_framenum;
+    gtime_t     sound2_entity_time;
 
     int         pic_health;
 
@@ -415,16 +444,16 @@ typedef struct {
     void        (*sight)(edict_t *self, edict_t *other);
     bool        (*checkattack)(edict_t *self);
 
-    int         pause_framenum;
-    int         attack_finished;
+    gtime_t     pause_time;
+    gtime_t     attack_finished_time;
 
     vec3_t      saved_goal;
-    int         search_framenum;
-    int         trail_framenum;
+    gtime_t     search_time;
+    gtime_t     trail_time;
     vec3_t      last_sighting;
     int         attack_state;
     int         lefty;
-    int         idle_framenum;
+    gtime_t     idle_time;
     int         linkcount;
 
     int         power_armor_type;
@@ -567,7 +596,8 @@ typedef enum {
     F_CLIENT,           // index on disk, pointer in memory
     F_FUNCTION,
     F_POINTER,
-    F_IGNORE
+    F_IGNORE,
+    F_INT64
 } fieldtype_t;
 
 extern  gitem_t itemlist[];
@@ -843,7 +873,7 @@ typedef struct {
 // client data that stays across deathmatch respawns
 typedef struct {
     client_persistant_t coop_respawn;   // what to set client->pers to on a respawn
-    int         enterframe;         // level.framenum the client entered the game
+    gtime_t     entertime;         // level.time the client entered the game
     int         score;              // frags, etc
     vec3_t      cmd_angles;         // angles sent over in the last command
 
@@ -890,8 +920,10 @@ struct gclient_s {
     weaponstate_t   weaponstate;
     vec3_t      kick_angles;    // weapon kicks
     vec3_t      kick_origin;
-    float       v_dmg_roll, v_dmg_pitch, v_dmg_time;    // damage kicks
-    float       fall_time, fall_value;      // for view drop on fall
+    float       v_dmg_roll, v_dmg_pitch;
+    gtime_t     v_dmg_time;    // damage kicks
+    gtime_t     fall_time;
+    float       fall_value;      // for view drop on fall
     float       damage_alpha;
     float       bonus_alpha;
     vec3_t      damage_blend;
@@ -900,7 +932,7 @@ struct gclient_s {
     vec3_t      oldviewangles;
     vec3_t      oldvelocity;
 
-    int         next_drown_framenum;
+    gtime_t     next_drown_time;
     int         old_waterlevel;
     int         breather_sound;
 
@@ -913,23 +945,21 @@ struct gclient_s {
     bool        anim_run;
 
     // powerup timers
-    int         quad_framenum;
-    int         invincible_framenum;
-    int         breather_framenum;
-    int         enviro_framenum;
+    gtime_t     quad_time;
+    gtime_t     invincible_time;
+    gtime_t     breather_time;
+    gtime_t     enviro_time;
 
-    bool        grenade_blew_up;
-    int         grenade_framenum;
     int         silencer_shots;
     int         weapon_sound;
 
-    int         pickup_msg_framenum;
+    gtime_t     pickup_msg_time;
 
-    float       flood_locktill;     // locked from talking
-    float       flood_when[10];     // when messages were said
+    gtime_t     flood_locktill_time;     // locked from talking
+    gtime_t     flood_when_times[10];     // when messages were said
     int         flood_whenhead;     // head pointer for when said
 
-    int         respawn_framenum;   // can respawn when time > this
+    gtime_t     respawn_time;   // can respawn when time > this
 
     edict_t     *chase_target;      // player we are chasing
     bool        update_chase;       // need to update chase info?
@@ -976,7 +1006,7 @@ struct edict_s {
     int         flags;
 
     char        *model;
-    float       freetime;           // sv.time when the object was freed
+    gtime_t     free_time;           // time when the object was freed
 
     //
     // only used locally in game, not by server
@@ -985,7 +1015,7 @@ struct edict_s {
     char        *classname;
     int         spawnflags;
 
-    int         timestamp;
+    gtime_t     timestamp;
 
     float       angle;          // set in qe3, -1 = up, -2 = down
     char        *target;
@@ -1004,7 +1034,7 @@ struct edict_s {
     vec3_t      velocity;
     vec3_t      avelocity;
     int         mass;
-    int         air_finished_framenum;
+    gtime_t     air_finished_time;
     float       gravity;        // per entity gravity multiplier (1.0 is normal)
                                 // use for lowgrav artifact, flares
 
@@ -1013,7 +1043,7 @@ struct edict_s {
     float       yaw_speed;
     float       ideal_yaw;
 
-    int         nextthink;
+    gtime_t     nextthink;
     void        (*prethink)(edict_t *ent);
     void        (*think)(edict_t *self);
     void        (*blocked)(edict_t *self, edict_t *other);         // move to moveinfo?
@@ -1022,19 +1052,19 @@ struct edict_s {
     void        (*pain)(edict_t *self, edict_t *other, float kick, int damage);
     void        (*die)(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 
-    int         touch_debounce_framenum;        // are all these legit?  do we need more/less of them?
-    int         pain_debounce_framenum;
-    int         damage_debounce_framenum;
-    int         fly_sound_debounce_framenum;    // move to clientinfo
-    int         last_move_framenum;
+    gtime_t     touch_debounce_time;        // are all these legit?  do we need more/less of them?
+    gtime_t     pain_debounce_time;
+    gtime_t     damage_debounce_time;
+    gtime_t     fly_sound_debounce_time;    // move to clientinfo
+    gtime_t     last_move_time;
 
     int         health;
     int         max_health;
     int         gib_health;
     int         deadflag;
-    int         show_hostile;
+    gtime_t     show_hostile_time;
 
-    int         powerarmor_framenum;
+    gtime_t     powerarmor_time;
 
     char        *map;           // target_changelevel
 
@@ -1068,7 +1098,7 @@ struct edict_s {
     float       delay;          // before firing targets
     float       random;
 
-    int         last_sound_framenum;
+    gtime_t     last_sound_time;
 
     int         watertype;
     int         waterlevel;

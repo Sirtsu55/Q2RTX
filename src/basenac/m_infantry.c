@@ -211,10 +211,10 @@ void infantry_pain(edict_t *self, edict_t *other, float kick, int damage)
     if (self->health < (self->max_health / 2))
         self->s.skinnum = 1;
 
-    if (level.framenum < self->pain_debounce_framenum)
+    if (level.time < self->pain_debounce_time)
         return;
 
-    self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
+    self->pain_debounce_time = level.time + 3000;
 
     if (skill.integer == 3)
         return;     // no pain anims in nightmare
@@ -406,13 +406,13 @@ void infantry_duck_down(edict_t *self)
     self->monsterinfo.aiflags |= AI_DUCKED;
     self->maxs[2] -= 32;
     self->takedamage = DAMAGE_YES;
-    self->monsterinfo.pause_framenum = level.framenum + 1 * BASE_FRAMERATE;
+    self->monsterinfo.pause_time = level.time + 1000;
     SV_LinkEntity(self);
 }
 
 void infantry_duck_hold(edict_t *self)
 {
-    if (level.framenum >= self->monsterinfo.pause_framenum)
+    if (level.time >= self->monsterinfo.pause_time)
         self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
     else
         self->monsterinfo.aiflags |= AI_HOLD_FRAME;
@@ -453,14 +453,14 @@ void infantry_cock_gun(edict_t *self)
 
     SV_StartSound(self, CHAN_WEAPON, sound_weapon_cock, 1, ATTN_NORM, 0);
     n = (Q_rand() & 15) + 3 + 7;
-    self->monsterinfo.pause_framenum = level.framenum + n;
+    self->monsterinfo.pause_time = level.time + G_FramesToMs(n);
 }
 
 void infantry_fire(edict_t *self)
 {
     InfantryMachineGun(self);
 
-    if (level.framenum >= self->monsterinfo.pause_framenum)
+    if (level.time >= self->monsterinfo.pause_time)
         self->monsterinfo.aiflags &= ~AI_HOLD_FRAME;
     else
         self->monsterinfo.aiflags |= AI_HOLD_FRAME;

@@ -344,7 +344,7 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     bolt->s.sound = SV_SoundIndex("misc/lasfly.wav");
     bolt->owner = self;
     bolt->touch = blaster_touch;
-    bolt->nextthink = level.framenum + 2 * BASE_FRAMERATE;
+    bolt->nextthink = level.time + 2000;
     bolt->think = G_FreeEdict;
     bolt->dmg = damage;
     bolt->classname = "bolt";
@@ -474,7 +474,7 @@ void fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
     grenade->s.modelindex = SV_ModelIndex("models/objects/grenade/tris.md2");
     grenade->owner = self;
     grenade->touch = Grenade_Touch;
-    grenade->nextthink = level.framenum + timer * BASE_FRAMERATE;
+    grenade->nextthink = level.time + G_SecToMs(timer);
     grenade->think = Grenade_Explode;
     grenade->dmg = damage;
     grenade->dmg_radius = damage_radius;
@@ -510,7 +510,7 @@ void fire_grenade2(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
     grenade->s.modelindex = SV_ModelIndex("models/objects/grenade2/tris.md2");
     grenade->owner = self;
     grenade->touch = Grenade_Touch;
-    grenade->nextthink = level.framenum + timer * BASE_FRAMERATE;
+    grenade->nextthink = level.time + G_SecToMs(timer);
     grenade->think = Grenade_Explode;
     grenade->dmg = damage;
     grenade->dmg_radius = damage_radius;
@@ -598,7 +598,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
     rocket->s.modelindex = SV_ModelIndex("models/objects/rocket/tris.md2");
     rocket->owner = self;
     rocket->touch = rocket_touch;
-    rocket->nextthink = level.framenum + BASE_FRAMERATE * 8000 / speed;
+    rocket->nextthink = level.time + 4000;
     rocket->think = G_FreeEdict;
     rocket->dmg = damage;
     rocket->radius_dmg = radius_damage;
@@ -656,7 +656,7 @@ void fire_nail(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed)
     nail->s.modelindex = SV_ModelIndex("models/objects/nail/tris.md3");
     nail->owner = self;
     nail->touch = nail_touch;
-    nail->nextthink = level.framenum + BASE_FRAMERATE * 8000 / speed;
+    nail->nextthink = level.time + 2000;
     nail->think = G_FreeEdict;
     nail->dmg = damage;
     nail->classname = "nail";
@@ -771,7 +771,7 @@ void bfg_explode(edict_t *self)
         }
     }
 
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 100;
     self->s.frame++;
     if (self->s.frame == 5)
         self->think = G_FreeEdict;
@@ -798,14 +798,14 @@ void bfg_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
     SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("weapons/bfg__x1b.wav"), 1, ATTN_NORM, 0);
     self->solid = SOLID_NOT;
     self->touch = NULL;
-    VectorMA(self->s.origin, -1 * FRAMETIME, self->velocity, self->s.origin);
+    VectorMA(self->s.origin, -1 * BASE_FRAMETIME_S, self->velocity, self->s.origin);
     VectorClear(self->velocity);
     self->s.modelindex = SV_ModelIndex("sprites/s_bfg3.sp2");
     self->s.frame = 0;
     self->s.sound = 0;
     self->s.effects &= ~EF_ANIM_ALLFAST;
     self->think = bfg_explode;
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 1;
     self->enemy = other;
 
     SV_WriteByte(svc_temp_entity);
@@ -886,7 +886,7 @@ void bfg_think(edict_t *self)
         SV_Multicast(self->s.origin, MULTICAST_PHS, false);
     }
 
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 100;
 }
 
 
@@ -908,7 +908,7 @@ void fire_bfg(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, fl
     bfg->s.modelindex = SV_ModelIndex("sprites/s_bfg1.sp2");
     bfg->owner = self;
     bfg->touch = bfg_touch;
-    bfg->nextthink = level.framenum + BASE_FRAMERATE * 8000 / speed;
+    bfg->nextthink = level.time + 2000;
     bfg->think = G_FreeEdict;
     bfg->radius_dmg = damage;
     bfg->dmg_radius = damage_radius;
@@ -916,7 +916,7 @@ void fire_bfg(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, fl
     bfg->s.sound = SV_SoundIndex("weapons/bfg__l1a.wav");
 
     bfg->think = bfg_think;
-    bfg->nextthink = level.framenum + 1;
+    bfg->nextthink = level.time + 100;
     bfg->teammaster = bfg;
     bfg->teamchain = NULL;
 
@@ -942,8 +942,7 @@ void flare_sparks(edict_t *self)
 
     SV_WriteShort((int)(self - g_edicts));
     // if this is the first tick of flare, set count to 1 to start the sound
-    SV_WriteByte( self->timestamp - level.framenum < (int)(14.75f * BASE_FRAMERATE) ? 0 : 1);
-
+    SV_WriteByte(self->air_finished_time);
     SV_WritePos(self->s.origin);
 
 	// If we are still moving, calculate the normal to the direction 
@@ -963,6 +962,8 @@ void flare_sparks(edict_t *self)
 		SV_WriteDir(vec3_origin);
 	}
 	SV_Multicast(self->s.origin, MULTICAST_PVS, false);
+
+    self->air_finished_time = 0;
 }
 
 /*
@@ -992,7 +993,7 @@ void flare_think(edict_t *self)
 {
 	// self->timestamp is 15 seconds after the flare was spawned. 
 	// 
-	if (level.framenum > self->timestamp)
+	if (level.time > self->timestamp)
 	{
 		G_FreeEdict(self);
 		return;
@@ -1004,7 +1005,7 @@ void flare_think(edict_t *self)
 	
 	// We'll think again in .2 seconds 
 	// 
-	self->nextthink = level.framenum + (int)(.2f * BASE_FRAMERATE);
+	self->nextthink = level.time + 200;
 }
 
 void flare_touch(edict_t *ent, edict_t *other,
@@ -1042,11 +1043,12 @@ void fire_flaregun(edict_t *self, vec3_t start, vec3_t aimdir,
 	flare->s.modelindex = SV_ModelIndex("models/objects/flare/tris.md2");
 	flare->owner = self;
 	flare->touch = flare_touch;
-	flare->nextthink = level.framenum + (int)(.2f * BASE_FRAMERATE);
+	flare->nextthink = level.time + 200;
 	flare->think = flare_think;
 	flare->radius_dmg = damage;
 	flare->dmg_radius = damage_radius;
 	flare->classname = "flare";
-	flare->timestamp = level.framenum + (int)(15.f * BASE_FRAMERATE); //live for 15 seconds 
+	flare->timestamp = level.time + G_SecToMs(15);
+    flare->air_finished_time = 1;
 	SV_LinkEntity(flare);
 }

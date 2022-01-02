@@ -115,7 +115,7 @@ void M_FliesOn(edict_t *self)
     self->s.effects |= EF_FLIES;
     self->s.sound = SV_SoundIndex("infantry/inflies1.wav");
     self->think = M_FliesOff;
-    self->nextthink = level.framenum + 60 * BASE_FRAMERATE;
+    self->nextthink = level.time + G_MinToMs(1);
 }
 
 void M_FlyCheck(edict_t *self)
@@ -127,12 +127,12 @@ void M_FlyCheck(edict_t *self)
         return;
 
     self->think = M_FliesOn;
-    self->nextthink = level.framenum + (5 + 10 * random()) * BASE_FRAMERATE;
+    self->nextthink = level.time + (5000 + Q_rand_uniform(10000));
 }
 
 void AttackFinished(edict_t *self, float time)
 {
-    self->monsterinfo.attack_finished = level.framenum + time * BASE_FRAMERATE;
+    self->monsterinfo.attack_finished_time = level.time + G_SecToMs(time);
 }
 
 
@@ -216,28 +216,28 @@ void M_WorldEffects(edict_t *ent)
     if (ent->health > 0) {
         if (!(ent->flags & FL_SWIM)) {
             if (ent->waterlevel < 3) {
-                ent->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE;
-            } else if (ent->air_finished_framenum < level.framenum) {
+                ent->air_finished_time = level.time + 12000;
+            } else if (ent->air_finished_time < level.time) {
                 // drown!
-                if (ent->pain_debounce_framenum < level.framenum) {
-                    dmg = 2 + 2 * ((level.framenum - ent->air_finished_framenum) / BASE_FRAMERATE);
+                if (ent->pain_debounce_time < level.time) {
+                    dmg = 2 + 2 * G_MsToSec(level.time - ent->air_finished_time);
                     if (dmg > 15)
                         dmg = 15;
                     T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
             }
         } else {
             if (ent->waterlevel > 0) {
-                ent->air_finished_framenum = level.framenum + 9 * BASE_FRAMERATE;
-            } else if (ent->air_finished_framenum < level.framenum) {
+                ent->air_finished_time = level.time + 9000;
+            } else if (ent->air_finished_time < level.time) {
                 // suffocate!
-                if (ent->pain_debounce_framenum < level.framenum) {
-                    dmg = 2 + 2 * ((level.framenum - ent->air_finished_framenum) / BASE_FRAMERATE);
+                if (ent->pain_debounce_time < level.time) {
+                    dmg = 2 + 2 * G_MsToSec(level.time - ent->air_finished_time);
                     if (dmg > 15)
                         dmg = 15;
                     T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
             }
         }
@@ -252,14 +252,14 @@ void M_WorldEffects(edict_t *ent)
     }
 
     if ((ent->watertype & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA)) {
-        if (ent->damage_debounce_framenum < level.framenum) {
-            ent->damage_debounce_framenum = level.framenum + 0.2f * BASE_FRAMERATE;
+        if (ent->damage_debounce_time < level.time) {
+            ent->damage_debounce_time = level.time + 200;
             T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10 * ent->waterlevel, 0, 0, MOD_LAVA);
         }
     }
     if ((ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME)) {
-        if (ent->damage_debounce_framenum < level.framenum) {
-            ent->damage_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+        if (ent->damage_debounce_time < level.time) {
+            ent->damage_debounce_time = level.time + 100;
             T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4 * ent->waterlevel, 0, 0, MOD_SLIME);
         }
     }
@@ -278,7 +278,7 @@ void M_WorldEffects(edict_t *ent)
         }
 
         ent->flags |= FL_INWATER;
-        ent->damage_debounce_framenum = 0;
+        ent->damage_debounce_time = 0;
     }
 }
 
@@ -318,7 +318,7 @@ void M_SetEffects(edict_t *ent)
     if (ent->health <= 0)
         return;
 
-    if (ent->powerarmor_framenum > level.framenum) {
+    if (ent->powerarmor_time > level.time) {
         if (ent->monsterinfo.power_armor_type == POWER_ARMOR_SCREEN) {
             ent->s.effects |= EF_POWERSCREEN;
         } else if (ent->monsterinfo.power_armor_type == POWER_ARMOR_SHIELD) {
@@ -335,7 +335,7 @@ void M_MoveFrame(edict_t *self)
     int     index;
 
     move = self->monsterinfo.currentmove;
-    self->nextthink = level.framenum + 1 * BASE_FRAMEDIV;
+    self->nextthink = level.time + 100;
 
     if ((self->monsterinfo.nextframe) && (self->monsterinfo.nextframe >= move->firstframe) && (self->monsterinfo.nextframe <= move->lastframe)) {
         self->s.frame = self->monsterinfo.nextframe;
@@ -427,7 +427,7 @@ void monster_triggered_spawn(edict_t *self)
     self->solid = SOLID_BBOX;
     self->movetype = MOVETYPE_STEP;
     self->svflags &= ~SVF_NOCLIENT;
-    self->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE;
+    self->air_finished_time = level.time + 12000;
     SV_LinkEntity(self);
 
     monster_start_go(self);
@@ -443,7 +443,7 @@ void monster_triggered_spawn_use(edict_t *self, edict_t *other, edict_t *activat
 {
     // we have a one frame delay here so we don't telefrag the guy who activated us
     self->think = monster_triggered_spawn;
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 1;
     if (activator->client)
         self->enemy = activator;
     self->use = monster_use;
@@ -505,11 +505,11 @@ bool monster_start(edict_t *self)
     if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
         level.total_monsters++;
 
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 1;
     self->svflags |= SVF_MONSTER;
     self->s.renderfx |= RF_FRAMELERP;
     self->takedamage = DAMAGE_AIM;
-    self->air_finished_framenum = level.framenum + 12 * BASE_FRAMERATE;
+    self->air_finished_time = level.time + 12000;
     self->use = monster_use;
     self->max_health = self->health;
     self->clipmask = MASK_MONSTERSOLID;
@@ -585,7 +585,7 @@ void monster_start_go(edict_t *self)
         if (!self->movetarget) {
             Com_WPrintf("%s can't find target %s at %s\n", self->classname, self->target, vtos(self->s.origin));
             self->target = NULL;
-            self->monsterinfo.pause_framenum = INT_MAX;
+            self->monsterinfo.pause_time = INT64_MAX;
             self->monsterinfo.stand(self);
         } else if (strcmp(self->movetarget->classname, "path_corner") == 0) {
             VectorSubtract(self->goalentity->s.origin, self->s.origin, v);
@@ -594,22 +594,22 @@ void monster_start_go(edict_t *self)
             self->target = NULL;
         } else {
             self->goalentity = self->movetarget = NULL;
-            self->monsterinfo.pause_framenum = INT_MAX;
+            self->monsterinfo.pause_time = INT64_MAX;
             self->monsterinfo.stand(self);
         }
     } else {
-        self->monsterinfo.pause_framenum = INT_MAX;
+        self->monsterinfo.pause_time = INT64_MAX;
         self->monsterinfo.stand(self);
     }
 
     self->think = monster_think;
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 1;
 }
 
 
 void walkmonster_start_go(edict_t *self)
 {
-    if (!(self->spawnflags & 2) && level.time < 1) {
+    if (!(self->spawnflags & 2) && level.time < 1000) {
         M_droptofloor(self);
 
         if (self->groundentity)

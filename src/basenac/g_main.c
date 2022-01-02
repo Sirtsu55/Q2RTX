@@ -362,14 +362,14 @@ void CheckDMRules(void)
     int         i;
     gclient_t   *cl;
 
-    if (level.intermission_framenum)
+    if (level.intermission_time)
         return;
 
     if (!deathmatch.integer)
         return;
 
     if (timelimit.value) {
-        if (level.time >= timelimit.value * 60) {
+        if (level.time >= G_MinToMs(timelimit.value)) {
             SV_BroadcastPrint(PRINT_HIGH, "Timelimit hit.\n");
             EndDMLevel();
             return;
@@ -406,7 +406,7 @@ void ExitLevel(void)
 
     level.changemap = NULL;
     level.exitintermission = 0;
-    level.intermission_framenum = 0;
+    level.intermission_time = 0;
     ClientEndServerFrames();
 
     // clear some things before going to next level
@@ -456,7 +456,7 @@ void G_RunFrame(void)
     G_UpdateCvars();
 
     level.framenum++;
-    level.time = level.framenum * FRAMETIME;
+    level.time += BASE_FRAMETIME;
 
     // choose a client for monsters to target this frame
     AI_SetSightClient();

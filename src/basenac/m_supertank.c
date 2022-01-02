@@ -438,7 +438,7 @@ void supertank_pain(edict_t *self, edict_t *other, float kick, int damage)
     if (self->health < (self->max_health / 2))
         self->s.skinnum = 1;
 
-    if (level.framenum < self->pain_debounce_framenum)
+    if (level.time < self->pain_debounce_time)
         return;
 
     // Lessen the chance of him going into his pain frames
@@ -451,7 +451,7 @@ void supertank_pain(edict_t *self, edict_t *other, float kick, int damage)
         if ((self->s.frame >= FRAME_attak2_1) && (self->s.frame <= FRAME_attak2_14))
             return;
 
-    self->pain_debounce_framenum = level.framenum + 3 * BASE_FRAMERATE;
+    self->pain_debounce_time = level.time + 3000;
 
     if (skill.integer == 3)
         return;     // no pain anims in nightmare
@@ -624,7 +624,7 @@ void BossExplode(edict_t *self)
     SV_WritePos(org);
     SV_Multicast(self->s.origin, MULTICAST_PVS, false);
 
-    self->nextthink = level.framenum + 1;
+    self->nextthink = level.time + 100;
 }
 
 

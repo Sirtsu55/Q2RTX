@@ -106,17 +106,17 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
     if (type == PNOISE_SELF || type == PNOISE_WEAPON) {
         noise = who->mynoise;
         level.sound_entity = noise;
-        level.sound_entity_framenum = level.framenum;
+        level.sound_entity_time = level.time;
     } else { // type == PNOISE_IMPACT
         noise = who->mynoise2;
         level.sound2_entity = noise;
-        level.sound2_entity_framenum = level.framenum;
+        level.sound2_entity_time = level.time;
     }
 
     VectorCopy(where, noise->s.origin);
     VectorSubtract(where, noise->maxs, noise->absmin);
     VectorAdd(where, noise->maxs, noise->absmax);
-    noise->last_sound_framenum = level.framenum;
+    noise->last_sound_time = level.time;
     SV_LinkEntity(noise);
 }
 
@@ -180,11 +180,6 @@ current
 void ChangeWeapon(edict_t *ent)
 {
     int i;
-
-    if (ent->client->grenade_framenum) {
-        ent->client->grenade_framenum = level.framenum;
-        ent->client->grenade_framenum = 0;
-    }
 
     ent->client->pers.lastweapon = ent->client->pers.weapon;
     ent->client->pers.weapon = ent->client->newweapon;
@@ -267,7 +262,7 @@ void Think_Weapon(edict_t *ent)
 
     // call active weapon think routine
     if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink) {
-        is_quad = (ent->client->quad_framenum > level.framenum);
+        is_quad = (ent->client->quad_time > level.time);
         if (ent->client->silencer_shots)
             is_silenced = MZ_SILENCED;
         else
@@ -485,7 +480,7 @@ static void weapon_perforator_fire(edict_t *ent)
     VectorMA(start, 32, forward, start);
     VectorMA(start, -10, up, start);
 
-    float rotation = fmodf(level.time * 10.0f, M_PI * 2);
+    float rotation = fmodf(G_MsToSec(level.time) * 10.0f, M_PI * 2);
 
     VectorMA(start, -4 * cosf(rotation), right, start);
     VectorMA(start, 4 * sinf(rotation), up, start);
@@ -531,9 +526,9 @@ void Weapon_Perforator(edict_t *ent)
             if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
                 ent->client->weaponstate = WEAPON_FIRING;
             } else {
-                if (level.framenum >= ent->pain_debounce_framenum) {
+                if (level.time >= ent->pain_debounce_time) {
                     SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
                 NoAmmoWeaponChange(ent);
                 goto ready_noammo;
@@ -591,9 +586,9 @@ ready_noammo:
                         ent->client->pers.inventory[ent->client->ammo_index]--;
                 }
             } else {
-                if (level.framenum >= ent->pain_debounce_framenum) {
+                if (level.time >= ent->pain_debounce_time) {
                     SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
                 NoAmmoWeaponChange(ent);
                 goto spindown;
@@ -724,9 +719,9 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
                 if (!(dmflags.integer & DF_INFINITE_AMMO))
                     ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity;
             } else {
-                if (level.framenum >= ent->pain_debounce_framenum) {
+                if (level.time >= ent->pain_debounce_time) {
                     SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
                 NoAmmoWeaponChange(ent);
             }
@@ -1019,9 +1014,9 @@ void Weapon_Thunderbolt(edict_t *ent)
             if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
                 ent->client->weaponstate = WEAPON_FIRING;
             } else {
-                if (level.framenum >= ent->pain_debounce_framenum) {
+                if (level.time >= ent->pain_debounce_time) {
                     SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
                 NoAmmoWeaponChange(ent);
                 goto ready_noammo;
@@ -1075,9 +1070,9 @@ ready_noammo:
                 if (!(dmflags.integer & DF_INFINITE_AMMO))
                     ent->client->pers.inventory[ent->client->ammo_index]--;
             } else {
-                if (level.framenum >= ent->pain_debounce_framenum) {
+                if (level.time >= ent->pain_debounce_time) {
                     SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_framenum = level.framenum + 1 * BASE_FRAMERATE;
+                    ent->pain_debounce_time = level.time + 1000;
                 }
                 NoAmmoWeaponChange(ent);
             }

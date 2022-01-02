@@ -51,6 +51,8 @@ typedef struct {
 #define T(name) _F(F_ITEM, name)
 #define E(name) _F(F_EDICT, name)
 #define P(name, type) _FA(F_POINTER, name, type)
+#define I64A(name, size) _FA(F_INT64, name, size)
+#define I64(name) IA(name, 1)
 
 static const save_field_t entityfields[] = {
 #define _OFS FOFS
@@ -86,13 +88,13 @@ static const save_field_t entityfields[] = {
     I(flags),
 
     L(model),
-    F(freetime),
+    I64(free_time),
 
     L(message),
     L(classname),
     I(spawnflags),
 
-    I(timestamp),
+    I64(timestamp),
 
     L(target),
     L(targetname),
@@ -113,7 +115,7 @@ static const save_field_t entityfields[] = {
     V(velocity),
     V(avelocity),
     I(mass),
-    I(air_finished_framenum),
+    I64(air_finished_time),
     F(gravity),
 
     E(goalentity),
@@ -121,7 +123,7 @@ static const save_field_t entityfields[] = {
     F(yaw_speed),
     F(ideal_yaw),
 
-    I(nextthink),
+    I64(nextthink),
     P(prethink, P_prethink),
     P(think, P_think),
     P(blocked, P_blocked),
@@ -130,19 +132,19 @@ static const save_field_t entityfields[] = {
     P(pain, P_pain),
     P(die, P_die),
 
-    I(touch_debounce_framenum),
-    I(pain_debounce_framenum),
-    I(damage_debounce_framenum),
-    I(fly_sound_debounce_framenum),
-    I(last_move_framenum),
+    I64(touch_debounce_time),
+    I64(pain_debounce_time),
+    I64(damage_debounce_time),
+    I64(fly_sound_debounce_time),
+    I64(last_move_time),
 
     I(health),
     I(max_health),
     I(gib_health),
     I(deadflag),
-    I(show_hostile),
+    I64(show_hostile_time),
 
-    I(powerarmor_framenum),
+    I64(powerarmor_time),
 
     L(map),
 
@@ -175,7 +177,7 @@ static const save_field_t entityfields[] = {
     F(delay),
     F(random),
 
-    I(last_sound_framenum),
+    I64(last_sound_time),
 
     I(watertype),
     I(waterlevel),
@@ -230,16 +232,16 @@ static const save_field_t entityfields[] = {
     P(monsterinfo.sight, P_monsterinfo_sight),
     P(monsterinfo.checkattack, P_monsterinfo_checkattack),
 
-    I(monsterinfo.pause_framenum),
-    I(monsterinfo.attack_finished),
+    I64(monsterinfo.pause_time),
+    I64(monsterinfo.attack_finished_time),
 
     V(monsterinfo.saved_goal),
-    I(monsterinfo.search_framenum),
-    I(monsterinfo.trail_framenum),
+    I64(monsterinfo.search_time),
+    I64(monsterinfo.trail_time),
     V(monsterinfo.last_sighting),
     I(monsterinfo.attack_state),
     I(monsterinfo.lefty),
-    I(monsterinfo.idle_framenum),
+    I64(monsterinfo.idle_time),
     I(monsterinfo.linkcount),
 
     I(monsterinfo.power_armor_type),
@@ -252,13 +254,13 @@ static const save_field_t entityfields[] = {
 static const save_field_t levelfields[] = {
 #define _OFS LLOFS
     I(framenum),
-    F(time),
+    I64(time),
 
     SZ(level_name, MAX_QPATH),
     SZ(mapname, MAX_QPATH),
     SZ(nextmap, MAX_QPATH),
 
-    I(intermission_framenum),
+    I64(intermission_time),
     L(changemap),
     I(exitintermission),
     V(intermission_origin),
@@ -267,11 +269,11 @@ static const save_field_t levelfields[] = {
     E(sight_client),
 
     E(sight_entity),
-    I(sight_entity_framenum),
+    I64(sight_entity_time),
     E(sound_entity),
-    I(sound_entity_framenum),
+    I64(sound_entity_time),
     E(sound2_entity),
-    I(sound2_entity_framenum),
+    I64(sound2_entity_time),
 
     I(pic_health),
 
@@ -371,8 +373,8 @@ static const save_field_t clientfields[] = {
     V(kick_origin),
     F(v_dmg_roll),
     F(v_dmg_pitch),
-    F(v_dmg_time),
-    F(fall_time),
+    I64(v_dmg_time),
+    I64(fall_time),
     F(fall_value),
     F(damage_alpha),
     F(bonus_alpha),
@@ -382,7 +384,7 @@ static const save_field_t clientfields[] = {
     V(oldviewangles),
     V(oldvelocity),
 
-    I(next_drown_framenum),
+    I64(next_drown_time),
     I(old_waterlevel),
     I(breather_sound),
 
@@ -394,17 +396,15 @@ static const save_field_t clientfields[] = {
     O(anim_run),
 
     // powerup timers
-    I(quad_framenum),
-    I(invincible_framenum),
-    I(breather_framenum),
-    I(enviro_framenum),
+    I64(quad_time),
+    I64(invincible_time),
+    I64(breather_time),
+    I64(enviro_time),
 
-    O(grenade_blew_up),
-    I(grenade_framenum),
     I(silencer_shots),
     I(weapon_sound),
 
-    I(pickup_msg_framenum),
+    I64(pickup_msg_time),
 
     {0}
 #undef _OFS
@@ -1009,7 +1009,7 @@ void ReadLevel(const char *filename)
         // fire any cross-level triggers
         if (ent->classname)
             if (strcmp(ent->classname, "target_crosslevel_target") == 0)
-                ent->nextthink = level.framenum + ent->delay * BASE_FRAMERATE;
+                ent->nextthink = level.time + G_SecToMs(ent->delay);
 
         if (ent->think == func_clock_think || ent->use == func_clock_use) {
             char *msg = ent->message;

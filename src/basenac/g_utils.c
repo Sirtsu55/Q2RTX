@@ -174,7 +174,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
         // create a temp object to fire at a later time
         t = G_Spawn();
         t->classname = "DelayedUse";
-        t->nextthink = level.framenum + ent->delay * BASE_FRAMERATE;
+        t->nextthink = level.time + G_SecToMs(ent->delay);
         t->think = Think_Delay;
         t->activator = activator;
         if (!activator)
@@ -387,7 +387,7 @@ edict_t *G_Spawn(void)
     for (i = game.maxclients + 1 ; i < globals.num_edicts ; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
-        if (!e->inuse && (e->freetime < 2 || level.time - e->freetime > 0.5f)) {
+        if (!e->inuse && (e->free_time < 2000 || level.time - e->free_time > 500)) {
             G_InitEdict(e);
             return e;
         }
@@ -419,7 +419,7 @@ void G_FreeEdict(edict_t *ed)
 
     memset(ed, 0, sizeof(*ed));
     ed->classname = "freed";
-    ed->freetime = level.time;
+    ed->free_time = level.time;
     ed->inuse = false;
 }
 
@@ -430,7 +430,7 @@ G_TouchTriggers
 
 ============
 */
-void    G_TouchTriggers(edict_t *ent)
+void G_TouchTriggers(edict_t *ent)
 {
     int         i, num;
     edict_t     *touch[MAX_EDICTS], *hit;

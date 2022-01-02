@@ -229,7 +229,7 @@ static int CheckPowerArmor(edict_t *ent, vec3_t point, vec3_t normal, int damage
         save = damage;
 
     SpawnDamage(pa_te_type, point, normal, save);
-    ent->powerarmor_framenum = level.framenum + 0.2f * BASE_FRAMERATE;
+    ent->powerarmor_time = level.time + 200;
 
     power_used = save / damagePerCell;
 
@@ -439,10 +439,10 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
     }
 
     // check for invincibility
-    if ((client && client->invincible_framenum > level.framenum) && !(dflags & DAMAGE_NO_PROTECTION)) {
-        if (targ->pain_debounce_framenum < level.framenum) {
+    if ((client && client->invincible_time > level.time) && !(dflags & DAMAGE_NO_PROTECTION)) {
+        if (targ->pain_debounce_time < level.time) {
             SV_StartSound(targ, CHAN_ITEM, SV_SoundIndex("items/protect4.wav"), 1, ATTN_NORM, 0);
-            targ->pain_debounce_framenum = level.framenum + 2 * BASE_FRAMERATE;
+            targ->pain_debounce_time = level.time + 2000;
         }
         take = 0;
         save = damage;
@@ -488,7 +488,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, 
             targ->pain(targ, attacker, knockback, take);
             // nightmare mode monsters don't go into pain frames often
             if (skill.integer == 3)
-                targ->pain_debounce_framenum = level.framenum + 5 * BASE_FRAMERATE;
+                targ->pain_debounce_time = level.time + 5000;
         }
     } else if (client) {
         if (!(targ->flags & FL_GODMODE) && (take))

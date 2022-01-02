@@ -594,7 +594,7 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f(edict_t *ent)
 {
-    if ((level.framenum - ent->client->respawn_framenum) < 5 * BASE_FRAMERATE)
+    if ((level.time - ent->client->respawn_time) < 5000)
         return;
     ent->flags &= ~FL_GODMODE;
     ent->health = 0;
@@ -770,24 +770,24 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
     if (flood_msgs.integer) {
         cl = ent->client;
 
-        if (level.time < cl->flood_locktill) {
-            SV_ClientPrintf(ent, PRINT_HIGH, "You can't talk for %d more seconds\n",
-                       (int)(cl->flood_locktill - level.time));
+        if (level.time < cl->flood_locktill_time) {
+            SV_ClientPrintf(ent, PRINT_HIGH, "Flood protection: You can't talk for %d seconds\n",
+                       G_MsToSec(cl->flood_locktill_time - level.time));
             return;
         }
         i = cl->flood_whenhead - flood_msgs.integer + 1;
         if (i < 0)
-            i = (sizeof(cl->flood_when) / sizeof(cl->flood_when[0])) + i;
-        if (cl->flood_when[i] &&
-            level.time - cl->flood_when[i] < flood_persecond.integer) {
-            cl->flood_locktill = level.time + flood_waitdelay.integer;
-            SV_ClientPrintf(ent, PRINT_CHAT, "Flood protection:  You can't talk for %d seconds.\n",
+            i = q_countof(cl->flood_when_times) + i;
+        if (cl->flood_when_times[i] &&
+            level.time - cl->flood_when_times[i] < flood_persecond.integer) {
+            cl->flood_locktill_time = level.time + G_SecToMs(flood_waitdelay.integer);
+            SV_ClientPrintf(ent, PRINT_CHAT, "Flood protection: You can't talk for %d seconds.\n",
                        flood_waitdelay.integer);
             return;
         }
         cl->flood_whenhead = (cl->flood_whenhead + 1) %
-                             (sizeof(cl->flood_when) / sizeof(cl->flood_when[0]));
-        cl->flood_when[cl->flood_whenhead] = level.time;
+                             q_countof(cl->flood_when_times);
+        cl->flood_when_times[cl->flood_whenhead] = level.time;
     }
 
     if (dedicated.integer)
@@ -821,8 +821,8 @@ void Cmd_PlayerList_f(edict_t *ent)
             continue;
 
         Q_snprintf(st, sizeof(st), "%02d:%02d %4d %3d %s%s\n",
-                   (level.framenum - e2->client->resp.enterframe) / 600,
-                   ((level.framenum - e2->client->resp.enterframe) % 600) / 10,
+                   (int) G_MsToMin(level.time - e2->client->resp.entertime),
+                   (int) G_MsToSec((level.time - e2->client->resp.entertime) % 60000),
                    e2->client->ping,
                    e2->client->resp.score,
                    e2->client->pers.netname,
@@ -873,7 +873,7 @@ void ClientCommand(edict_t *ent)
         return;
     }
 
-    if (level.intermission_framenum)
+    if (level.intermission_time)
         return;
 
     if (Q_stricmp(cmd, "use") == 0)

@@ -269,6 +269,7 @@ static void SV_SetBrushModel(edict_t *ent, const char *name)
 
     VectorCopy(mod->mins, ent->mins);
     VectorCopy(mod->maxs, ent->maxs);
+    VectorSubtract(ent->maxs, ent->mins, ent->size);
     ent->s.modelindex = PF_ModelIndex(name);
 }
 
