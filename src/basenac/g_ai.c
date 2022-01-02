@@ -492,7 +492,7 @@ bool FindTarget(edict_t *self)
             if (!visible(self, client))
                 return false;
         } else {
-            if (!SV_InPHS(self->s.origin, client->s.origin))
+            if (!SV_InVis(self->s.origin, client->s.origin, DVIS_PHS, false))
                 return false;
         }
 

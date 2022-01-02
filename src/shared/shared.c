@@ -1282,7 +1282,7 @@ void Com_LPrintf(print_type_t type, const char *fmt, ...)
     Com_LPrint(type, msg);
 }
 
-void Com_Errorf(error_type_t code, const char *fmt, ...)
+_Noreturn void Com_Errorf(error_type_t code, const char *fmt, ...)
 {
     char            msg[MAXERRORMSG];
     va_list         argptr;

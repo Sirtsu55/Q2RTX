@@ -485,7 +485,7 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
-void Com_Error(error_type_t code, const char *message)
+_Noreturn void Com_Error(error_type_t code, const char *message)
 {
     // may not be entered recursively
     if (com_errorEntered) {

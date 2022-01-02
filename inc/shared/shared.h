@@ -103,9 +103,8 @@ typedef enum {
 void    Com_LPrint(print_type_t type, const char *message);
 void    Com_LPrintf(print_type_t type, const char *fmt, ...)
 q_printf(2, 3);
-void    Com_Error(error_type_t type, const char *message) q_noreturn;
-void    Com_Errorf(error_type_t code, const char *fmt, ...)
-q_noreturn q_printf(2, 3);
+_Noreturn void Com_Error(error_type_t type, const char *message);
+_Noreturn void Com_Errorf(error_type_t code, const char *fmt, ...) q_printf(2, 3);
 
 #define Com_Print(message) Com_LPrint(PRINT_ALL, message)
 #define Com_Printf(...) Com_LPrintf(PRINT_ALL, __VA_ARGS__)
@@ -128,6 +127,13 @@ typedef enum {
     MULTICAST_PHS,
     MULTICAST_PVS
 } multicast_t;
+
+// Potential Sets, from BSP
+typedef enum {
+    DVIS_PVS,
+    DVIS_PHS,
+    DVIS_TOTAL
+} vis_set_t;
 
 /*
 ==============================================================

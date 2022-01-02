@@ -298,12 +298,7 @@ void SV_CalcViewOffset(edict_t *ent)
     bob = bobfracsin * xyspeed * bob_up.value;
     if (bob > 6)
         bob = 6;
-    //gi.DebugGraph (bob *2, 255);
     v[2] += bob;
-
-    // add kick offset
-
-    VectorAdd(v, ent->client->kick_origin, v);
 
     // absolutely bound offsets
     // so the view can never be outside the player box
@@ -948,8 +943,13 @@ void ClientEndServerFrame(edict_t *ent)
     VectorCopy(ent->client->ps.viewangles, ent->client->oldviewangles);
 
     // clear weapon kicks
-    VectorClear(ent->client->kick_origin);
-    VectorClear(ent->client->kick_angles);
+    if (ent->client->kick_angles[0] || ent->client->kick_angles[1] || ent->client->kick_angles[2]) {
+        VectorScale(ent->client->kick_angles, 0.5f, ent->client->kick_angles);
+
+        if (VectorLength(ent->client->kick_angles) < 0.125f) {
+            VectorClear(ent->client->kick_angles);
+        }
+    }
 
     // if the scoreboard is up, update it
     if (ent->client->showscores && !(level.time % 3000)) {

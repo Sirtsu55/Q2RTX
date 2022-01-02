@@ -442,6 +442,13 @@ void G_TouchTriggers(edict_t *ent)
     num = SV_AreaEdicts(ent->absmin, ent->absmax, touch
                         , MAX_EDICTS, AREA_TRIGGERS);
 
+    if (!num)
+        return;
+
+    vec3_t mins, maxs;
+    VectorAdd(ent->s.origin, ent->mins, mins);
+    VectorAdd(ent->s.origin, ent->maxs, maxs);
+
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
     for (i = 0 ; i < num ; i++) {
@@ -450,6 +457,11 @@ void G_TouchTriggers(edict_t *ent)
             continue;
         if (!hit->touch)
             continue;
+
+        // check full collision
+        if (!SV_EntityCollide(mins, maxs, hit))
+            continue;
+
         hit->touch(hit, ent, NULL, NULL);
     }
 }

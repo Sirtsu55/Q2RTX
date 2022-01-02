@@ -60,29 +60,29 @@ static int PF_FindIndex(const char *name, int start, int max, const char *func)
     return i;
 }
 
-static int PF_ModelIndex(const char *name)
+static int SV_ModelIndex(const char *name)
 {
     return PF_FindIndex(name, CS_MODELS, MAX_MODELS, __func__);
 }
 
-static int PF_SoundIndex(const char *name)
+static int SV_SoundIndex(const char *name)
 {
     return PF_FindIndex(name, CS_SOUNDS, MAX_SOUNDS, __func__);
 }
 
-static int PF_ImageIndex(const char *name)
+static int SV_ImageIndex(const char *name)
 {
     return PF_FindIndex(name, CS_IMAGES, MAX_IMAGES, __func__);
 }
 
 /*
 ===============
-PF_Unicast
+SV_Unicast
 
 Sends the contents of the mutlicast buffer to a single client.
 ===============
 */
-static void PF_Unicast(edict_t *ent, bool reliable)
+static void SV_Unicast(edict_t *ent, bool reliable)
 {
     client_t    *client;
     int         cmd, flags, clientNum;
@@ -110,25 +110,36 @@ static void PF_Unicast(edict_t *ent, bool reliable)
 
     cmd = msg_write.data[0];
 
-    flags = 0;
+    flags = MSG_COMPRESS_AUTO;
     if (reliable) {
         flags |= MSG_RELIABLE;
     }
 
-    if (cmd == svc_layout || (cmd == svc_configstring && msg_write.data[1] == CS_STATUSBAR)) {
-        flags |= MSG_COMPRESS_AUTO;
-    }
-
     SV_ClientAddMessage(client, flags);
-
-    // fix anti-kicking exploit for broken mods
-    if (cmd == svc_disconnect) {
-        client->drop_hack = true;
-        goto clear;
-    }
 
 clear:
     SZ_Clear(&msg_write);
+}
+
+static void PF_SV_DropClient(edict_t *ent, const char *reason)
+{
+    client_t    *client;
+    int         clientNum;
+
+    clientNum = NUM_FOR_EDICT(ent) - 1;
+    if (clientNum < 0 || clientNum >= sv_maxclients->integer) {
+        Com_WPrintf("%s to a non-client %d\n", __func__, clientNum);
+        return;
+    }
+
+    client = svs.client_pool + clientNum;
+    if (client->state <= cs_zombie) {
+        Com_WPrintf("%s to a free/zombie client %d\n", __func__, clientNum);
+        return;
+    }
+
+    SV_DropClient(client, reason);
+    SV_RemoveClient(client);
 }
 
 /*
@@ -138,7 +149,7 @@ PF_bprintf
 Sends text to all active clients.
 =================
 */
-static void PF_bprint(client_print_type_t level, const char *message)
+static void SV_BroadcastPrint(client_print_type_t level, const char *message)
 {
     client_t    *client;
     int         i;
@@ -173,24 +184,12 @@ static void PF_bprint(client_print_type_t level, const char *message)
 
 /*
 ===============
-PF_dprint
-
-Debug print to server console.
-===============
-*/
-static void PF_dprint(print_type_t type, const char *message)
-{
-    Com_LPrint(type, message);
-}
-
-/*
-===============
 PF_cprintf
 
 Print to a single client if the level passes.
 ===============
 */
-static void PF_cprint(edict_t *ent, client_print_type_t level, const char *message)
+static void SV_ClientPrint(edict_t *ent, client_print_type_t level, const char *message)
 {
     int         clientNum;
     client_t    *client;
@@ -230,7 +229,7 @@ PF_centerprintf
 Centerprint to a single client.
 ===============
 */
-static void PF_centerprint(edict_t *ent, const char *message)
+static void SV_CenterPrint(edict_t *ent, const char *message)
 {
     int         n;
 
@@ -249,7 +248,7 @@ static void PF_centerprint(edict_t *ent, const char *message)
     MSG_WriteByte(svc_centerprint);
     MSG_WriteData(message, len + 1);
 
-    PF_Unicast(ent, true);
+    SV_Unicast(ent, true);
 }
 
 /*
@@ -270,7 +269,7 @@ static void SV_SetBrushModel(edict_t *ent, const char *name)
     VectorCopy(mod->mins, ent->mins);
     VectorCopy(mod->maxs, ent->maxs);
     VectorSubtract(ent->maxs, ent->mins, ent->size);
-    ent->s.modelindex = PF_ModelIndex(name);
+    ent->s.modelindex = SV_ModelIndex(name);
 }
 
 /*
@@ -357,7 +356,7 @@ static void PF_WriteFloat(float f)
     Com_Error(ERR_DROP, "PF_WriteFloat not implemented");
 }
 
-static bool PF_inVIS(vec3_t p1, vec3_t p2, int vis)
+static bool SV_InVis(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas)
 {
     mleaf_t *leaf1, *leaf2;
     byte mask[VIS_MAX_BYTES];
@@ -365,6 +364,10 @@ static bool PF_inVIS(vec3_t p1, vec3_t p2, int vis)
 
     if (!bsp) {
         Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
+    }
+
+    if (vis < 0 || vis >= DVIS_TOTAL) {
+        Com_Errorf(ERR_DROP, "%s: invalid vis type", __func__);
     }
 
     leaf1 = BSP_PointLeaf(bsp->nodes, p1);
@@ -375,33 +378,9 @@ static bool PF_inVIS(vec3_t p1, vec3_t p2, int vis)
         return false;
     if (!Q_IsBitSet(mask, leaf2->cluster))
         return false;
-    if (!CM_AreasConnected(&sv.cm, leaf1->area, leaf2->area))
+    if (!ignore_areas && !CM_AreasConnected(&sv.cm, leaf1->area, leaf2->area))
         return false;       // a door blocks it
     return true;
-}
-
-/*
-=================
-PF_inPVS
-
-Also checks portalareas so that doors block sight
-=================
-*/
-static bool PF_inPVS(vec3_t p1, vec3_t p2)
-{
-    return PF_inVIS(p1, p2, DVIS_PVS);
-}
-
-/*
-=================
-PF_inPHS
-
-Also checks portalareas so that doors block sound
-=================
-*/
-static bool PF_inPHS(vec3_t p1, vec3_t p2)
-{
-    return PF_inVIS(p1, p2, DVIS_PHS);
 }
 
 /*
@@ -599,7 +578,7 @@ static bool PF_GetAreaPortalState(int portalnum)
     return CM_GetAreaPortalState(&sv.cm, portalnum);
 }
 
-static bool PF_AreasConnected(int area1, int area2)
+static bool SV_AreasConnected(int area1, int area2)
 {
     if (!sv.cm.cache) {
         Com_Errorf(ERR_DROP, "%s: no map loaded", __func__);
@@ -607,7 +586,7 @@ static bool PF_AreasConnected(int area1, int area2)
     return CM_AreasConnected(&sv.cm, area1, area2);
 }
 
-static void *PF_TagMalloc(size_t size, memtag_t tag)
+static void *PF_TagMalloc(size_t size, unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
         Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
@@ -618,7 +597,7 @@ static void *PF_TagMalloc(size_t size, memtag_t tag)
     return memset(Z_TagMalloc(size, tag + TAG_MAX), 0, size);
 }
 
-static void PF_FreeTags(memtag_t tag)
+static void PF_FreeTags(unsigned tag)
 {
     if (tag + TAG_MAX < tag) {
         Com_Errorf(ERR_FATAL, "%s: bad tag", __func__);
@@ -756,6 +735,31 @@ static void PF_Cvar_SetFloat(cvarRef_t *cvar, float value, bool force)
     PF_Cvar_Update(cvar);
 }
 
+static size_t PF_Cmd_Argv(int n, char *buffer, size_t size)
+{
+    return Q_strlcpy(buffer, Cmd_Argv(n), size);
+}
+
+static size_t PF_Cmd_Args(char *buffer, size_t size)
+{
+    return Q_strlcpy(buffer, Cmd_Args(), size);
+}
+
+static size_t PF_Cmd_RawArgs(char *buffer, size_t size)
+{
+    return Q_strlcpy(buffer, Cmd_RawArgs(), size);
+}
+
+static bool SV_EntityCollide(vec3_t mins, vec3_t maxs, edict_t *ent)
+{
+    mnode_t *headnode = SV_HullForEntity(ent);
+    trace_t tr;
+
+    CM_TransformedBoxTrace(&tr, vec3_origin, vec3_origin, mins, maxs, headnode, -1, ent->s.origin, ent->s.angles);
+
+    return tr.startsolid;
+}
+
 /*
 ===============
 SV_InitGameProgs
@@ -794,33 +798,34 @@ void SV_InitGameProgs(void)
         Com_Error(ERR_DROP, "Failed to load game library");
 
     // load a new game dll
-    import.multicast = SV_Multicast;
-    import.unicast = PF_Unicast;
-    import.bprint = PF_bprint;
-    import.dprint = PF_dprint;
-    import.cprint = PF_cprint;
-    import.centerprint = PF_centerprint;
-    import.error = Com_Error;
+    import.SV_BroadcastPrint = SV_BroadcastPrint;
+    import.Com_LPrint = Com_LPrint;
+    import.SV_ClientPrint = SV_ClientPrint;
+    import.SV_CenterPrint = SV_CenterPrint;
+    import.Com_Error = Com_Error;
 
-    import.linkentity = PF_LinkEdict;
-    import.unlinkentity = PF_UnlinkEdict;
+    import.SV_LinkEntity = PF_LinkEdict;
+    import.SV_UnlinkEntity = PF_UnlinkEdict;
     import.SV_AreaEdicts = SV_AreaEdicts;
-    import.trace = SV_Trace;
-    import.pointcontents = SV_PointContents;
+    import.SV_EntityCollide = SV_EntityCollide;
+    import.SV_Trace = SV_Trace;
+    import.SV_PointContents = SV_PointContents;
     import.SV_SetBrushModel = SV_SetBrushModel;
-    import.inPVS = PF_inPVS;
-    import.inPHS = PF_inPHS;
+    import.SV_InVis = SV_InVis;
     import.Pmove = PF_Pmove;
 
-    import.modelindex = PF_ModelIndex;
-    import.soundindex = PF_SoundIndex;
-    import.imageindex = PF_ImageIndex;
+    import.SV_ModelIndex = SV_ModelIndex;
+    import.SV_SoundIndex = SV_SoundIndex;
+    import.SV_ImageIndex = SV_ImageIndex;
 
     import.SV_SetConfigString = PF_SetConfigString;
     import.SV_GetConfigString = PF_GetConfigString;
 
     import.SV_StartSound = SV_StartSound;
 
+    import.SV_DropClient = PF_SV_DropClient;
+    import.SV_Multicast = SV_Multicast;
+    import.SV_Unicast = SV_Unicast;
     import.WriteChar = MSG_WriteChar;
     import.WriteByte = MSG_WriteByte;
     import.WriteShort = MSG_WriteShort;
@@ -843,15 +848,15 @@ void SV_InitGameProgs(void)
     import.Cvar_SetInteger = PF_Cvar_SetInteger;
     import.Cvar_SetFloat = PF_Cvar_SetFloat;
 
-    import.argc = Cmd_Argc;
-    import.argv = Cmd_Argv;
-    // original Cmd_Args() did actually return raw arguments
-    import.args = Cmd_RawArgs;
+    import.Cmd_Argc = Cmd_Argc;
+    import.Cmd_Argv = PF_Cmd_Argv;
+    import.Cmd_RawArgs = PF_Cmd_RawArgs;
+    import.Cmd_Args = PF_Cmd_Args;
     import.Cbuf_AddText = PF_Cbuf_AddText;
     
     import.SV_SetAreaPortalState = PF_SetAreaPortalState;
     import.SV_GetAreaPortalState = PF_GetAreaPortalState;
-    import.AreasConnected = PF_AreasConnected;
+    import.SV_AreasConnected = SV_AreasConnected;
 
     ge = entry(&import);
     if (!ge) {

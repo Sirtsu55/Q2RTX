@@ -611,3 +611,4 @@ void SV_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 
 // passedict is explicitly excluded from clipping checks (normally NULL)
 
+mnode_t *SV_HullForEntity(edict_t *ent);

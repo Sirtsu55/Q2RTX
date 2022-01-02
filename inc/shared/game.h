@@ -105,23 +105,15 @@ struct edict_s {
 
 //===============================================================
 
-#ifdef GAME_INCLUDE
-typedef enum {
-    TAG_GAME,
-    TAG_LEVEL,
-    TAG_MAX
-} memtag_t;
-#endif
-
 //
 // functions provided by the main engine
 //
 typedef struct {
     // special messages
-    void (*bprint)(client_print_type_t printlevel, const char *message);
-    void (*dprint)(print_type_t type, const char *message);
-    void (*cprint)(edict_t *ent, client_print_type_t printlevel, const char *message);
-    void (*centerprint)(edict_t *ent, const char *message);
+    void (*SV_BroadcastPrint)(client_print_type_t printlevel, const char *message);
+    void (*Com_LPrint)(print_type_t type, const char *message);
+    void (*SV_ClientPrint)(edict_t *ent, client_print_type_t printlevel, const char *message);
+    void (*SV_CenterPrint)(edict_t *ent, const char *message);
     void (*SV_StartSound)(vec3_t origin, edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
 
     // config strings hold all the index strings, the lightstyles,
@@ -131,35 +123,36 @@ typedef struct {
     void (*SV_SetConfigString)(uint32_t num, const char *string);
     size_t (*SV_GetConfigString)(uint32_t num, char *buffer, size_t len);
 
-    void (* q_noreturn error)(error_type_t type, const char *message);
+    void (*Com_Error)(error_type_t type, const char *message);
 
     // the *index functions create configstrings and some internal server state
-    int (*modelindex)(const char *name);
-    int (*soundindex)(const char *name);
-    int (*imageindex)(const char *name);
+    int (*SV_ModelIndex)(const char *name);
+    int (*SV_SoundIndex)(const char *name);
+    int (*SV_ImageIndex)(const char *name);
 
     void (*SV_SetBrushModel)(edict_t *ent, const char *name);
 
     // collision detection
-    void (*trace)(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
-    int (*pointcontents)(vec3_t point);
-    bool (*inPVS)(vec3_t p1, vec3_t p2);
-    bool (*inPHS)(vec3_t p1, vec3_t p2);
+    void (*SV_Trace)(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
+    int (*SV_PointContents)(vec3_t point);
+    bool (*SV_InVis)(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas);
     void (*SV_SetAreaPortalState)(int portalnum, bool open);
     bool (*SV_GetAreaPortalState)(int portalnum);
-    bool (*AreasConnected)(int area1, int area2);
+    bool (*SV_AreasConnected)(int area1, int area2);
 
     // an entity will never be sent to a client or used for collision
     // if it is not passed to linkentity.  If the size, position, or
     // solidity changes, it must be relinked.
-    void (*linkentity)(edict_t *ent);
-    void (*unlinkentity)(edict_t *ent);     // call before removing an interactive edict
+    void (*SV_LinkEntity)(edict_t *ent);
+    void (*SV_UnlinkEntity)(edict_t *ent);     // call before removing an interactive edict
     size_t (*SV_AreaEdicts)(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
+    bool (*SV_EntityCollide)(vec3_t mins, vec3_t maxs, edict_t *ent);
     void (*Pmove)(pmove_t *pmove);          // player movement code common with client prediction
 
     // network messaging
-    void (*multicast)(vec3_t origin, multicast_t to, bool reliable);
-    void (*unicast)(edict_t *ent, bool reliable);
+    void (*SV_DropClient)(edict_t *ent, const char *reason);
+    void (*SV_Multicast)(vec3_t origin, multicast_t to, bool reliable);
+    void (*SV_Unicast)(edict_t *ent, bool reliable);
     void (*WriteChar)(int c);
     void (*WriteByte)(int c);
     void (*WriteShort)(int c);
@@ -174,8 +167,8 @@ typedef struct {
     // managed memory allocation
     void (*Z_Free)(void *ptr);
     void *(*Z_Realloc)(void *ptr, size_t size);
-    void *(*Z_TagMalloc)(size_t size, memtag_t tag) q_malloc;
-    void (*Z_FreeTags)(memtag_t tag);
+    void *(*Z_TagMalloc)(size_t size, unsigned tag) q_malloc;
+    void (*Z_FreeTags)(unsigned tag);
 
     // console variable interaction
     void (*Cvar_Get)(cvarRef_t *cvar, const char *var_name, const char *value, int flags);
@@ -185,9 +178,10 @@ typedef struct {
     void (*Cvar_SetFloat)(cvarRef_t *cvar, float value, bool force);
 
     // ClientCommand and ServerCommand parameter access
-    int (*argc)(void);
-    char *(*argv)(int n);
-    char *(*args)(void);     // concatenation of all argv >= 1
+    int (*Cmd_Argc)(void);
+    size_t (*Cmd_Argv)(int n, char *buffer, size_t len);
+    size_t (*Cmd_Args)(char *buffer, size_t len);
+    size_t (*Cmd_RawArgs)(char *buffer, size_t len);
 
     // add commands to the server console as if they were typed in
     // for map changing, etc

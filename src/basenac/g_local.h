@@ -919,7 +919,6 @@ struct gclient_s {
 
     weaponstate_t   weaponstate;
     vec3_t      kick_angles;    // weapon kicks
-    vec3_t      kick_origin;
     float       v_dmg_roll, v_dmg_pitch;
     gtime_t     v_dmg_time;    // damage kicks
     gtime_t     fall_time;
@@ -1137,8 +1136,7 @@ int SV_ModelIndex(const char *name);
 int SV_SoundIndex(const char *name);
 int SV_ImageIndex(const char *name);
 
-bool SV_InPVS(vec3_t p1, vec3_t p2);
-bool SV_InPHS(vec3_t p1, vec3_t p2);
+bool SV_InVis(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas);
 void SV_SetAreaPortalState(int portalnum, bool open);
 bool SV_GetAreaPortalState(int portalnum);
 bool SV_AreasConnected(int area1, int area2);
@@ -1149,12 +1147,21 @@ trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
                  edict_t *passedict, int contentmask);
 int SV_PointContents(vec3_t p);
 size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
+bool SV_EntityCollide(vec3_t mins, vec3_t maxs, edict_t *ent);
 
 int Cmd_Argc(void);
 char *Cmd_Argv(int arg);
+char *Cmd_RawArgs(void);
 char *Cmd_Args(void);
 
 void Cbuf_AddText(const char *text);
+
+typedef enum {
+    TAG_COMMON,
+    TAG_GAME,
+    TAG_LEVEL,
+    TAG_MAX
+} memtag_t;
 
 void Z_Free(void *ptr);
 void *Z_Realloc(void *ptr, size_t size);
@@ -1166,6 +1173,7 @@ void Z_FreeTags(memtag_t tag);
 void SV_SetConfigString(uint32_t num, const char *string);
 size_t SV_GetConfigString(uint32_t num, char *buffer, size_t len);
 
+void SV_DropClient(edict_t *ent, const char *reason);
 void SV_Multicast(vec3_t origin, multicast_t to, bool reliable);
 void SV_Unicast(edict_t *ent, bool reliable);
 void SV_WriteChar(int c);

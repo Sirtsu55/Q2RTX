@@ -485,6 +485,10 @@ static void weapon_perforator_fire(edict_t *ent)
     VectorMA(start, -4 * cosf(rotation), right, start);
     VectorMA(start, 4 * sinf(rotation), up, start);
 
+    for (int i = 0; i < 3; i++) {
+        ent->client->kick_angles[i] += crandom() * 0.5f;
+    }
+
     fire_nail(ent, start, forward, 12, 2000);
 
     SV_WriteByte(svc_muzzleflash);
@@ -642,7 +646,6 @@ void weapon_shotgun_fire(edict_t *ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -2, ent->client->kick_origin);
     ent->client->kick_angles[0] = -2;
 
     VectorSet(offset, 0, 0, ent->viewheight);
@@ -775,7 +778,6 @@ void weapon_supershotgun_fire(edict_t *ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -4, ent->client->kick_origin);
     ent->client->kick_angles[0] = -4;
     
     VectorSet(offset, 0, 10, ent->viewheight);
@@ -826,7 +828,6 @@ void weapon_nailgun_fire(edict_t *ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -1, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
     
     VectorSet(offset, 0, 0, ent->viewheight);
@@ -866,7 +867,6 @@ void weapon_grenadelauncher_fire(edict_t *ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -1, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
     
     VectorSet(offset, 0, 0, ent->viewheight);
@@ -906,7 +906,6 @@ void weapon_rocketlauncher_fire(edict_t *ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -1, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
     
     VectorSet(offset, 0, 0, ent->viewheight);
@@ -946,7 +945,6 @@ void weapon_thunderbolt_fire(edict_t *ent)
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    VectorScale(forward, -1, ent->client->kick_origin);
     ent->client->kick_angles[0] = -1;
     
     VectorSet(offset, 0, 0, ent->viewheight);

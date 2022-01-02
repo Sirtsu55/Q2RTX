@@ -78,7 +78,7 @@ Sys_Quit
 This function never returns.
 =================
 */
-void Sys_Quit(void)
+_Noreturn void Sys_Quit(void)
 {
 #if USE_CLIENT
     Sys_ShutdownAsyncQueue();
@@ -247,7 +247,7 @@ void Sys_Init(void)
 Sys_Error
 =================
 */
-void Sys_Error(const char *error, ...)
+_Noreturn void Sys_Error(const char *error, ...)
 {
     tty_shutdown_input();
 

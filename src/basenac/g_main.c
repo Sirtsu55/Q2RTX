@@ -511,45 +511,45 @@ void G_RunFrame(void)
 
 void SV_CenterPrint(edict_t *ent, const char *message)
 {
-    gi.centerprint(ent, message);
+    gi.SV_CenterPrint(ent, message);
 }
 
 void SV_CenterPrintf(edict_t *ent, const char *fmt, ...)
 {
     Com_VarArgs(MAXPRINTMSG);
-    gi.centerprint(ent, msg);
+    gi.SV_CenterPrint(ent, msg);
 }
 
 void SV_BroadcastPrint(client_print_type_t level, const char *message)
 {
-    gi.bprint(level, message);
+    gi.SV_BroadcastPrint(level, message);
 }
 
 void SV_BroadcastPrintf(client_print_type_t level, const char *fmt, ...)
 {
     Com_VarArgs(MAXPRINTMSG);
-    gi.bprint(level, msg);
+    gi.SV_BroadcastPrint(level, msg);
 }
 
 void SV_ClientPrint(edict_t *ent, client_print_type_t level, const char *message)
 {
-    gi.cprint(ent, level, message);
+    gi.SV_ClientPrint(ent, level, message);
 }
 
 void SV_ClientPrintf(edict_t *ent, client_print_type_t level, const char *fmt, ...)
 {
     Com_VarArgs(MAXPRINTMSG);
-    gi.cprint(ent, level, msg);
+    gi.SV_ClientPrint(ent, level, msg);
 }
 
 void Com_LPrint(print_type_t type, const char *message)
 {
-    gi.dprint(type, message);
+    gi.Com_LPrint(type, message);
 }
 
-void Com_Error(error_type_t type, const char *message)
+_Noreturn void Com_Error(error_type_t type, const char *message)
 {
-    gi.error(type, message);
+    gi.Com_Error(type, message);
 }
 
 void Z_Free(void *ptr)
@@ -574,13 +574,11 @@ void *Z_TagMallocz(size_t size, memtag_t tag) q_malloc
 
 char *Z_TagCopyString(const char *in, memtag_t tag) q_malloc
 {
-    size_t len;
-
     if (!in) {
         return NULL;
     }
 
-    len = strlen(in) + 1;
+    size_t len = strlen(in) + 1;
     return memcpy(Z_TagMalloc(len, tag), in, len);
 }
 
@@ -591,17 +589,43 @@ void Z_FreeTags(memtag_t tag)
 
 int Cmd_Argc(void)
 {
-    return gi.argc();
+    return gi.Cmd_Argc();
 }
 
 char *Cmd_Argv(int arg)
 {
-    return gi.argv(arg);
+    static char arg_buffer[8][MAX_INFO_STRING] = { 0 };
+    size_t l = gi.Cmd_Argv(arg, arg_buffer[arg % 8], sizeof(arg_buffer[0]));
+
+    if (l == sizeof(arg_buffer[0]) - 1) {
+        Com_WPrint("Cmd_Argv truncated");
+    }
+
+    return arg_buffer[arg];
 }
+
+ static char args_buffer[MAX_INFO_STRING] = { 0 };
 
 char *Cmd_Args(void)
 {
-    return gi.args();
+    size_t l = gi.Cmd_Args(args_buffer, sizeof(args_buffer));
+
+    if (l == sizeof(args_buffer) - 1) {
+        Com_WPrint("Cmd_Args truncated");
+    }
+
+    return args_buffer;
+}
+
+char *Cmd_RawArgs(void)
+{
+    size_t l = gi.Cmd_RawArgs(args_buffer, sizeof(args_buffer));
+
+    if (l == sizeof(args_buffer) - 1) {
+        Com_WPrint("Cmd_RawArgs truncated");
+    }
+
+    return args_buffer;
 }
 
 void Cbuf_AddText(const char *text)
@@ -621,17 +645,17 @@ size_t SV_GetConfigString(uint32_t num, char *buffer, size_t len)
 
 int SV_ModelIndex(const char *name)
 {
-    return gi.modelindex(name);
+    return gi.SV_ModelIndex(name);
 }
 
 int SV_SoundIndex(const char *name)
 {
-    return gi.soundindex(name);
+    return gi.SV_SoundIndex(name);
 }
 
 int SV_ImageIndex(const char *name)
 {
-    return gi.imageindex(name);
+    return gi.SV_ImageIndex(name);
 }
 
 void SV_SetBrushModel(edict_t *ent, const char *model)
@@ -641,30 +665,35 @@ void SV_SetBrushModel(edict_t *ent, const char *model)
 
 void SV_LinkEntity(edict_t *ent)
 {
-    gi.linkentity(ent);
+    gi.SV_LinkEntity(ent);
 }
 
 void SV_UnlinkEntity(edict_t *ent)
 {
-    gi.unlinkentity(ent);
+    gi.SV_UnlinkEntity(ent);
 }
 
 trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
                  edict_t *passedict, int contentmask)
 {
     trace_t tr;
-    gi.trace(&tr, start, mins, maxs, end, passedict, contentmask);
+    gi.SV_Trace(&tr, start, mins, maxs, end, passedict, contentmask);
     return tr;
 }
 
 int SV_PointContents(vec3_t p)
 {
-    return gi.pointcontents(p);
+    return gi.SV_PointContents(p);
 }
 
 size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype)
 {
     return gi.SV_AreaEdicts(mins, maxs, list, maxcount, areatype);
+}
+
+bool SV_EntityCollide(vec3_t mins, vec3_t maxs, edict_t *ent)
+{
+    return gi.SV_EntityCollide(mins, maxs, ent);
 }
 
 void SV_PositionedSound(vec3_t origin, edict_t *entity, int channel,
@@ -681,14 +710,9 @@ void SV_StartSound(edict_t *entity, int channel,
     gi.SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, pitch_shift);
 }
 
-bool SV_InPVS(vec3_t p1, vec3_t p2)
+bool SV_InVis(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas)
 {
-    return gi.inPVS(p1, p2);
-}
-
-bool SV_InPHS(vec3_t p1, vec3_t p2)
-{
-    return gi.inPHS(p1, p2);
+    return gi.SV_InVis(p1, p2, vis, ignore_areas);
 }
 
 void SV_SetAreaPortalState(int portalnum, bool open)
@@ -703,7 +727,7 @@ bool SV_GetAreaPortalState(int portalnum)
 
 bool SV_AreasConnected(int area1, int area2)
 {
-    return gi.AreasConnected(area1, area2);
+    return gi.SV_AreasConnected(area1, area2);
 }
 
 void Pm_Move(pmove_t *pm)
@@ -711,14 +735,19 @@ void Pm_Move(pmove_t *pm)
     gi.Pmove(pm);
 }
 
+void SV_DropClient(edict_t *ent, const char *reason)
+{
+    gi.SV_DropClient(ent, reason);
+}
+
 void SV_Multicast(vec3_t origin, multicast_t to, bool reliable)
 {
-    gi.multicast(origin, to, reliable);
+    gi.SV_Multicast(origin, to, reliable);
 }
 
 void SV_Unicast(edict_t *ent, bool reliable)
 {
-    gi.unicast(ent, reliable);
+    gi.SV_Unicast(ent, reliable);
 }
 
 void SV_WriteChar(int c)

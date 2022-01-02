@@ -750,9 +750,9 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
     if (arg0) {
         strcat(text, Cmd_Argv(0));
         strcat(text, " ");
-        strcat(text, Cmd_Args());
+        strcat(text, Cmd_RawArgs());
     } else {
-        p = Cmd_Args();
+        p = Cmd_RawArgs();
 
         if (*p == '"') {
             p++;
@@ -845,7 +845,7 @@ ClientCommand
 */
 void ClientCommand(edict_t *ent)
 {
-    char    *cmd;
+    const char    *cmd;
 
     if (!ent->client)
         return;     // not fully in game yet

@@ -1480,10 +1480,6 @@ static void SV_CheckTimeouts(void)
             }
             continue;
         }
-        if (client->drop_hack) {
-            SV_DropClient(client, NULL);
-            continue;
-        }
 #if USE_ICMP
         if (client->unreachable) {
             if (delta > sv_ghostime->integer) {

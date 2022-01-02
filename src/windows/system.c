@@ -855,7 +855,7 @@ void Sys_Printf(const char *fmt, ...)
 Sys_Error
 ================
 */
-void Sys_Error(const char *fmt, ...)
+_Noreturn void Sys_Error(const char *fmt, ...)
 {
     Com_VarArgs(MAXERRORMSG);
 
@@ -896,7 +896,7 @@ Sys_Quit
 This function never returns.
 ================
 */
-void Sys_Quit(void)
+_Noreturn void Sys_Quit(void)
 {
 #if USE_CLIENT
     Sys_ShutdownAsyncQueue();

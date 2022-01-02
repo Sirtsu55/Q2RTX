@@ -1765,7 +1765,7 @@ opens non-unique file handle as an optimization
 a NULL buffer will just return the file length without loading
 ============
 */
-int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t tag)
+int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, unsigned tag)
 {
     file_t *file;
     qhandle_t f;

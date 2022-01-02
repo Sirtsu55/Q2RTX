@@ -89,7 +89,7 @@ static inline void Z_Validate(zhead_t *z, const char *func)
     }
 }
 
-void Z_LeakTest(memtag_t tag)
+void Z_LeakTest(unsigned tag)
 {
     zhead_t *z;
     size_t numLeaks = 0, numBytes = 0;
@@ -223,7 +223,7 @@ void Z_Stats_f(void)
 Z_FreeTags
 ========================
 */
-void Z_FreeTags(memtag_t tag)
+void Z_FreeTags(unsigned tag)
 {
     zhead_t *z, *n;
 
@@ -240,7 +240,7 @@ void Z_FreeTags(memtag_t tag)
 Z_TagMalloc
 ========================
 */
-void *Z_TagMalloc(size_t size, memtag_t tag)
+void *Z_TagMalloc(size_t size, unsigned tag)
 {
     zhead_t *z;
 
@@ -279,7 +279,7 @@ void *Z_TagMalloc(size_t size, memtag_t tag)
     return z + 1;
 }
 
-void *Z_TagMallocz(size_t size, memtag_t tag)
+void *Z_TagMallocz(size_t size, unsigned tag)
 {
     if (!size) {
         return NULL;
@@ -291,7 +291,7 @@ static byte     *z_reserved_data;
 static size_t   z_reserved_inuse;
 static size_t   z_reserved_total;
 
-void Z_TagReserve(size_t size, memtag_t tag)
+void Z_TagReserve(size_t size, unsigned tag)
 {
     z_reserved_data = Z_TagMalloc(size, tag);
     z_reserved_total = size;
@@ -362,7 +362,7 @@ void Z_Init(void)
 Z_TagCopyString
 ================
 */
-char *Z_TagCopyString(const char *in, memtag_t tag)
+char *Z_TagCopyString(const char *in, unsigned tag)
 {
     size_t len;
 

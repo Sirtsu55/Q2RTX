@@ -84,7 +84,7 @@ void        Com_AbortFrame(void);
 char        *Com_GetLastError(void);
 void        Com_SetLastError(const char *msg);
 
-void        Com_Quit(const char *reason, error_type_t type) q_noreturn;
+_Noreturn void Com_Quit(const char *reason, error_type_t type);
 
 void        Com_SetColor(color_index_t color);
 
