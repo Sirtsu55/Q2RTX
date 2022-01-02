@@ -559,7 +559,7 @@ extern void target_lightramp_use(void);
 extern void target_string_use(void);
 extern void teleporter_touch(void);
 extern void TH_viewthing(void);
-extern void AccelMove_Think(void);
+extern void Think_AccelMove(void);
 extern void Think_Boss3Stand(void);
 extern void Think_CalcMoveSpeed(void);
 extern void Think_Delay(void);
@@ -663,7 +663,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, target_laser_think },
 { P_think, target_lightramp_think },
 { P_think, TH_viewthing },
-{ P_think, AccelMove_Think },
+{ P_think, Think_AccelMove },
 { P_think, Think_Boss3Stand },
 { P_think, Think_CalcMoveSpeed },
 { P_think, Think_Delay },

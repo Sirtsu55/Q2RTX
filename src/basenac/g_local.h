@@ -411,6 +411,7 @@ typedef struct {
     float       remaining_distance;
     float       decel_distance;
     void        (*endfunc)(edict_t *);
+    vec3_t      dest;
 } moveinfo_t;
 
 

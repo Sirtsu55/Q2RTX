@@ -56,7 +56,7 @@ void CL_CheckPredictionError(void)
         return;
     }
 
-    SHOWMISS("prediction miss on %i: %i (%d %d %d)\n",
+    SHOWMISS("prediction miss on %i: %g (%g %g %g)\n",
              cl.frame.number, len, delta[0], delta[1], delta[2]);
 
     // don't predict steps against server returned data
