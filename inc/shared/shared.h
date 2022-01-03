@@ -1508,8 +1508,7 @@ typedef struct entity_state_s {
     int     skinnum;
     unsigned int        effects;        // PGM - we're filling it, so it needs to be unsigned
     int     renderfx;
-    int     solid;          // for client side prediction, 8*(bits 0-4) is x/y radius
-                            // 8*(bits 5-9) is z down distance, 8(bits10-15) is z up
+    int     bbox;           // for client side prediction;
                             // SV_LinkEntity sets this properly
     int     sound;          // for looping sounds, to guarantee shutoff
     int     event;          // impulse events -- muzzle flashes, footsteps, etc

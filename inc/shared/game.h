@@ -19,8 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef GAME_H
 #define GAME_H
 
-#include "shared/list.h"
-
 //
 // game.h -- game dll information visible to server
 //
@@ -78,14 +76,10 @@ struct edict_s {
     entity_state_t  s;
     struct gclient_s    *client;
     bool    inuse;
-    int         linkcount;
+    bool    linked;
+    int     linkcount;
 
     // FIXME: move these fields to a server private sv_entity_t
-    list_t      area;               // linked to a division node or leaf
-
-    int         num_clusters;       // if -1, use headnode instead
-    int         clusternums[MAX_ENT_CLUSTERS];
-    int         headnode;           // unused if num_clusters != -1
     int         areanum, areanum2;
 
     //================================

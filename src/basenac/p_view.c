@@ -213,7 +213,6 @@ Auto pitching on slopes?
 void SV_CalcViewOffset(edict_t *ent)
 {
     float       *angles;
-    float       bob;
     float       ratio;
     float       delta;
     vec3_t      v;
@@ -257,10 +256,10 @@ void SV_CalcViewOffset(edict_t *ent)
         // add angles based on velocity
 
         delta = DotProduct(ent->velocity, forward);
-        angles[PITCH] += delta * run_pitch.value;
+        angles[PITCH] += delta * (run_pitch.value / BASE_FRAMEDIV);
 
         delta = DotProduct(ent->velocity, right);
-        angles[ROLL] += delta * run_roll.value;
+        angles[ROLL] += delta * (run_roll.value / BASE_FRAMEDIV);
 
         // add angles based on bob
 
@@ -285,20 +284,6 @@ void SV_CalcViewOffset(edict_t *ent)
     // add view height
 
     v[2] += ent->viewheight;
-
-    // add fall height
-
-    ratio = (float) (ent->client->fall_time - level.time) / FALL_TIME;
-    if (ratio < 0)
-        ratio = 0;
-    v[2] -= ratio * ent->client->fall_value * 0.4f;
-
-    // add bob height
-
-    bob = bobfracsin * xyspeed * bob_up.value;
-    if (bob > 6)
-        bob = 6;
-    v[2] += bob;
 
     // absolutely bound offsets
     // so the view can never be outside the player box

@@ -378,23 +378,25 @@ void SV_BuildClientFrame(client_t *client)
 
             if (ent_visible)
             {
+                server_entity_t *sent = &sv.entities[e];
+
                 // beams just check one point for PHS
                 if (ent->s.renderfx & RF_BEAM) {
-                    if (!Q_IsBitSet(clientphs, ent->clusternums[0]))
+                    if (!Q_IsBitSet(clientphs, sent->clusternums[0]))
                         ent_visible = false;
                 }
                 else {
                     if (cull_nonvisible_entities) {
-                        if (ent->num_clusters == -1) {
+                        if (sent->num_clusters == -1) {
                             // too many leafs for individual check, go by headnode
-                            if (!CM_HeadnodeVisible(CM_NodeNum(&sv.cm, ent->headnode), clientpvs))
+                            if (!CM_HeadnodeVisible(CM_NodeNum(&sv.cm, sent->headnode), clientpvs))
                                 ent_visible = false;
                         } else {
                             // check individual leafs
-                            for (i = 0; i < ent->num_clusters; i++)
-                                if (Q_IsBitSet(clientpvs, ent->clusternums[i]))
+                            for (i = 0; i < sent->num_clusters; i++)
+                                if (Q_IsBitSet(clientpvs, sent->clusternums[i]))
                                     break;
-                            if (i == ent->num_clusters)
+                            if (i == sent->num_clusters)
                                 ent_visible = false;       // not visible
                         }
                     }
@@ -447,7 +449,7 @@ void SV_BuildClientFrame(client_t *client)
 
         if (ent->owner == clent) {
             // don't mark players missiles as solid
-            state->solid = 0;
+            state->bbox = 0;
         }
 
         svs.next_entity++;

@@ -125,12 +125,12 @@ static void parse_entity_update(const entity_state_t *state)
     vec3_t origin_v;
 
     // if entity is solid, decode mins/maxs and add to the list
-    if (state->solid && state->number != cl.frame.clientNum + 1
+    if (state->bbox && state->number != cl.frame.clientNum + 1
         && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = ent;
-        if (state->solid != PACKED_BSP) {
+        if (state->bbox != BBOX_BMODEL) {
             // encoded bbox
-            MSG_UnpackSolid32(state->solid, ent->mins, ent->maxs);
+            MSG_UnpackBBox(state->bbox, ent->mins, ent->maxs);
         }
     }
 
@@ -1382,7 +1382,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
 
         // calculate origin for BSP models to be closest point
         // from listener to the bmodel's aabb
-        if (ent->current.solid == PACKED_BSP) {
+        if (ent->current.bbox == BBOX_BMODEL) {
             cm = cl.model_clip[ent->current.modelindex];
             if (cm) {
                 vec3_t absmin, absmax;

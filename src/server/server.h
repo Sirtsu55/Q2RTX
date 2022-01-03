@@ -92,7 +92,10 @@ typedef struct {
 } client_frame_t;
 
 typedef struct {
-    bool dummy; // just to keep this struct alive, since I want to use it later
+    int         num_clusters;       // if -1, use headnode instead
+    int         clusternums[MAX_ENT_CLUSTERS];
+    int         headnode;           // unused if num_clusters != -1
+    list_t      area;               // linked to a division node or leaf
 } server_entity_t;
 
 typedef struct {

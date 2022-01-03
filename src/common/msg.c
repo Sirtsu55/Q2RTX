@@ -152,6 +152,47 @@ void MSG_WriteLong(int c)
     buf[3] = c >> 24;
 }
 
+void MSG_WriteVarInt(uint64_t c)
+{
+    byte ba[8] = { 0 };
+    byte byteOffset = 0;
+    uint64_t e = c;
+
+    do {
+        if (byteOffset == 8) {
+            Com_Error(ERR_FATAL, "MSG_WriteVarInt: range error");
+        }
+        byte b = c & 0b01111111;
+        c >>= 7;
+        if (c) {
+            b |= 0b10000000;
+        }
+        ba[byteOffset++] = b;
+    } while (c != 0);
+
+    Com_Printf("Compressed %llu into %u bytes\n", e, byteOffset);
+
+    byte *buf = SZ_GetSpace(&msg_write, byteOffset);
+    memcpy(buf, ba, byteOffset);
+}
+
+uint64_t MSG_ReadVarInt(void)
+{
+    uint64_t result = 0;
+    byte shift = 0;
+
+    while (true) {
+        byte b = MSG_ReadByte();
+        result |= (b & 0b01111111ull) << shift;
+        if (!(b & 0b10000000)) {
+            break;
+        }
+        shift += 7;
+    }
+
+    return result;
+}
+
 /*
 =============
 MSG_WriteString
@@ -465,7 +506,7 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
             bits |= U_RENDERFX8;
     }
 
-    if (to->solid != from->solid)
+    if (to->bbox != from->bbox)
         bits |= U_SOLID;
 
     // event is not delta compressed, just 0 compressed
@@ -589,32 +630,42 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
     if (bits & U_EVENT)
         MSG_WriteByte(to->event);
     if (bits & U_SOLID)
-        MSG_WriteLong(to->solid);
+        MSG_WriteLong(to->bbox);
 
     if (bits & U_SOUNDPITCH)
         MSG_WriteChar(to->sound_pitch);
 }
 
-static inline int OFFSET2CHAR(float x)
+static inline int OFFSET2SHORT(float x)
 {
-    return clamp(x, -32, 127.0f / 4) * 4;
+    return FLOAT2COMPRESS(x, 1024.f);
 }
 
 static inline void MSG_WriteOffset(vec3_t v)
 {
-    MSG_WriteChar(OFFSET2CHAR(v[0]));
-    MSG_WriteChar(OFFSET2CHAR(v[1]));
-    MSG_WriteChar(OFFSET2CHAR(v[2]));
+    //MSG_WriteChar(OFFSET2CHAR(v[0]));
+    //MSG_WriteChar(OFFSET2CHAR(v[1]));
+    //MSG_WriteChar(OFFSET2CHAR(v[2]));
+    MSG_WriteShort(OFFSET2SHORT(v[0]));
+    MSG_WriteShort(OFFSET2SHORT(v[1]));
+    MSG_WriteShort(OFFSET2SHORT(v[2]));
 }
 
 #define OffsetCompare(x, y) \
-    (OFFSET2CHAR((x)[0]) == OFFSET2CHAR((y)[0]) && \
-    OFFSET2CHAR((x)[1]) == OFFSET2CHAR((y)[1]) && \
-    OFFSET2CHAR((x)[2]) == OFFSET2CHAR((y)[2]))
+    (OFFSET2SHORT((x)[0]) == OFFSET2SHORT((y)[0]) && \
+    OFFSET2SHORT((x)[1]) == OFFSET2SHORT((y)[1]) && \
+    OFFSET2SHORT((x)[2]) == OFFSET2SHORT((y)[2]))
 
-static inline float CHAR2OFFSET(int x)
+static inline float SHORT2OFFSET(int x)
 {
-    return x * 0.25f;
+    return COMPRESS2FLOAT(x, 1024.f);
+}
+
+static inline void MSG_ReadOffset(vec3_t v)
+{
+    v[0] = SHORT2OFFSET(MSG_ReadShort());
+    v[1] = SHORT2OFFSET(MSG_ReadShort());
+    v[2] = SHORT2OFFSET(MSG_ReadShort());
 }
 
 static inline int BLEND2BYTE(float x)
@@ -1251,7 +1302,7 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
     }
 
     if (bits & U_SOLID) {
-        to->solid = MSG_ReadLong();
+        to->bbox = MSG_ReadLong();
     }
 
     if (bits & U_SOUNDPITCH) {
@@ -1330,9 +1381,7 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
     // parse the rest of the player_state_t
     //
     if (flags & PS_VIEWOFFSET) {
-        to->viewoffset[0] = CHAR2OFFSET(MSG_ReadChar());
-        to->viewoffset[1] = CHAR2OFFSET(MSG_ReadChar());
-        to->viewoffset[2] = CHAR2OFFSET(MSG_ReadChar());
+        MSG_ReadOffset(to->viewoffset);
     }
 
     if (flags & PS_VIEWANGLES) {
@@ -1345,9 +1394,7 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
     }
 
     if (flags & PS_KICKANGLES) {
-        to->kick_angles[0] = CHAR2OFFSET(MSG_ReadChar());
-        to->kick_angles[1] = CHAR2OFFSET(MSG_ReadChar());
-        to->kick_angles[2] = CHAR2OFFSET(MSG_ReadChar());
+        MSG_ReadOffset(to->kick_angles);
     }
     
     if (flags & PS_BLEND) {

@@ -67,7 +67,7 @@ static const save_field_t entityfields[] = {
     I(s.skinnum),
     I(s.effects),
     I(s.renderfx),
-    I(s.solid),
+    I(s.bbox),
     I(s.sound),
     I(s.event),
     I(s.sound_pitch),

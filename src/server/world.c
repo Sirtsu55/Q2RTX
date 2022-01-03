@@ -101,8 +101,6 @@ SV_ClearWorld
 void SV_ClearWorld(void)
 {
     mmodel_t *cm;
-    edict_t *ent;
-    int i;
 
     memset(sv_areanodes, 0, sizeof(sv_areanodes));
     sv_numareanodes = 0;
@@ -113,10 +111,7 @@ void SV_ClearWorld(void)
     }
 
     // make sure all entities are unlinked
-    for (i = 0; i < ge->max_edicts; i++) {
-        ent = EDICT_NUM(i);
-        ent->area.prev = ent->area.next = NULL;
-    }
+    memset(sv.entities, 0, sizeof(sv.entities));
 }
 
 /*
@@ -126,7 +121,7 @@ SV_LinkEdict
 Links entity to PVS leafs.
 ===============
 */
-static void SV_LinkEdict(cm_t *cm, edict_t *ent)
+static void SV_LinkEdict(cm_t *cm, edict_t *ent, server_entity_t *sent)
 {
     mleaf_t     *leafs[MAX_TOTAL_ENT_LEAFS];
     int         clusters[MAX_TOTAL_ENT_LEAFS];
@@ -172,7 +167,6 @@ static void SV_LinkEdict(cm_t *cm, edict_t *ent)
     ent->absmax[2] += 1;
 
 // link to PVS leafs
-    ent->num_clusters = 0;
     ent->areanum = 0;
     ent->areanum2 = 0;
 
@@ -198,12 +192,15 @@ static void SV_LinkEdict(cm_t *cm, edict_t *ent)
         }
     }
 
+    // link clusters
+    sent->num_clusters = 0;
+
     if (num_leafs >= MAX_TOTAL_ENT_LEAFS) {
         // assume we missed some leafs, and mark by headnode
-        ent->num_clusters = -1;
-        ent->headnode = CM_NumNode(cm, topnode);
+        sent->num_clusters = -1;
+        sent->headnode = CM_NumNode(cm, topnode);
     } else {
-        ent->num_clusters = 0;
+        sent->num_clusters = 0;
         for (i = 0; i < num_leafs; i++) {
             if (clusters[i] == -1)
                 continue;        // not a visible leaf
@@ -211,14 +208,14 @@ static void SV_LinkEdict(cm_t *cm, edict_t *ent)
                 if (clusters[j] == clusters[i])
                     break;
             if (j == i) {
-                if (ent->num_clusters == MAX_ENT_CLUSTERS) {
+                if (sent->num_clusters == MAX_ENT_CLUSTERS) {
                     // assume we missed some leafs, and mark by headnode
-                    ent->num_clusters = -1;
-                    ent->headnode = CM_NumNode(cm, topnode);
+                    sent->num_clusters = -1;
+                    sent->headnode = CM_NumNode(cm, topnode);
                     break;
                 }
 
-                ent->clusternums[ent->num_clusters++] = clusters[i];
+                sent->clusternums[sent->num_clusters++] = clusters[i];
             }
         }
     }
@@ -226,10 +223,15 @@ static void SV_LinkEdict(cm_t *cm, edict_t *ent)
 
 void PF_UnlinkEdict(edict_t *ent)
 {
-    if (!ent->area.prev)
-        return;        // not linked in anywhere
-    List_Remove(&ent->area);
-    ent->area.prev = ent->area.next = NULL;
+    int entnum = NUM_FOR_EDICT(ent);
+    server_entity_t *sent = &sv.entities[entnum];
+
+    // check if we're even linked
+    if (!sent->area.prev)
+        return;
+
+    List_Remove(&sent->area);
+    sent->area.prev = sent->area.next = NULL;
 }
 
 void PF_LinkEdict(edict_t *ent)
@@ -238,11 +240,14 @@ void PF_LinkEdict(edict_t *ent)
     server_entity_t *sent;
     int entnum;
 
-    if (ent->area.prev)
-        PF_UnlinkEdict(ent);     // unlink from old position
-
     if (ent == ge->edicts)
         return;        // don't add the world
+
+    entnum = NUM_FOR_EDICT(ent);
+    sent = &sv.entities[entnum];
+
+    if (sent->area.prev)
+        PF_UnlinkEdict(ent);     // unlink from old position
 
     if (!ent->inuse) {
         Com_DPrintf("%s: entity %d is not in use\n", __func__, NUM_FOR_EDICT(ent));
@@ -253,28 +258,21 @@ void PF_LinkEdict(edict_t *ent)
         return;
     }
 
-    entnum = NUM_FOR_EDICT(ent);
-    sent = &sv.entities[entnum];
+    ent->s.bbox = 0;
 
     // encode the size into the entity_state for client prediction
     switch (ent->solid) {
     case SOLID_BBOX:
-        if ((ent->svflags & SVF_DEADMONSTER) || VectorCompare(ent->mins, ent->maxs)) {
-            ent->s.solid = 0;
-        } else {
-            ent->s.solid = MSG_PackSolid32(ent->mins, ent->maxs);
+        if (!(ent->svflags & SVF_DEADMONSTER) && !VectorCompare(ent->mins, ent->maxs)) {
+            ent->s.bbox = MSG_PackBBox(ent->mins, ent->maxs);
         }
         break;
     case SOLID_BSP:
-        ent->s.solid = PACKED_BSP;  // a SOLID_BBOX will never create this value
-                                    // FIXME: use 255?
-        break;
-    default:
-        ent->s.solid = 0;
+        ent->s.bbox = BBOX_BMODEL;
         break;
     }
 
-    SV_LinkEdict(&sv.cm, ent);
+    SV_LinkEdict(&sv.cm, ent, sent);
 
     // if first time, make sure old_origin is valid
     if (!ent->linkcount) {
@@ -300,9 +298,9 @@ void PF_LinkEdict(edict_t *ent)
 
     // link it in
     if (ent->solid == SOLID_TRIGGER)
-        List_Append(&node->trigger_edicts, &ent->area);
+        List_Append(&node->trigger_edicts, &sent->area);
     else
-        List_Append(&node->solid_edicts, &ent->area);
+        List_Append(&node->solid_edicts, &sent->area);
 }
 
 
@@ -314,8 +312,8 @@ SV_AreaEdicts_r
 */
 static void SV_AreaEdicts_r(areanode_t *node)
 {
-    list_t      *start;
-    edict_t     *check;
+    list_t              *start;
+    server_entity_t     *check_sent;
 
     // touch linked edicts
     if (area_type == AREA_SOLID)
@@ -323,7 +321,8 @@ static void SV_AreaEdicts_r(areanode_t *node)
     else
         start = &node->trigger_edicts;
 
-    LIST_FOR_EACH(edict_t, check, start, area) {
+    LIST_FOR_EACH(server_entity_t, check_sent, start, area) {
+        edict_t *check = EDICT_POOL(check_sent - sv.entities);
         if (check->solid == SOLID_NOT)
             continue;        // deactivated
         if (check->absmin[0] > area_maxs[0]

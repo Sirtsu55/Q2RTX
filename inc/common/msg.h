@@ -54,6 +54,7 @@ void    MSG_WriteChar(int c);
 void    MSG_WriteByte(int c);
 void    MSG_WriteShort(int c);
 void    MSG_WriteLong(int c);
+void    MSG_WriteVarInt(uint64_t i);
 void    MSG_WriteString(const char *s);
 void    MSG_WriteCoord(float f);
 void    MSG_WritePos(const vec3_t pos);
@@ -85,6 +86,7 @@ int     MSG_ReadByte(void);
 int     MSG_ReadShort(void);
 int     MSG_ReadWord(void);
 int     MSG_ReadLong(void);
+uint64_t MSG_ReadVarInt(void);
 size_t  MSG_ReadString(char *dest, size_t size);
 size_t  MSG_ReadStringLine(char *dest, size_t size);
 #if USE_CLIENT
@@ -114,7 +116,7 @@ const char *MSG_ServerCommandString(int cmd);
 
 //============================================================================
 
-static inline int MSG_PackSolid32(const vec3_t mins, const vec3_t maxs)
+static inline int MSG_PackBBox(const vec3_t mins, const vec3_t maxs)
 {
     int x, zd, zu;
 
@@ -133,7 +135,7 @@ static inline int MSG_PackSolid32(const vec3_t mins, const vec3_t maxs)
     return ((unsigned)zu << 16) | (zd << 8) | x;
 }
 
-static inline void MSG_UnpackSolid32(int solid, vec3_t mins, vec3_t maxs)
+static inline void MSG_UnpackBBox(int solid, vec3_t mins, vec3_t maxs)
 {
     int x, zd, zu;
 
