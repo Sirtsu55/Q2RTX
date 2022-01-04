@@ -1992,8 +1992,8 @@ static void CL_Trace(trace_t *tr, vec3_t start, vec3_t end, vec3_t mins, vec3_t 
 
 static void CL_RunParticleBounce(cparticle_t *p, vec3_t next_origin)
 {
-    static vec3_t mins = { 0, 0, 0 };
-    static vec3_t maxs = { 0, 0, 0 };
+    static vec3_t mins = { -1.5f, -1.5f, -1.5f };
+    static vec3_t maxs = { 1.5f, 1.5f, 1.5f };
     trace_t tr;
 
     // trace a line from the previous position to the current position
