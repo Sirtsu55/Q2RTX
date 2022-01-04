@@ -128,7 +128,6 @@ typedef struct decal_s {
     vec3_t dir;
     float spread;
     float length;
-    float dummy;
 } decal_t;
 
 // passes information back from the RTX renderer to the engine for various development maros
