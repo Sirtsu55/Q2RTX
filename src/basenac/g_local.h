@@ -1139,6 +1139,7 @@ bool SV_GetAreaPortalState(int portalnum);
 bool SV_AreasConnected(int area1, int area2);
 void SV_SetBrushModel(edict_t *ent, const char *model);
 void SV_LinkEntity(edict_t *ent);
+bool SV_EntityLinked(edict_t *ent);
 void SV_UnlinkEntity(edict_t *ent);
 trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
                  edict_t *passedict, int contentmask);

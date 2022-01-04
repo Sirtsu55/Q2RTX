@@ -1545,7 +1545,7 @@ void MSG_ShowDeltaEntityBits(int bits)
     S(SOUND, "sound");
     S(EVENT, "event");
     S(SOLID, "solid");
-    S(SOUNDPITCH, "soundpitch");
+    S(SOUNDPITCH, "sound_pitch");
 #undef S
 }
 

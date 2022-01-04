@@ -1992,8 +1992,8 @@ static void CL_Trace(trace_t *tr, vec3_t start, vec3_t end, vec3_t mins, vec3_t 
 
 static void CL_RunParticleBounce(cparticle_t *p, vec3_t next_origin)
 {
-    static vec3_t mins = { -0.5f, -0.5f, -0.5f };
-    static vec3_t maxs = { 0.5f, 0.5f, 0.5f };
+    static vec3_t mins = { 0, 0, 0 };
+    static vec3_t maxs = { 0, 0, 0 };
     trace_t tr;
 
     // trace a line from the previous position to the current position
@@ -2004,17 +2004,20 @@ static void CL_RunParticleBounce(cparticle_t *p, vec3_t next_origin)
 		CL_Trace(&tr, p->org, p->org, mins, maxs, MASK_SOLID);
 		tr.fraction = 0;
 	}
-	else {
-		VectorCopy( tr.endpos, p->org );
-	}
 
-    if (tr.fraction != 1) {
+    if (tr.fraction != 1.f) {
 
-        if (ClipVelocity(p->vel, tr.plane.normal, p->vel, p->bounce)) {
-		    VectorCopy(tr.endpos, p->org);
-        } else {
-    	    VectorAdd(p->org, tr.plane.normal, p->org);
+        ClipVelocity(p->vel, tr.plane.normal, p->vel, p->bounce);
+        
+        if (tr.plane.normal[2] > 0.2f) {
+            if (p->vel[2] < 22) {
+                VectorClear(p->vel);
+            }
         }
+        
+        VectorMA(tr.endpos, 0.0125f, tr.plane.normal, p->org);
+    } else {
+        VectorCopy(tr.endpos, p->org);
     }
 }
 

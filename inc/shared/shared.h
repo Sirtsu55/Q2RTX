@@ -282,26 +282,14 @@ void UnionBounds(vec3_t a[2], vec3_t b[2], vec3_t c[2]);
 ClipVelocity
 
 Slide off of the impacting object.
-Returns true if the object has stopped.
 ==================
 */
-static inline bool ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out, float overbounce)
+static inline void ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out, float overbounce)
 {
 	// reflect the velocity on the trace plane
 	float dot = DotProduct(in, normal);
 	VectorMA( in, -2*dot, normal, out );
-
-    if (overbounce != 1.f) {
-    	VectorScale(out, overbounce, out);
-    }
-
-	// check for stop
-	if (normal[2] > 0.2f && VectorLength(out) <= 40.f) {
-        VectorClear(out);
-		return true;
-	}
-
-	return false;
+    VectorScale(out, overbounce, out);
 }
 
 static inline void AnglesToAxis(vec3_t angles, vec3_t axis[3])
@@ -1508,8 +1496,8 @@ typedef struct entity_state_s {
     int     skinnum;
     unsigned int        effects;        // PGM - we're filling it, so it needs to be unsigned
     int     renderfx;
-    int     bbox;           // for client side prediction;
-                            // SV_LinkEntity sets this properly
+    unsigned int  bbox;           // for client side prediction;
+                                  // SV_LinkEntity sets this properly
     int     sound;          // for looping sounds, to guarantee shutoff
     int     event;          // impulse events -- muzzle flashes, footsteps, etc
                             // events only go out for a single frame, they
