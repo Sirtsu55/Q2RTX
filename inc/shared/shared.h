@@ -1368,24 +1368,9 @@ typedef enum {
 #define DF_ALLOW_EXIT       0x00001000  // 4096
 #define DF_INFINITE_AMMO    0x00002000  // 8192
 #define DF_QUAD_DROP        0x00004000  // 16384
-#define DF_FIXED_FOV        0x00008000  // 32768
 
-// RAFAEL
-#define DF_QUADFIRE_DROP    0x00010000  // 65536
-
-//ROGUE
-#define DF_NO_MINES         0x00020000
-#define DF_NO_STACK_DOUBLE  0x00040000
-#define DF_NO_NUKES         0x00080000
-#define DF_NO_SPHERES       0x00100000
-//ROGUE
-
-#define UF_AUTOSCREENSHOT   1   // stuff a screenshot
 #define UF_AUTORECORD       2   // force demo recording
 #define UF_LOCALFOV         4   // keep FOV when chasing
-#define UF_MUTE_PLAYERS     8   // mute
-#define UF_MUTE_OBSERVERS   16  // mute
-#define UF_MUTE_MISC        32  // mute
 #define UF_PLAYERFOV        64  // hard caps fov at 90??
 
 /*

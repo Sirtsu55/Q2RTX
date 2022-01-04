@@ -980,7 +980,7 @@ void flare_sparks(edict_t *self)
 
    Notes:
 	 - I'm not sure how much bandwidth is eaten by spawning a temp
-	   entity every FRAMETIME seconds.  It might very well turn out
+	   entity every BASE_FRAMETIME_S seconds.  It might very well turn out
 	   that the sparks need to go bye-bye in favor of less bandwidth
 	   usage.  Then again, why the hell would you use this gun on
 	   a DM server????

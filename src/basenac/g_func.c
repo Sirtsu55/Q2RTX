@@ -84,7 +84,7 @@ void Move_Final(edict_t *ent)
         return;
     }
 
-    VectorScale(ent->moveinfo.dir, ent->moveinfo.remaining_distance / FRAMETIME, ent->velocity);
+    VectorScale(ent->moveinfo.dir, ent->moveinfo.remaining_distance / BASE_FRAMETIME_S, ent->velocity);
 
     ent->think = Move_Done;
     ent->nextthink = level.time + 1;
@@ -94,13 +94,13 @@ void Move_Begin(edict_t *ent)
 {
     float   frames;
 
-    if ((ent->moveinfo.speed * FRAMETIME) >= ent->moveinfo.remaining_distance) {
+    if ((ent->moveinfo.speed * BASE_FRAMETIME_S) >= ent->moveinfo.remaining_distance) {
         Move_Final(ent);
         return;
     }
     VectorScale(ent->moveinfo.dir, ent->moveinfo.speed, ent->velocity);
-    frames = floor((ent->moveinfo.remaining_distance / ent->moveinfo.speed) / FRAMETIME);
-    ent->moveinfo.remaining_distance -= frames * ent->moveinfo.speed * FRAMETIME;
+    frames = floor((ent->moveinfo.remaining_distance / ent->moveinfo.speed) / BASE_FRAMETIME_S);
+    ent->moveinfo.remaining_distance -= frames * ent->moveinfo.speed * BASE_FRAMETIME_S;
     ent->nextthink = level.time + G_FramesToMs(frames);
     ent->think = Move_Final;
 }
@@ -155,7 +155,7 @@ void AngleMove_Final(edict_t *ent)
         return;
     }
 
-    VectorScale(move, 1.0f / FRAMETIME, ent->avelocity);
+    VectorScale(move, 1.0f / BASE_FRAMETIME_S, ent->avelocity);
 
     ent->think = AngleMove_Done;
     ent->nextthink = level.time + 1;
@@ -180,12 +180,12 @@ void AngleMove_Begin(edict_t *ent)
     // divide by speed to get time to reach dest
     traveltime = len / ent->moveinfo.speed;
 
-    if (traveltime < FRAMETIME) {
+    if (traveltime < BASE_FRAMETIME_S) {
         AngleMove_Final(ent);
         return;
     }
 
-    frames = floor(traveltime / FRAMETIME);
+    frames = floor(traveltime / BASE_FRAMETIME_S);
 
     // scale the destdelta vector by the time spent traveling to get velocity
     VectorScale(destdelta, 1.0f / traveltime, ent->avelocity);
@@ -1705,7 +1705,7 @@ void SP_func_timer(edict_t *self)
     self->think = func_timer_think;
 
     if (self->random >= self->wait) {
-        self->random = self->wait - FRAMETIME;
+        self->random = self->wait - BASE_FRAMETIME_S;
         Com_WPrintf("func_timer at %s has random >= wait\n", vtos(self->s.origin));
     }
 

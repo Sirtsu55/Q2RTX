@@ -104,8 +104,6 @@ static inline float G_MsToFrames(gtime_t ms)
 #define FL_ACCELERATE           0x00002000  // accelerative movement (plats, etc)
 #define FL_RESPAWN              0x80000000  // used for item respawning
 
-#define FRAMETIME       BASE_FRAMETIME_S
-
 #define MELEE_DISTANCE  80
 
 #define BODY_QUEUE_SIZE     8
