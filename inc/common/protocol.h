@@ -238,25 +238,14 @@ typedef enum {
 typedef enum {
     // r1q2 specific
     CLS_NOGUN,
-    CLS_NOBLEND,
     CLS_RECORDING,
     CLS_PLAYERUPDATES,
 
     // q2pro specific
-    CLS_NOGIBS            = 10,
-    CLS_NOFOOTSTEPS,
     CLS_NOPREDICT,
 
     CLS_MAX
 } clientSetting_t;
-
-typedef enum {
-    // r1q2 specific
-    SVS_PLAYERUPDATES,
-    SVS_FPS,
-
-    SVS_MAX
-} serverSetting_t;
 
 // q2pro frame flags sent by the server
 // only SUPPRESSCOUNT_BITS can be used

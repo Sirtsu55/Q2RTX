@@ -445,7 +445,6 @@ extern char        cl_cmdbuf_text[MAX_STRING_CHARS];
 //
 extern cvar_t    *cl_gunalpha;
 extern cvar_t    *cl_predict;
-extern cvar_t    *cl_footsteps;
 extern cvar_t    *cl_noskins;
 extern cvar_t    *cl_kickangles;
 extern cvar_t    *cl_rollhack;
@@ -485,8 +484,6 @@ extern cvar_t    *cl_chat_filter;
 extern cvar_t    *cl_disconnectcmd;
 extern cvar_t    *cl_changemapcmd;
 extern cvar_t    *cl_beginmapcmd;
-
-extern cvar_t    *cl_gibs;
 
 #define CL_PLAYER_MODEL_DISABLED     0
 #define CL_PLAYER_MODEL_ONLY_GUN     1
@@ -675,7 +672,6 @@ void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float 
 #define V_AddLightEx(org, intensity, r, g, b, radius)
 #endif
 void V_AddLightStyle(int style, vec4_t value);
-void CL_UpdateBlendSetting(void);
 
 
 //

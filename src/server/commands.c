@@ -592,24 +592,18 @@ static void dump_protocols(void)
 static void dump_settings(void)
 {
     client_t    *cl;
-    char        opt[8];
+    char        opt[8] = "        ";
 
     Com_Printf(
-        "num name            proto options upd\n"
-        "--- --------------- ----- ------- ---\n");
+        "num name            proto options\n"
+        "--- --------------- ----- -------\n");
 
-    opt[6] = ' ';
-    opt[7] = 0;
     FOR_EACH_CLIENT(cl) {
         opt[0] = cl->settings[CLS_NOGUN]          ? 'G' : ' ';
-        opt[1] = cl->settings[CLS_NOBLEND]        ? 'B' : ' ';
-        opt[2] = cl->settings[CLS_RECORDING]      ? 'R' : ' ';
-        opt[3] = cl->settings[CLS_NOGIBS]         ? 'I' : ' ';
-        opt[4] = cl->settings[CLS_NOFOOTSTEPS]    ? 'F' : ' ';
-        opt[5] = cl->settings[CLS_NOPREDICT]      ? 'P' : ' ';
-        Com_Printf("%3i %-15.15s %5d %s %3d\n",
-                   cl->number, cl->name, cl->protocol, opt,
-                   cl->settings[CLS_PLAYERUPDATES]);
+        opt[0] = cl->settings[CLS_RECORDING]      ? 'R' : ' ';
+        opt[2] = cl->settings[CLS_NOPREDICT]      ? 'P' : ' ';
+        Com_Printf("%3i %-15.15s %5d %s\n",
+                   cl->number, cl->name, cl->protocol, opt);
     }
 }
 

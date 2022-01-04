@@ -574,6 +574,8 @@ int SV_NoSaveGames(void);
 void SV_ClearWorld(void);
 // called after the world model has been loaded, before linking any entities
 
+bool SV_EntityLinked(edict_t *ent);
+
 void PF_UnlinkEdict(edict_t *ent);
 // call before removing an entity, and before trying to move one,
 // so it doesn't clip against itself

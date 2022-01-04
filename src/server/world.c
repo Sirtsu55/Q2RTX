@@ -221,6 +221,14 @@ static void SV_LinkEdict(cm_t *cm, edict_t *ent, server_entity_t *sent)
     }
 }
 
+bool SV_EntityLinked(edict_t *ent)
+{
+    int entnum = NUM_FOR_EDICT(ent);
+    server_entity_t *sent = &sv.entities[entnum];
+
+    return !!sent->area.prev;
+}
+
 void PF_UnlinkEdict(edict_t *ent)
 {
     int entnum = NUM_FOR_EDICT(ent);
@@ -264,7 +272,12 @@ void PF_LinkEdict(edict_t *ent)
     switch (ent->solid) {
     case SOLID_BBOX:
         if (!(ent->svflags & SVF_DEADMONSTER) && !VectorCompare(ent->mins, ent->maxs)) {
-            ent->s.bbox = MSG_PackBBox(ent->mins, ent->maxs);
+            bool safe;
+            ent->s.bbox = MSG_PackBBox(ent->mins, ent->maxs, &safe);
+
+            if (!safe) {
+                Com_WPrintf("Entity %i has unpredictable bounding box (%f %f %f -> %f %f %f)\n", ent->s.number, ent->mins[0], ent->mins[1], ent->mins[2], ent->maxs[0], ent->maxs[1], ent->maxs[2]);
+            }
         }
         break;
     case SOLID_BSP:

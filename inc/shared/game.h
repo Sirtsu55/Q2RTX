@@ -139,6 +139,7 @@ typedef struct {
     // solidity changes, it must be relinked.
     void (*SV_LinkEntity)(edict_t *ent);
     void (*SV_UnlinkEntity)(edict_t *ent);     // call before removing an interactive edict
+    void (*SV_EntityLinked)(edict_t *ent);
     size_t (*SV_AreaEdicts)(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
     bool (*SV_EntityCollide)(vec3_t mins, vec3_t maxs, edict_t *ent);
     void (*Pmove)(pmove_t *pmove);          // player movement code common with client prediction

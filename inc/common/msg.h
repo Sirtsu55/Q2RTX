@@ -116,7 +116,7 @@ const char *MSG_ServerCommandString(int cmd);
 
 //============================================================================
 
-static inline int MSG_PackBBox(const vec3_t mins, const vec3_t maxs)
+static inline int MSG_PackBBox(const vec3_t mins, const vec3_t maxs, bool *safe)
 {
     int x, zd, zu;
 
@@ -126,11 +126,18 @@ static inline int MSG_PackBBox(const vec3_t mins, const vec3_t maxs)
 
     // z is not symetric
     zd = -mins[2];
-    clamp(zd, 1, 255);
+    clamp(zd, 0, 255);
 
     // and z maxs can be negative...
     zu = maxs[2] + 32768;
-    clamp(zu, 1, 65535);
+    clamp(zu, 0, 65535);
+
+    if (x != maxs[0] || x != -mins[0] || x != maxs[1] || x != -mins[1] ||
+        zd != -mins[2] || (maxs[2] + 32768) != zu) {
+        *safe = false;
+    } else {
+        *safe = true;
+    }
 
     return ((unsigned)zu << 16) | (zd << 8) | x;
 }

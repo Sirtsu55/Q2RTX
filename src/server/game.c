@@ -806,6 +806,7 @@ void SV_InitGameProgs(void)
 
     import.SV_LinkEntity = PF_LinkEdict;
     import.SV_UnlinkEntity = PF_UnlinkEdict;
+    import.SV_EntityLinked = SV_EntityLinked;
     import.SV_AreaEdicts = SV_AreaEdicts;
     import.SV_EntityCollide = SV_EntityCollide;
     import.SV_Trace = SV_Trace;

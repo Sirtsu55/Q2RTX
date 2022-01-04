@@ -178,8 +178,7 @@ static void parse_entity_event(int number)
         CL_TeleportParticles(cent->current.origin);
         break;
     case EV_FOOTSTEP:
-        if (cl_footsteps->integer)
-            S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[Q_rand() & 3], 1, ATTN_NORM, 0, 0);
+        S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[Q_rand() & 3], 1, ATTN_NORM, 0, 0);
         break;
     case EV_FALLSHORT:
         S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0, 0);
@@ -537,10 +536,6 @@ static void CL_AddPacketEntities(void)
                            cl.lerpfrac, ent.origin);
                 VectorCopy(ent.origin, ent.oldorigin);
             }
-        }
-
-        if ((effects & EF_GIB) && !cl_gibs->integer) {
-            goto skip;
         }
 
         // create a new entity

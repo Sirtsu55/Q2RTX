@@ -23,7 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 cvar_t  *rcon_address;
 
 cvar_t  *cl_noskins;
-cvar_t  *cl_footsteps;
 cvar_t  *cl_timeout;
 cvar_t  *cl_predict;
 cvar_t  *cl_gunalpha;
@@ -191,30 +190,6 @@ static void CL_UpdateGunSetting(void)
     MSG_WriteByte(clc_setting);
     MSG_WriteShort(CLS_NOGUN);
     MSG_WriteShort(nogun);
-    MSG_FlushTo(&cls.netchan->message);
-}
-
-static void CL_UpdateGibSetting(void)
-{
-    if (!cls.netchan) {
-        return;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_NOGIBS);
-    MSG_WriteShort(!cl_gibs->integer);
-    MSG_FlushTo(&cls.netchan->message);
-}
-
-static void CL_UpdateFootstepsSetting(void)
-{
-    if (!cls.netchan) {
-        return;
-    }
-
-    MSG_WriteByte(clc_setting);
-    MSG_WriteShort(CLS_NOFOOTSTEPS);
-    MSG_WriteShort(!cl_footsteps->integer);
     MSG_FlushTo(&cls.netchan->message);
 }
 
@@ -1611,9 +1586,6 @@ void CL_Begin(void)
     CL_ClientCommand(va("begin %i\n", precache_spawncount));
 
     CL_UpdateGunSetting();
-    CL_UpdateBlendSetting();
-    CL_UpdateGibSetting();
-    CL_UpdateFootstepsSetting();
     CL_UpdatePredictSetting();
     CL_UpdateRecordingSetting();
 }
@@ -2419,16 +2391,6 @@ static void info_hand_changed(cvar_t *self)
     CL_UpdateGunSetting();
 }
 
-static void cl_gibs_changed(cvar_t *self)
-{
-    CL_UpdateGibSetting();
-}
-
-static void cl_footsteps_changed(cvar_t *self)
-{
-    CL_UpdateFootstepsSetting();
-}
-
 static void cl_predict_changed(cvar_t *self)
 {
     CL_UpdatePredictSetting();
@@ -2589,8 +2551,6 @@ static void CL_InitLocal(void)
     // register our variables
     //
     cl_gunalpha = Cvar_Get("cl_gunalpha", "1", 0);
-    cl_footsteps = Cvar_Get("cl_footsteps", "1", 0);
-    cl_footsteps->changed = cl_footsteps_changed;
     cl_noskins = Cvar_Get("cl_noskins", "0", 0);
     cl_noskins->changed = cl_noskins_changed;
     cl_predict = Cvar_Get("cl_predict", "1", 0);
@@ -2637,8 +2597,6 @@ static void CL_InitLocal(void)
     cl_disable_explosions = Cvar_Get("cl_disable_explosions", "0", 0);
 	cl_explosion_sprites = Cvar_Get("cl_explosion_sprites", "1", 0);
 	cl_explosion_frametime = Cvar_Get("cl_explosion_frametime", "20", 0);
-    cl_gibs = Cvar_Get("cl_gibs", "1", 0);
-    cl_gibs->changed = cl_gibs_changed;
 
     cl_chat_notify = Cvar_Get("cl_chat_notify", "1", 0);
     cl_chat_sound = Cvar_Get("cl_chat_sound", "1", 0);
@@ -2969,18 +2927,18 @@ void CL_UpdateFrameTimes(void)
         sync_mode = SYNC_SLEEP_10;
     } else if (cls.active == ACT_RESTORED || cls.state != ca_active) {
         // run at 60 fps if not active
-            main_msec = fps_to_msec(60);
-            sync_mode = SYNC_SLEEP_60;
+        main_msec = fps_to_clamped_msec(cl_maxfps, MIN_PHYS_HZ, 60);
+        sync_mode = SYNC_SLEEP_60;
     } else if (cl_async->integer > 0) {
         // run physics and refresh separately
         phys_msec = fps_to_clamped_msec(cl_maxfps, MIN_PHYS_HZ, MAX_PHYS_HZ);
         ref_msec = fps_to_clamped_msec(r_maxfps, MIN_REF_HZ, MAX_REF_HZ);
-            sync_mode = ASYNC_FULL;
+        sync_mode = ASYNC_FULL;
     } else {
         // everything ticks in sync with refresh
         main_msec = fps_to_clamped_msec(cl_maxfps, MIN_PHYS_HZ, MAX_PHYS_HZ);
-            sync_mode = SYNC_MAXFPS;
-        }
+        sync_mode = SYNC_MAXFPS;
+    }
 
     Com_DDPrintf("%s: mode=%s main_msec=%d ref_msec=%d, phys_msec=%d\n",
                   __func__, sync_names[sync_mode], main_msec, ref_msec, phys_msec);

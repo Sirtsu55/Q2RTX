@@ -673,6 +673,11 @@ void SV_UnlinkEntity(edict_t *ent)
     gi.SV_UnlinkEntity(ent);
 }
 
+bool SV_EntityLinked(edict_t *ent)
+{
+    return gi.SV_EntityLinked(ent);
+}
+
 trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
                  edict_t *passedict, int contentmask)
 {

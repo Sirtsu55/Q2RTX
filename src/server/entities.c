@@ -208,9 +208,6 @@ void SV_WriteFrameToClient(client_t *client)
                 psFlags |= MSG_PS_IGNORE_GUNINDEX;
             }
         }
-        if (client->settings[CLS_NOBLEND]) {
-            psFlags |= MSG_PS_IGNORE_BLEND;
-        }
         if (frame->ps.pmove.pm_type < PM_DEAD) {
             if (!(frame->ps.pmove.pm_flags & PMF_NO_PREDICTION)) {
                 psFlags |= MSG_PS_IGNORE_VIEWANGLES;
@@ -350,16 +347,7 @@ void SV_BuildClientFrame(client_t *client)
             continue;
 
         // ignore ents without visible models unless they have an effect
-        if (!ent->s.modelindex && !ent->s.effects && !ent->s.sound) {
-            if (!ent->s.event) {
-                continue;
-            }
-            if (ent->s.event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {
-                continue;
-            }
-        }
-
-        if ((ent->s.effects & EF_GIB) && client->settings[CLS_NOGIBS]) {
+        if (!ent->s.modelindex && !ent->s.effects && !ent->s.sound && !ent->s.event) {
             continue;
         }
 
@@ -435,11 +423,6 @@ void SV_BuildClientFrame(client_t *client)
         state = &svs.entities[svs.next_entity % svs.num_entities];
 
         *state = es;
-
-        // clear footsteps
-        if (state->event == EV_FOOTSTEP && client->settings[CLS_NOFOOTSTEPS]) {
-            state->event = 0;
-        }
 
         // hide POV entity from renderer, unless this is player's own entity
         if (e == frame->clientNum + 1 && ent != clent &&

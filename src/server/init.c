@@ -355,8 +355,11 @@ void SV_InitGame()
             Cvar_SetInteger(sv_maxclients, CLIENTNUM_RESERVED, FROM_CODE);
         }
     } else if (Cvar_VariableInteger("coop")) {
-        if (sv_maxclients->integer <= 1)
+        if (sv_maxclients->integer <= 1) {
             Cvar_Set("maxclients", "2");
+        } else if (sv_maxclients->integer > CLIENTNUM_RESERVED) {
+            Cvar_SetInteger(sv_maxclients, CLIENTNUM_RESERVED, FROM_CODE);
+        }
     } else {    // non-deathmatch, non-coop is one player
         Cvar_FullSet("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH, FROM_CODE);
     }
