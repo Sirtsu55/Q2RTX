@@ -455,7 +455,6 @@ void G_RunFrame(void)
 
     G_UpdateCvars();
 
-    level.framenum++;
     level.time += BASE_FRAMETIME;
 
     // choose a client for monsters to target this frame

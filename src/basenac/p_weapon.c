@@ -579,10 +579,10 @@ ready_noammo:
 
                     ent->client->anim_priority = ANIM_ATTACK;
                     if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
-                        ent->s.frame = (FRAME_crattak1 - 1) + (level.framenum % 2);
+                        ent->s.frame = (FRAME_crattak1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
                         ent->client->anim_end = FRAME_crattak9;
                     } else {
-                        ent->s.frame = (FRAME_attack1 - 1) + (level.framenum % 2);
+                        ent->s.frame = (FRAME_attack1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
                         ent->client->anim_end = FRAME_attack8;
                     }
 
@@ -1058,10 +1058,10 @@ ready_noammo:
 
                 ent->client->anim_priority = ANIM_ATTACK;
                 if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
-                    ent->s.frame = (FRAME_crattak1 - 1) + (level.framenum % 2);
+                    ent->s.frame = (FRAME_crattak1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
                     ent->client->anim_end = FRAME_crattak9;
                 } else {
-                    ent->s.frame = (FRAME_attack1 - 1) + (level.framenum % 2);
+                    ent->s.frame = (FRAME_attack1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
                     ent->client->anim_end = FRAME_attack8;
                 }
 

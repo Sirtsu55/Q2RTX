@@ -316,7 +316,6 @@ typedef struct {
 // it is read/written to the level.sav file for savegames
 //
 typedef struct {
-    int         framenum;
     gtime_t     time;
 
     char        level_name[MAX_QPATH];  // the descriptive name (Outer Base, etc)
