@@ -700,6 +700,11 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
             ent->client->ps.gunframe = frames[PUTAWAY_FIRST];
             break;
         } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
+
+            if (frames[INSPECT_FIRST] && ent->client->ps.gunframe >= frames[INSPECT_FIRST]) {
+                ent->client->ps.gunframe = frames[IDLE_FIRST];
+            }
+
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
 
             if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
@@ -728,7 +733,16 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
                 }
                 NoAmmoWeaponChange(ent);
             }
+        } else if (ent->client->inspect) {
+            ent->client->inspect = false;
+            ent->client->ps.gunframe = frames[INSPECT_FIRST];
         } else if (ent->client->ps.gunframe == frames[IDLE_LAST]) {
+            if (random() < 0.1) {
+                ent->client->ps.gunframe = frames[INSPECT_FIRST];
+            } else {
+                ent->client->ps.gunframe = frames[IDLE_FIRST];
+            }
+        } else if (ent->client->ps.gunframe == frames[INSPECT_LAST]) {
             ent->client->ps.gunframe = frames[IDLE_FIRST];
         }
         break;
@@ -757,8 +771,8 @@ void Weapon_Shotgun(edict_t *ent)
         [ATTACK_LAST]    = 78,
         [PUTAWAY_FIRST]  = 79,
         [PUTAWAY_LAST]   = 81,
-        [INSPECT_FIRST]  = -1,
-        [INSPECT_LAST]   = -1
+        [INSPECT_FIRST]  = 84,
+        [INSPECT_LAST]   = 135
     };
     Weapon_Generic(ent, frames, weapon_shotgun_fire);
 }
@@ -814,8 +828,8 @@ void Weapon_SuperShotgun(edict_t *ent)
         [ATTACK_LAST]    = 78,
         [PUTAWAY_FIRST]  = 79,
         [PUTAWAY_LAST]   = 81,
-        [INSPECT_FIRST]  = -1,
-        [INSPECT_LAST]   = -1
+        [INSPECT_FIRST]  = 0,
+        [INSPECT_LAST]   = 0
     };
     Weapon_Generic(ent, frames, weapon_supershotgun_fire);
 }
@@ -853,8 +867,8 @@ void Weapon_Nailgun(edict_t *ent)
         [ATTACK_LAST]    = 78,
         [PUTAWAY_FIRST]  = 79,
         [PUTAWAY_LAST]   = 81,
-        [INSPECT_FIRST]  = -1,
-        [INSPECT_LAST]   = -1
+        [INSPECT_FIRST]  = 0,
+        [INSPECT_LAST]   = 0
     };
     Weapon_Generic(ent, frames, weapon_nailgun_fire);
 }
@@ -892,8 +906,8 @@ void Weapon_GrenadeLauncher(edict_t *ent)
         [ATTACK_LAST]    = 78,
         [PUTAWAY_FIRST]  = 79,
         [PUTAWAY_LAST]   = 81,
-        [INSPECT_FIRST]  = -1,
-        [INSPECT_LAST]   = -1
+        [INSPECT_FIRST]  = 0,
+        [INSPECT_LAST]   = 0
     };
     Weapon_Generic(ent, frames, weapon_grenadelauncher_fire);
 }
@@ -931,8 +945,8 @@ void Weapon_RocketLauncher(edict_t *ent)
         [ATTACK_LAST]    = 78,
         [PUTAWAY_FIRST]  = 79,
         [PUTAWAY_LAST]   = 81,
-        [INSPECT_FIRST]  = -1,
-        [INSPECT_LAST]   = -1
+        [INSPECT_FIRST]  = 0,
+        [INSPECT_LAST]   = 0
     };
     Weapon_Generic(ent, frames, weapon_rocketlauncher_fire);
 }

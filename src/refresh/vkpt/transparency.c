@@ -677,16 +677,16 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 			VectorScale(view_x, frame->origin_x, left);
 			VectorScale(view_x, frame->origin_x - frame->width, right);
 
-			if (model->sprite_vertical)
-			{
+			/*if (model->sprite_vertical)
+			{*/
 				VectorScale(world_y, -frame->origin_y, down);
 				VectorScale(world_y, frame->height - frame->origin_y, up);
-			}
+			/*}
 			else
 			{
 				VectorScale(view_y, -frame->origin_y, down);
 				VectorScale(view_y, frame->height - frame->origin_y, up);
-			}
+			}*/
 		}
 
 		VectorAdd3(e->origin, down, left, vertex_positions[0]);

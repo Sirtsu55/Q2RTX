@@ -89,8 +89,6 @@ extern cvar_t *gl_modulate_entities;
 extern cvar_t *gl_brightness;
 #endif
 
-extern cvar_t *fs_shareware;
-
 client_static_t cls;
 client_state_t  cl;
 
@@ -426,12 +424,6 @@ static void CL_Connect_f(void)
     netadr_t    address;
     int protocol;
     int argc = Cmd_Argc();
-
-	if (fs_shareware->integer)
-	{
-		Com_EPrintf("Multiplayer is not supported in the shareware version of the game.\n");
-		return;
-	}
 
     if (argc < 2) {
 usage:
