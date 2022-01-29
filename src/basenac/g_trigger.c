@@ -175,6 +175,19 @@ This fixed size trigger cannot be touched, it can only be fired by other events.
 */
 void trigger_relay_use(edict_t *self, edict_t *other, edict_t *activator)
 {
+    // Paril - kill after X many "count"s
+    if (self->count) {
+        if (self->count < 0) {
+            return;
+        }
+
+        if (!--self->count) {
+            self->count = -1;
+            self->think = G_FreeEdict;
+            self->nextthink = level.time + 1;
+        }
+    }
+
     G_UseTargets(self, activator);
 }
 
@@ -359,6 +372,10 @@ trigger_push
 */
 
 #define PUSH_ONCE       1
+// Paril: extra pushy support
+#define PUSH_START_OFF  2
+#define PUSH_TOGGLE     4
+#define PUSH_SILENT     8
 
 static int windsound;
 
@@ -372,9 +389,11 @@ void trigger_push_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
         if (other->client) {
             // don't take falling damage immediately from this
             VectorCopy(other->velocity, other->client->oldvelocity);
-            if (other->fly_sound_debounce_time < level.time) {
-                other->fly_sound_debounce_time = level.time + 1500;
-                SV_StartSound(other, CHAN_AUTO, windsound, 1, ATTN_NORM, 0);
+            if (!(self->spawnflags & PUSH_SILENT)) {
+            	if (other->fly_sound_debounce_time < level.time) {
+                	other->fly_sound_debounce_time = level.time + 1500;
+                    SV_StartSound(other, CHAN_AUTO, windsound, 1, ATTN_NORM, 0);
+                }
             }
         }
     }
@@ -382,6 +401,17 @@ void trigger_push_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface
         G_FreeEdict(self);
 }
 
+void trigger_push_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+    if (self->solid == SOLID_NOT)
+        self->solid = SOLID_TRIGGER;
+    else
+        self->solid = SOLID_NOT;
+    SV_LinkEntity(self);
+
+    if (!(self->spawnflags & PUSH_TOGGLE))
+        self->use = NULL;
+}
 
 /*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
 Pushes the player
@@ -390,10 +420,21 @@ Pushes the player
 void SP_trigger_push(edict_t *self)
 {
     InitTrigger(self);
-    windsound = SV_SoundIndex("misc/windfly.wav");
+    if (!(self->spawnflags & PUSH_SILENT))
+        windsound = SV_SoundIndex("misc/windfly.wav");
+
     self->touch = trigger_push_touch;
     if (!self->speed)
         self->speed = 1000;
+
+    if (self->spawnflags & PUSH_START_OFF)
+        self->solid = SOLID_NOT;
+    else
+        self->solid = SOLID_TRIGGER;
+
+    if (self->spawnflags & PUSH_TOGGLE)
+        self->use = trigger_push_use;
+
     SV_LinkEntity(self);
 }
 

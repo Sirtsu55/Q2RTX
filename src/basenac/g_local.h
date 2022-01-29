@@ -353,6 +353,10 @@ typedef struct {
     int         body_que;           // dead bodies
 
     int         power_cubes;        // ugly necessity for coop
+
+    // Paril: level gravity change support.
+    // we have to do this here for save/load support.
+    float       gravity;
 } level_locals_t;
 
 
@@ -966,7 +970,6 @@ struct gclient_s {
     bool        inspect;
 };
 
-
 struct edict_s {
     entity_state_t  s;
     struct gclient_s    *client;    // NULL if not a player
@@ -1109,9 +1112,31 @@ struct edict_s {
     // common data blocks
     moveinfo_t      moveinfo;
     monsterinfo_t   monsterinfo;
+
+    // Paril - animated entity stuff
+    struct {
+        // entity keys
+        int start, end;
+        int frame_delay;
+        bool animating, reset_on_trigger;
+        char *target, *finished_target;
+        int count;
+
+        // state only
+        bool is_active;
+        int next_frame;
+        int count_left;
+    } anim;
+
+    // Paril: switchable light style
+    char        *style2;
 };
 
 // API wrappers
+
+// Paril - animated entity stuff
+#define SPAWNFLAG_USE_ANIMATION (1 << 23)
+void G_InitAnimation(edict_t *ent);
 
 void SV_CenterPrint(edict_t *ent, const char *message);
 void SV_CenterPrintf(edict_t *ent, const char *fmt, ...);

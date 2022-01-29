@@ -482,6 +482,8 @@ static void CL_AddPacketEntities(void)
         else
             ent.frame = s1->frame;
 
+        ent.alpha = 1;
+
         // quad and pent can do different things on client
         if (effects & EF_PENT) {
             effects &= ~EF_PENT;

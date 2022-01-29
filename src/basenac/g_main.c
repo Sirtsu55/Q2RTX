@@ -439,6 +439,14 @@ static void G_UpdateCvars(void)
     Cvar_Update(&flood_msgs);
     Cvar_Update(&flood_persecond);
     Cvar_Update(&flood_waitdelay);
+
+    // Paril: gravity change support.
+    // this is just so you can change it via console still
+    // for shenanigans. sv_gravity should be 800 at all
+    // times normally though.
+    if (Cvar_Update(&sv_gravity)) {
+        level.gravity = sv_gravity.value;
+    }
 }
 
 /*

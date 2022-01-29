@@ -276,9 +276,6 @@ char *SV_GetSaveInfo(const char *dir)
     autosave = MSG_ReadByte();
     MSG_ReadString(name, sizeof(name));
 
-    if (autosave)
-        return Z_CopyString(va("ENTERING %s", name));
-
     // get current year
     t = time(NULL);
     tm = localtime(&t);
@@ -506,12 +503,12 @@ void SV_AutoSaveEnd(void)
     if (SV_NoSaveGames())
         return;
 
-	// save the map just entered to include the player position (client edict shell)
-	if (write_level_file())
-	{
-		Com_EPrintf("Couldn't write level file.\n");
-		return;
-	}
+    // save the map just entered to include the player position (client edict shell)
+    if (write_level_file())
+    {
+        Com_EPrintf("Couldn't write level file.\n");
+        return;
+    }
 
     // save server state
     if (write_server_file(true)) {
@@ -522,6 +519,35 @@ void SV_AutoSaveEnd(void)
     // clear whatever savegames are there
     if (wipe_save_dir(SAVE_AUTO)) {
         Com_EPrintf("Couldn't wipe '%s' directory.\n", SAVE_AUTO);
+        return;
+    }
+
+    // copy off the level to the autosave slot
+    if (copy_save_dir(SAVE_CURRENT, SAVE_AUTO)) {
+        Com_EPrintf("Couldn't write '%s' directory.\n", SAVE_AUTO);
+        return;
+    }
+}
+
+// Paril - autosave functionality
+void SV_AutoSave_f(void)
+{
+    if (sv.state != ss_game)
+        return;
+
+    if (SV_NoSaveGames())
+        return;
+
+    // save the map just entered to include the player position (client edict shell)
+    if (write_level_file())
+    {
+        Com_EPrintf("Couldn't write level file.\n");
+        return;
+    }
+
+    // save server state
+    if (write_server_file(true)) {
+        Com_EPrintf("Couldn't write server file.\n");
         return;
     }
 

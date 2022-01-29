@@ -1658,6 +1658,8 @@ static const cmdreg_t c_server[] = {
     { "addfiltercmd", SV_AddFilterCmd_f },
     { "delfiltercmd", SV_DelFilterCmd_f },
     { "listfiltercmds", SV_ListFilterCmds_f },
+    { "autosave", SV_AutoSave_f },
+
     { "checkcvarbans", SV_CheckCvarBans_f },
     { "addcvarban", SV_AddCvarBan_f },
     { "delcvarban", SV_DelCvarBan_f },

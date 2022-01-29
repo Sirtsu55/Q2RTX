@@ -88,6 +88,9 @@ void SP_target_earthquake(edict_t *ent);
 void SP_target_character(edict_t *ent);
 void SP_target_string(edict_t *ent);
 
+// Paril: gravity change support
+void SP_target_gravity(edict_t *ent);
+
 void SP_worldspawn(edict_t *ent);
 void SP_viewthing(edict_t *ent);
 
@@ -147,6 +150,9 @@ void SP_turret_breach(edict_t *self);
 void SP_turret_base(edict_t *self);
 void SP_turret_driver(edict_t *self);
 
+// Paril
+void SP_model_spawn(edict_t *ent);
+
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
     {"item_health_small", SP_item_health_small},
@@ -205,6 +211,9 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_earthquake", SP_target_earthquake},
     {"target_character", SP_target_character},
     {"target_string", SP_target_string},
+
+    // Paril: gravity change support
+    {"target_gravity", SP_target_gravity},
 
     {"worldspawn", SP_worldspawn},
     {"viewthing", SP_viewthing},
@@ -267,6 +276,9 @@ static const spawn_func_t spawn_funcs[] = {
     {"turret_base", SP_turret_base},
     {"turret_driver", SP_turret_driver},
 
+    // Paril
+    { "model_spawn", SP_model_spawn },
+
     {NULL, NULL}
 };
 
@@ -303,6 +315,25 @@ static const spawn_field_t spawn_fields[] = {
     {"origin", FOFS(s.origin), F_VECTOR},
     {"angles", FOFS(s.angles), F_VECTOR},
     {"angle", FOFS(s.angles), F_ANGLEHACK},
+
+    // Paril - entity animation stuff
+    {"anim_start", FOFS(anim.start), F_INT},
+    {"anim_end", FOFS(anim.end), F_INT},
+    {"anim_frame_delay", FOFS(anim.frame_delay), F_INT},
+    {"anim_animating", FOFS(anim.animating), F_INT},
+    {"anim_reset_on_trigger", FOFS(anim.reset_on_trigger), F_INT},
+    {"anim_target", FOFS(anim.target), F_LSTRING},
+    {"anim_count", FOFS(anim.count), F_INT},
+    {"anim_finished_target", FOFS(anim.finished_target), F_LSTRING},
+
+    // Paril - miscmodel
+    {"skinnum", FOFS(s.skinnum), F_INT},
+    {"avelocity", FOFS(avelocity), F_VECTOR},
+    {"effects", FOFS(s.effects), F_INT},
+    {"renderfx", FOFS(s.renderfx), F_INT},
+
+    // Paril: switchable light style support
+    {"style2", FOFS(style2), F_LSTRING},
 
     {NULL}
 };
@@ -639,6 +670,11 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             }
 
             ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_NOT_DEATHMATCH);
+
+            // Paril - generic animation support
+            if (ent->spawnflags & SPAWNFLAG_USE_ANIMATION) {
+                G_InitAnimation(ent);
+            }
         }
 
         ED_CallSpawn(ent);
@@ -894,6 +930,9 @@ void SP_worldspawn(edict_t *ent)
         Cvar_Set(&sv_gravity, 800, false);
     else
         Cvar_Set(&sv_gravity, st.gravity, false);
+
+    // Level gravity change support
+    level.gravity = sv_gravity.value;
 
     snd_fry = SV_SoundIndex("player/fry.wav");  // standing in lava / slime
 

@@ -605,6 +605,9 @@ extern void Use_Target_Speaker(void);
 extern void use_target_splash(void);
 extern void Use_Target_Tent(void);
 extern void walkmonster_start_go(void);
+
+extern void trigger_push_use(void);
+extern void target_gravity_use(void);
 const save_ptr_t save_ptrs[] = {
 { P_prethink, misc_viper_bomb_prethink },
 { P_think, AngleMove_Begin },
@@ -1211,5 +1214,9 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, Makron_CheckAttack },
 { P_monsterinfo_checkattack, medic_checkattack },
 { P_monsterinfo_checkattack, mutant_checkattack },
+
+// Paril
+{ P_use, trigger_push_use },
+{ P_use, target_gravity_use }
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);

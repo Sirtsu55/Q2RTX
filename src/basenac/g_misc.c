@@ -514,7 +514,8 @@ Default _cone value is 10 (used to set size of light for spotlights)
 void light_use(edict_t *self, edict_t *other, edict_t *activator)
 {
     if (self->spawnflags & START_OFF) {
-        SV_SetConfigString(CS_LIGHTS + self->style, "m");
+        // Paril: switchable light style
+        SV_SetConfigString(CS_LIGHTS + self->style, self->style2 ? self->style2 : "m");
         self->spawnflags &= ~START_OFF;
     } else {
         SV_SetConfigString(CS_LIGHTS + self->style, "a");
@@ -535,7 +536,8 @@ void SP_light(edict_t *self)
         if (self->spawnflags & START_OFF)
             SV_SetConfigString(CS_LIGHTS + self->style, "a");
         else
-            SV_SetConfigString(CS_LIGHTS + self->style, "m");
+            // Paril: switchable light style
+            SV_SetConfigString(CS_LIGHTS + self->style, self->style2 ? self->style2 : "m");
     }
 }
 
@@ -1785,3 +1787,13 @@ void SP_misc_teleporter_dest(edict_t *ent)
     SV_LinkEntity(ent);
 }
 
+
+// Paril
+void SP_model_spawn(edict_t *ent)
+{
+    ent->s.modelindex = SV_ModelIndex(ent->model);
+
+    ent->movetype = MOVETYPE_NOCLIP;
+
+    SV_LinkEntity(ent);
+}
