@@ -48,11 +48,11 @@ static cvar_t *map_visibility_patch;
     Hunk_Alloc(&bsp->hunk, size)
 
 #define LOAD(func) \
-    static qerror_t BSP_Load##func(bsp_t *bsp, void *base, size_t count)
+    static int BSP_Load##func(bsp_t *bsp, void *base, size_t count)
 
 // QBSP
 #define LOAD_EXT(func) \
-    static qerror_t BSP_QBSP_Load##func(bsp_t *bsp, void *base, size_t count)
+    static int BSP_QBSP_Load##func(bsp_t *bsp, void *base, size_t count)
 
 #define DEBUG(msg) \
     Com_DPrintf("%s: %s\n", __func__, msg)
@@ -1096,11 +1096,11 @@ LOAD(EntString)
 */
 
 typedef struct {
-    qerror_t (*load)(bsp_t *, void *, size_t);
-    unsigned lump;
-    size_t disksize;
-    size_t memsize;
-    size_t maxcount;
+    int (*load)(bsp_t *, void *, size_t);
+    uint8_t lump;
+    uint8_t disksize;
+    uint16_t memsize;
+    uint32_t maxcount;
 } lump_info_t;
 
 #define L(func, lump, disk_t, mem_t) \
@@ -1182,11 +1182,11 @@ static void BSP_List_f(void)
     bytes = 0;
 
     LIST_FOR_EACH(bsp_t, bsp, &bsp_cache, entry) {
-        Com_Printf("%8"PRIz" : %s (%d refs)\n",
+        Com_Printf("%8zu : %s (%d refs)\n",
                    bsp->hunk.mapped, bsp->name, bsp->refcount);
         bytes += bsp->hunk.mapped;
     }
-    Com_Printf("Total resident: %"PRIz"\n", bytes);
+    Com_Printf("Total resident: %zu\n", bytes);
 }
 
 static bsp_t *BSP_Find(const char *name)
@@ -1202,7 +1202,7 @@ static bsp_t *BSP_Find(const char *name)
     return NULL;
 }
 
-static qerror_t BSP_SetParent(mnode_t *node, int key)
+static int BSP_SetParent(mnode_t *node, int key)
 {
     mnode_t *child;
 #if USE_REF
@@ -1244,11 +1244,10 @@ static qerror_t BSP_SetParent(mnode_t *node, int key)
     return Q_ERR_SUCCESS;
 }
 
-static qerror_t BSP_ValidateTree(bsp_t *bsp)
+static int BSP_ValidateTree(bsp_t *bsp)
 {
     mmodel_t *mod;
-    qerror_t ret;
-    int i;
+    int i, ret;
 #if USE_REF
     mface_t *face;
     int j;
@@ -1282,7 +1281,7 @@ static qerror_t BSP_ValidateTree(bsp_t *bsp)
 
 // also calculates the last portal number used
 // by CM code to allocate portalopen[] array
-static qerror_t BSP_ValidateAreaPortals(bsp_t *bsp)
+static int BSP_ValidateAreaPortals(bsp_t *bsp)
 {
     mareaportal_t   *p;
     int             i;
@@ -1370,11 +1369,11 @@ byte* BSP_GetPvs2(bsp_t *bsp, int cluster)
 }
 
 // Converts `maps/<name>.bsp` into `maps/pvs/<name>.bin`
-static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MAX_QPATH])
+static bool BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MAX_QPATH])
 {
 	int path_len = strlen(map_path);
 	if (path_len < 5 || strcmp(map_path + path_len - 4, ".bsp") != 0)
-		return qfalse;
+		return false;
 
 	const char* map_file = strrchr(map_path, '/');
 	if (map_file)
@@ -1388,29 +1387,29 @@ static qboolean BSP_GetPatchedPVSFileName(const char* map_path, char pvs_path[MA
 	strncat(pvs_path, map_file, strlen(map_file) - 4);
 	strcat(pvs_path, ".bin");
 
-	return qtrue;
+	return true;
 }
 
 // Loads the first- and second-order PVS matrices from a file called `maps/pvs/<mapname>.bin`
-static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
+static bool BSP_LoadPatchedPVS(bsp_t *bsp)
 {
 	char pvs_path[MAX_QPATH];
 
 	if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
-		return qfalse;
+		return false;
 
 	unsigned char* filebuf = 0;
-	ssize_t filelen = 0;
+	int filelen = 0;
 	filelen = FS_LoadFile(pvs_path, (void**)&filebuf);
 
 	if (filebuf == 0)
-		return qfalse;
+		return false;
 
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 	if (filelen != matrix_size * 2)
 	{
 		FS_FreeFile(filebuf);
-		return qfalse;
+		return false;
 	}
 
 	bsp->pvs_matrix = Z_Malloc(matrix_size);
@@ -1420,22 +1419,22 @@ static qboolean BSP_LoadPatchedPVS(bsp_t *bsp)
 	memcpy(bsp->pvs2_matrix, filebuf + matrix_size, matrix_size);
 
 	FS_FreeFile(filebuf);
-	return qtrue;
+	return true;
 }
 
 // Saves the first- and second-order PVS matrices to a file called `maps/pvs/<mapname>.bin`
-qboolean BSP_SavePatchedPVS(bsp_t *bsp)
+bool BSP_SavePatchedPVS(bsp_t *bsp)
 {
 	char pvs_path[MAX_QPATH];
 
 	if (!BSP_GetPatchedPVSFileName(bsp->name, pvs_path))
-		return qfalse;
+		return false;
 
 	if (!bsp->pvs_matrix)
-		return qfalse;
+		return false;
 
 	if (!bsp->pvs2_matrix)
-		return qfalse;
+		return false;
 
 	size_t matrix_size = bsp->visrowsize * bsp->vis->numclusters;
 	unsigned char* filebuf = Z_Malloc(matrix_size * 2);
@@ -1443,15 +1442,110 @@ qboolean BSP_SavePatchedPVS(bsp_t *bsp)
 	memcpy(filebuf, bsp->pvs_matrix, matrix_size);
 	memcpy(filebuf + matrix_size, bsp->pvs2_matrix, matrix_size);
 
-	qerror_t err = FS_WriteFile(pvs_path, filebuf, matrix_size * 2);
+	int err = FS_WriteFile(pvs_path, filebuf, matrix_size * 2);
 
 	Z_Free(filebuf);
 
 	if (err >= 0)
-		return qtrue;
+		return true;
 	else
-		return qfalse;
+		return false;
 }
+
+static bool BSP_FindBspxLump(dheader_t* header, size_t file_size, const char* name, const void** pLump, size_t* pLumpSize)
+{
+	// Find the end of the last BSP lump
+	size_t max_bsp_lump = 0;
+	for (uint32_t i = 0; i < HEADER_LUMPS; i++)
+	{
+		size_t end_of_lump = header->lumps[i].fileofs + header->lumps[i].filelen;
+		max_bsp_lump = max(max_bsp_lump, end_of_lump);
+	}
+
+	// Align to 4 bytes
+	max_bsp_lump = (max_bsp_lump + 3) & ~3ull;
+
+	// See if the BSPX header still fits in the file after the last BSP lump
+	if (max_bsp_lump + sizeof(bspx_header_t) > file_size)
+		return false;
+
+	// Validate the BSPX header
+	const bspx_header_t* bspx = (bspx_header_t*)((uint8_t*)header + max_bsp_lump);
+	if (bspx->id[0] != 'B' || bspx->id[1] != 'S' || bspx->id[2] != 'P' || bspx->id[3] != 'X')
+		return false;
+	if (max_bsp_lump + sizeof(bspx_header_t) + sizeof(bspx_lump_t) * bspx->numlumps > file_size)
+		return false;
+
+	// Go over the BSPX lumps and find one with the right name
+	for (uint32_t i = 0; i < bspx->numlumps; i++)
+	{
+		const bspx_lump_t* lump = (const bspx_lump_t*)(bspx + 1) + i;
+		if (strncmp(name, lump->lumpname, sizeof(lump->lumpname) - 1) == 0)
+		{
+			// See if the lump as declared fits in the file
+			if (lump->fileofs + lump->filelen > file_size)
+			{
+				Com_WPrintf("Malformed BSPX file: lump '%s' points at data past the end of file\n", name);
+				return false;
+			}
+
+			// Found a valid lump, return it
+			*pLump = (uint8_t*)header + lump->fileofs;
+			*pLumpSize = lump->filelen;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+#if USE_REF
+static void BSP_LoadBspxNormals(bsp_t* bsp, const void* data, size_t data_size)
+{
+	if (data_size < sizeof(bspx_facenormals_header_t))
+		return;
+
+	// Count the total number of face-vertices in the BSP
+	uint32_t total_vertices = 0;
+	for (int i = 0; i < bsp->numfaces; i++)
+	{
+		mface_t* face = bsp->faces + i;
+		total_vertices += face->numsurfedges;
+	}
+
+	// Validate the header and that all data fits into the lump
+	const bspx_facenormals_header_t* header = data;
+	size_t expected_data_size =
+		sizeof(bspx_facenormals_header_t) +
+		sizeof(vec3_t) * header->num_vectors +    // vectors
+		sizeof(uint32_t) * 3 * total_vertices;    // indices
+	if (data_size < expected_data_size)
+		return;
+
+	// Allocate the storage arrays
+	bsp->basisvectors = ALLOC(sizeof(vec3_t) * header->num_vectors);
+	bsp->numbasisvectors = header->num_vectors;
+	bsp->bases = ALLOC(sizeof(mbasis_t) * total_vertices);
+	bsp->numbases = total_vertices;
+
+	// Copy the vectors data
+	const float* vectors = (const float*)((const bspx_facenormals_header_t*)data + 1);
+	memcpy(bsp->basisvectors, vectors, sizeof(vec3_t) * header->num_vectors);
+
+	// Copy the indices data
+	const uint32_t* indices = (const uint32_t*)(vectors + header->num_vectors * 3);
+    memcpy(bsp->bases, indices, sizeof(uint32_t) * 3 * total_vertices);
+
+	// Add basis indexing
+	int basis_offset = 0;
+	for (int i = 0; i < bsp->numfaces; i++)
+	{
+		mface_t* face = bsp->faces + i;
+		face->firstbasis = basis_offset;
+		basis_offset += face->numsurfedges;
+	}
+}
+#endif
 
 /*
 ==================
@@ -1460,14 +1554,14 @@ BSP_Load
 Loads in the map and all submodels
 ==================
 */
-qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
+int BSP_Load(const char *name, bsp_t **bsp_p)
 {
     bsp_t           *bsp;
     byte            *buf;
     dheader_t       *header;
     const lump_info_t *info;
     size_t          filelen, ofs, len, end, count;
-    qerror_t        ret;
+    int             ret;
     byte            *lumpdata[HEADER_LUMPS];
     size_t          lumpcount[HEADER_LUMPS];
     size_t          memsize;
@@ -1534,6 +1628,15 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 
         memsize += count * info->memsize;
     }
+	
+#if USE_REF
+    const void* normal_lump_data = NULL;
+    size_t normal_lump_size = 0;
+    if (BSP_FindBspxLump(header, filelen, "FACENORMALS", &normal_lump_data, &normal_lump_size))
+    {
+        memsize += normal_lump_size;
+    }
+#endif
 
     // load into hunk
     len = strlen(name);
@@ -1546,7 +1649,7 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
     Hunk_Begin(&bsp->hunk, memsize + 4096);
 
     // calculate the checksum
-    bsp->checksum = LittleLong(Com_BlockChecksum(buf, filelen));
+    bsp->checksum = Com_BlockChecksum(buf, filelen);
 
     // load all lumps
     for (info = lumps; info->load; info++) {
@@ -1572,8 +1675,15 @@ qerror_t BSP_Load(const char *name, bsp_t **bsp_p)
 	}
 	else
 	{
-		bsp->pvs_patched = qtrue;
+		bsp->pvs_patched = true;
 	}
+
+#if USE_REF
+    if (normal_lump_size)
+	{
+		BSP_LoadBspxNormals(bsp, normal_lump_data, normal_lump_size);
+	}
+#endif
 
     Hunk_End(&bsp->hunk);
 
@@ -1604,7 +1714,7 @@ HELPER FUNCTIONS
 
 static lightpoint_t *light_point;
 
-static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec3_t p1, vec3_t p2)
+static bool BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec3_t p1, vec3_t p2)
 {
     vec_t d1, d2, frac, midf;
     vec3_t mid;
@@ -1631,7 +1741,7 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
 
         // check near side
         if (BSP_RecursiveLightPoint(node->children[side], p1f, midf, p1, mid))
-            return qtrue;
+            return true;
 
         for (i = 0, surf = node->firstface; i < node->numfaces; i++, surf++) {
             if (!surf->lightmap)
@@ -1656,14 +1766,14 @@ static qboolean BSP_RecursiveLightPoint(mnode_t *node, float p1f, float p2f, vec
             light_point->s = s;
             light_point->t = t;
             light_point->fraction = midf;
-            return qtrue;
+            return true;
         }
 
         // check far side
         return BSP_RecursiveLightPoint(node->children[side ^ 1], midf, p2f, mid, p2);
     }
 
-    return qfalse;
+    return false;
 }
 
 void BSP_LightPoint(lightpoint_t *point, vec3_t start, vec3_t end, mnode_t *headnode)
@@ -1766,7 +1876,7 @@ byte *BSP_ClusterVis(bsp_t *bsp, byte *mask, int cluster, int vis)
         }
         c = in[1];
         in += 2;
-        if (out + c > out_end) {
+        if (c > out_end - out) {
 overrun:
             c = out_end - out;
         }
@@ -1812,7 +1922,7 @@ overrun:
     return mask;
 }
 
-mleaf_t *BSP_PointLeaf(mnode_t *node, vec3_t p)
+mleaf_t *BSP_PointLeaf(mnode_t *node, const vec3_t p)
 {
     float d;
 

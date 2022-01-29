@@ -221,11 +221,9 @@ typedef struct {
 #define DVIS_PHS    1
 #define DVIS_PVS2   16 // Q2RTX : 2nd order PVS
 
-#define DVIS_CLUSTERS   8
-
 typedef struct {
     uint32_t    numclusters;
-    uint32_t    bitofs[DVIS_CLUSTERS][2];    // bitofs[numclusters][2]
+    uint32_t    bitofs[][2];    // bitofs[numclusters][2]
 } dvis_t;
 
 // each area has a list of portals that lead into other areas
@@ -288,5 +286,31 @@ typedef struct {
     uint32_t    planenum;        // facing out of the leaf
     uint32_t    texinfo;
 } dbrushside_qbsp_t;
+
+typedef struct {
+    char id[4];  // 'BSPX'
+    uint32_t numlumps;
+} bspx_header_t;
+
+typedef struct {
+    char lumpname[24]; // up to 23 chars, zero-padded
+    uint32_t fileofs;       // from file start
+    uint32_t filelen;
+} bspx_lump_t;
+
+typedef struct {
+	uint32_t num_vectors;
+	/* followed by:
+		vec3 vectors[num_vectors]
+
+		for each face in bsp {
+			for each vert in face {
+				u32 normal_index;
+				u32 tangent_index;
+				u32 bitangent_index;
+			}
+		}
+	 */
+} bspx_facenormals_header_t;
 
 #endif // FORMAT_BSP_H

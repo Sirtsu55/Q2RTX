@@ -1,5 +1,7 @@
 # Quake II RTX
 
+[![Build Status](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml/badge.svg)](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml)
+
 **Quake II RTX** is NVIDIA's attempt at implementing a fully functional 
 version of Id Software's 1997 hit game **Quake II** with RTX path-traced 
 global illumination.
@@ -40,11 +42,13 @@ original game.
   - Player avatar (casting shadows, visible in reflections)
   - Recursive reflections and refractions on water and glass, mirror, and screen surfaces
   - Procedural environments (sky, mountains, clouds that react to lighting; also space)
-  - "Shader balls" as a way to experiment with materials and see how they look in different environments
   - Sunlight with direct and indirect illumination
   - Volumetric lighting (god-rays)
 
 You can download functional builds of the game from [GitHub Releases](https://github.com/NVIDIA/Q2RTX/releases).
+
+Latest development builds can be found in the [Actions](https://github.com/NVIDIA/Q2RTX/actions/workflows/build.yml) tab.
+To run a development build, download the artifact, extract it and put `q2rtx_media.pkz`, `blue_noise.pkz` and the `pak*.pak` files from the original game into `baseq2/`.
 
 ## Additional Information
 
@@ -231,11 +235,11 @@ Note: the password set here should match the password specified in the korgi con
 Note 2: enabling the rcon backdoor allows other people to issue console commands to your game from 
 other computers, so choose a good password.
 
-## Shader Balls Feature
+## Test Model
 
-The engine includes support for placing a set of material sampling balls in any location. Follow these steps to use this feature:
+The engine includes support for placing a test model in any location. You can use any MD2, MD3 or IQM model. Follow these steps to use this feature:
 
-  - Download the `shader_balls.pkz` package from the [Releases](https://github.com/NVIDIA/Q2RTX/releases) page.
-  - Place or extract that package into your `baseq2` folder.
-  - Run the game with `cl_shaderballs` set to 1, either from command line or from console before loading a map.
-  - Use the `drop_balls` command to place the balls at the current player location.
+  - To use the material sampling balls model, download the `shader_balls.pkz` package from the [Releases](https://github.com/NVIDIA/Q2RTX/releases) page. Place or extract that package into your `baseq2` folder.
+  - Run the game with the `cl_testmodel` variable set to the path of the test model.
+  - Use the `puttest` command to place the test model at the current player location.
+  - Adjust the test model animation speed with the `cl_testfps` variable and its opacity with the `cl_testalpha` variable.
