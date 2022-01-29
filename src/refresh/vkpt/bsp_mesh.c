@@ -1920,10 +1920,6 @@ bsp_mesh_create_from_bsp(bsp_mesh_t *wm, bsp_t *bsp, const char* map_name)
 	}
 
 	wm->num_primitives = prim_ctr;
-	
-    if (wm->num_vertices >= MAX_VERT_BSP) {
-		Com_Error(ERR_DROP, "The BSP model has too many vertices (%d)", wm->num_vertices);
-	}
 
 	compute_world_tangents(bsp, wm);
 	
