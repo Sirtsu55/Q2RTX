@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "bspentityalias": {
+      "commandName": "Project",
+      "commandLineArgs": "2box4-qbism.bsp"
+    }
+  }
+}
