@@ -1,0 +1,19 @@
+models/weapons/v_shotg/v_shotg:
+	texture_base models/weapons/v_shotg/v_shotg.tga
+	texture_normals models/weapons/v_shotg/v_shotg_n.tga
+	kind CHROME
+
+models/weapons/v_perf/v_perf:
+	texture_base models/weapons/v_perf/v_perf.tga
+	texture_normals models/weapons/v_perf/v_perf_n.tga
+	kind CHROME
+	
+models/weapons/v_axe/arm:
+	texture_base models/weapons/v_axe/arm.tga
+	texture_normals models/weapons/v_axe/arm_n.png
+	metalness_factor 0
+
+models/weapons/v_axe/axe:
+	texture_base models/weapons/v_axe/axe.tga
+	texture_normals models/weapons/v_axe/axe_n.tga
+	kind CHROME
