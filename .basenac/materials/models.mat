@@ -17,3 +17,10 @@ models/weapons/v_axe/axe:
 	texture_base models/weapons/v_axe/axe.tga
 	texture_normals models/weapons/v_axe/axe_n.tga
 	kind CHROME
+
+models/proj/lightning/skin:
+	texture_base models/proj/lightning/skin.pcx
+	texture_emissive models/proj/lightning/skin.pcx
+	emissive_factor 4.0
+	base_factor 2.5
+	specular_factor 0
