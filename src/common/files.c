@@ -3343,12 +3343,25 @@ static void free_game_paths(void)
     fs_searchpaths = fs_base_searchpaths;
 }
 
+#ifdef _DEBUG
+#define add_temp_game_dir(...) \
+    { \
+        char backup[sizeof(fs_gamedir)]; \
+        Q_strlcpy(backup, fs_gamedir, sizeof(backup)); \
+        add_game_dir(__VA_ARGS__); \
+        Q_strlcpy(fs_gamedir, backup, sizeof(backup)); \
+    }
+#else
+#define add_temp_game_dir(...)
+#endif
+
 static void setup_base_paths(void)
 {
     // base paths have both BASE and GAME bits set by default
     // the GAME bit will be removed once gamedir is set,
     // and will be put back once gamedir is reset to basegame
     add_game_dir(FS_PATH_BASE | FS_PATH_GAME, "%s/"BASEGAME, sys_basedir->string);
+    add_temp_game_dir(FS_PATH_GAME, "%s/."BASEGAME, sys_basedir->string);
     fs_base_searchpaths = fs_searchpaths;
 }
 
@@ -3364,6 +3377,7 @@ static void setup_game_paths(void)
         // home paths override system paths
         if (sys_homedir->string[0]) {
             add_game_dir(FS_PATH_BASE, "%s/"BASEGAME, sys_homedir->string);
+            add_temp_game_dir(FS_PATH_GAME, "%s/."BASEGAME, sys_homedir->string);
             add_game_dir(FS_PATH_GAME, "%s/%s", sys_homedir->string, fs_game->string);
         }
 
@@ -3379,6 +3393,8 @@ static void setup_game_paths(void)
         if (sys_homedir->string[0]) {
             add_game_dir(FS_PATH_BASE | FS_PATH_GAME,
                          "%s/"BASEGAME, sys_homedir->string);
+            add_temp_game_dir(FS_PATH_GAME,
+                              "%s/."BASEGAME, sys_homedir->string);
         }
 
         // add the game bit to base paths
