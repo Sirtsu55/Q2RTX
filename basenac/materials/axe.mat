@@ -1,9 +1,0 @@
-models/weapons/axe/arm:
-	texture_base models/weapons/axe/arm.tga
-	texture_normals models/weapons/axe/arm_n.png
-	metalness_factor 0.000000
-
-models/weapons/axe/axe:
-	texture_base models/weapons/axe/axe.tga
-	texture_normals models/weapons/axe/axe_n.tga
-

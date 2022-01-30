@@ -2,9 +2,10 @@
 .q2pro/
 .q2proded/
 .baseq2/
-.basenac/
 q2rtx
 q2rtxded
+nac
+nacded
 game*.so
 *.swp
 build*/
@@ -21,29 +22,14 @@ shader_vkpt
 music/
 *.sublime-*
 
-*.bin
-*.bsp
-*.cin
-*.dds
-*.dm2
-*.jpg
-*.md2
-*.md3
-*.iqm
-*.pak
-*.pcx
-*.pkz
-*.png
-*.sp2
-*.tga
 *.tmp
-*.wal
-*.wav
 *.bak
+*.obj
 
 q2config.cfg
 save
 */docs
-basenac/**/*.txt
-!basenac/*.txt
 baseq2/
+basenac/
+
+CMakeSettings.json
