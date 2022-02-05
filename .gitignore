@@ -29,7 +29,6 @@ music/
 q2config.cfg
 save
 */docs
-baseq2/
-basenac/
+./basenac/
 
 CMakeSettings.json

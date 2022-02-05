@@ -966,7 +966,7 @@ struct gclient_s {
     bool        update_chase;       // need to update chase info?
 
     // N&C
-    bool        axe_attack;
+    bool        axe_attack, can_charge_axe, can_release_charge;
     bool        inspect;
 };
 
@@ -1001,7 +1001,7 @@ struct edict_s {
     int         movetype;
     int         flags;
 
-    char        *model;
+    char        *model, *model2, *model3, *model4;
     gtime_t     free_time;           // time when the object was freed
 
     //
@@ -1135,7 +1135,6 @@ struct edict_s {
 // API wrappers
 
 // Paril - animated entity stuff
-#define SPAWNFLAG_USE_ANIMATION (1 << 23)
 void G_InitAnimation(edict_t *ent);
 
 void SV_CenterPrint(edict_t *ent, const char *message);

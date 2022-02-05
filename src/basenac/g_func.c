@@ -1094,8 +1094,12 @@ void SP_func_door(edict_t *ent)
 
     G_SetMovedir(ent->s.angles, ent->movedir);
     ent->movetype = MOVETYPE_PUSH;
+
     ent->solid = SOLID_BSP;
     SV_SetBrushModel(ent, ent->model);
+
+    if (ent->model2)
+        ent->s.modelindex2 = SV_ModelIndex(ent->model2);
 
     ent->blocked = door_blocked;
     ent->use = door_use;
@@ -1578,8 +1582,12 @@ void SP_func_train(edict_t *self)
         if (!self->dmg)
             self->dmg = 100;
     }
+
     self->solid = SOLID_BSP;
     SV_SetBrushModel(self, self->model);
+
+    if (self->model2)
+        self->s.modelindex2 = SV_ModelIndex(self->model2);
 
     if (st.noise)
         self->moveinfo.sound_middle = SV_SoundIndex(st.noise);

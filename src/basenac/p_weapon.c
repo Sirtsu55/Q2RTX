@@ -346,16 +346,22 @@ void Weapon_Axe(edict_t *ent)
         ANIM_IDLE_FIRST,
         ANIM_IDLE_LAST      = 115,
         ANIM_ATTACK1_FIRST,
+        ANIM_ATTACK1_CHARGE = 119,
         ANIM_ATTACK1_LAST   = 131,
         ANIM_ATTACK2_FIRST,
         ANIM_ATTACK2_LAST   = 147,
         ANIM_ATTACK3_FIRST,
         ANIM_ATTACK3_LAST   = 162,
-        ANIM_PUTAWAY_FIRST  = 173,
-        ANIM_PUTAWAY_LAST   = 178,
-        ANIM_HUG_FIRST      = 163,
-        ANIM_HUG_WAIT       = 168,
-        ANIM_HUG_LAST       = 172
+        ANIM_PUTAWAY_FIRST  = 163,
+        ANIM_PUTAWAY_LAST   = 168,
+        ANIM_INSPECT1_FIRST = 207,
+        ANIM_INSPECT1_LAST  = 235,
+        ANIM_INSPECT2_FIRST = 237,
+        ANIM_INSPECT2_LAST  = 294,
+        ANIM_CHARGE_LOOP_FIRST = 169,
+        ANIM_CHARGE_LOOP_END   = 183,
+        ANIM_CHARGE_ATK_FIRST  = 184,
+        ANIM_CHARGE_ATK_END    = 205,
     };
     ent->client->ps.gunframe++;
 
@@ -373,80 +379,174 @@ void Weapon_Axe(edict_t *ent)
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
             ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
             ent->client->weaponstate = WEAPON_FIRING;
-            ent->client->axe_attack = true;
-        } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST + 1 || ent->client->ps.gunframe == ANIM_HUG_LAST + 1) {
-            ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+            ent->client->axe_attack = ent->client->can_charge_axe = true;
+            ent->client->can_release_charge = false;
+        } else if ((ent->client->ps.gunframe == ANIM_IDLE_LAST + 1 ||
+                    ent->client->ps.gunframe == ANIM_INSPECT1_LAST + 1 ||
+                    ent->client->ps.gunframe == ANIM_INSPECT2_LAST + 1) ||
+                    ent->client->inspect) {
+            float r = random();
+            float inspect_threshold = ent->client->inspect ? 0.5f : 0.9f;
+
+            if (!ent->client->inspect && r < 0.8f) {
+                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+            } else if (ent->client->ps.gunframe <= ANIM_IDLE_LAST + 1) {
+                if (r < inspect_threshold) {
+                    ent->client->ps.gunframe = ANIM_INSPECT1_FIRST;
+                } else {
+                    ent->client->ps.gunframe = ANIM_INSPECT2_FIRST;
+                }
+            }
+
+            ent->client->inspect = false;
         }
         break;
     case WEAPON_FIRING:
-        if (ent->client->ps.gunframe == ANIM_ATTACK1_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK2_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
+        // charging logic
+        if (ent->client->ps.gunframe >= ANIM_CHARGE_LOOP_FIRST)
         {
-            ent->client->axe_attack = true;
-
-            if (!(ent->client->buttons & BUTTON_ATTACK))
+            if (ent->client->ps.gunframe >= ANIM_CHARGE_LOOP_FIRST && ent->client->ps.gunframe <= ANIM_CHARGE_LOOP_END)
             {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-                ent->client->weaponstate = WEAPON_READY;
+                if (!(ent->client->buttons & BUTTON_ATTACK)) {
+                    if (!ent->client->can_release_charge)
+                        ent->client->ps.gunframe = ANIM_ATTACK1_CHARGE + 1;
+                    else
+                        ent->client->ps.gunframe = ANIM_CHARGE_ATK_FIRST;
+                }
+
+                if (ent->client->ps.gunframe == ANIM_CHARGE_LOOP_END)
+                {
+                    ent->client->ps.gunframe = ANIM_CHARGE_LOOP_FIRST;
+                    ent->client->can_release_charge = true;
+                }
             }
-            else if (ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
-                ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
-        }
 
-        if (ent->client->axe_attack && (
-            (ent->client->ps.gunframe >= 120 && ent->client->ps.gunframe <= 123) ||
-            (ent->client->ps.gunframe >= 134 && ent->client->ps.gunframe <= 137) ||
-            (ent->client->ps.gunframe >= 151 && ent->client->ps.gunframe <= 154)))
-        {
-            vec3_t forward, right, start, end, offset;
+            // charge attack
+            if (ent->client->ps.gunframe >= ANIM_CHARGE_ATK_FIRST)
+            {
+                if (ent->client->axe_attack && (ent->client->ps.gunframe >= 185 && ent->client->ps.gunframe <= 192))
+                {
+                    vec3_t forward, right, start, end, offset;
 
-            AngleVectors(ent->client->v_angle, forward, right, NULL);
-            VectorSet(offset, 0, 0, ent->viewheight - 8);
-            P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-            VectorMA(start, 48.f, forward, end);
+                    AngleVectors(ent->client->v_angle, forward, right, NULL);
+                    VectorSet(offset, 0, 0, ent->viewheight - 8);
+                    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+                    VectorMA(start, 48.f, forward, end);
             
-            trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
+                    trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
 
-            if (tr.fraction == 1.f)
-                tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+                    if (tr.fraction == 1.f)
+                        tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
 
-            if (tr.fraction < 1.f)
-            {
-                if (tr.ent && tr.ent->takedamage)
-                {
-                    T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
-                    SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+                    if (tr.fraction < 1.f)
+                    {
+                        if (tr.ent && tr.ent->takedamage)
+                        {
+                            T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8 * 5, 0, 0, MOD_BLASTER);
+                            SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+                        }
+                        else if (!(tr.surface->flags & SURF_SKY))
+                        {
+                            SV_WriteByte(svc_temp_entity);
+                            SV_WriteByte(TE_GUNSHOT);
+                            SV_WritePos(tr.endpos);
+                            SV_WriteDir(tr.plane.normal);
+                            SV_Multicast(tr.endpos, MULTICAST_PVS, false);
+                        }
+
+                        ent->client->axe_attack = false;
+                    }
                 }
-                else if (!(tr.surface->flags & SURF_SKY))
-                {
-                    SV_WriteByte(svc_temp_entity);
-                    SV_WriteByte(TE_GUNSHOT);
-                    SV_WritePos(tr.endpos);
-                    SV_WriteDir(tr.plane.normal);
-                    SV_Multicast(tr.endpos, MULTICAST_PVS, false);
-                }
 
-                ent->client->axe_attack = false;
+                if (ent->client->ps.gunframe == ANIM_CHARGE_ATK_END + 1)
+                {
+                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+                    ent->client->weaponstate = WEAPON_READY;
+                }
             }
         }
-
-        if (ent->client->latched_buttons & BUTTON_ATTACK)
+        // not charging, regular swipes
+        else
         {
-            ent->client->latched_buttons &= ~BUTTON_ATTACK;
+            if (!(ent->client->buttons & BUTTON_ATTACK)) {
+                ent->client->can_charge_axe = false;
+            }
 
-            if (ent->client->ps.gunframe >= 121 && ent->client->ps.gunframe <= ANIM_ATTACK2_FIRST)
+            if (ent->client->ps.gunframe == ANIM_ATTACK1_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK2_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
             {
-                ent->client->ps.gunframe = ANIM_ATTACK2_FIRST + 1;
                 ent->client->axe_attack = true;
+
+                if (!(ent->client->buttons & BUTTON_ATTACK))
+                {
+                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+                    ent->client->weaponstate = WEAPON_READY;
+                }
+                else if (ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
+                {
+                    ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
+                    ent->client->can_charge_axe = true;
+                }
             }
-            else if (ent->client->ps.gunframe >= 138 && ent->client->ps.gunframe <= ANIM_ATTACK3_FIRST)
+
+            if (ent->client->can_charge_axe && ent->client->ps.gunframe == ANIM_ATTACK1_CHARGE)
+                ent->client->ps.gunframe = ANIM_CHARGE_LOOP_FIRST;
+            else if (ent->client->axe_attack && (
+                (ent->client->ps.gunframe >= 120 && ent->client->ps.gunframe <= 123) ||
+                (ent->client->ps.gunframe >= 134 && ent->client->ps.gunframe <= 137) ||
+                (ent->client->ps.gunframe >= 151 && ent->client->ps.gunframe <= 154)))
             {
-                ent->client->ps.gunframe = ANIM_ATTACK3_FIRST + 1;
-                ent->client->axe_attack = true;
+                vec3_t forward, right, start, end, offset;
+
+                AngleVectors(ent->client->v_angle, forward, right, NULL);
+                VectorSet(offset, 0, 0, ent->viewheight - 8);
+                P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+                VectorMA(start, 48.f, forward, end);
+            
+                trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
+
+                if (tr.fraction == 1.f)
+                    tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+
+                if (tr.fraction < 1.f)
+                {
+                    if (tr.ent && tr.ent->takedamage)
+                    {
+                        T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
+                        SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+                    }
+                    else if (!(tr.surface->flags & SURF_SKY))
+                    {
+                        SV_WriteByte(svc_temp_entity);
+                        SV_WriteByte(TE_GUNSHOT);
+                        SV_WritePos(tr.endpos);
+                        SV_WriteDir(tr.plane.normal);
+                        SV_Multicast(tr.endpos, MULTICAST_PVS, false);
+                    }
+
+                    ent->client->axe_attack = false;
+                }
             }
-            else if (ent->client->ps.gunframe >= 154 && ent->client->ps.gunframe <= ANIM_ATTACK3_LAST)
+
+            if (ent->client->latched_buttons & BUTTON_ATTACK)
             {
-                ent->client->ps.gunframe = ANIM_ATTACK1_FIRST + 1;
-                ent->client->axe_attack = true;
+                ent->client->latched_buttons &= ~BUTTON_ATTACK;
+
+                if (ent->client->ps.gunframe >= 121 && ent->client->ps.gunframe <= ANIM_ATTACK2_FIRST)
+                {
+                    ent->client->ps.gunframe = ANIM_ATTACK2_FIRST + 1;
+                    ent->client->axe_attack = true;
+                }
+                else if (ent->client->ps.gunframe >= 138 && ent->client->ps.gunframe <= ANIM_ATTACK3_FIRST)
+                {
+                    ent->client->ps.gunframe = ANIM_ATTACK3_FIRST + 1;
+                    ent->client->axe_attack = true;
+                }
+                else if (ent->client->ps.gunframe >= 154 && ent->client->ps.gunframe <= ANIM_ATTACK3_LAST)
+                {
+                    ent->client->ps.gunframe = ANIM_ATTACK1_FIRST + 1;
+                    ent->client->axe_attack = true;
+                    ent->client->can_charge_axe = true;
+                }
             }
         }
         break;

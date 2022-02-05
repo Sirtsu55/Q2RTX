@@ -1797,3 +1797,90 @@ void SP_model_spawn(edict_t *ent)
 
     SV_LinkEntity(ent);
 }
+
+#define PROPERTY_SPAWNFLAG_MODEL    1
+#define PROPERTY_SPAWNFLAG_EFFECTS  2
+#define PROPERTY_SPAWNFLAG_RENDERFX 4
+#define PROPERTY_SPAWNFLAG_NOISE    8
+#define PROPERTY_SPAWNFLAG_MODEL2   16
+#define PROPERTY_SPAWNFLAG_MODEL3   32
+#define PROPERTY_SPAWNFLAG_MODEL4   64
+
+static void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
+{
+    int new_modelindex, new_effects, new_renderfx, new_sound, new_modelindex2, new_modelindex3, new_modelindex4;
+    
+    edict_t *t = NULL;
+    
+    while (t = G_Find(t, FOFS(targetname), ent->target))
+    {
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL)
+        {
+            new_modelindex = t->s.modelindex;
+            t->s.modelindex = ent->s.modelindex;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_EFFECTS)
+        {
+            new_effects = t->s.effects;
+            t->s.effects = ent->s.effects;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_RENDERFX)
+        {
+            new_renderfx = t->s.renderfx;
+            t->s.renderfx = ent->s.renderfx;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_NOISE)
+        {
+            new_sound = t->s.sound;
+            t->s.sound = ent->s.sound;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL2)
+        {
+            new_modelindex2 = t->s.modelindex2;
+            t->s.modelindex2 = ent->s.modelindex2;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL3)
+        {
+            new_modelindex3 = t->s.modelindex3;
+            t->s.modelindex3 = ent->s.modelindex3;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL4)
+        {
+            new_modelindex4 = t->s.modelindex4;
+            t->s.modelindex4 = ent->s.modelindex4;
+        }
+    }
+
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL)
+        ent->s.modelindex = new_modelindex;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_EFFECTS)
+        ent->s.effects = new_effects;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_RENDERFX)
+        ent->s.renderfx = new_renderfx;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_NOISE)
+        ent->s.sound = new_sound;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL2)
+        ent->s.modelindex2 = new_modelindex2;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL3)
+        ent->s.modelindex3 = new_modelindex3;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL4)
+        ent->s.modelindex4 = new_modelindex4;
+
+    SV_LinkEntity(t);
+}
+
+void SP_misc_property_swap(edict_t *ent)
+{
+    ent->use = misc_property_swap_use;
+    
+    if (ent->model)
+        ent->s.modelindex = SV_ModelIndex(ent->model);
+    if (ent->model2)
+        ent->s.modelindex2 = SV_ModelIndex(ent->model2);
+    if (ent->model3)
+        ent->s.modelindex3 = SV_ModelIndex(ent->model3);
+    if (ent->model4)
+        ent->s.modelindex4 = SV_ModelIndex(ent->model4);
+    if (st.noise)
+        ent->s.sound = SV_SoundIndex(st.noise);
+}

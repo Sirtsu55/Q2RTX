@@ -152,6 +152,7 @@ void SP_turret_driver(edict_t *self);
 
 // Paril
 void SP_model_spawn(edict_t *ent);
+void SP_misc_property_swap(edict_t *ent);
 
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
@@ -278,6 +279,7 @@ static const spawn_func_t spawn_funcs[] = {
 
     // Paril
     { "model_spawn", SP_model_spawn },
+    { "misc_property_swap", SP_misc_property_swap },
 
     {NULL, NULL}
 };
@@ -285,6 +287,9 @@ static const spawn_func_t spawn_funcs[] = {
 static const spawn_field_t spawn_fields[] = {
     {"classname", FOFS(classname), F_LSTRING},
     {"model", FOFS(model), F_LSTRING},
+    {"model2", FOFS(model2), F_LSTRING},
+    {"model3", FOFS(model3), F_LSTRING},
+    {"model4", FOFS(model4), F_LSTRING},
     {"spawnflags", FOFS(spawnflags), F_INT},
     {"speed", FOFS(speed), F_FLOAT},
     {"accel", FOFS(accel), F_FLOAT},
@@ -672,7 +677,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_NOT_DEATHMATCH);
 
             // Paril - generic animation support
-            if (ent->spawnflags & SPAWNFLAG_USE_ANIMATION) {
+            if (ent->anim.start || ent->anim.end) {
                 G_InitAnimation(ent);
             }
         }

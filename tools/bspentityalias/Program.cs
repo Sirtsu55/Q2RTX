@@ -163,7 +163,7 @@ static class Application
 		if (!bspFile.Exists)
 		{
 			PrintUsage();
-			Console.WriteLine("File \"{0}\" does not exist", args[1]);
+			Console.WriteLine("File \"{0}\" does not exist", args.Length == 2 ? args[1] : args[0]);
 			return;
 		}
 
@@ -177,7 +177,7 @@ static class Application
 			if (!file.Exists)
 			{
 				PrintUsage();
-				Console.WriteLine("Alias definition file \"{0}\" does not exist (checked relative to current dir & relative to path-to-map.bsp's directory)", args[0]);
+				Console.WriteLine("Alias definition file \"{0}\" does not exist (checked relative to current dir & relative to path-to-map.bsp's directory)", aliasFile);
 				return;
 			}
 		}
@@ -333,7 +333,7 @@ static class Application
 		Console.WriteLine("done; writing output...");
 
 		var outFile = new FileInfo(Path.Join(bspFile.DirectoryName, bspFile.Name + ".ent"));
-		using (var outStream = new StreamWriter(outFile.OpenWrite()))
+		using (var outStream = outFile.CreateText())
 		{
 			foreach (var entity in entities)
 			{
@@ -345,7 +345,7 @@ static class Application
 				outStream.WriteLine("}");
 			}
 		}
-		Console.WriteLine("finished");
 
+		Console.WriteLine("finished");
 	}
 }

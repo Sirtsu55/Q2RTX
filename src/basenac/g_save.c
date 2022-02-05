@@ -86,8 +86,11 @@ static const save_field_t entityfields[] = {
 
     I(movetype),
     I(flags),
-
+    
     L(model),
+    L(model2),
+    L(model3),
+    L(model4),
     I64(free_time),
 
     L(message),
