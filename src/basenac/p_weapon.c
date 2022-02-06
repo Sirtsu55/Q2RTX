@@ -372,30 +372,44 @@ void Weapon_Axe(edict_t *ent)
             ent->client->weaponstate = WEAPON_READY;
         break;
     case WEAPON_READY:
-        if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING)) {
+        if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING))
+        {
             ent->client->weaponstate = WEAPON_DROPPING;
             ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
-        } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
+        }
+        else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK))
+        {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
             ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
             ent->client->weaponstate = WEAPON_FIRING;
             ent->client->axe_attack = ent->client->can_charge_axe = true;
             ent->client->can_release_charge = false;
-        } else if ((ent->client->ps.gunframe == ANIM_IDLE_LAST + 1 ||
+        }
+        else if ((ent->client->ps.gunframe == ANIM_IDLE_LAST + 1 ||
                     ent->client->ps.gunframe == ANIM_INSPECT1_LAST + 1 ||
                     ent->client->ps.gunframe == ANIM_INSPECT2_LAST + 1) ||
-                    ent->client->inspect) {
+                    ent->client->inspect)
+        {
             float r = random();
-            float inspect_threshold = ent->client->inspect ? 0.5f : 0.9f;
 
-            if (!ent->client->inspect && r < 0.8f) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            } else if (ent->client->ps.gunframe <= ANIM_IDLE_LAST + 1) {
-                if (r < inspect_threshold) {
-                    ent->client->ps.gunframe = ANIM_INSPECT1_FIRST;
-                } else {
-                    ent->client->ps.gunframe = ANIM_INSPECT2_FIRST;
+            if (ent->client->inspect)
+            {
+                if (ent->client->ps.gunframe <= ANIM_IDLE_LAST + 1)
+                {
+                    if (r < 0.5f)
+                        ent->client->ps.gunframe = ANIM_INSPECT1_FIRST;
+                    else
+                        ent->client->ps.gunframe = ANIM_INSPECT2_FIRST;
                 }
+            }
+            else
+            {
+                if (ent->client->ps.gunframe > ANIM_IDLE_LAST + 1 || r < 0.8f)
+                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+                else if (r < 0.9f)
+                    ent->client->ps.gunframe = ANIM_INSPECT1_FIRST;
+                else
+                    ent->client->ps.gunframe = ANIM_INSPECT2_FIRST;
             }
 
             ent->client->inspect = false;
