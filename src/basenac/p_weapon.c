@@ -482,9 +482,9 @@ void Weapon_Axe(edict_t *ent)
         // not charging, regular swipes
         else
         {
-            if (!(ent->client->buttons & BUTTON_ATTACK)) {
-                ent->client->can_charge_axe = false;
-            }
+            //if (!(ent->client->buttons & BUTTON_ATTACK)) {
+            //    ent->client->can_charge_axe = false;
+            //}
 
             if (ent->client->ps.gunframe == ANIM_ATTACK1_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK2_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
             {
