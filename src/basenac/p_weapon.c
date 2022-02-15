@@ -440,11 +440,23 @@ void Weapon_Axe(edict_t *ent)
             {
                 if (ent->client->axe_attack && (ent->client->ps.gunframe >= 185 && ent->client->ps.gunframe <= 192))
                 {
+
                     vec3_t forward, right, start, end, offset;
 
                     AngleVectors(ent->client->v_angle, forward, right, NULL);
                     VectorSet(offset, 0, 0, ent->viewheight - 8);
                     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+                    
+                    if (ent->client->ps.gunframe == 185)
+                    {
+                        if (!(ent->client->ps.pmove.pm_flags & PMF_ON_GROUND))
+                            ent->velocity[2] = 0;
+
+                        VectorMA(ent->velocity, 400.f, forward, ent->velocity);
+
+                        ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
+                    }
+
                     VectorMA(start, 48.f, forward, end);
             
                     trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
