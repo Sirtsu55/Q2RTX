@@ -450,9 +450,18 @@ void Weapon_Axe(edict_t *ent)
                     if (ent->client->ps.gunframe == 185)
                     {
                         if (!(ent->client->ps.pmove.pm_flags & PMF_ON_GROUND))
-                            ent->velocity[2] = 0;
+                            ent->velocity[2] = 181.f;
+                        else
+                        {
+                            ent->s.origin[2] -= 2.f;
+                            ent->client->ps.pmove.origin[2] -= 2.f;
+                            ent->velocity[2] = 181.f;
+                            ent->groundentity = NULL;
 
-                        VectorMA(ent->velocity, 400.f, forward, ent->velocity);
+                            SV_LinkEntity(ent);
+                        }
+
+                        VectorMA(ent->velocity, 300.f, forward, ent->velocity);
 
                         ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
                     }
