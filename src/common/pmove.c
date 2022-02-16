@@ -293,7 +293,7 @@ static void PM_Friction(void)
     drop = 0;
 
 // apply ground friction
-    if ((pm->groundentity && pml.groundsurface && !(pml.groundsurface->flags & SURF_SLICK)) || (pml.ladder)) {
+    if (!(pm->s.pm_flags & PMF_TIME_LAND) && ((pm->groundentity && pml.groundsurface && !(pml.groundsurface->flags & SURF_SLICK)) || (pml.ladder))) {
         friction = pmp->friction;
         control = speed < pm_stopspeed ? pm_stopspeed : speed;
         drop += control * friction * pml.frametime;
@@ -592,7 +592,7 @@ static void PM_CategorizePosition(void)
 
             // hitting solid ground will end a waterjump
             if (pm->s.pm_flags & PMF_TIME_WATERJUMP) {
-                pm->s.pm_flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
+                pm->s.pm_flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_TELEPORT);
                 pm->s.pm_time = 0;
             }
 
@@ -640,11 +640,6 @@ PM_CheckJump
 */
 static void PM_CheckJump(void)
 {
-    if (pm->s.pm_flags & PMF_TIME_LAND) {
-        // hasn't been long enough since landing to jump again
-        return;
-    }
-
     if (pm->cmd.upmove < 10) {
         // not holding jump
         pm->s.pm_flags &= ~PMF_JUMP_HELD;

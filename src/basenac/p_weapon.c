@@ -453,17 +453,22 @@ void Weapon_Axe(edict_t *ent)
                             ent->velocity[2] = 181.f;
                         else
                         {
-                            ent->s.origin[2] -= 2.f;
-                            ent->client->ps.pmove.origin[2] -= 2.f;
-                            ent->velocity[2] = 181.f;
-                            ent->groundentity = NULL;
+                            if (ent->client->v_angle[0] < -2.f)
+                            {
+                                ent->s.origin[2] -= 2.f;
+                                ent->client->ps.pmove.origin[2] -= 2.f;
+                                ent->velocity[2] = 181.f;
+                                ent->groundentity = NULL;
 
-                            SV_LinkEntity(ent);
+                                SV_LinkEntity(ent);
+                            }
                         }
 
                         VectorMA(ent->velocity, 300.f, forward, ent->velocity);
 
                         ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
+                        ent->client->ps.pmove.pm_flags |= PMF_TIME_LAND;
+                        ent->client->ps.pmove.pm_time = 42;
                     }
 
                     VectorMA(start, 48.f, forward, end);
