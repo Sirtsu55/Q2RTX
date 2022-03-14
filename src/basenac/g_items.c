@@ -22,7 +22,7 @@ bool        Pickup_Weapon(edict_t *ent, edict_t *other);
 void        Use_Weapon(edict_t *ent, gitem_t *inv);
 void        Drop_Weapon(edict_t *ent, gitem_t *inv);
 
-void Weapon_Axe(edict_t *ent);
+extern const weapon_animation_t weap_axe_activate;
 void Weapon_Shotgun(edict_t *ent);
 void Weapon_SuperShotgun(edict_t *ent);
 void Weapon_Nailgun(edict_t *ent);
@@ -1182,7 +1182,7 @@ gitem_t itemlist[] = {
         NULL,
         Use_Weapon,
         NULL,
-        Weapon_Axe,
+        NULL,
         "misc/w_pkup.wav",
         NULL, 0,
         "models/weapons/v_axe/axe.iqm",
@@ -1195,7 +1195,8 @@ gitem_t itemlist[] = {
         WEAP_BLASTER,
         NULL,
         0,
-        /* precache */ ""
+        /* precache */ "",
+        &weap_axe_activate
     },
 
     /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)

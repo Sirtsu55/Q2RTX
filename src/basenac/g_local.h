@@ -221,6 +221,25 @@ typedef enum {
 
 
 
+// for start/end; allow any value
+// for this particular cap
+#define WEAPON_EVENT_MINMAX -1
+
+// return false to cancel usual handling
+typedef bool (*weapon_func_t) (struct edict_s *ent);
+
+typedef struct weapon_event_s {
+    weapon_func_t func; // function; null for end of list
+    int32_t start, end; // frame range, or WEAPON_EVENT_ALWAYS
+} weapon_event_t;
+
+typedef struct weapon_animation_s {
+    int32_t start, end;
+    const struct weapon_animation_s *next; // null for looping animations, otherwise you must use a Finished func
+    weapon_func_t frame, finished;
+    const weapon_event_t *events;
+} weapon_animation_t;
+
 typedef struct {
     int     base_count;
     int     max_count;
@@ -278,6 +297,8 @@ typedef struct gitem_s {
     int         tag;
 
     char        *precaches;     // string of all models, sounds, and images this item will use
+
+    const weapon_animation_t *animation; // animation to 'start' this weapon
 } gitem_t;
 
 //
@@ -621,7 +642,7 @@ gitem_t *FindItemByClassname(char *classname);
 #define ITEM_INDEX(x) ((x)-itemlist)
 edict_t *Drop_Item(edict_t *ent, gitem_t *item);
 void SetRespawn(edict_t *ent, float delay);
-void ChangeWeapon(edict_t *ent);
+bool ChangeWeapon(edict_t *ent);
 void SpawnItem(edict_t *ent, gitem_t *item);
 void Think_Weapon(edict_t *ent);
 int ArmorIndex(edict_t *ent);
@@ -794,9 +815,12 @@ void ValidateSelectedItem(edict_t *ent);
 void DeathmatchScoreboardMessage(edict_t *client, edict_t *killer);
 
 //
-// g_pweapon.c
+// p_weapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
+void Weapon_RunAnimation(edict_t *ent);
+void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation, int32_t frame);
+void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation);
 
 //
 // m_move.c
@@ -920,6 +944,7 @@ struct gclient_s {
     float       killer_yaw;         // when dead, look at killer
 
     weaponstate_t   weaponstate;
+    const weapon_animation_t *weaponanimation;
     vec3_t      kick_angles;    // weapon kicks
     float       v_dmg_roll, v_dmg_pitch;
     gtime_t     v_dmg_time;    // damage kicks

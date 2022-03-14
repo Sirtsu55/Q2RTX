@@ -575,7 +575,7 @@ static void PM_CategorizePosition(void)
     point[0] = pml.origin[0];
     point[1] = pml.origin[1];
     point[2] = pml.origin[2] - 0.25f;
-    if (pml.velocity[2] > 180) { //!!ZOID changed from 100 to 180 (ramp accel)
+    if (pml.velocity[2] > 180 || ((pm->s.pm_flags & PMF_TIME_LAND) && pm->s.pm_time > 33)) { //!!ZOID changed from 100 to 180 (ramp accel)
         pm->s.pm_flags &= ~PMF_ON_GROUND;
         pm->groundentity = NULL;
     } else {

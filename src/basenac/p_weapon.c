@@ -177,7 +177,7 @@ The old weapon has been dropped all the way, so make the new one
 current
 ===============
 */
-void ChangeWeapon(edict_t *ent)
+bool ChangeWeapon(edict_t *ent)
 {
     int i;
 
@@ -207,11 +207,16 @@ void ChangeWeapon(edict_t *ent)
     if (!ent->client->pers.weapon) {
         // dead
         ent->client->ps.gunindex = 0;
-        return;
+        return false;
     }
 
-    ent->client->weaponstate = WEAPON_ACTIVATING;
-    ent->client->ps.gunframe = 0;
+    if (ent->client->pers.weapon->animation)
+        Weapon_SetAnimation(ent, ent->client->pers.weapon->animation);
+    else
+    {
+        ent->client->weaponstate = WEAPON_ACTIVATING;
+        ent->client->ps.gunframe = 0;
+    }
     ent->client->ps.gunindex = SV_ModelIndex(ent->client->pers.weapon->view_model);
 
     ent->client->anim_priority = ANIM_PAIN;
@@ -221,8 +226,9 @@ void ChangeWeapon(edict_t *ent)
     } else {
         ent->s.frame = FRAME_pain301;
         ent->client->anim_end = FRAME_pain304;
-
     }
+
+    return false;
 }
 
 /*
@@ -261,13 +267,17 @@ void Think_Weapon(edict_t *ent)
     }
 
     // call active weapon think routine
-    if (ent->client->pers.weapon && ent->client->pers.weapon->weaponthink) {
+    if (ent->client->pers.weapon) {
         is_quad = (ent->client->quad_time > level.time);
         if (ent->client->silencer_shots)
             is_silenced = MZ_SILENCED;
         else
             is_silenced = 0;
-        ent->client->pers.weapon->weaponthink(ent);
+
+        if (ent->client->pers.weapon->weaponthink)
+            ent->client->pers.weapon->weaponthink(ent);
+        else
+            Weapon_RunAnimation(ent);
     }
 }
 
@@ -338,6 +348,387 @@ AXE
 ======================================================================
 */
 
+void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation, int32_t frame)
+{
+    ent->client->weaponanimation = animation;
+
+    if (frame < animation->start || frame > animation->end)
+    {
+        Com_Print("Bad start frame\n");
+        ent->client->ps.gunframe = animation->start;
+    }
+    else
+        ent->client->ps.gunframe = frame;
+}
+
+void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation)
+{
+    Weapon_SetAnimationFrame(ent, animation, animation->start);
+}
+
+void Weapon_RunAnimation(edict_t *ent)
+{
+    int32_t currentFrame = ent->client->ps.gunframe;
+    const weapon_animation_t *animation = ent->client->weaponanimation;
+
+    // assertion...
+    if (currentFrame < animation->start || currentFrame > animation->end)
+    {
+        currentFrame = animation->start;
+        Com_Print("animation out of range; restarting\n");
+    }
+    // will the next frame bring us to the end?
+    else if (currentFrame + 1 > animation->end)
+    {
+        if (animation->finished && !animation->finished(ent))
+            return;
+
+        if (animation->next)
+            Weapon_SetAnimation(ent, animation->next);
+        else
+            ent->client->ps.gunframe = animation->start;
+
+        return;
+    }
+    // regular frame, so we're going up by 1
+    else
+        currentFrame++;
+
+    // run frame func first
+    if (animation->frame && !animation->frame(ent))
+        return;
+
+    // run events
+    for (const weapon_event_t *event = animation->events; event && event->func; event++)
+        if ((event->start == WEAPON_EVENT_MINMAX || currentFrame >= event->start) &&
+            (event->end == WEAPON_EVENT_MINMAX || currentFrame <= event->end))
+            if (!event->func(ent))
+                return;
+
+    // copy over to visual model
+    ent->client->ps.gunframe = currentFrame;
+}
+
+static bool Axe_PickIdle(edict_t *ent);
+
+const weapon_animation_t weap_axe_activate = {
+    0, 8, NULL,
+    NULL, Axe_PickIdle,
+    NULL
+};
+
+const weapon_animation_t weap_axe_deactivate = {
+    163, 168, NULL,
+    NULL, ChangeWeapon,
+    NULL
+};
+
+extern const weapon_animation_t weap_axe_idle;
+
+static void Axe_Attack(edict_t *ent, int damage)
+{
+    if (!ent->client->axe_attack)
+        return;
+
+    vec3_t forward, right, start, end, offset;
+
+    AngleVectors(ent->client->v_angle, forward, right, NULL);
+    VectorSet(offset, 0, 0, ent->viewheight - 8);
+    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+    VectorMA(start, 48.f, forward, end);
+            
+    trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
+
+    if (tr.fraction == 1.f)
+        tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
+
+    if (tr.fraction < 1.f)
+    {
+        if (tr.ent && tr.ent->takedamage)
+        {
+            T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
+            SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+        }
+        else if (!(tr.surface->flags & SURF_SKY))
+        {
+            SV_WriteByte(svc_temp_entity);
+            SV_WriteByte(TE_GUNSHOT);
+            SV_WritePos(tr.endpos);
+            SV_WriteDir(tr.plane.normal);
+            SV_Multicast(tr.endpos, MULTICAST_PVS, false);
+        }
+
+        ent->client->axe_attack = false;
+    }
+}
+
+static bool Axe_RegularAttack(edict_t *ent)
+{
+    Axe_Attack(ent, 8);
+    return true;
+}
+
+static bool Axe_NextAttack(edict_t *ent);
+static bool Axe_QuickAttack(edict_t *ent);
+static bool Axe_EnsureCharge(edict_t *ent);
+static bool Axe_TransitionIntoCharge(edict_t *ent);
+
+const weapon_animation_t weap_axe_attack1 = {
+    116, 131, &weap_axe_idle,
+    NULL, Axe_NextAttack,
+    (const weapon_event_t []) {
+        { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 118 },
+        { Axe_TransitionIntoCharge, 119, 119 },
+        { Axe_RegularAttack, 120, 123 },
+        { Axe_QuickAttack, 123, WEAPON_EVENT_MINMAX },
+        { NULL }
+    }
+};
+
+const weapon_animation_t weap_axe_attack2 = {
+    132, 147, &weap_axe_idle,
+    NULL, Axe_NextAttack,
+    (const weapon_event_t []) {
+        { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 134 },
+        { Axe_TransitionIntoCharge, 135, 135 },
+        { Axe_RegularAttack, 136, 139 },
+        { Axe_QuickAttack, 139, WEAPON_EVENT_MINMAX },
+        { NULL }
+    }
+};
+
+const weapon_animation_t weap_axe_attack3 = {
+    148, 162, &weap_axe_idle,
+    NULL, Axe_NextAttack,
+    (const weapon_event_t []) {
+        { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 150 },
+        { Axe_TransitionIntoCharge, 151, 151 },
+        { Axe_RegularAttack, 152, 155 },
+        { Axe_QuickAttack, 155, WEAPON_EVENT_MINMAX },
+        { NULL }
+    }
+};
+
+static bool Axe_ChargedAttack(edict_t *ent)
+{
+    Axe_Attack(ent, 80);
+    return true;
+}
+
+const weapon_animation_t weap_axe_attack_charged = {
+    189, 214, &weap_axe_idle,
+    NULL, NULL,
+    (const weapon_event_t []) {
+        { Axe_ChargedAttack, 190, 200 },
+        { NULL }
+    }
+};
+
+static bool Axe_ChargeReady(edict_t *ent)
+{
+    if (!(ent->client->buttons & BUTTON_ATTACK))
+    {
+        Weapon_SetAnimation(ent, &weap_axe_attack_charged);
+
+        vec3_t forward, right, start, offset;
+
+        AngleVectors(ent->client->v_angle, forward, right, NULL);
+        VectorSet(offset, 0, 0, ent->viewheight - 8);
+        P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+        if (!(ent->client->ps.pmove.pm_flags & PMF_ON_GROUND))
+            ent->velocity[2] = 100.f;
+        else
+        {
+            if (ent->client->v_angle[0] < -2.f)
+            {
+                ent->s.origin[2] -= 2.f;
+                ent->client->ps.pmove.origin[2] -= 2.f;
+                ent->velocity[2] = 100.f;
+                ent->groundentity = NULL;
+
+                SV_LinkEntity(ent);
+            }
+        }
+
+        VectorMA(ent->velocity, 250.f, forward, ent->velocity);
+
+        ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
+        ent->client->ps.pmove.pm_flags |= PMF_TIME_LAND;
+        ent->client->ps.pmove.pm_time = 42;
+
+        return false;
+    }
+
+    return true;
+}
+
+const weapon_animation_t weap_axe_charge_hold = {
+    174, 188, NULL,
+    Axe_ChargeReady, NULL,
+    NULL
+};
+
+static bool Axe_Uncharge(edict_t *ent)
+{
+    if (!(ent->client->buttons & BUTTON_ATTACK))
+    {
+        Weapon_SetAnimationFrame(ent, &weap_axe_attack1, 120);
+        return false;
+    }
+
+    return true;
+}
+
+const weapon_animation_t weap_axe_charge = {
+    170, 181, &weap_axe_charge_hold,
+    Axe_Uncharge, NULL,
+    NULL
+};
+
+static bool Axe_AttackTransitionCharge(edict_t *ent)
+{
+    Weapon_SetAnimationFrame(ent, &weap_axe_charge, weap_axe_charge.start + 6);
+    return false;
+}
+
+const weapon_animation_t weap_axe_transition_attack2 = {
+    311, 316, NULL,
+    NULL, Axe_AttackTransitionCharge,
+    NULL
+};
+
+const weapon_animation_t weap_axe_transition_attack3 = {
+    318, 323, NULL,
+    NULL, Axe_AttackTransitionCharge,
+    NULL
+};
+
+static bool Axe_TransitionIntoCharge(edict_t *ent)
+{
+    if (!(ent->client->buttons & BUTTON_ATTACK) ||
+        !ent->client->can_charge_axe)
+        return true;
+
+    if (ent->client->weaponanimation == &weap_axe_attack1)
+        Weapon_SetAnimation(ent, &weap_axe_charge);
+    else if (ent->client->weaponanimation == &weap_axe_attack2)
+        Weapon_SetAnimation(ent, &weap_axe_transition_attack2);
+    else if (ent->client->weaponanimation == &weap_axe_attack3)
+        Weapon_SetAnimation(ent, &weap_axe_transition_attack3);
+    return false;
+}
+
+static bool Axe_EnsureCharge(edict_t *ent)
+{
+    if (!(ent->client->buttons & BUTTON_ATTACK))
+        ent->client->can_charge_axe = false;
+
+    return true;
+}
+
+static bool Axe_NextAttack(edict_t *ent)
+{
+    if (ent->client->buttons & BUTTON_ATTACK)
+    {
+        if (ent->client->weaponanimation == &weap_axe_attack1)
+            Weapon_SetAnimation(ent, &weap_axe_attack2);
+        else if (ent->client->weaponanimation == &weap_axe_attack2)
+            Weapon_SetAnimation(ent, &weap_axe_attack3);
+        else
+            Weapon_SetAnimation(ent, &weap_axe_attack1);
+        
+        ent->client->axe_attack = ent->client->can_charge_axe = true;
+        ent->client->can_release_charge = false;
+        return false;
+    }
+
+    return true;
+}
+
+static bool Axe_QuickAttack(edict_t *ent)
+{
+    if (ent->client->latched_buttons & BUTTON_ATTACK)
+        return Axe_NextAttack(ent);
+
+    return true;
+}
+
+static bool Axe_Idle(edict_t *ent)
+{
+    // check weapon change
+    if (ent->client->newweapon)
+    {
+        Weapon_SetAnimation(ent, &weap_axe_deactivate);
+        return false;
+    }
+
+    // check attack transition
+    if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK))
+    {
+        ent->client->latched_buttons &= ~BUTTON_ATTACK;
+        ent->client->weaponstate = WEAPON_FIRING;
+        ent->client->axe_attack = ent->client->can_charge_axe = true;
+        ent->client->can_release_charge = false;
+        Weapon_SetAnimation(ent, &weap_axe_attack1);
+        return false;
+    }
+
+    // check explicit inspect
+    if (ent->client->inspect)
+    {
+        if (ent->client->weaponanimation == &weap_axe_idle)
+        {
+            Axe_PickIdle(ent);
+            return false;
+        }
+
+        ent->client->inspect = false;
+    }
+
+    return true;
+}
+
+const weapon_animation_t weap_axe_idle = {
+    9, 115, NULL,
+    Axe_Idle, Axe_PickIdle,
+    NULL
+};
+
+const weapon_animation_t weap_axe_inspect1 = {
+    215, 244, NULL,
+    Axe_Idle, Axe_PickIdle,
+    NULL
+};
+
+const weapon_animation_t weap_axe_inspect2 = {
+    245, 302, NULL,
+    Axe_Idle, Axe_PickIdle,
+    NULL
+};
+
+static bool Axe_PickIdle(edict_t *ent)
+{
+    // at end of inspect animations always go back to idle
+    // otherwise, have a 20% chance of inspecting
+    if (ent->client->weaponanimation == &weap_axe_inspect1 ||
+        ent->client->weaponanimation == &weap_axe_inspect2 ||
+        (!ent->client->inspect && random() < 0.8f))
+    {
+        Weapon_SetAnimation(ent, &weap_axe_idle);
+        return false;
+    }
+
+    if (random() < 0.5f)
+        Weapon_SetAnimation(ent, &weap_axe_inspect1);
+    else
+        Weapon_SetAnimation(ent, &weap_axe_inspect2);
+
+    ent->client->inspect = false;
+    return false;
+}
+
+#if 0
 void Weapon_Axe(edict_t *ent)
 {
     enum {
@@ -596,6 +987,7 @@ void Weapon_Axe(edict_t *ent)
         break;
     }
 }
+#endif
 
 /*
 ======================================================================
