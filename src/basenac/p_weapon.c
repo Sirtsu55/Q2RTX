@@ -472,14 +472,17 @@ static bool Axe_NextAttack(edict_t *ent);
 static bool Axe_QuickAttack(edict_t *ent);
 static bool Axe_EnsureCharge(edict_t *ent);
 static bool Axe_TransitionIntoCharge(edict_t *ent);
+static bool Axe_InitialCharge(edict_t *ent);
 
 const weapon_animation_t weap_axe_attack1 = {
     116, 131, &weap_axe_idle,
     NULL, Axe_NextAttack,
     (const weapon_event_t []) {
         { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 118 },
-        { Axe_TransitionIntoCharge, 119, 119 },
+        { Axe_InitialCharge, 119, 119 },
         { Axe_RegularAttack, 120, 123 },
+        { Axe_EnsureCharge, 119, 121 },
+        { Axe_TransitionIntoCharge, 122, 122 },
         { Axe_QuickAttack, 123, WEAPON_EVENT_MINMAX },
         { NULL }
     }
@@ -489,9 +492,9 @@ const weapon_animation_t weap_axe_attack2 = {
     132, 147, &weap_axe_idle,
     NULL, Axe_NextAttack,
     (const weapon_event_t []) {
-        { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 134 },
-        { Axe_TransitionIntoCharge, 135, 135 },
         { Axe_RegularAttack, 136, 139 },
+        { Axe_EnsureCharge, 135, 137 },
+        { Axe_TransitionIntoCharge, 138, 138 },
         { Axe_QuickAttack, 139, WEAPON_EVENT_MINMAX },
         { NULL }
     }
@@ -501,9 +504,9 @@ const weapon_animation_t weap_axe_attack3 = {
     148, 162, &weap_axe_idle,
     NULL, Axe_NextAttack,
     (const weapon_event_t []) {
-        { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 150 },
-        { Axe_TransitionIntoCharge, 151, 151 },
         { Axe_RegularAttack, 152, 155 },
+        { Axe_EnsureCharge, 151, 153 },
+        { Axe_TransitionIntoCharge, 154, 154 },
         { Axe_QuickAttack, 155, WEAPON_EVENT_MINMAX },
         { NULL }
     }
@@ -516,7 +519,7 @@ static bool Axe_ChargedAttack(edict_t *ent)
 }
 
 const weapon_animation_t weap_axe_attack_charged = {
-    189, 214, &weap_axe_idle,
+    190, 214, &weap_axe_idle,
     NULL, NULL,
     (const weapon_event_t []) {
         { Axe_ChargedAttack, 190, 200 },
@@ -564,7 +567,7 @@ static bool Axe_ChargeReady(edict_t *ent)
 }
 
 const weapon_animation_t weap_axe_charge_hold = {
-    174, 188, NULL,
+    175, 189, NULL,
     Axe_ChargeReady, NULL,
     NULL
 };
@@ -581,26 +584,45 @@ static bool Axe_Uncharge(edict_t *ent)
 }
 
 const weapon_animation_t weap_axe_charge = {
-    170, 181, &weap_axe_charge_hold,
+    170, 174, &weap_axe_charge_hold,
     Axe_Uncharge, NULL,
     NULL
 };
 
-static bool Axe_AttackTransitionCharge(edict_t *ent)
+static bool Axe_InitialCharge(edict_t *ent)
 {
-    Weapon_SetAnimationFrame(ent, &weap_axe_charge, weap_axe_charge.start + 6);
+    if (!(ent->client->buttons & BUTTON_ATTACK) ||
+        !ent->client->can_charge_axe)
+    {
+        ent->client->can_charge_axe = true;
+        return true;
+    }
+
+    Weapon_SetAnimation(ent, &weap_axe_charge);
     return false;
 }
 
+static bool Axe_AttackTransitionCharge(edict_t *ent)
+{
+    Weapon_SetAnimation(ent, &weap_axe_charge_hold);
+    return false;
+}
+
+const weapon_animation_t weap_axe_transition_attack1 = {
+    304, 309, NULL,
+    Axe_Uncharge, Axe_AttackTransitionCharge,
+    NULL
+};
+
 const weapon_animation_t weap_axe_transition_attack2 = {
     311, 316, NULL,
-    NULL, Axe_AttackTransitionCharge,
+    Axe_Uncharge, Axe_AttackTransitionCharge,
     NULL
 };
 
 const weapon_animation_t weap_axe_transition_attack3 = {
     318, 323, NULL,
-    NULL, Axe_AttackTransitionCharge,
+    Axe_Uncharge, Axe_AttackTransitionCharge,
     NULL
 };
 
@@ -611,7 +633,7 @@ static bool Axe_TransitionIntoCharge(edict_t *ent)
         return true;
 
     if (ent->client->weaponanimation == &weap_axe_attack1)
-        Weapon_SetAnimation(ent, &weap_axe_charge);
+        Weapon_SetAnimation(ent, &weap_axe_transition_attack1);
     else if (ent->client->weaponanimation == &weap_axe_attack2)
         Weapon_SetAnimation(ent, &weap_axe_transition_attack2);
     else if (ent->client->weaponanimation == &weap_axe_attack3)
@@ -1326,21 +1348,13 @@ void weapon_supershotgun_fire(edict_t *ent)
 
     ent->client->kick_angles[0] = -4;
     
-    VectorSet(offset, 0, 10, ent->viewheight);
+    VectorSet(offset, 0, 0, ent->viewheight);
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
     if (deathmatch.integer)
-        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+        fire_shotgun(ent, start, forward, damage, kick, 350 * 2.2f, 350 * 1.1f, DEFAULT_DEATHMATCH_SHOTGUN_COUNT * 2, MOD_SHOTGUN);
     else
-        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
-
-    VectorSet(offset, 0, -10, ent->viewheight);
-    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-
-    if (deathmatch.integer)
-        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
-    else
-        fire_shotgun(ent, start, forward, damage, kick, 350, 350, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+        fire_shotgun(ent, start, forward, damage, kick, 350 * 2.2f, 350 * 1.1f, DEFAULT_SHOTGUN_COUNT * 2, MOD_SHOTGUN);
 
     // send muzzle flash
     SV_WriteByte(svc_muzzleflash);
