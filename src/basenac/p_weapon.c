@@ -465,6 +465,8 @@ static void Axe_Attack(edict_t *ent, int damage)
 static bool Axe_RegularAttack(edict_t *ent)
 {
     Axe_Attack(ent, 8);
+    ent->client->can_charge_axe = true;
+
     return true;
 }
 
