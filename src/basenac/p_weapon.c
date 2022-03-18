@@ -465,8 +465,12 @@ static void Axe_Attack(edict_t *ent, int damage)
 static bool Axe_RegularAttack(edict_t *ent)
 {
     Axe_Attack(ent, 8);
-    ent->client->can_charge_axe = true;
+    return true;
+}
 
+static bool Axe_RestoreCharge(edict_t *ent)
+{
+    ent->client->can_charge_axe = true;
     return true;
 }
 
@@ -482,6 +486,7 @@ const weapon_animation_t weap_axe_attack1 = {
     (const weapon_event_t []) {
         { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 118 },
         { Axe_InitialCharge, 119, 119 },
+        { Axe_RestoreCharge, 120, 120 },
         { Axe_RegularAttack, 120, 123 },
         { Axe_EnsureCharge, 119, 121 },
         { Axe_TransitionIntoCharge, 122, 122 },
