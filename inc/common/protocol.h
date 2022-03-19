@@ -136,12 +136,10 @@ typedef enum {
 #define PS_KICKANGLES       (1<<9)
 #define PS_BLEND            (1<<10)
 #define PS_FOV              (1<<11)
-#define PS_WEAPONINDEX      (1<<12)
-#define PS_WEAPONFRAME      (1<<13)
-#define PS_RDFLAGS          (1<<14)
-#define PS_WEAPONSPIN       (1<<15)
+#define PS_RDFLAGS          (1<<12)
+#define PS_GUNS             (1<<13)
 
-#define PS_BITS             16
+#define PS_BITS             14
 #define PS_MASK             ((1<<PS_BITS)-1)
 
 #define EPS_M_VELOCITY2     (1<<0)
@@ -152,6 +150,16 @@ typedef enum {
 
 #define EPS_BITS            5
 #define EPS_MASK            ((1<<EPS_BITS)-1)
+
+#define GB_INDEX0           (1<<0)
+#define GB_INDEX1           (1<<1)
+#define GB_FRAME0           (1<<2)
+#define GB_FRAME1           (1<<3)
+#define GB_SPIN0            (1<<4)
+#define GB_SPIN1            (1<<5)
+
+#define GB_BITS             6
+#define GB_MASK             ((1<<GB_BITS)-1)
 
 //==============================================
 

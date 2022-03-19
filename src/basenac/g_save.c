@@ -324,10 +324,14 @@ static const save_field_t clientfields[] = {
     V(ps.viewangles),
     V(ps.viewoffset),
     V(ps.kick_angles),
+    
+    I(ps.gun[0].index),
+    I(ps.gun[0].frame),
+    F(ps.gun[0].spin),
 
-    I(ps.gunindex),
-    I(ps.gunframe),
-    F(ps.gunspin),
+    I(ps.gun[1].index),
+    I(ps.gun[1].frame),
+    F(ps.gun[1].spin),
 
     FA(ps.blend, 4),
 

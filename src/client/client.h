@@ -267,6 +267,9 @@ typedef struct client_state_s {
 
     float   bobtime;
     vec3_t  gunangles;
+
+    float gunspin[2];
+    int gunweapon[2];
 } client_state_t;
 
 extern    client_state_t    cl;

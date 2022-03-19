@@ -1144,7 +1144,7 @@ void PutClientInServer(edict_t *ent)
     else if (client->ps.fov > 160)
         client->ps.fov = 160;
 
-    client->ps.gunindex = SV_ModelIndex(client->pers.weapon->view_model);
+    client->ps.gun[0].index = SV_ModelIndex(client->pers.weapon->view_model);
 
     // clear entity state values
     ent->s.effects = 0;
@@ -1177,7 +1177,7 @@ void PutClientInServer(edict_t *ent)
         ent->movetype = MOVETYPE_NOCLIP;
         ent->solid = SOLID_NOT;
         ent->svflags |= SVF_NOCLIENT;
-        ent->client->ps.gunindex = 0;
+        ent->client->ps.gun[0].index = 0;
         SV_LinkEntity(ent);
         return;
     } else

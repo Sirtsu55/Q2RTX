@@ -57,6 +57,7 @@ SET(SRC_BASENAC
 	basenac/p_trail.c
 	basenac/p_view.c
 	basenac/p_weapon.c
+	basenac/weapons/nac_axe.c
 )
 
 SET(HEADERS_BASENAC

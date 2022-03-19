@@ -31,7 +31,8 @@ void G_ProjectSource2(const vec3_t point, const vec3_t distance, const vec3_t fo
     result[1] = point[1] + forward[1] * distance[0] + right[1] * distance[1] + up[1] * distance[2];
     result[2] = point[2] + forward[2] * distance[0] + right[2] * distance[1] + up[2] * distance[2];
 }
-static void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+
+void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
 {
     vec3_t  _distance;
 
@@ -42,7 +43,8 @@ static void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, ve
         _distance[1] = 0;
     G_ProjectSource(point, _distance, forward, right, result);
 }
-static void P_ProjectSource2(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result)
+
+void P_ProjectSource2(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result)
 {
     vec3_t  _distance;
 
@@ -202,11 +204,11 @@ bool ChangeWeapon(edict_t *ent)
 
     ent->client->weapon_sound = 0;
     ent->s.sound_pitch = 0;
-    ent->client->ps.gunspin = 0;
+    ent->client->ps.gun[0].spin = 0;
 
     if (!ent->client->pers.weapon) {
         // dead
-        ent->client->ps.gunindex = 0;
+        ent->client->ps.gun[0].index = 0;
         return false;
     }
 
@@ -215,9 +217,9 @@ bool ChangeWeapon(edict_t *ent)
     else
     {
         ent->client->weaponstate = WEAPON_ACTIVATING;
-        ent->client->ps.gunframe = 0;
+        ent->client->ps.gun[0].frame = 0;
     }
-    ent->client->ps.gunindex = SV_ModelIndex(ent->client->pers.weapon->view_model);
+    ent->client->ps.gun[0].index = SV_ModelIndex(ent->client->pers.weapon->view_model);
 
     ent->client->anim_priority = ANIM_PAIN;
     if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
@@ -236,7 +238,7 @@ bool ChangeWeapon(edict_t *ent)
 NoAmmoWeaponChange
 =================
 */
-void NoAmmoWeaponChange(edict_t *ent)
+static void NoAmmoWeaponChange(edict_t *ent)
 {
     if (ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))]
         &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("perforator"))]) {
@@ -249,6 +251,24 @@ void NoAmmoWeaponChange(edict_t *ent)
         return;
     }
     ent->client->newweapon = FindItem("axe");
+}
+
+// not animation function; returns true if
+// we can keep firing
+bool Weapon_AmmoCheck(edict_t *ent)
+{
+    if (ent->client->newweapon)
+        return false;
+
+    if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
+        return true;
+    }
+
+    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+
+    NoAmmoWeaponChange(ent);
+
+    return false;
 }
 
 /*
@@ -355,10 +375,10 @@ void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation,
     if (frame < animation->start || frame > animation->end)
     {
         Com_Print("Bad start frame\n");
-        ent->client->ps.gunframe = animation->start;
+        ent->client->ps.gun[0].frame = animation->start;
     }
     else
-        ent->client->ps.gunframe = frame;
+        ent->client->ps.gun[0].frame = frame;
 }
 
 void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation)
@@ -368,7 +388,7 @@ void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation)
 
 void Weapon_RunAnimation(edict_t *ent)
 {
-    int32_t currentFrame = ent->client->ps.gunframe;
+    int32_t currentFrame = ent->client->ps.gun[0].frame;
     const weapon_animation_t *animation = ent->client->weaponanimation;
 
     // assertion...
@@ -386,7 +406,7 @@ void Weapon_RunAnimation(edict_t *ent)
         if (animation->next)
             Weapon_SetAnimation(ent, animation->next);
         else
-            ent->client->ps.gunframe = animation->start;
+            ent->client->ps.gun[0].frame = animation->start;
 
         return;
     }
@@ -406,788 +426,8 @@ void Weapon_RunAnimation(edict_t *ent)
                 return;
 
     // copy over to visual model
-    ent->client->ps.gunframe = currentFrame;
+    ent->client->ps.gun[0].frame = currentFrame;
 }
-
-static bool Axe_PickIdle(edict_t *ent);
-
-const weapon_animation_t weap_axe_activate = {
-    0, 8, NULL,
-    NULL, Axe_PickIdle,
-    NULL
-};
-
-const weapon_animation_t weap_axe_deactivate = {
-    163, 168, NULL,
-    NULL, ChangeWeapon,
-    NULL
-};
-
-extern const weapon_animation_t weap_axe_idle;
-
-static void Axe_Attack(edict_t *ent, int damage)
-{
-    if (!ent->client->axe_attack)
-        return;
-
-    vec3_t forward, right, start, end, offset;
-
-    AngleVectors(ent->client->v_angle, forward, right, NULL);
-    VectorSet(offset, 0, 0, ent->viewheight - 8);
-    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-    VectorMA(start, 48.f, forward, end);
-            
-    trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
-
-    if (tr.fraction == 1.f)
-        tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
-
-    if (tr.fraction < 1.f)
-    {
-        if (tr.ent && tr.ent->takedamage)
-        {
-            T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
-            SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
-        }
-        else if (!(tr.surface->flags & SURF_SKY))
-        {
-            SV_WriteByte(svc_temp_entity);
-            SV_WriteByte(TE_GUNSHOT);
-            SV_WritePos(tr.endpos);
-            SV_WriteDir(tr.plane.normal);
-            SV_Multicast(tr.endpos, MULTICAST_PVS, false);
-        }
-
-        ent->client->axe_attack = false;
-    }
-}
-
-static bool Axe_RegularAttack(edict_t *ent)
-{
-    Axe_Attack(ent, 8);
-    return true;
-}
-
-static bool Axe_RestoreCharge(edict_t *ent)
-{
-    ent->client->can_charge_axe = true;
-    return true;
-}
-
-static bool Axe_NextAttack(edict_t *ent);
-static bool Axe_QuickAttack(edict_t *ent);
-static bool Axe_EnsureCharge(edict_t *ent);
-static bool Axe_TransitionIntoCharge(edict_t *ent);
-static bool Axe_InitialCharge(edict_t *ent);
-
-const weapon_animation_t weap_axe_attack1 = {
-    116, 131, &weap_axe_idle,
-    NULL, Axe_NextAttack,
-    (const weapon_event_t []) {
-        { Axe_EnsureCharge, WEAPON_EVENT_MINMAX, 118 },
-        { Axe_InitialCharge, 119, 119 },
-        { Axe_RestoreCharge, 120, 120 },
-        { Axe_RegularAttack, 120, 123 },
-        { Axe_EnsureCharge, 119, 121 },
-        { Axe_TransitionIntoCharge, 122, 122 },
-        { Axe_QuickAttack, 123, WEAPON_EVENT_MINMAX },
-        { NULL }
-    }
-};
-
-const weapon_animation_t weap_axe_attack2 = {
-    132, 147, &weap_axe_idle,
-    NULL, Axe_NextAttack,
-    (const weapon_event_t []) {
-        { Axe_RegularAttack, 136, 139 },
-        { Axe_EnsureCharge, 135, 137 },
-        { Axe_TransitionIntoCharge, 138, 138 },
-        { Axe_QuickAttack, 139, WEAPON_EVENT_MINMAX },
-        { NULL }
-    }
-};
-
-const weapon_animation_t weap_axe_attack3 = {
-    148, 162, &weap_axe_idle,
-    NULL, Axe_NextAttack,
-    (const weapon_event_t []) {
-        { Axe_RegularAttack, 152, 155 },
-        { Axe_EnsureCharge, 151, 153 },
-        { Axe_TransitionIntoCharge, 154, 154 },
-        { Axe_QuickAttack, 155, WEAPON_EVENT_MINMAX },
-        { NULL }
-    }
-};
-
-static bool Axe_ChargedAttack(edict_t *ent)
-{
-    Axe_Attack(ent, 80);
-    return true;
-}
-
-const weapon_animation_t weap_axe_attack_charged = {
-    190, 214, &weap_axe_idle,
-    NULL, NULL,
-    (const weapon_event_t []) {
-        { Axe_ChargedAttack, 190, 200 },
-        { NULL }
-    }
-};
-
-static bool Axe_ChargeReady(edict_t *ent)
-{
-    if (!(ent->client->buttons & BUTTON_ATTACK))
-    {
-        Weapon_SetAnimation(ent, &weap_axe_attack_charged);
-
-        vec3_t forward, right, start, offset;
-
-        AngleVectors(ent->client->v_angle, forward, right, NULL);
-        VectorSet(offset, 0, 0, ent->viewheight - 8);
-        P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-
-        if (!(ent->client->ps.pmove.pm_flags & PMF_ON_GROUND))
-            ent->velocity[2] = 100.f;
-        else
-        {
-            if (ent->client->v_angle[0] < -2.f)
-            {
-                ent->s.origin[2] -= 2.f;
-                ent->client->ps.pmove.origin[2] -= 2.f;
-                ent->velocity[2] = 100.f;
-                ent->groundentity = NULL;
-
-                SV_LinkEntity(ent);
-            }
-        }
-
-        VectorMA(ent->velocity, 250.f, forward, ent->velocity);
-
-        ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
-        ent->client->ps.pmove.pm_flags |= PMF_TIME_LAND;
-        ent->client->ps.pmove.pm_time = 42;
-
-        return false;
-    }
-
-    return true;
-}
-
-const weapon_animation_t weap_axe_charge_hold = {
-    175, 189, NULL,
-    Axe_ChargeReady, NULL,
-    NULL
-};
-
-static bool Axe_Uncharge(edict_t *ent)
-{
-    if (!(ent->client->buttons & BUTTON_ATTACK))
-    {
-        Weapon_SetAnimationFrame(ent, &weap_axe_attack1, 120);
-        return false;
-    }
-
-    return true;
-}
-
-const weapon_animation_t weap_axe_charge = {
-    170, 174, &weap_axe_charge_hold,
-    Axe_Uncharge, NULL,
-    NULL
-};
-
-static bool Axe_InitialCharge(edict_t *ent)
-{
-    if (!(ent->client->buttons & BUTTON_ATTACK) ||
-        !ent->client->can_charge_axe)
-    {
-        ent->client->can_charge_axe = true;
-        return true;
-    }
-
-    Weapon_SetAnimation(ent, &weap_axe_charge);
-    return false;
-}
-
-static bool Axe_AttackTransitionCharge(edict_t *ent)
-{
-    Weapon_SetAnimation(ent, &weap_axe_charge_hold);
-    return false;
-}
-
-const weapon_animation_t weap_axe_transition_attack1 = {
-    304, 309, NULL,
-    Axe_Uncharge, Axe_AttackTransitionCharge,
-    NULL
-};
-
-const weapon_animation_t weap_axe_transition_attack2 = {
-    311, 316, NULL,
-    Axe_Uncharge, Axe_AttackTransitionCharge,
-    NULL
-};
-
-const weapon_animation_t weap_axe_transition_attack3 = {
-    318, 323, NULL,
-    Axe_Uncharge, Axe_AttackTransitionCharge,
-    NULL
-};
-
-static bool Axe_TransitionIntoCharge(edict_t *ent)
-{
-    if (!(ent->client->buttons & BUTTON_ATTACK) ||
-        !ent->client->can_charge_axe)
-        return true;
-
-    if (ent->client->weaponanimation == &weap_axe_attack1)
-        Weapon_SetAnimation(ent, &weap_axe_transition_attack1);
-    else if (ent->client->weaponanimation == &weap_axe_attack2)
-        Weapon_SetAnimation(ent, &weap_axe_transition_attack2);
-    else if (ent->client->weaponanimation == &weap_axe_attack3)
-        Weapon_SetAnimation(ent, &weap_axe_transition_attack3);
-    return false;
-}
-
-static bool Axe_EnsureCharge(edict_t *ent)
-{
-    if (!(ent->client->buttons & BUTTON_ATTACK))
-        ent->client->can_charge_axe = false;
-
-    return true;
-}
-
-static bool Axe_NextAttack(edict_t *ent)
-{
-    if (ent->client->buttons & BUTTON_ATTACK)
-    {
-        if (ent->client->weaponanimation == &weap_axe_attack1)
-            Weapon_SetAnimation(ent, &weap_axe_attack2);
-        else if (ent->client->weaponanimation == &weap_axe_attack2)
-            Weapon_SetAnimation(ent, &weap_axe_attack3);
-        else
-            Weapon_SetAnimation(ent, &weap_axe_attack1);
-        
-        ent->client->axe_attack = ent->client->can_charge_axe = true;
-        ent->client->can_release_charge = false;
-        return false;
-    }
-
-    return true;
-}
-
-static bool Axe_QuickAttack(edict_t *ent)
-{
-    if (ent->client->latched_buttons & BUTTON_ATTACK)
-        return Axe_NextAttack(ent);
-
-    return true;
-}
-
-static bool Axe_Idle(edict_t *ent)
-{
-    // check weapon change
-    if (ent->client->newweapon)
-    {
-        Weapon_SetAnimation(ent, &weap_axe_deactivate);
-        return false;
-    }
-
-    // check attack transition
-    if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK))
-    {
-        ent->client->latched_buttons &= ~BUTTON_ATTACK;
-        ent->client->weaponstate = WEAPON_FIRING;
-        ent->client->axe_attack = ent->client->can_charge_axe = true;
-        ent->client->can_release_charge = false;
-        Weapon_SetAnimation(ent, &weap_axe_attack1);
-        return false;
-    }
-
-    // check explicit inspect
-    if (ent->client->inspect)
-    {
-        if (ent->client->weaponanimation == &weap_axe_idle)
-        {
-            Axe_PickIdle(ent);
-            return false;
-        }
-
-        ent->client->inspect = false;
-    }
-
-    return true;
-}
-
-const weapon_animation_t weap_axe_idle = {
-    9, 115, NULL,
-    Axe_Idle, Axe_PickIdle,
-    NULL
-};
-
-const weapon_animation_t weap_axe_inspect1 = {
-    215, 244, NULL,
-    Axe_Idle, Axe_PickIdle,
-    NULL
-};
-
-const weapon_animation_t weap_axe_inspect2 = {
-    245, 302, NULL,
-    Axe_Idle, Axe_PickIdle,
-    NULL
-};
-
-static bool Axe_PickIdle(edict_t *ent)
-{
-    // at end of inspect animations always go back to idle
-    // otherwise, have a 20% chance of inspecting
-    if (ent->client->weaponanimation == &weap_axe_inspect1 ||
-        ent->client->weaponanimation == &weap_axe_inspect2 ||
-        (!ent->client->inspect && random() < 0.8f))
-    {
-        Weapon_SetAnimation(ent, &weap_axe_idle);
-        return false;
-    }
-
-    if (random() < 0.5f)
-        Weapon_SetAnimation(ent, &weap_axe_inspect1);
-    else
-        Weapon_SetAnimation(ent, &weap_axe_inspect2);
-
-    ent->client->inspect = false;
-    return false;
-}
-
-#if 0
-void Weapon_Axe(edict_t *ent)
-{
-    enum {
-        ANIM_EQUIP_FIRST    = 0,
-        ANIM_EQUIP_LAST     = 8,
-        ANIM_IDLE_FIRST,
-        ANIM_IDLE_LAST      = 115,
-        ANIM_ATTACK1_FIRST,
-        ANIM_ATTACK1_CHARGE = 119,
-        ANIM_ATTACK1_LAST   = 131,
-        ANIM_ATTACK2_FIRST,
-        ANIM_ATTACK2_LAST   = 147,
-        ANIM_ATTACK3_FIRST,
-        ANIM_ATTACK3_LAST   = 162,
-        ANIM_PUTAWAY_FIRST  = 163,
-        ANIM_PUTAWAY_LAST   = 168,
-        ANIM_INSPECT1_FIRST = 207,
-        ANIM_INSPECT1_LAST  = 235,
-        ANIM_INSPECT2_FIRST = 237,
-        ANIM_INSPECT2_LAST  = 294,
-        ANIM_CHARGE_LOOP_FIRST = 169,
-        ANIM_CHARGE_LOOP_END   = 183,
-        ANIM_CHARGE_ATK_FIRST  = 184,
-        ANIM_CHARGE_ATK_END    = 205,
-    };
-    ent->client->ps.gunframe++;
-
-    switch (ent->client->weaponstate)
-    {
-    case WEAPON_ACTIVATING:
-        if (ent->client->ps.gunframe == ANIM_EQUIP_LAST)
-            ent->client->weaponstate = WEAPON_READY;
-        break;
-    case WEAPON_READY:
-        if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING))
-        {
-            ent->client->weaponstate = WEAPON_DROPPING;
-            ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
-        }
-        else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK))
-        {
-            ent->client->latched_buttons &= ~BUTTON_ATTACK;
-            ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
-            ent->client->weaponstate = WEAPON_FIRING;
-            ent->client->axe_attack = ent->client->can_charge_axe = true;
-            ent->client->can_release_charge = false;
-        }
-        else if ((ent->client->ps.gunframe == ANIM_IDLE_LAST + 1 ||
-                    ent->client->ps.gunframe == ANIM_INSPECT1_LAST + 1 ||
-                    ent->client->ps.gunframe == ANIM_INSPECT2_LAST + 1) ||
-                    ent->client->inspect)
-        {
-            float r = random();
-
-            if (ent->client->inspect)
-            {
-                if (ent->client->ps.gunframe <= ANIM_IDLE_LAST + 1)
-                {
-                    if (r < 0.5f)
-                        ent->client->ps.gunframe = ANIM_INSPECT1_FIRST;
-                    else
-                        ent->client->ps.gunframe = ANIM_INSPECT2_FIRST;
-                }
-            }
-            else
-            {
-                if (ent->client->ps.gunframe > ANIM_IDLE_LAST + 1 || r < 0.8f)
-                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-                else if (r < 0.9f)
-                    ent->client->ps.gunframe = ANIM_INSPECT1_FIRST;
-                else
-                    ent->client->ps.gunframe = ANIM_INSPECT2_FIRST;
-            }
-
-            ent->client->inspect = false;
-        }
-        break;
-    case WEAPON_FIRING:
-        // charging logic
-        if (ent->client->ps.gunframe >= ANIM_CHARGE_LOOP_FIRST)
-        {
-            if (ent->client->ps.gunframe >= ANIM_CHARGE_LOOP_FIRST && ent->client->ps.gunframe <= ANIM_CHARGE_LOOP_END)
-            {
-                if (!(ent->client->buttons & BUTTON_ATTACK)) {
-                    if (!ent->client->can_release_charge)
-                        ent->client->ps.gunframe = ANIM_ATTACK1_CHARGE + 1;
-                    else
-                        ent->client->ps.gunframe = ANIM_CHARGE_ATK_FIRST;
-                }
-
-                if (ent->client->ps.gunframe == ANIM_CHARGE_LOOP_END)
-                {
-                    ent->client->ps.gunframe = ANIM_CHARGE_LOOP_FIRST;
-                    ent->client->can_release_charge = true;
-                }
-            }
-
-            // charge attack
-            if (ent->client->ps.gunframe >= ANIM_CHARGE_ATK_FIRST)
-            {
-                if (ent->client->axe_attack && (ent->client->ps.gunframe >= 185 && ent->client->ps.gunframe <= 192))
-                {
-
-                    vec3_t forward, right, start, end, offset;
-
-                    AngleVectors(ent->client->v_angle, forward, right, NULL);
-                    VectorSet(offset, 0, 0, ent->viewheight - 8);
-                    P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-                    
-                    if (ent->client->ps.gunframe == 185)
-                    {
-                        if (!(ent->client->ps.pmove.pm_flags & PMF_ON_GROUND))
-                            ent->velocity[2] = 181.f;
-                        else
-                        {
-                            if (ent->client->v_angle[0] < -2.f)
-                            {
-                                ent->s.origin[2] -= 2.f;
-                                ent->client->ps.pmove.origin[2] -= 2.f;
-                                ent->velocity[2] = 181.f;
-                                ent->groundentity = NULL;
-
-                                SV_LinkEntity(ent);
-                            }
-                        }
-
-                        VectorMA(ent->velocity, 300.f, forward, ent->velocity);
-
-                        ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
-                        ent->client->ps.pmove.pm_flags |= PMF_TIME_LAND;
-                        ent->client->ps.pmove.pm_time = 42;
-                    }
-
-                    VectorMA(start, 48.f, forward, end);
-            
-                    trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
-
-                    if (tr.fraction == 1.f)
-                        tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
-
-                    if (tr.fraction < 1.f)
-                    {
-                        if (tr.ent && tr.ent->takedamage)
-                        {
-                            T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8 * 5, 0, 0, MOD_BLASTER);
-                            SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
-                        }
-                        else if (!(tr.surface->flags & SURF_SKY))
-                        {
-                            SV_WriteByte(svc_temp_entity);
-                            SV_WriteByte(TE_GUNSHOT);
-                            SV_WritePos(tr.endpos);
-                            SV_WriteDir(tr.plane.normal);
-                            SV_Multicast(tr.endpos, MULTICAST_PVS, false);
-                        }
-
-                        ent->client->axe_attack = false;
-                    }
-                }
-
-                if (ent->client->ps.gunframe == ANIM_CHARGE_ATK_END + 1)
-                {
-                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-                    ent->client->weaponstate = WEAPON_READY;
-                }
-            }
-        }
-        // not charging, regular swipes
-        else
-        {
-            //if (!(ent->client->buttons & BUTTON_ATTACK)) {
-            //    ent->client->can_charge_axe = false;
-            //}
-
-            if (ent->client->ps.gunframe == ANIM_ATTACK1_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK2_LAST + 1 || ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
-            {
-                ent->client->axe_attack = true;
-
-                if (!(ent->client->buttons & BUTTON_ATTACK))
-                {
-                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-                    ent->client->weaponstate = WEAPON_READY;
-                }
-                else if (ent->client->ps.gunframe == ANIM_ATTACK3_LAST + 1)
-                {
-                    ent->client->ps.gunframe = ANIM_ATTACK1_FIRST;
-                    ent->client->can_charge_axe = true;
-                }
-            }
-
-            if (ent->client->can_charge_axe && ent->client->ps.gunframe == ANIM_ATTACK1_CHARGE)
-                ent->client->ps.gunframe = ANIM_CHARGE_LOOP_FIRST;
-            else if (ent->client->axe_attack && (
-                (ent->client->ps.gunframe >= 120 && ent->client->ps.gunframe <= 123) ||
-                (ent->client->ps.gunframe >= 134 && ent->client->ps.gunframe <= 137) ||
-                (ent->client->ps.gunframe >= 151 && ent->client->ps.gunframe <= 154)))
-            {
-                vec3_t forward, right, start, end, offset;
-
-                AngleVectors(ent->client->v_angle, forward, right, NULL);
-                VectorSet(offset, 0, 0, ent->viewheight - 8);
-                P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-                VectorMA(start, 48.f, forward, end);
-            
-                trace_t tr = SV_Trace(ent->s.origin, vec3_origin, vec3_origin, start, ent, MASK_SHOT);
-
-                if (tr.fraction == 1.f)
-                    tr = SV_Trace(start, vec3_origin, vec3_origin, end, ent, MASK_SHOT);
-
-                if (tr.fraction < 1.f)
-                {
-                    if (tr.ent && tr.ent->takedamage)
-                    {
-                        T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, 8, 0, 0, MOD_BLASTER);
-                        SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
-                    }
-                    else if (!(tr.surface->flags & SURF_SKY))
-                    {
-                        SV_WriteByte(svc_temp_entity);
-                        SV_WriteByte(TE_GUNSHOT);
-                        SV_WritePos(tr.endpos);
-                        SV_WriteDir(tr.plane.normal);
-                        SV_Multicast(tr.endpos, MULTICAST_PVS, false);
-                    }
-
-                    ent->client->axe_attack = false;
-                }
-            }
-
-            if (ent->client->latched_buttons & BUTTON_ATTACK)
-            {
-                ent->client->latched_buttons &= ~BUTTON_ATTACK;
-
-                if (ent->client->ps.gunframe >= 121 && ent->client->ps.gunframe <= ANIM_ATTACK2_FIRST)
-                {
-                    ent->client->ps.gunframe = ANIM_ATTACK2_FIRST + 1;
-                    ent->client->axe_attack = true;
-                }
-                else if (ent->client->ps.gunframe >= 138 && ent->client->ps.gunframe <= ANIM_ATTACK3_FIRST)
-                {
-                    ent->client->ps.gunframe = ANIM_ATTACK3_FIRST + 1;
-                    ent->client->axe_attack = true;
-                }
-                else if (ent->client->ps.gunframe >= 154 && ent->client->ps.gunframe <= ANIM_ATTACK3_LAST)
-                {
-                    ent->client->ps.gunframe = ANIM_ATTACK1_FIRST + 1;
-                    ent->client->axe_attack = true;
-                    ent->client->can_charge_axe = true;
-                }
-            }
-        }
-        break;
-    case WEAPON_DROPPING:
-        if (ent->client->ps.gunframe == ANIM_PUTAWAY_LAST)
-            ChangeWeapon(ent);
-        break;
-    }
-}
-#endif
-
-/*
-======================================================================
-
-PERFORATOR
-
-======================================================================
-*/
-
-// in radians per second
-#define MAX_ROTATION ((float) (M_PI * 4.25f))
-#define ROTATION_SPEED ((float) (MAX_ROTATION * BASE_FRAMETIME_S))
-
-static void weapon_perforator_fire(edict_t *ent)
-{
-    vec3_t forward, right, up, start;
-
-    // get start / end positions
-    AngleVectors(ent->client->v_angle, forward, right, up);
-    VectorCopy(ent->s.origin, start);
-    start[2] += ent->viewheight;
-    VectorMA(start, 32, forward, start);
-    VectorMA(start, -10, up, start);
-
-    float rotation = fmodf(G_MsToSec(level.time) * 10.0f, M_PI * 2);
-
-    VectorMA(start, -4 * cosf(rotation), right, start);
-    VectorMA(start, 4 * sinf(rotation), up, start);
-
-    for (int i = 0; i < 3; i++) {
-        ent->client->kick_angles[i] += crandom() * 0.5f;
-    }
-
-    fire_nail(ent, start, forward, 12, 2000);
-
-    SV_WriteByte(svc_muzzleflash);
-    SV_WriteShort(ent - g_edicts);
-    SV_WriteByte(MZ_HYPERBLASTER | is_silenced);
-    SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
-}
-
-void Weapon_Perforator(edict_t *ent)
-{
-    enum {
-        ANIM_EQUIP_FIRST    = 0,
-        ANIM_EQUIP_LAST     = 8,
-        ANIM_IDLE_FIRST,
-        ANIM_IDLE_LAST      = 57,
-        ANIM_ATTACK_FIRST   = 62,
-        ANIM_ATTACK_LAST    = 69,
-        ANIM_PUTAWAY_FIRST  = 58,
-        ANIM_PUTAWAY_LAST   = 60,
-        ANIM_INSPECT_FIRST  = 70,
-        ANIM_INSPECT_LAST   = 126
-    };
-    ent->client->ps.gunframe++;
-
-    switch (ent->client->weaponstate)
-    {
-    case WEAPON_ACTIVATING:
-        if (ent->client->ps.gunframe == ANIM_EQUIP_LAST)
-            ent->client->weaponstate = WEAPON_READY;
-        break;
-    case WEAPON_READY:
-        if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
-            ent->client->latched_buttons &= ~BUTTON_ATTACK;
-
-            if (ent->client->ps.gunframe >= ANIM_INSPECT_FIRST) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            }
-
-            if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
-                ent->client->weaponstate = WEAPON_FIRING;
-            } else {
-                if (level.time >= ent->pain_debounce_time) {
-                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_time = level.time + 1000;
-                }
-                NoAmmoWeaponChange(ent);
-                goto ready_noammo;
-            }
-
-            // intentional fall-through
-        } else {
-ready_noammo:
-            if (ent->client->inspect) {
-                ent->client->inspect = false;
-                ent->client->ps.gunframe = ANIM_INSPECT_FIRST;
-            } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST) {
-                if (random() < 0.1) {
-                    ent->client->ps.gunframe = ANIM_INSPECT_FIRST;
-                } else {
-                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-                }
-            } else if (ent->client->ps.gunframe == ANIM_INSPECT_LAST) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            }
-
-            if (ent->client->newweapon) {
-                ent->client->weaponstate = WEAPON_DROPPING;
-                ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
-                break;
-            }
-        }
-    case WEAPON_FIRING:
-
-        ent->client->weapon_sound = SV_SoundIndex("misc/lasfly.wav");
-        if ((ent->client->buttons | ent->client->latched_buttons) & BUTTON_ATTACK) {
-            ent->client->latched_buttons &= ~BUTTON_ATTACK;
-
-            if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
-                ent->client->ps.gunspin = min(MAX_ROTATION, ent->client->ps.gunspin + ROTATION_SPEED);
-
-                if (ent->client->ps.gunspin >= MAX_ROTATION)
-                {
-                    if (ent->client->ps.gunframe < ANIM_ATTACK_FIRST) {
-                        ent->client->ps.gunframe = ANIM_ATTACK_FIRST;
-                    }
-
-                    weapon_perforator_fire(ent);
-
-                    ent->client->anim_priority = ANIM_ATTACK;
-                    if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
-                        ent->s.frame = (FRAME_crattak1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
-                        ent->client->anim_end = FRAME_crattak9;
-                    } else {
-                        ent->s.frame = (FRAME_attack1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
-                        ent->client->anim_end = FRAME_attack8;
-                    }
-
-                    if (!(dmflags.integer & DF_INFINITE_AMMO))
-                        ent->client->pers.inventory[ent->client->ammo_index]--;
-                }
-            } else {
-                if (level.time >= ent->pain_debounce_time) {
-                    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-                    ent->pain_debounce_time = level.time + 1000;
-                }
-                NoAmmoWeaponChange(ent);
-                goto spindown;
-            }
-
-            if (ent->client->ps.gunframe == ANIM_IDLE_LAST) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            } else if (ent->client->ps.gunframe == ANIM_ATTACK_LAST) {
-                ent->client->ps.gunframe = ANIM_ATTACK_FIRST;
-            }
-        } else {
-spindown:
-            ent->client->ps.gunspin = max(0.f, ent->client->ps.gunspin - ROTATION_SPEED);
-
-            if (ent->client->weaponstate == WEAPON_FIRING) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-                ent->client->weaponstate = WEAPON_READY;
-            }
-        }
-
-        if (ent->client->ps.gunspin <= 0) {
-            ent->client->weapon_sound = 0;
-            ent->s.sound_pitch = 0;
-        } else {
-            ent->s.sound_pitch = -63 + ((ent->client->ps.gunspin / MAX_ROTATION) * 63 * 2);
-        }
-        break;
-    case WEAPON_DROPPING:
-        if (ent->client->ps.gunframe == ANIM_PUTAWAY_LAST)
-            ChangeWeapon(ent);
-        break;
-    }
-}
-
 
 /*
 ======================================================================
@@ -1247,23 +487,23 @@ enum {
 // shared generic entry point for basic weapons
 inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*fire) (edict_t *ent))
 {
-    ent->client->ps.gunframe++;
+    ent->client->ps.gun[0].frame++;
 
     switch (ent->client->weaponstate)
     {
     case WEAPON_ACTIVATING:
-        if (ent->client->ps.gunframe == frames[EQUIP_LAST])
+        if (ent->client->ps.gun[0].frame == frames[EQUIP_LAST])
             ent->client->weaponstate = WEAPON_READY;
         break;
     case WEAPON_READY:
         if (ent->client->newweapon) {
             ent->client->weaponstate = WEAPON_DROPPING;
-            ent->client->ps.gunframe = frames[PUTAWAY_FIRST];
+            ent->client->ps.gun[0].frame = frames[PUTAWAY_FIRST];
             break;
         } else if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
 
-            if (frames[INSPECT_FIRST] && ent->client->ps.gunframe >= frames[INSPECT_FIRST]) {
-                ent->client->ps.gunframe = frames[IDLE_FIRST];
+            if (frames[INSPECT_FIRST] && ent->client->ps.gun[0].frame >= frames[INSPECT_FIRST]) {
+                ent->client->ps.gun[0].frame = frames[IDLE_FIRST];
             }
 
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
@@ -1279,7 +519,7 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
                 }
 
                 ent->client->weaponstate = WEAPON_FIRING;
-                ent->client->ps.gunframe = frames[ATTACK_FIRST];
+                ent->client->ps.gun[0].frame = frames[ATTACK_FIRST];
 
                 fire(ent);
 
@@ -1296,25 +536,25 @@ inline void Weapon_Generic(edict_t *ent, const int frames[FRAMES_TOTAL], void (*
             }
         } else if (ent->client->inspect) {
             ent->client->inspect = false;
-            ent->client->ps.gunframe = frames[INSPECT_FIRST];
-        } else if (ent->client->ps.gunframe == frames[IDLE_LAST]) {
+            ent->client->ps.gun[0].frame = frames[INSPECT_FIRST];
+        } else if (ent->client->ps.gun[0].frame == frames[IDLE_LAST]) {
             if (random() < 0.1) {
-                ent->client->ps.gunframe = frames[INSPECT_FIRST];
+                ent->client->ps.gun[0].frame = frames[INSPECT_FIRST];
             } else {
-                ent->client->ps.gunframe = frames[IDLE_FIRST];
+                ent->client->ps.gun[0].frame = frames[IDLE_FIRST];
             }
-        } else if (ent->client->ps.gunframe == frames[INSPECT_LAST]) {
-            ent->client->ps.gunframe = frames[IDLE_FIRST];
+        } else if (ent->client->ps.gun[0].frame == frames[INSPECT_LAST]) {
+            ent->client->ps.gun[0].frame = frames[IDLE_FIRST];
         }
         break;
     case WEAPON_FIRING:
-        if (ent->client->ps.gunframe == frames[ATTACK_LAST]) {
-            ent->client->ps.gunframe = frames[IDLE_FIRST];
+        if (ent->client->ps.gun[0].frame == frames[ATTACK_LAST]) {
+            ent->client->ps.gun[0].frame = frames[IDLE_FIRST];
             ent->client->weaponstate = WEAPON_READY;
         }
         break;
     case WEAPON_DROPPING:
-        if (ent->client->ps.gunframe == frames[PUTAWAY_LAST]) {
+        if (ent->client->ps.gun[0].frame == frames[PUTAWAY_LAST]) {
             ChangeWeapon(ent);
         }
         break;
@@ -1560,20 +800,20 @@ void Weapon_Thunderbolt(edict_t *ent)
         ANIM_INSPECT_LAST     = 68
     };
     
-    ent->client->ps.gunframe++;
+    ent->client->ps.gun[0].frame++;
 
     switch (ent->client->weaponstate)
     {
     case WEAPON_ACTIVATING:
-        if (ent->client->ps.gunframe == ANIM_EQUIP_LAST)
+        if (ent->client->ps.gun[0].frame == ANIM_EQUIP_LAST)
             ent->client->weaponstate = WEAPON_READY;
         break;
     case WEAPON_READY:
         if (((ent->client->latched_buttons | ent->client->buttons) & BUTTON_ATTACK)) {
             ent->client->latched_buttons &= ~BUTTON_ATTACK;
 
-            if (ent->client->ps.gunframe >= ANIM_INSPECT_FIRST) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+            if (ent->client->ps.gun[0].frame >= ANIM_INSPECT_FIRST) {
+                ent->client->ps.gun[0].frame = ANIM_IDLE_FIRST;
             }
 
             if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
@@ -1592,20 +832,20 @@ void Weapon_Thunderbolt(edict_t *ent)
 ready_noammo:
             if (ent->client->inspect) {
                 ent->client->inspect = false;
-                ent->client->ps.gunframe = ANIM_INSPECT_FIRST;
-            } else if (ent->client->ps.gunframe == ANIM_IDLE_LAST) {
+                ent->client->ps.gun[0].frame = ANIM_INSPECT_FIRST;
+            } else if (ent->client->ps.gun[0].frame == ANIM_IDLE_LAST) {
                 if (random() < 0.1) {
-                    ent->client->ps.gunframe = ANIM_INSPECT_FIRST;
+                    ent->client->ps.gun[0].frame = ANIM_INSPECT_FIRST;
                 } else {
-                    ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+                    ent->client->ps.gun[0].frame = ANIM_IDLE_FIRST;
                 }
-            } else if (ent->client->ps.gunframe == ANIM_INSPECT_LAST) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+            } else if (ent->client->ps.gun[0].frame == ANIM_INSPECT_LAST) {
+                ent->client->ps.gun[0].frame = ANIM_IDLE_FIRST;
             }
 
             if (ent->client->newweapon) {
                 ent->client->weaponstate = WEAPON_DROPPING;
-                ent->client->ps.gunframe = ANIM_PUTAWAY_FIRST;
+                ent->client->ps.gun[0].frame = ANIM_PUTAWAY_FIRST;
                 break;
             }
         }
@@ -1615,7 +855,7 @@ ready_noammo:
 
             if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
 
-                ent->client->ps.gunframe = ANIM_ATTACK_FIRST;
+                ent->client->ps.gun[0].frame = ANIM_ATTACK_FIRST;
 
                 weapon_thunderbolt_fire(ent);
 
@@ -1642,20 +882,20 @@ ready_noammo:
                 NoAmmoWeaponChange(ent);
             }
 
-            if (ent->client->ps.gunframe == ANIM_IDLE_LAST) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
-            } else if (ent->client->ps.gunframe == ANIM_ATTACK_LAST) {
-                ent->client->ps.gunframe = ANIM_ATTACK_FIRST;
+            if (ent->client->ps.gun[0].frame == ANIM_IDLE_LAST) {
+                ent->client->ps.gun[0].frame = ANIM_IDLE_FIRST;
+            } else if (ent->client->ps.gun[0].frame == ANIM_ATTACK_LAST) {
+                ent->client->ps.gun[0].frame = ANIM_ATTACK_FIRST;
             }
         } else {
             if (ent->client->weaponstate == WEAPON_FIRING) {
-                ent->client->ps.gunframe = ANIM_IDLE_FIRST;
+                ent->client->ps.gun[0].frame = ANIM_IDLE_FIRST;
                 ent->client->weaponstate = WEAPON_READY;
             }
         }
         break;
     case WEAPON_DROPPING:
-        if (ent->client->ps.gunframe == ANIM_PUTAWAY_LAST)
+        if (ent->client->ps.gun[0].frame == ANIM_PUTAWAY_LAST)
             ChangeWeapon(ent);
         break;
     }

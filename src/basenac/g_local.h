@@ -821,6 +821,12 @@ void PlayerNoise(edict_t *who, vec3_t where, int type);
 void Weapon_RunAnimation(edict_t *ent);
 void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation, int32_t frame);
 void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation);
+void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
+void P_ProjectSource2(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
+bool Weapon_AmmoCheck(edict_t *ent);
+
+// 20% chance of inspect after idle
+#define WEAPON_RANDOM_INSPECT_CHANCE    0.2f
 
 //
 // m_move.c

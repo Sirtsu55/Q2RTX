@@ -2101,7 +2101,7 @@ static size_t CL_Armor_m(char *buffer, size_t size)
 static size_t CL_WeaponModel_m(char *buffer, size_t size)
 {
     return Q_scnprintf(buffer, size, "%s",
-                       cl.configstrings[cl.frame.ps.gunindex + CS_MODELS]);
+                       cl.configstrings[cl.frame.ps.gun[0].index + CS_MODELS]);
 }
 
 static size_t CL_Cluster_m(char *buffer, size_t size)

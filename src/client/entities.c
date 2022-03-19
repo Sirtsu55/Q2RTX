@@ -395,9 +395,10 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 
 // Use a static entity ID on some things because the renderer relies on eid to match between meshes
 // on the current and previous frames.
-#define RESERVED_ENTITIY_GUN 1
-#define RESERVED_ENTITIY_TESTMODEL 2
-#define RESERVED_ENTITIY_COUNT 3
+#define RESERVED_ENTITIY_GUN1 1
+#define RESERVED_ENTITIY_GUN2 2
+#define RESERVED_ENTITIY_TESTMODEL 3
+#define RESERVED_ENTITIY_COUNT 4
 
 static int adjust_shell_fx(int renderfx)
 {
@@ -915,17 +916,6 @@ static void CL_AddViewWeapon(void)
 
     memset(&gun, 0, sizeof(gun));
 
-    if (gun_model) {
-        gun.model = gun_model;  // development tool
-    } else {
-        gun.model = cl.model_draw[ps->gunindex];
-    }
-    if (!gun.model) {
-        return;
-    }
-
-	gun.id = RESERVED_ENTITIY_GUN;
-
     // set up gun position
     VectorCopy(cl.refdef.vieworg, gun.origin);
     VectorAdd(cl.refdef.viewangles, cl.gunangles, gun.angles);
@@ -953,7 +943,8 @@ static void CL_AddViewWeapon(void)
 		VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
 		VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
 
-		CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl.bsp->nodes, MASK_SOLID);
+		CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl.bsp->nodes, MASK_PLAYERSOLID & ~CONTENTS_PLAYERCLIP);
+        CL_ClipMoveToEntities(gun_real_pos, mins, maxs, gun_tip, &trace, MASK_PLAYERSOLID & ~CONTENTS_PLAYERCLIP);
 
 		if (trace.fraction != 1.0f) 
 		{
@@ -966,19 +957,6 @@ static void CL_AddViewWeapon(void)
 	}
 
     VectorCopy(gun.origin, gun.oldorigin);      // don't lerp at all
-
-    if (gun_frame) {
-        gun.frame = gun_frame;  // development tool
-        gun.oldframe = gun_frame;   // development tool
-    } else {
-        gun.frame = ps->gunframe;
-        if (gun.frame == 0) {
-            gun.oldframe = 0;   // just changed weapons, don't lerp from old
-        } else {
-            gun.oldframe = ops->gunframe;
-            gun.backlerp = 1.0f - cl.lerpfrac;
-        }
-    }
 
     gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
     if (info_hand->integer == 1) {
@@ -996,35 +974,55 @@ static void CL_AddViewWeapon(void)
 	// same entity in rtx mode
 	if (vid_rtx->integer) {
 		gun.flags |= shell_flags;
-	}
-
-	model_t* model = MOD_ForHandle(gun.model);
-	if (model && strstr(model->name, "v_flareg"))
-		gun.scale = 0.3f;
-
-    // SPIN
-    static float spin_angle = 0;
-    static int last_weapon = -1;
-
-    if (last_weapon != ps->gunindex)
-    {
-        spin_angle = 0;
-        last_weapon = ps->gunindex;
     }
 
-    float delta = cls.realdelta;
-    float speed = Lerp(ops->gunspin, ps->gunspin, cl.lerpfrac);
-    spin_angle += (speed * delta);
-    gun.spin_angle = spin_angle;
-    // SPIN
+    for (int32_t i = 0; i < q_countof(ps->gun); i++) {
+        if (i == 0 && gun_model) {
+            gun.model = gun_model;  // development tool
+        } else {
+            gun.model = cl.model_draw[ps->gun[i].index];
+        }
 
-    V_AddEntity(&gun);
+        if (!gun.model) {
+            continue;
+        }
 
-	// separate entity in non-rtx mode
-    if (shell_flags && !vid_rtx->integer) {
-        gun.alpha = 0.30f * cl_gunalpha->value;
-        gun.flags |= shell_flags | RF_TRANSLUCENT;
+    	gun.id = RESERVED_ENTITIY_GUN1 + i;
+
+        if (i == 0 && gun_frame) {
+            gun.frame = gun_frame;  // development tool
+            gun.oldframe = gun_frame;   // development tool
+        } else {
+            gun.frame = ps->gun[i].frame;
+            if (gun.frame == 0) {
+                gun.oldframe = 0;   // just changed weapons, don't lerp from old
+            } else {
+                gun.oldframe = ops->gun[i].frame;
+                gun.backlerp = 1.0f - cl.lerpfrac;
+            }
+        }
+        
+        // SPIN
+        if (cl.gunweapon[i] != ps->gun[i].index)
+        {
+            cl.gunspin[i] = 0;
+            cl.gunweapon[i] = ps->gun[i].index;
+        }
+
+        float delta = cls.realdelta;
+        float speed = Lerp(ops->gun[i].spin, ps->gun[i].spin, cl.lerpfrac);
+        cl.gunspin[i] += (speed * delta);
+        gun.spin_angle = cl.gunspin[i];
+        // SPIN
+
         V_AddEntity(&gun);
+
+	    // separate entity in non-rtx mode
+        if (shell_flags && !vid_rtx->integer) {
+            gun.alpha = 0.30f * cl_gunalpha->value;
+            gun.flags |= shell_flags | RF_TRANSLUCENT;
+            V_AddEntity(&gun);
+        }
     }
 }
 

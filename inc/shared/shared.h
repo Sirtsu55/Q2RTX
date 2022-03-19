@@ -1493,6 +1493,11 @@ typedef struct entity_state_s {
 
 //==============================================
 
+typedef struct {
+    int     index;
+    int     frame;
+    float   spin;
+} player_gun_t;
 
 // player_state_t is the information needed in addition to pmove_state_t
 // to rendered a view.  There will only be 10 player_state_t sent each second,
@@ -1508,9 +1513,7 @@ typedef struct {
     vec3_t      kick_angles;    // add to view direction to get render angles
                                 // set by weapon kicks, pain effects, etc
 
-    int         gunindex;
-    int         gunframe;
-    float       gunspin;
+    player_gun_t    gun[2];
 
     float       blend[4];       // rgba full screen effect
 

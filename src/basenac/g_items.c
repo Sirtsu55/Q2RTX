@@ -23,6 +23,7 @@ void        Use_Weapon(edict_t *ent, gitem_t *inv);
 void        Drop_Weapon(edict_t *ent, gitem_t *inv);
 
 extern const weapon_animation_t weap_axe_activate;
+extern const weapon_animation_t weap_perf_activate;
 void Weapon_Shotgun(edict_t *ent);
 void Weapon_SuperShotgun(edict_t *ent);
 void Weapon_Nailgun(edict_t *ent);
@@ -1275,7 +1276,7 @@ gitem_t itemlist[] = {
         Pickup_Weapon,
         Use_Weapon,
         Drop_Weapon,
-        Weapon_Perforator,
+        NULL,
         "misc/w_pkup.wav",
         "models/weapons/g_perf/g_perf.md3", EF_ROTATE,
         "models/weapons/v_perf/v_perf.iqm",
@@ -1288,7 +1289,8 @@ gitem_t itemlist[] = {
         WEAP_CHAINGUN,
         NULL,
         0,
-        /* precache */ "misc/lasfly.wav weapons/hyprbf1a.wav"
+        /* precache */ "misc/lasfly.wav weapons/hyprbf1a.wav",
+        &weap_perf_activate
     },
 
     /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16)

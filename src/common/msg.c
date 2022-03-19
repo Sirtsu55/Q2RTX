@@ -822,29 +822,65 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
         MSG_WriteByte(to->rdflags);
     }
 
+    int gunflags = 0;
+
     if (!(flags & MSG_PS_IGNORE_GUNINDEX)) {
-        if (to->gunindex != from->gunindex) {
-            *pflags |= PS_WEAPONINDEX;
-            MSG_WriteByte(to->gunindex);
+        if (to->gun[0].index != from->gun[0].index) {
+            gunflags |= GB_INDEX0;
+        }
+        if (to->gun[1].index != from->gun[1].index) {
+            gunflags |= GB_INDEX1;
         }
     } else {
         // save previous state
-        to->gunindex = from->gunindex;
+        to->gun[0].index = from->gun[0].index;
+        to->gun[1].index = from->gun[1].index;
     }
 
     if (!(flags & MSG_PS_IGNORE_GUNFRAMES)) {
-        if (to->gunframe != from->gunframe) {
-            *pflags |= PS_WEAPONFRAME;
-            MSG_WriteShort(to->gunframe);
+        if (to->gun[0].frame != from->gun[0].frame) {
+            gunflags |= GB_FRAME0;
         }
-        if (FLOAT2COMPRESS(to->gunspin, 2048) != FLOAT2COMPRESS(from->gunspin, 2048)) {
-            *pflags |= PS_WEAPONSPIN;
-            MSG_WriteLong(FLOAT2COMPRESS(to->gunspin, 2048));
+        if (to->gun[1].frame != from->gun[1].frame) {
+            gunflags |= GB_FRAME1;
+        }
+        if (FLOAT2COMPRESS(to->gun[0].spin, 2048) != FLOAT2COMPRESS(from->gun[0].spin, 2048)) {
+            gunflags |= GB_SPIN0;
+        }
+        if (FLOAT2COMPRESS(to->gun[1].spin, 2048) != FLOAT2COMPRESS(from->gun[1].spin, 2048)) {
+            gunflags |= GB_SPIN1;
         }
     } else {
         // save previous state
-        to->gunframe = from->gunframe;
-        to->gunspin = from->gunspin;
+        to->gun[0].frame = from->gun[0].frame;
+        to->gun[0].spin = from->gun[0].spin;
+        to->gun[1].frame = from->gun[1].frame;
+        to->gun[1].spin = from->gun[1].spin;
+    }
+
+    if (gunflags) {
+        *pflags |= PS_GUNS;
+
+        MSG_WriteByte(gunflags);
+        
+        if (gunflags & GB_INDEX0) {
+            MSG_WriteByte(to->gun[0].index);
+        }
+        if (gunflags & GB_INDEX1) {
+            MSG_WriteByte(to->gun[1].index);
+        }
+        if (gunflags & GB_FRAME0) {
+            MSG_WriteShort(to->gun[0].frame);
+        }
+        if (gunflags & GB_FRAME1) {
+            MSG_WriteShort(to->gun[1].frame);
+        }
+        if (gunflags & GB_SPIN0) {
+            MSG_WriteLong(FLOAT2COMPRESS(to->gun[0].spin, 2048));
+        }
+        if (gunflags & GB_SPIN1) {
+            MSG_WriteLong(FLOAT2COMPRESS(to->gun[1].spin, 2048));
+        }
     }
 
     statbits = 0;
@@ -1410,16 +1446,27 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
     if (flags & PS_RDFLAGS)
         to->rdflags = MSG_ReadByte();
 
-    if (flags & PS_WEAPONINDEX) {
-        to->gunindex = MSG_ReadByte();
-    }
-
-    if (flags & PS_WEAPONFRAME) {
-        to->gunframe = MSG_ReadWord();
-    }
-
-    if (flags & PS_WEAPONSPIN) {
-        to->gunspin = COMPRESS2FLOAT(MSG_ReadLong(), 2048);
+    if (flags & PS_GUNS) {
+        int gunflags = MSG_ReadByte();
+        
+        if (gunflags & GB_INDEX0) {
+            to->gun[0].index = MSG_ReadByte();
+        }
+        if (gunflags & GB_INDEX1) {
+            to->gun[1].index = MSG_ReadByte();
+        }
+        if (gunflags & GB_FRAME0) {
+            to->gun[0].frame = MSG_ReadWord();
+        }
+        if (gunflags & GB_FRAME1) {
+            to->gun[1].frame = MSG_ReadWord();
+        }
+        if (gunflags & GB_SPIN0) {
+            to->gun[0].spin = COMPRESS2FLOAT(MSG_ReadLong(), 2048);
+        }
+        if (gunflags & GB_SPIN1) {
+            to->gun[1].spin = COMPRESS2FLOAT(MSG_ReadLong(), 2048);
+        }
     }
 
     // parse stats
@@ -1467,9 +1514,7 @@ void MSG_ShowDeltaPlayerstateBits(int flags, int extraflags)
     SP(VIEWANGLES,      "viewangles[0,1]");
     SE(VIEWANGLE2,      "viewangles[2]");
     SP(KICKANGLES,      "kick_angles");
-    SP(WEAPONINDEX,     "gunindex");
-    SP(WEAPONFRAME,     "gunframe");
-    SP(WEAPONSPIN,      "gunspin");
+    SP(GUNS,            "guns");
     SP(BLEND,           "blend");
     SP(FOV,             "fov");
     SP(RDFLAGS,         "rdflags");
