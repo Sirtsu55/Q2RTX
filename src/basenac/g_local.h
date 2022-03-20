@@ -115,13 +115,6 @@ typedef enum {
 } damage_t;
 
 typedef enum {
-    WEAPON_READY,
-    WEAPON_ACTIVATING,
-    WEAPON_DROPPING,
-    WEAPON_FIRING
-} weaponstate_t;
-
-typedef enum {
     AMMO_BULLETS,
     AMMO_SHELLS,
     AMMO_ROCKETS,
@@ -233,6 +226,13 @@ typedef struct weapon_event_s {
     int32_t start, end; // frame range, or WEAPON_EVENT_ALWAYS
 } weapon_event_t;
 
+typedef enum {
+    WEAPID_GUN,
+    WEAPID_AXE,
+
+    WEAPID_TOTAL
+} weapon_id_t;
+
 typedef struct weapon_animation_s {
     int32_t start, end;
     const struct weapon_animation_s *next; // null for looping animations, otherwise you must use a Finished func
@@ -276,7 +276,7 @@ typedef struct gitem_s {
     bool        (*pickup)(struct edict_s *ent, struct edict_s *other);
     void        (*use)(struct edict_s *ent, struct gitem_s *item);
     void        (*drop)(struct edict_s *ent, struct gitem_s *item);
-    void        (*weaponthink)(struct edict_s *ent);
+    const       weapon_animation_t *animation; // animation to 'start' this weapon
     char        *pickup_sound;
     char        *world_model;
     int         world_model_flags;
@@ -285,7 +285,6 @@ typedef struct gitem_s {
     // client side info
     char        *icon;
     char        *pickup_name;   // for printing on pickup
-    int         count_width;    // number of digits to display by icon
 
     int         quantity;       // for ammo how much, for weapons how much is used per shot
     char        *ammo;          // for weapons
@@ -298,7 +297,7 @@ typedef struct gitem_s {
 
     char        *precaches;     // string of all models, sounds, and images this item will use
 
-    const weapon_animation_t *animation; // animation to 'start' this weapon
+    weapon_id_t weapid;
 } gitem_t;
 
 //
@@ -643,6 +642,7 @@ gitem_t *FindItemByClassname(char *classname);
 edict_t *Drop_Item(edict_t *ent, gitem_t *item);
 void SetRespawn(edict_t *ent, float delay);
 bool ChangeWeapon(edict_t *ent);
+void Weapon_Activate(edict_t *ent);
 void SpawnItem(edict_t *ent, gitem_t *item);
 void Think_Weapon(edict_t *ent);
 int ArmorIndex(edict_t *ent);
@@ -818,15 +818,15 @@ void DeathmatchScoreboardMessage(edict_t *client, edict_t *killer);
 // p_weapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
-void Weapon_RunAnimation(edict_t *ent);
 void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation, int32_t frame);
 void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation);
+void Weapon_RunAnimation(edict_t *ent);
 void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 void P_ProjectSource2(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
 bool Weapon_AmmoCheck(edict_t *ent);
 
 // 20% chance of inspect after idle
-#define WEAPON_RANDOM_INSPECT_CHANCE    0.2f
+#define WEAPON_RANDOM_INSPECT_CHANCE    0.8f
 
 //
 // m_move.c
@@ -949,8 +949,8 @@ struct gclient_s {
 
     float       killer_yaw;         // when dead, look at killer
 
-    weaponstate_t   weaponstate;
-    const weapon_animation_t *weaponanimation;
+    const weapon_animation_t *weapanim[WEAPID_TOTAL];
+
     vec3_t      kick_angles;    // weapon kicks
     float       v_dmg_roll, v_dmg_pitch;
     gtime_t     v_dmg_time;    // damage kicks
@@ -967,8 +967,6 @@ struct gclient_s {
     gtime_t     next_drown_time;
     int         old_waterlevel;
     int         breather_sound;
-
-    int         machinegun_shots;   // for weapon raising
 
     // animation vars
     int         anim_end;

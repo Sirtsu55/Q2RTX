@@ -387,8 +387,6 @@ static const save_field_t clientfields[] = {
 
     F(killer_yaw),
 
-    I(weaponstate),
-
     V(kick_angles),
     F(v_dmg_roll),
     F(v_dmg_pitch),
@@ -406,8 +404,6 @@ static const save_field_t clientfields[] = {
     I64(next_drown_time),
     I(old_waterlevel),
     I(breather_sound),
-
-    I(machinegun_shots),
 
     I(anim_end),
     I(anim_priority),

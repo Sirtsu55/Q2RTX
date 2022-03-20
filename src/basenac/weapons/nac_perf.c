@@ -39,128 +39,14 @@ enum {
 #define ROTATION_SPEED ((float) (MAX_ROTATION * BASE_FRAMETIME_S))
 
 static bool Perf_PickIdle(edict_t *ent);
-static bool Perf_SpinDown(edict_t *ent);
-static bool Perf_Idle(edict_t *ent);
-static bool Perf_Firing(edict_t *ent);
 
-const weapon_animation_t weap_perf_activate = {
-    ANIM_EQUIP_FIRST, ANIM_EQUIP_LAST, NULL,
-    NULL, Perf_PickIdle,
-    NULL
-};
-
-const weapon_animation_t weap_perf_deactivate = {
-    ANIM_PUTAWAY_FIRST, ANIM_PUTAWAY_LAST, NULL,
-    Perf_SpinDown, ChangeWeapon,
-    NULL
-};
-
-const weapon_animation_t weap_perf_idle = {
-    ANIM_IDLE_FIRST, ANIM_IDLE_LAST, NULL,
-    Perf_Idle, Perf_PickIdle,
-    NULL
-};
-
-const weapon_animation_t weap_perf_inspect = {
-    ANIM_INSPECT_FIRST, ANIM_INSPECT_LAST, NULL,
-    Perf_Idle, Perf_PickIdle,
-    NULL
-};
-
-const weapon_animation_t weap_perf_firing = {
-    ANIM_ATTACK_FIRST, ANIM_ATTACK_LAST, NULL,
-    Perf_Firing, NULL,
-    NULL
-};
-
-static bool Perf_CheckSpin(edict_t *ent)
+static bool Perf_SetSpinPitch(edict_t *ent)
 {
-    // can't fire, so we're gonna switch
-    if (!Weapon_AmmoCheck(ent)) {
-
-        // if we're in firing, switch to idle animation
-        if (ent->client->weaponanimation == &weap_perf_firing) {
-            Weapon_SetAnimation(ent, &weap_perf_idle);
-        }
-
-        return false;
-    }
-    
-    // attack is being held, so start spin sound
-    ent->client->weapon_sound = SV_SoundIndex("misc/lasfly.wav");
-
-    // calculate spin value
-    ent->client->ps.gun[0].spin = min(MAX_ROTATION, ent->client->ps.gun[0].spin + ROTATION_SPEED);
-
-    // check if we're firing nails 
-    if (ent->client->ps.gun[0].spin < MAX_ROTATION) {
-
-        // if we're in firing, switch to idle animation
-        if (ent->client->weaponanimation == &weap_perf_firing) {
-            Weapon_SetAnimation(ent, &weap_perf_idle);
-            return false;
-        }
-
-        return true;
-    }
-
-    if (ent->client->ps.gun[0].frame < ANIM_ATTACK_FIRST) {
-        ent->client->ps.gun[0].frame = ANIM_ATTACK_FIRST;
-    }
-
-    Perf_Fire(ent);
-
-    ent->client->anim_priority = ANIM_ATTACK;
-    if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
-        ent->s.frame = (FRAME_crattak1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
-        ent->client->anim_end = FRAME_crattak9;
+    if (ent->client->ps.gun[WEAPID_GUN].spin <= 0) {
+        ent->client->weapon_sound = 0;
+        ent->s.sound_pitch = 0;
     } else {
-        ent->s.frame = (FRAME_attack1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
-        ent->client->anim_end = FRAME_attack8;
-    }
-
-    // if we're in idle, switch to firing animation
-    if (ent->client->weaponanimation != &weap_perf_firing) {
-        Weapon_SetAnimation(ent, &weap_perf_firing);
-        return false;
-    }
-
-    return true;
-}
-
-static bool Perf_Firing(edict_t *ent)
-{
-    if (!(ent->client->buttons & BUTTON_ATTACK)) {
-        Perf_SpinDown();
-    } else if (!Perf_CheckSpin(ent)) {
-        return false;
-    }
-
-    return true;
-}
-
-static bool Perf_Idle(edict_t *ent)
-{
-    if (ent->client->newweapon)
-    {
-        Weapon_SetAnimation(ent, &weap_perf_deactivate);
-        return false;
-    }
-
-    if (!Perf_Firing(ent)) {
-        return false;
-    }
-    
-    // check explicit inspect last
-    if (ent->client->inspect)
-    {
-        if (ent->client->weaponanimation == &weap_perf_idle)
-        {
-            Perf_PickIdle(ent);
-            return false;
-        }
-
-        ent->client->inspect = false;
+        ent->s.sound_pitch = -63 + ((ent->client->ps.gun[WEAPID_GUN].spin / MAX_ROTATION) * 63 * 2);
     }
 
     return true;
@@ -168,35 +54,40 @@ static bool Perf_Idle(edict_t *ent)
 
 static bool Perf_SpinDown(edict_t *ent)
 {
-    ent->client->ps.gun[0].spin = max(0.f, ent->client->ps.gun[0].spin - ROTATION_SPEED);
-
-    if (ent->client->ps.gun[0].spin <= 0) {
-        ent->client->weapon_sound = 0;
-        ent->s.sound_pitch = 0;
-    } else {
-        ent->s.sound_pitch = -63 + ((ent->client->ps.gun[0].spin / MAX_ROTATION) * 63 * 2);
-    }
-
+    ent->client->ps.gun[WEAPID_GUN].spin = max(0.f, ent->client->ps.gun[WEAPID_GUN].spin - ROTATION_SPEED);
+    Perf_SetSpinPitch(ent);
     return true;
 }
 
-static bool Perf_PickIdle(edict_t *ent)
-{
-    if (ent->client->weaponanimation == &weap_perf_inspect ||
-        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
-    {
-        Weapon_SetAnimation(ent, &weap_perf_idle);
-        return false;
-    }
-    
-    Weapon_SetAnimation(ent, &weap_perf_inspect);
+static bool Perf_Idle(edict_t *ent);
+static bool Perf_Firing(edict_t *ent);
 
-    ent->client->inspect = false;
+const weapon_animation_t weap_perf_activate = {
+    .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
+    .finished = Perf_PickIdle
+};
 
-    return false;
-}
+const weapon_animation_t weap_perf_deactivate = {
+    .start = ANIM_PUTAWAY_FIRST, .end = ANIM_PUTAWAY_LAST,
+    .frame = Perf_SpinDown, .finished = ChangeWeapon
+};
 
-static bool Perf_Fire(edict_t *ent)
+const weapon_animation_t weap_perf_idle = {
+    .start = ANIM_IDLE_FIRST, .end = ANIM_IDLE_LAST,
+    .frame = Perf_Idle, .finished = Perf_PickIdle
+};
+
+const weapon_animation_t weap_perf_inspect = {
+    .start = ANIM_INSPECT_FIRST, .end = ANIM_INSPECT_LAST,
+    .frame = Perf_Idle, .finished = Perf_PickIdle
+};
+
+const weapon_animation_t weap_perf_firing = {
+    .start = ANIM_ATTACK_FIRST, .end = ANIM_ATTACK_LAST,
+    .frame = Perf_Firing
+};
+
+static void Perf_Fire(edict_t *ent)
 {
     vec3_t forward, right, up, start;
 
@@ -220,12 +111,127 @@ static bool Perf_Fire(edict_t *ent)
 
     SV_WriteByte(svc_muzzleflash);
     SV_WriteShort(ent - g_edicts);
-    SV_WriteByte(MZ_HYPERBLASTER | is_silenced);
+    SV_WriteByte(MZ_HYPERBLASTER);
     SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 
     if (!(dmflags.integer & DF_INFINITE_AMMO)) {
         ent->client->pers.inventory[ent->client->ammo_index]--;
     }
+}
+
+static bool Perf_CheckSpin(edict_t *ent)
+{
+    // can't fire, so we're gonna switch
+    if (!Weapon_AmmoCheck(ent)) {
+
+        // if we're in firing, switch to idle animation
+        if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_firing) {
+            Weapon_SetAnimation(ent, &weap_perf_idle);
+        }
+
+        return false;
+    }
+    
+    // attack is being held, so start spin sound
+    ent->client->weapon_sound = SV_SoundIndex("misc/lasfly.wav");
+
+    // calculate spin value
+    ent->client->ps.gun[WEAPID_GUN].spin = min(MAX_ROTATION, ent->client->ps.gun[WEAPID_GUN].spin + ROTATION_SPEED);
+
+    Perf_SetSpinPitch(ent);
+
+    // check if we're firing nails 
+    if (ent->client->ps.gun[WEAPID_GUN].spin < MAX_ROTATION) {
+
+        // if we're in firing, switch to idle animation
+        if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_firing) {
+            Weapon_SetAnimation(ent, &weap_perf_idle);
+            return false;
+        }
+
+        return true;
+    }
+    
+    if (ent->client->ps.gun[WEAPID_GUN].frame < ANIM_ATTACK_FIRST) {
+        ent->client->ps.gun[WEAPID_GUN].frame = ANIM_ATTACK_FIRST;
+    }
+
+    Perf_Fire(ent);
+
+    ent->client->anim_priority = ANIM_ATTACK;
+    if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
+        ent->s.frame = (FRAME_crattak1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
+        ent->client->anim_end = FRAME_crattak9;
+    } else {
+        ent->s.frame = (FRAME_attack1 - 1) + (level.time % (int)(BASE_FRAMETIME * 2));
+        ent->client->anim_end = FRAME_attack8;
+    }
+
+    // if we're in idle, switch to firing animation
+    if (ent->client->weapanim[WEAPID_GUN] != &weap_perf_firing) {
+        Weapon_SetAnimation(ent, &weap_perf_firing);
+        return false;
+    }
 
     return true;
+}
+
+static bool Perf_Firing(edict_t *ent)
+{
+    if (!(ent->client->buttons & BUTTON_ATTACK)) {
+        Perf_SpinDown(ent);
+
+        if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_firing) {
+            Weapon_SetAnimation(ent, &weap_perf_idle);
+        }
+
+        return false;
+    }
+    
+    return Perf_CheckSpin(ent);
+}
+
+static bool Perf_Idle(edict_t *ent)
+{
+    if (ent->client->newweapon)
+    {
+        Weapon_SetAnimation(ent, &weap_perf_deactivate);
+        Weapon_Activate(ent);
+        return false;
+    }
+
+    if (!Perf_Firing(ent)) {
+        return false;
+    }
+    
+    // check explicit inspect last
+    if (ent->client->inspect)
+    {
+        if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_idle)
+        {
+            Perf_PickIdle(ent);
+            return false;
+        }
+
+        ent->client->inspect = false;
+    }
+
+    return true;
+}
+
+
+static bool Perf_PickIdle(edict_t *ent)
+{
+    if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_inspect ||
+        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
+    {
+        Weapon_SetAnimation(ent, &weap_perf_idle);
+        return false;
+    }
+    
+    Weapon_SetAnimation(ent, &weap_perf_inspect);
+
+    ent->client->inspect = false;
+
+    return false;
 }

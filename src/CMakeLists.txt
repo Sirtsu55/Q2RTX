@@ -58,6 +58,8 @@ SET(SRC_BASENAC
 	basenac/p_view.c
 	basenac/p_weapon.c
 	basenac/weapons/nac_axe.c
+	basenac/weapons/nac_perf.c
+	basenac/weapons/nac_shotgun.c
 )
 
 SET(HEADERS_BASENAC
@@ -649,4 +651,8 @@ IF(CONFIG_LINUX_PACKAGING_SUPPORT)
         DESTINATION share/quake2rtx/bin
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         COMPONENT shareware)
+ENDIF()
+
+IF(MSVC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D_CRT_DECLARE_NONSTDC_NAMES")
 ENDIF()

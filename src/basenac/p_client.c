@@ -1144,8 +1144,6 @@ void PutClientInServer(edict_t *ent)
     else if (client->ps.fov > 160)
         client->ps.fov = 160;
 
-    client->ps.gun[0].index = SV_ModelIndex(client->pers.weapon->view_model);
-
     // clear entity state values
     ent->s.effects = 0;
     ent->s.modelindex = 255;        // will use the skin specified model
@@ -1177,7 +1175,7 @@ void PutClientInServer(edict_t *ent)
         ent->movetype = MOVETYPE_NOCLIP;
         ent->solid = SOLID_NOT;
         ent->svflags |= SVF_NOCLIENT;
-        ent->client->ps.gun[0].index = 0;
+        ent->client->ps.gun[0].index = ent->client->ps.gun[1].index = 0;
         SV_LinkEntity(ent);
         return;
     } else
@@ -1191,7 +1189,7 @@ void PutClientInServer(edict_t *ent)
 
     // force the current weapon up
     client->newweapon = client->pers.weapon;
-    ChangeWeapon(ent);
+    Weapon_Activate(ent);
 }
 
 /*

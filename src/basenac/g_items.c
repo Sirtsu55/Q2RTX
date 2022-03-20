@@ -24,13 +24,7 @@ void        Drop_Weapon(edict_t *ent, gitem_t *inv);
 
 extern const weapon_animation_t weap_axe_activate;
 extern const weapon_animation_t weap_perf_activate;
-void Weapon_Shotgun(edict_t *ent);
-void Weapon_SuperShotgun(edict_t *ent);
-void Weapon_Nailgun(edict_t *ent);
-void Weapon_Perforator(edict_t *ent);
-void Weapon_GrenadeLauncher(edict_t *ent);
-void Weapon_RocketLauncher(edict_t *ent);
-void Weapon_Thunderbolt(edict_t *ent);
+extern const weapon_animation_t weap_shotgun_activate;
 
 gitem_armor_t jacketarmor_info  = { 25,  50, .30, .00, ARMOR_JACKET};
 gitem_armor_t combatarmor_info  = { 50, 100, .60, .30, ARMOR_COMBAT};
@@ -1024,9 +1018,7 @@ void SpawnItem(edict_t *ent, gitem_t *item)
 //======================================================================
 
 gitem_t itemlist[] = {
-    {
-        NULL
-    },  // leave index 0 alone
+    { 0 },  // leave index 0 alone
 
     //
     // ARMOR
@@ -1035,96 +1027,59 @@ gitem_t itemlist[] = {
     /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "item_armor_body",
-        Pickup_Armor,
-        NULL,
-        NULL,
-        NULL,
-        "misc/ar1_pkup.wav",
-        "models/items/armor/body/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_bodyarmor",
-        /* pickup */    "Body Armor",
-        /* width */     3,
-        0,
-        NULL,
-        IT_ARMOR,
-        0,
-        &bodyarmor_info,
-        ARMOR_BODY,
-        /* precache */ ""
+        .classname = "item_armor_body",
+        .pickup = Pickup_Armor,
+        .pickup_sound = "misc/ar1_pkup.wav",
+        .world_model = "models/items/armor/body/tris.md2", .world_model_flags = EF_ROTATE,
+        .icon = "i_bodyarmor",
+        .pickup_name = "Body Armor",
+        .flags = IT_ARMOR,
+        .info = &bodyarmor_info,
+        .tag = ARMOR_BODY
     },
 
     /*QUAKED item_armor_combat (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "item_armor_combat",
-        Pickup_Armor,
-        NULL,
-        NULL,
-        NULL,
-        "misc/ar1_pkup.wav",
-        "models/items/armor/combat/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_combatarmor",
-        /* pickup */    "Combat Armor",
-        /* width */     3,
-        0,
-        NULL,
-        IT_ARMOR,
-        0,
-        &combatarmor_info,
-        ARMOR_COMBAT,
-        /* precache */ ""
+        .classname = "item_armor_combat",
+        .pickup = Pickup_Armor,
+        .pickup_sound = "misc/ar1_pkup.wav",
+        .world_model = "models/items/armor/combat/tris.md2", .world_model_flags = EF_ROTATE,
+        .icon = "i_combatarmor",
+        .pickup_name = "Combat Armor",
+        .flags = IT_ARMOR,
+        .info = &combatarmor_info,
+        .tag = ARMOR_COMBAT
     },
 
     /*QUAKED item_armor_jacket (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "item_armor_jacket",
-        Pickup_Armor,
-        NULL,
-        NULL,
-        NULL,
-        "misc/ar1_pkup.wav",
-        "models/items/armor/jacket/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_jacketarmor",
-        /* pickup */    "Jacket Armor",
-        /* width */     3,
-        0,
-        NULL,
-        IT_ARMOR,
-        0,
-        &jacketarmor_info,
-        ARMOR_JACKET,
-        /* precache */ ""
+        .classname = "item_armor_jacket",
+        .pickup = Pickup_Armor,
+        .pickup_sound = "misc/ar1_pkup.wav",
+        .world_model = "models/items/armor/jacket/tris.md2", .world_model_flags = EF_ROTATE,
+        .icon = "i_jacketarmor",
+        .pickup_name = "Jacket Armor",
+        .flags = IT_ARMOR,
+        .info = &jacketarmor_info,
+        .tag = ARMOR_JACKET
     },
 
     /*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "item_armor_shard",
-        Pickup_Armor,
-        NULL,
-        NULL,
-        NULL,
-        "misc/ar2_pkup.wav",
-        "models/items/armor/shard/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_jacketarmor",
-        /* pickup */    "Armor Shard",
-        /* width */     3,
-        0,
-        NULL,
-        IT_ARMOR,
-        0,
-        NULL,
-        ARMOR_SHARD,
-        /* precache */ ""
+        .classname = "item_armor_shard",
+        .pickup = Pickup_Armor,
+        .pickup_sound = "misc/ar2_pkup.wav",
+        .world_model = "models/items/armor/shard/tris.md2", .world_model_flags = EF_ROTATE,
+        .icon = "i_jacketarmor",
+        .pickup_name = "Armor Shard",
+        .flags = IT_ARMOR,
+        .tag = ARMOR_SHARD
     },
 
-
+#if 0
     /*QUAKED item_power_screen (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
@@ -1170,7 +1125,7 @@ gitem_t itemlist[] = {
         0,
         /* precache */ "misc/power2.wav misc/power1.wav"
     },
-
+#endif
 
     //
     // WEAPONS
@@ -1179,187 +1134,55 @@ gitem_t itemlist[] = {
     /* weapon_axe (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "weapon_axe",
-        NULL,
-        Use_Weapon,
-        NULL,
-        NULL,
-        "misc/w_pkup.wav",
-        NULL, 0,
-        "models/weapons/v_axe/axe.iqm",
-        /* icon */      "w_blaster",
-        /* pickup */    "Axe",
-        0,
-        0,
-        NULL,
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_BLASTER,
-        NULL,
-        0,
-        /* precache */ "",
-        &weap_axe_activate
+        .classname = "weapon_axe",
+        .use = Use_Weapon,
+        .animation = &weap_axe_activate,
+        .pickup_sound = "misc/w_pkup.wav",
+        .view_model = "models/weapons/v_axe/axe.iqm",
+        .icon = "w_blaster",
+        .pickup_name = "Axe",
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .tag = WEAP_BLASTER,
+        .weapid = WEAPID_AXE
     },
 
     /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "weapon_shotgun",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_Shotgun,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/g_shotg.md3", EF_ROTATE,
-        "models/weapons/v_shotg/v_shotg.iqm",
-        /* icon */      "w_shotgun",
-        /* pickup */    "Shotgun",
-        0,
-        1,
-        "Shells",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav"
-    },
-
-    /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_supershotgun",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_SuperShotgun,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
-        "models/weapons/v_shotg/v_shotg.iqm",
-        /* icon */      "w_sshotgun",
-        /* pickup */    "Double-Barreled Shotgun",
-        0,
-        2,
-        "Shells",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav"
-    },
-
-    /*QUAKED weapon_nailgun (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_nailgun",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_Nailgun,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
-        "models/weapons/v_shotg/v_shotg.iqm",
-        /* icon */      "w_machg",
-        /* pickup */    "Nailgun",
-        0,
-        1,
-        "Bullets",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav"
+        .classname = "weapon_shotgun",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_shotgun_activate,
+        .pickup_sound = "misc/w_pkup.wav",
+        .world_model = "models/weapons/g_shotg/g_shotg.md3", .world_model_flags = EF_ROTATE,
+        .view_model = "models/weapons/v_shotg/v_shotg.iqm",
+        .icon = "w_shotgun",
+        .pickup_name = "Shotgun",
+        .quantity = 1,
+        .ammo = "Shells",
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .tag = WEAP_SHOTGUN
     },
 
     /*QUAKED weapon_perforator (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "weapon_perforator",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        NULL,
-        "misc/w_pkup.wav",
-        "models/weapons/g_perf/g_perf.md3", EF_ROTATE,
-        "models/weapons/v_perf/v_perf.iqm",
-        /* icon */      "w_chaingun",
-        /* pickup */    "Perforator",
-        0,
-        1,
-        "Bullets",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_CHAINGUN,
-        NULL,
-        0,
-        /* precache */ "misc/lasfly.wav weapons/hyprbf1a.wav",
-        &weap_perf_activate
-    },
-
-    /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_grenadelauncher",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_GrenadeLauncher,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
-        "models/weapons/v_shotg/v_shotg.iqm",
-        /* icon */      "w_glauncher",
-        /* pickup */    "Grenade Launcher",
-        0,
-        1,
-        "Rockets",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav"
-    },
-
-    /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_rocketlauncher",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_RocketLauncher,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
-        "models/weapons/v_shotg/v_shotg.iqm",
-        /* icon */      "w_rlauncher",
-        /* pickup */    "Rocket Launcher",
-        0,
-        1,
-        "Rockets",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav"
-    },
-
-    /*QUAKED weapon_thunderbolt (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "weapon_thunderbolt",
-        Pickup_Weapon,
-        Use_Weapon,
-        Drop_Weapon,
-        Weapon_Thunderbolt,
-        "misc/w_pkup.wav",
-        "models/weapons/g_shotg/tris.md2", EF_ROTATE,
-        "models/weapons/v_shotg/v_shotg.iqm",
-        /* icon */      "w_railgun",
-        /* pickup */    "Thunderbolt",
-        0,
-        1,
-        "Cells",
-        IT_WEAPON | IT_STAY_COOP,
-        WEAP_SHOTGUN,
-        NULL,
-        0,
-        /* precache */ "weapons/shotgf1b.wav"
+        .classname = "weapon_perforator",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_perf_activate,
+        .pickup_sound = "misc/w_pkup.wav",
+        .world_model = "models/weapons/g_perf/g_perf.md3", .world_model_flags = EF_ROTATE,
+        .view_model = "models/weapons/v_perf/v_perf.iqm",
+        .icon = "w_chaingun",
+        .pickup_name = "Perforator",
+        .quantity = 1,
+        .ammo = "Bullets",
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .tag = WEAP_CHAINGUN,
+        .precaches = "misc/lasfly.wav"
     },
 
     //
@@ -1369,49 +1192,34 @@ gitem_t itemlist[] = {
     /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "ammo_shells",
-        Pickup_Ammo,
-        NULL,
-        Drop_Ammo,
-        NULL,
-        "misc/am_pkup.wav",
-        "models/items/ammo/shells/medium/tris.md2", 0,
-        NULL,
-        /* icon */      "a_shells",
-        /* pickup */    "Shells",
-        /* width */     3,
-        10,
-        NULL,
-        IT_AMMO,
-        0,
-        NULL,
-        AMMO_SHELLS,
-        /* precache */ ""
+        .classname = "ammo_shells",
+        .pickup = Pickup_Ammo,
+        .drop = Drop_Ammo,
+        .pickup_sound = "misc/am_pkup.wav",
+        .world_model = "models/items/ammo/shells/medium/tris.md2",
+        .icon = "a_shells",
+        .pickup_name = "Shells",
+        .quantity = 10,
+        .flags = IT_AMMO,
+        .tag = AMMO_SHELLS
     },
 
     /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        "ammo_bullets",
-        Pickup_Ammo,
-        NULL,
-        Drop_Ammo,
-        NULL,
-        "misc/am_pkup.wav",
-        "models/items/ammo/bullets/medium/tris.md2", 0,
-        NULL,
-        /* icon */      "a_bullets",
-        /* pickup */    "Bullets",
-        /* width */     3,
-        50,
-        NULL,
-        IT_AMMO,
-        0,
-        NULL,
-        AMMO_BULLETS,
-        /* precache */ ""
+        .classname = "ammo_bullets",
+        .pickup = Pickup_Ammo,
+        .drop = Drop_Ammo,
+        .pickup_sound = "misc/am_pkup.wav",
+        .world_model = "models/items/ammo/bullets/medium/tris.md2",
+        .icon = "a_bullets",
+        .pickup_name = "Bullets",
+        .quantity = 50,
+        .flags = IT_AMMO,
+        .tag = AMMO_BULLETS
     },
 
+#if 0
     /*QUAKED ammo_cells (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
@@ -1888,26 +1696,13 @@ gitem_t itemlist[] = {
         0,
         /* precache */ ""
     },
+#endif
 
     {
-        NULL,
-        Pickup_Health,
-        NULL,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        NULL, 0,
-        NULL,
-        /* icon */      "i_health",
-        /* pickup */    "Health",
-        /* width */     3,
-        0,
-        NULL,
-        0,
-        0,
-        NULL,
-        0,
-        /* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
+        .pickup = Pickup_Health,
+        .pickup_sound = "items/pkup.wav",
+        .icon = "i_health",
+        .pickup_name = "Health"
     },
 
     // end of list marker
