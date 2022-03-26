@@ -582,8 +582,8 @@ A moving object that doesn't obey physics
 void SV_Physics_Noclip(edict_t *ent)
 {
 // regular thinking
-    if (!SV_RunThink(ent))
-        return;
+    SV_RunThink(ent);
+
     if (!ent->inuse)
         return;
 
