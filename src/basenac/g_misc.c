@@ -1793,6 +1793,9 @@ void SP_model_spawn(edict_t *ent)
 {
     ent->s.modelindex = SV_ModelIndex(ent->model);
 
+    if (st.noise)
+        ent->s.sound = SV_SoundIndex(st.noise);
+
     ent->movetype = MOVETYPE_NOCLIP;
 
     SV_LinkEntity(ent);
