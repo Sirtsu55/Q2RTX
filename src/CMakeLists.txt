@@ -60,6 +60,7 @@ SET(SRC_BASENAC
 	basenac/weapons/nac_axe.c
 	basenac/weapons/nac_perf.c
 	basenac/weapons/nac_shotgun.c
+	basenac/monsters/nac_knight.c
 )
 
 SET(HEADERS_BASENAC

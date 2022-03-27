@@ -1809,7 +1809,7 @@ void SP_model_spawn(edict_t *ent)
 #define PROPERTY_SPAWNFLAG_MODEL3   32
 #define PROPERTY_SPAWNFLAG_MODEL4   64
 
-static void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
+void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
 {
     int new_modelindex, new_effects, new_renderfx, new_sound, new_modelindex2, new_modelindex3, new_modelindex4;
     

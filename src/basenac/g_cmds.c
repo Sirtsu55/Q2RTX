@@ -298,6 +298,25 @@ void Cmd_God_f(edict_t *ent)
         SV_ClientPrint(ent, PRINT_HIGH, "godmode ON\n");
 }
 
+void ED_CallSpawn(edict_t *ent);
+
+void Cmd_Spawn_f(edict_t *ent)
+{
+    if ((deathmatch.integer || coop.integer) && !sv_cheats.integer) {
+        SV_ClientPrint(ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
+        return;
+    }
+
+    vec3_t fwd;
+
+    AngleVectors(ent->client->v_angle, fwd, NULL, NULL);
+
+    edict_t *self = G_Spawn();
+    self->classname = Cmd_Argv(1);
+    VectorMA(ent->s.origin, 64.f, fwd, self->s.origin);
+    self->s.angles[1] = ent->s.angles[1];
+    ED_CallSpawn(self);
+}
 
 /*
 ==================
@@ -884,6 +903,8 @@ void ClientCommand(edict_t *ent)
         Cmd_Give_f(ent);
     else if (Q_stricmp(cmd, "god") == 0)
         Cmd_God_f(ent);
+    else if (Q_stricmp(cmd, "spawn") == 0)
+        Cmd_Spawn_f(ent);
     else if (Q_stricmp(cmd, "notarget") == 0)
         Cmd_Notarget_f(ent);
     else if (Q_stricmp(cmd, "noclip") == 0)

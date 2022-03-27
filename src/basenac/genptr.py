@@ -2,6 +2,8 @@
 
 import re
 import sys
+import os
+from glob import glob
 
 pointers = [
     'prethink', 'think', 'blocked', 'touch', 'use', 'pain', 'die',
@@ -12,9 +14,10 @@ pointers = [
 ]
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print('Usage: genptr.py <file> [...]')
-        sys.exit(1)
+    if len(sys.argv) >= 2:
+    	files = sys.argv[1:]
+    else:
+        files = [y for x in os.walk('.') for y in glob(os.path.join(x[0], '*.c'))];
 
     exprs = '|'.join(p.replace('_', '\\.') for p in pointers if not p == 'moveinfo_endfunc')
     regex = re.compile(r'->\s*(%s)\s*=\s*&?\s*(\w+)' % exprs, re.ASCII)
@@ -24,7 +27,7 @@ if __name__ == "__main__":
     for p in pointers:
         types[p] = []
 
-    for a in sys.argv[1:]:
+    for a in files:
         with open(a) as f:
             for line in f:
                 if not line.lstrip().startswith('//'):

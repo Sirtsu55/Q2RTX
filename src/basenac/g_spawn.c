@@ -153,6 +153,7 @@ void SP_turret_driver(edict_t *self);
 // Paril
 void SP_model_spawn(edict_t *ent);
 void SP_misc_property_swap(edict_t *ent);
+void SP_monster_knight(edict_t *self);
 
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
@@ -280,6 +281,9 @@ static const spawn_func_t spawn_funcs[] = {
     // Paril
     { "model_spawn", SP_model_spawn },
     { "misc_property_swap", SP_misc_property_swap },
+
+    // NAC
+    { "monster_knight", SP_monster_knight },
 
     {NULL, NULL}
 };

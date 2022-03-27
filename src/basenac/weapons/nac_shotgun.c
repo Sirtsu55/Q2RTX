@@ -28,7 +28,7 @@ static void Shotgun_Fire(edict_t *ent)
     vec3_t      forward, right;
     vec3_t      offset;
     int         damage = 4;
-    int         kick = 8;
+    int         kick = 1;
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 

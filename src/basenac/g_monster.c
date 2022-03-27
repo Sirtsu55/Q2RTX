@@ -335,7 +335,12 @@ void M_MoveFrame(edict_t *self)
     int     index;
 
     move = self->monsterinfo.currentmove;
-    self->nextthink = level.time + 100;
+
+    if (self->monsterinfo.aiflags & AI_HIGH_TICK_RATE) {
+        self->nextthink = level.time + 1;
+    } else {
+        self->nextthink = level.time + 100;
+    }
 
     if ((self->monsterinfo.nextframe) && (self->monsterinfo.nextframe >= move->firstframe) && (self->monsterinfo.nextframe <= move->lastframe)) {
         self->s.frame = self->monsterinfo.nextframe;
@@ -470,7 +475,7 @@ enemy as activator.
 void monster_death_use(edict_t *self)
 {
     self->flags &= ~(FL_FLY | FL_SWIM);
-    self->monsterinfo.aiflags &= AI_GOOD_GUY;
+    self->monsterinfo.aiflags &= (AI_HIGH_TICK_RATE | AI_GOOD_GUY);
 
     if (self->item) {
         Drop_Item(self, self->item);
@@ -504,6 +509,9 @@ bool monster_start(edict_t *self)
 
     if (!(self->monsterinfo.aiflags & AI_GOOD_GUY))
         level.total_monsters++;
+
+    if (!self->monsterinfo.scale)
+        self->monsterinfo.scale = 1.0;
 
     self->nextthink = level.time + 1;
     self->svflags |= SVF_MONSTER;

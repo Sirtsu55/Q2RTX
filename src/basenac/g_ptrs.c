@@ -163,6 +163,15 @@ extern int jorg_move_run;
 extern int jorg_move_stand;
 extern int jorg_move_start_attack1;
 extern int jorg_move_walk;
+extern int knight_move_attack;
+extern int knight_move_attack_spike;
+extern int knight_move_death1;
+extern int knight_move_death2;
+extern int knight_move_pain1;
+extern int knight_move_pain2;
+extern int knight_move_run1;
+extern int knight_move_stand;
+extern int knight_move_walk;
 extern int makron_move_attack3;
 extern int makron_move_attack4;
 extern int makron_move_attack5;
@@ -439,6 +448,16 @@ extern void jorg_run(void);
 extern void jorg_search(void);
 extern void jorg_stand(void);
 extern void jorg_walk(void);
+extern void knight_attack(void);
+extern void knight_die(void);
+extern void knight_melee(void);
+extern void knight_pain(void);
+extern void knight_run(void);
+extern void knight_search(void);
+extern void knight_search(void);
+extern void knight_sight(void);
+extern void knight_stand(void);
+extern void knight_walk(void);
 extern void light_use(void);
 extern void M_CheckAttack(void);
 extern void M_droptofloor(void);
@@ -473,6 +492,7 @@ extern void misc_deadsoldier_die(void);
 extern void misc_easterchick2_think(void);
 extern void misc_easterchick_think(void);
 extern void misc_eastertank_think(void);
+extern void misc_property_swap_use(void);
 extern void misc_satellite_dish_think(void);
 extern void misc_satellite_dish_use(void);
 extern void misc_strogg_ship_use(void);
@@ -500,6 +520,7 @@ extern void mutant_search(void);
 extern void mutant_sight(void);
 extern void mutant_stand(void);
 extern void mutant_walk(void);
+extern void nail_touch(void);
 extern void parasite_attack(void);
 extern void parasite_die(void);
 extern void parasite_idle(void);
@@ -551,6 +572,7 @@ extern void target_crosslevel_target_think(void);
 extern void target_earthquake_think(void);
 extern void target_earthquake_use(void);
 extern void target_explosion_explode(void);
+extern void target_gravity_use(void);
 extern void target_laser_start(void);
 extern void target_laser_think(void);
 extern void target_laser_use(void);
@@ -581,6 +603,7 @@ extern void trigger_gravity_touch(void);
 extern void trigger_key_use(void);
 extern void trigger_monsterjump_touch(void);
 extern void trigger_push_touch(void);
+extern void trigger_push_use(void);
 extern void trigger_relay_use(void);
 extern void turret_blocked(void);
 extern void turret_breach_finish_init(void);
@@ -605,9 +628,6 @@ extern void Use_Target_Speaker(void);
 extern void use_target_splash(void);
 extern void Use_Target_Tent(void);
 extern void walkmonster_start_go(void);
-
-extern void trigger_push_use(void);
-extern void target_gravity_use(void);
 const save_ptr_t save_ptrs[] = {
 { P_prethink, misc_viper_bomb_prethink },
 { P_think, AngleMove_Begin },
@@ -697,6 +717,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, hurt_touch },
 { P_touch, misc_viper_bomb_touch },
 { P_touch, mutant_jump_touch },
+{ P_touch, nail_touch },
 { P_touch, path_corner_touch },
 { P_touch, point_combat_touch },
 { P_touch, rocket_touch },
@@ -725,6 +746,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, hurt_use },
 { P_use, light_use },
 { P_use, misc_blackhole_use },
+{ P_use, misc_property_swap_use },
 { P_use, misc_satellite_dish_use },
 { P_use, misc_strogg_ship_use },
 { P_use, misc_viper_bomb_use },
@@ -733,6 +755,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, monster_use },
 { P_use, rotating_use },
 { P_use, target_earthquake_use },
+{ P_use, target_gravity_use },
 { P_use, target_laser_use },
 { P_use, target_lightramp_use },
 { P_use, target_string_use },
@@ -742,6 +765,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, trigger_elevator_use },
 { P_use, trigger_enable },
 { P_use, trigger_key_use },
+{ P_use, trigger_push_use },
 { P_use, trigger_relay_use },
 { P_use, Use_Areaportal },
 { P_use, Use_Boss3 },
@@ -773,6 +797,7 @@ const save_ptr_t save_ptrs[] = {
 { P_pain, infantry_pain },
 { P_pain, insane_pain },
 { P_pain, jorg_pain },
+{ P_pain, knight_pain },
 { P_pain, makron_pain },
 { P_pain, medic_pain },
 { P_pain, mutant_pain },
@@ -803,6 +828,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, infantry_die },
 { P_die, insane_die },
 { P_die, jorg_die },
+{ P_die, knight_die },
 { P_die, makron_die },
 { P_die, medic_die },
 { P_die, misc_deadsoldier_die },
@@ -987,6 +1013,15 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &jorg_move_stand },
 { P_monsterinfo_currentmove, &jorg_move_start_attack1 },
 { P_monsterinfo_currentmove, &jorg_move_walk },
+{ P_monsterinfo_currentmove, &knight_move_attack },
+{ P_monsterinfo_currentmove, &knight_move_attack_spike },
+{ P_monsterinfo_currentmove, &knight_move_death1 },
+{ P_monsterinfo_currentmove, &knight_move_death2 },
+{ P_monsterinfo_currentmove, &knight_move_pain1 },
+{ P_monsterinfo_currentmove, &knight_move_pain2 },
+{ P_monsterinfo_currentmove, &knight_move_run1 },
+{ P_monsterinfo_currentmove, &knight_move_stand },
+{ P_monsterinfo_currentmove, &knight_move_walk },
 { P_monsterinfo_currentmove, &makron_move_attack3 },
 { P_monsterinfo_currentmove, &makron_move_attack4 },
 { P_monsterinfo_currentmove, &makron_move_attack5 },
@@ -1093,6 +1128,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, infantry_stand },
 { P_monsterinfo_stand, insane_stand },
 { P_monsterinfo_stand, jorg_stand },
+{ P_monsterinfo_stand, knight_stand },
 { P_monsterinfo_stand, makron_stand },
 { P_monsterinfo_stand, medic_stand },
 { P_monsterinfo_stand, mutant_stand },
@@ -1105,6 +1141,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_idle, flyer_idle },
 { P_monsterinfo_idle, gladiator_idle },
 { P_monsterinfo_idle, infantry_fidget },
+{ P_monsterinfo_idle, knight_search },
 { P_monsterinfo_idle, medic_idle },
 { P_monsterinfo_idle, mutant_idle },
 { P_monsterinfo_idle, parasite_idle },
@@ -1116,6 +1153,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_search, gunner_search },
 { P_monsterinfo_search, hover_search },
 { P_monsterinfo_search, jorg_search },
+{ P_monsterinfo_search, knight_search },
 { P_monsterinfo_search, medic_search },
 { P_monsterinfo_search, mutant_search },
 { P_monsterinfo_search, supertank_search },
@@ -1133,6 +1171,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_walk, infantry_walk },
 { P_monsterinfo_walk, insane_walk },
 { P_monsterinfo_walk, jorg_walk },
+{ P_monsterinfo_walk, knight_walk },
 { P_monsterinfo_walk, makron_walk },
 { P_monsterinfo_walk, medic_walk },
 { P_monsterinfo_walk, mutant_walk },
@@ -1154,6 +1193,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_run, infantry_run },
 { P_monsterinfo_run, insane_run },
 { P_monsterinfo_run, jorg_run },
+{ P_monsterinfo_run, knight_run },
 { P_monsterinfo_run, makron_run },
 { P_monsterinfo_run, medic_run },
 { P_monsterinfo_run, mutant_run },
@@ -1177,6 +1217,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_attack, hover_start_attack },
 { P_monsterinfo_attack, infantry_attack },
 { P_monsterinfo_attack, jorg_attack },
+{ P_monsterinfo_attack, knight_attack },
 { P_monsterinfo_attack, makron_attack },
 { P_monsterinfo_attack, medic_attack },
 { P_monsterinfo_attack, mutant_jump },
@@ -1191,6 +1232,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_melee, floater_melee },
 { P_monsterinfo_melee, flyer_melee },
 { P_monsterinfo_melee, gladiator_melee },
+{ P_monsterinfo_melee, knight_melee },
 { P_monsterinfo_melee, mutant_melee },
 { P_monsterinfo_sight, berserk_sight },
 { P_monsterinfo_sight, brain_sight },
@@ -1202,6 +1244,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_sight, gunner_sight },
 { P_monsterinfo_sight, hover_sight },
 { P_monsterinfo_sight, infantry_sight },
+{ P_monsterinfo_sight, knight_sight },
 { P_monsterinfo_sight, makron_sight },
 { P_monsterinfo_sight, medic_sight },
 { P_monsterinfo_sight, mutant_sight },
@@ -1214,9 +1257,5 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, Makron_CheckAttack },
 { P_monsterinfo_checkattack, medic_checkattack },
 { P_monsterinfo_checkattack, mutant_checkattack },
-
-// Paril
-{ P_use, trigger_push_use },
-{ P_use, target_gravity_use }
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);
