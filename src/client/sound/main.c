@@ -828,7 +828,7 @@ void S_RawSamples(int samples, int rate, int width,
 		int channels, byte *data, float volume)
 {
     if (s_started == SS_OAL) {
-        S_RawSamples(samples, rate, width, channels, data, volume);
+        AL_RawSamples(samples, rate, width, channels, data, volume);
     }
 }
 

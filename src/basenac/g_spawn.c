@@ -394,6 +394,7 @@ void ED_CallSpawn(edict_t *ent)
             continue;
         if (!strcmp(item->classname, ent->classname)) {
             // found it
+            ent->classname = item->classname;
             SpawnItem(ent, item);
             return;
         }
@@ -403,6 +404,7 @@ void ED_CallSpawn(edict_t *ent)
     for (s = spawn_funcs ; s->name ; s++) {
         if (!strcmp(s->name, ent->classname)) {
             // found it
+            ent->classname = s->name;
             s->spawn(ent);
             return;
         }
