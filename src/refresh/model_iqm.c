@@ -849,16 +849,16 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 	const float backlerp = entity->backlerp;
 
 	// SPIN
-	int32_t spin_id = -1;
+	int32_t spin_id = -1, skip_id = -1;
 	static float spin_angle = 0;
 	
 	for (uint32_t i = 0; i < model->num_joints; i++)
 	{
 		if (Q_strcasecmp(model->jointNames[i], "spin") == 0)
-		{
 			spin_id = i;
-			break;
-		}
+		// SKIP
+		else if (Q_strcasecmp(model->jointNames[i], "root") == 0)
+			skip_id = i;
 	}
 
 	quat_t spin_quat = { 0, 0, 0, 1 };
@@ -873,6 +873,14 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 		const iqm_transform_t* pose = &model->poses[frame * model->num_poses];
 		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, pose++, relativeJoint++)
 		{
+			if (pose_idx == skip_id)
+			{
+				VectorClear(relativeJoint->translate);
+				VectorSet(relativeJoint->scale, 1, 1, 1);
+				QuatCopy(pose->rotate, relativeJoint->rotate);
+				continue;
+			}
+
 			VectorCopy(pose->translate, relativeJoint->translate);
 			VectorCopy(pose->scale, relativeJoint->scale);
 			QuatCopy(pose->rotate, relativeJoint->rotate);
@@ -888,6 +896,14 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 		const iqm_transform_t* oldpose = &model->poses[oldframe * model->num_poses];
 		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, oldpose++, pose++, relativeJoint++)
 		{
+			if (pose_idx == skip_id)
+			{
+				VectorClear(relativeJoint->translate);
+				VectorSet(relativeJoint->scale, 1, 1, 1);
+				QuatCopy(pose->rotate, relativeJoint->rotate);
+				continue;
+			}
+
 			relativeJoint->translate[0] = oldpose->translate[0] * backlerp + pose->translate[0] * lerp;
 			relativeJoint->translate[1] = oldpose->translate[1] * backlerp + pose->translate[1] * lerp;
 			relativeJoint->translate[2] = oldpose->translate[2] * backlerp + pose->translate[2] * lerp;
