@@ -409,7 +409,7 @@ void SP_monster_knight(edict_t *self)
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
 
-    self->health = 75;
+    self->health = 90;
     self->gib_health = -60;
     self->mass = 85;
     self->monsterinfo.aiflags |= AI_HIGH_TICK_RATE;
