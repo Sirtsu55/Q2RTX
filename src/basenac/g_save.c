@@ -354,7 +354,7 @@ static const save_field_t clientfields[] = {
     I(pers.selected_item),
     IA(pers.inventory, MAX_ITEMS),
 
-    I(pers.max_bullets),
+    I(pers.max_nails),
     I(pers.max_shells),
     I(pers.max_rockets),
     I(pers.max_cells),

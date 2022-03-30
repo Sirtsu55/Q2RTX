@@ -587,7 +587,7 @@ void InitClientPersistant(gclient_t *client)
     client->pers.health         = 100;
     client->pers.max_health     = 100;
 
-    client->pers.max_bullets    = 200;
+    client->pers.max_nails    = 200;
     client->pers.max_shells     = 100;
     client->pers.max_rockets    = 50;
     client->pers.max_cells      = 200;
