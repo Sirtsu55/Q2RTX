@@ -208,19 +208,19 @@ bool Pickup_Bandolier(edict_t *ent, edict_t *other)
     gitem_t *item;
     int     index;
 
-    if (other->client->pers.max_bullets < 250)
-        other->client->pers.max_bullets = 250;
+    if (other->client->pers.max_nails < 250)
+        other->client->pers.max_nails = 250;
     if (other->client->pers.max_shells < 150)
         other->client->pers.max_shells = 150;
     if (other->client->pers.max_cells < 250)
         other->client->pers.max_cells = 250;
 
-    item = FindItem("Bullets");
+    item = FindItem("nails");
     if (item) {
         index = ITEM_INDEX(item);
         other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_bullets)
-            other->client->pers.inventory[index] = other->client->pers.max_bullets;
+        if (other->client->pers.inventory[index] > other->client->pers.max_nails)
+            other->client->pers.inventory[index] = other->client->pers.max_nails;
     }
 
     item = FindItem("Shells");
@@ -242,8 +242,8 @@ bool Pickup_Pack(edict_t *ent, edict_t *other)
     gitem_t *item;
     int     index;
 
-    if (other->client->pers.max_bullets < 300)
-        other->client->pers.max_bullets = 300;
+    if (other->client->pers.max_nails < 300)
+        other->client->pers.max_nails = 300;
     if (other->client->pers.max_shells < 200)
         other->client->pers.max_shells = 200;
     if (other->client->pers.max_rockets < 100)
@@ -251,12 +251,12 @@ bool Pickup_Pack(edict_t *ent, edict_t *other)
     if (other->client->pers.max_cells < 300)
         other->client->pers.max_cells = 300;
 
-    item = FindItem("Bullets");
+    item = FindItem("nails");
     if (item) {
         index = ITEM_INDEX(item);
         other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_bullets)
-            other->client->pers.inventory[index] = other->client->pers.max_bullets;
+        if (other->client->pers.inventory[index] > other->client->pers.max_nails)
+            other->client->pers.inventory[index] = other->client->pers.max_nails;
     }
 
     item = FindItem("Shells");
@@ -400,8 +400,8 @@ bool Add_Ammo(edict_t *ent, gitem_t *item, int count)
     if (!ent->client)
         return false;
 
-    if (item->tag == AMMO_BULLETS)
-        max = ent->client->pers.max_bullets;
+    if (item->tag == AMMO_NAILS)
+        max = ent->client->pers.max_nails;
     else if (item->tag == AMMO_SHELLS)
         max = ent->client->pers.max_shells;
     else if (item->tag == AMMO_ROCKETS)
@@ -1179,7 +1179,7 @@ gitem_t itemlist[] = {
         .icon = "w_chaingun",
         .pickup_name = "Perforator",
         .quantity = 1,
-        .ammo = "Bullets",
+        .ammo = "nails",
         .flags = IT_WEAPON | IT_STAY_COOP,
         .tag = WEAP_CHAINGUN,
         .precaches = "misc/lasfly.wav"
@@ -1204,19 +1204,19 @@ gitem_t itemlist[] = {
         .tag = AMMO_SHELLS
     },
 
-    /*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED ammo_nails (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        .classname = "ammo_bullets",
+        .classname = "ammo_nails",
         .pickup = Pickup_Ammo,
         .drop = Drop_Ammo,
         .pickup_sound = "misc/am_pkup.wav",
         .world_model = "models/items/ammo/nails/nailbox.md3",
-        .icon = "a_bullets",
-        .pickup_name = "Bullets",
+        .icon = "a_nails",
+        .pickup_name = "Nails",
         .quantity = 50,
         .flags = IT_AMMO,
-        .tag = AMMO_BULLETS
+        .tag = AMMO_NAILS
     },
 
 #if 0

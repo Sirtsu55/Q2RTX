@@ -115,7 +115,7 @@ typedef enum {
 } damage_t;
 
 typedef enum {
-    AMMO_BULLETS,
+    AMMO_NAILS,
     AMMO_SHELLS,
     AMMO_ROCKETS,
     AMMO_CELLS
@@ -888,7 +888,7 @@ typedef struct {
     int         inventory[MAX_ITEMS];
 
     // ammo capacities
-    int         max_bullets;
+    int         max_nails;
     int         max_shells;
     int         max_rockets;
     int         max_cells;

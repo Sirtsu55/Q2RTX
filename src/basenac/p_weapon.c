@@ -175,7 +175,7 @@ NoAmmoWeaponChange
 */
 static void NoAmmoWeaponChange(edict_t *ent)
 {
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))]
+    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("nails"))]
         &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("perforator"))]) {
         ent->client->newweapon = FindItem("perforator");
         return;
