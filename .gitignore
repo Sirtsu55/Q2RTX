@@ -32,3 +32,4 @@ save
 ./basenac/
 
 CMakeSettings.json
+/network

@@ -540,6 +540,9 @@ bool monster_start(edict_t *self)
     if (self->monsterinfo.currentmove)
         self->s.frame = self->monsterinfo.currentmove->firstframe + (Q_rand() % (self->monsterinfo.currentmove->lastframe - self->monsterinfo.currentmove->firstframe + 1));
 
+    if (self->monsterinfo.load)
+        self->monsterinfo.load(self);
+
     return true;
 }
 

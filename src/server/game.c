@@ -859,6 +859,8 @@ void SV_InitGameProgs(void)
     import.SV_GetAreaPortalState = PF_GetAreaPortalState;
     import.SV_AreasConnected = SV_AreasConnected;
 
+    import.FS_LoadFileEx = FS_LoadFileEx;
+
     ge = entry(&import);
     if (!ge) {
         Com_Error(ERR_DROP, "Game library returned NULL exports");

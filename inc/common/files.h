@@ -125,7 +125,7 @@ qhandle_t FS_EasyOpenFile(char *buf, size_t size, unsigned mode,
 #define FS_FileExists(path) \
     FS_FileExistsEx(path, 0)
 
-int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, memtag_t tag);
+int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, unsigned tag);
 // a NULL buffer will just return the file length without loading
 // length < 0 indicates error
 

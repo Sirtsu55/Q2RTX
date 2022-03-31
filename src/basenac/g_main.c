@@ -836,3 +836,8 @@ void Cvar_SetFloat(cvarRef_t *cvar, float value, bool force)
 {
     gi.Cvar_SetFloat(cvar, value, force);
 }
+
+int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, unsigned tag)
+{
+    return gi.FS_LoadFileEx(path, buffer, flags, tag);
+}

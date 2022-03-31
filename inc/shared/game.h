@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // game.h -- game dll information visible to server
 //
 
-#define GAME_API_VERSION    3
+#define GAME_API_VERSION    666
 
 // edict->svflags
 
@@ -181,6 +181,9 @@ typedef struct {
     // add commands to the server console as if they were typed in
     // for map changing, etc
     void (*Cbuf_AddText)(const char *text);
+
+    // filesystem
+    int (*FS_LoadFileEx)(const char *path, void **buffer, unsigned flags, unsigned tag);
 } game_import_t;
 
 //

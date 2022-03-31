@@ -481,6 +481,8 @@ typedef struct {
 
     int         power_armor_type;
     int         power_armor_power;
+
+    void        (*load)(edict_t *self);
 } monsterinfo_t;
 
 
@@ -1209,6 +1211,7 @@ typedef enum {
     TAG_COMMON,
     TAG_GAME,
     TAG_LEVEL,
+    TAG_MODEL,
     TAG_MAX
 } memtag_t;
 
@@ -1243,6 +1246,11 @@ bool Cvar_Update(cvarRef_t *cvar);
 void Cvar_SetString(cvarRef_t *cvar, const char *value, bool force);
 void Cvar_SetInteger(cvarRef_t *cvar, int value, bool force);
 void Cvar_SetFloat(cvarRef_t *cvar, float value, bool force);
+
+int FS_LoadFileEx(const char *path, void **buffer, unsigned flags, unsigned tag);
+
+#define G_LoadFile(path, buf)  FS_LoadFileEx(path, buf, 0, TAG_GAME)
+#define G_FreeFile(buf)        Z_Free(buf)
 
 #define Cvar_Set(cvar, X, force) \
 _Generic((X), \

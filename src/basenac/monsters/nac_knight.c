@@ -229,7 +229,6 @@ mframe_t knight_frames_attack [FRAME_ATTACKB_COUNT] = {
 // last frame was unused in vanilla
 mmove_t knight_move_attack = {FRAME_ATTACKB_FIRST, FRAME_ATTACKB_LAST - 2, knight_frames_attack, knight_run};
 
-
 void knight_melee(edict_t *self)
 {
     self->monsterinfo.currentmove = &knight_move_attack ;
@@ -245,7 +244,6 @@ mframe_t knight_frames_pain1 [FRAME_PAINA_COUNT] = {
     { ai_move, 0, NULL }
 };
 mmove_t knight_move_pain1 = {FRAME_PAINA_FIRST, FRAME_PAINA_LAST, knight_frames_pain1, knight_run};
-
 
 mframe_t knight_frames_pain2 [FRAME_PAINB_COUNT] = {
     { ai_move, 0, NULL },
@@ -327,7 +325,6 @@ mframe_t knight_frames_death1 [FRAME_DEATHA_COUNT] = {
 };
 mmove_t knight_move_death1 = {FRAME_DEATHA_FIRST, FRAME_DEATHA_LAST, knight_frames_death1, knight_dead};
 
-
 mframe_t knight_frames_death2 [FRAME_DEATHB_COUNT] = {
     { ai_move, 0, NULL },
     { ai_move, 0, NULL },
@@ -353,7 +350,6 @@ mframe_t knight_frames_death2 [FRAME_DEATHB_COUNT] = {
     { ai_move, 0, NULL }
 };
 mmove_t knight_move_death2 = {FRAME_DEATHB_FIRST, FRAME_DEATHB_LAST, knight_frames_death2, knight_dead};
-
 
 void knight_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
@@ -385,6 +381,87 @@ void knight_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
         self->monsterinfo.currentmove = &knight_move_death2;
 }
 
+#include <shared/iqm.h>
+
+static void *G_ModelAllocate(void *arg, size_t s)
+{
+    return Z_TagMallocz(s, TAG_MODEL);
+}
+
+typedef struct {
+    iqm_model_t model;
+    int32_t root_id;
+} m_iqm_t;
+
+// TODO: check for errors
+m_iqm_t *M_InitializeIQM(const char *name)
+{
+    static m_iqm_t iqm;
+    void *buf;
+    int ret = G_LoadFile("models/monsters/knight/knight.iqm", &buf);
+    int iqmret = MOD_LoadIQM_Base(&iqm.model, buf, ret, "models/monsters/knight/knight.iqm", G_ModelAllocate, NULL);
+    G_FreeFile(buf);
+
+    // find the root joint
+    int32_t root_id = -1;
+
+    for (uint32_t i = 0; i < iqm.model.num_joints; i++)
+    {
+        if (Q_strcasecmp(iqm.model.jointNames[i], "root") == 0)
+        {
+            root_id = i;
+            break;
+        }
+    }
+
+    if (root_id == -1)
+        Com_Errorf(ERR_DROP, "Missing required model data for %s", name);
+
+    return &iqm;
+}
+
+void M_FreeIQM(m_iqm_t *iqm)
+{
+    Z_FreeTags(TAG_MODEL);
+}
+
+void M_SetupIQMDists(m_iqm_t *iqm, mmove_t *animations[])
+{
+    for (mmove_t **anim = animations; *anim; anim++)
+    {
+        vec3_t offsetFrom = { 0, 0, 0 };
+        mframe_t *frame = (*anim)->frame;
+
+        for (int32_t i = (*anim)->firstframe; i < (*anim)->lastframe; i++, frame++)
+        {
+            vec3_t d;
+            const iqm_transform_t *pose = &iqm->model.poses[i * iqm->model.num_poses];
+            VectorSubtract(offsetFrom, pose->translate, d);
+            VectorCopy(pose->translate, offsetFrom);
+            frame->dist = VectorLength(d);
+        }
+    }
+}
+
+static bool knight_inititalized = false;
+
+void knight_load(edict_t *self)
+{
+    if (knight_inititalized)
+        return;
+
+    m_iqm_t *iqm = M_InitializeIQM("models/monsters/knight/knight.iqm");
+
+    M_SetupIQMDists(iqm, (mmove_t *[]) {
+        &knight_move_stand, &knight_move_walk, &knight_move_run1, &knight_move_attack_spike,
+        &knight_move_attack, &knight_move_pain1, &knight_move_pain2, &knight_move_death1,
+        &knight_move_death2, NULL
+    });
+
+    M_FreeIQM(iqm);
+
+    knight_inititalized = true;
+}
 
 /*QUAKED monster_knight (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
@@ -427,6 +504,7 @@ void SP_monster_knight(edict_t *self)
     self->monsterinfo.idle = knight_search;
 
     self->monsterinfo.currentmove = &knight_move_stand;
+    self->monsterinfo.load = knight_load;
 
     SV_LinkEntity(self);
 

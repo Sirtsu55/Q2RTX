@@ -269,6 +269,50 @@ typedef struct vrect_s {
 
 #define QuatCopy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
 
+static inline void JointToMatrix(const quat_t rot, const vec3_t scale, const vec3_t trans, float *mat)
+{
+    float xx = 2.0f * rot[0] * rot[0];
+    float yy = 2.0f * rot[1] * rot[1];
+    float zz = 2.0f * rot[2] * rot[2];
+    float xy = 2.0f * rot[0] * rot[1];
+    float xz = 2.0f * rot[0] * rot[2];
+    float yz = 2.0f * rot[1] * rot[2];
+    float wx = 2.0f * rot[3] * rot[0];
+    float wy = 2.0f * rot[3] * rot[1];
+    float wz = 2.0f * rot[3] * rot[2];
+
+    mat[0] = scale[0] * (1.0f - (yy + zz));
+    mat[1] = scale[0] * (xy - wz);
+    mat[2] = scale[0] * (xz + wy);
+    mat[3] = trans[0];
+    mat[4] = scale[1] * (xy + wz);
+    mat[5] = scale[1] * (1.0f - (xx + zz));
+    mat[6] = scale[1] * (yz - wx);
+    mat[7] = trans[1];
+    mat[8] = scale[2] * (xz - wy);
+    mat[9] = scale[2] * (yz + wx);
+    mat[10] = scale[2] * (1.0f - (xx + yy));
+    mat[11] = trans[2];
+}
+
+// "multiply" 3x4 matrices, these are assumed to be the top 3 rows
+// of a 4x4 matrix with the last row = (0 0 0 1)
+static inline void Matrix34Multiply(const float *a, const float *b, float *out)
+{
+    out[0] = a[0] * b[0] + a[1] * b[4] + a[2] * b[8];
+    out[1] = a[0] * b[1] + a[1] * b[5] + a[2] * b[9];
+    out[2] = a[0] * b[2] + a[1] * b[6] + a[2] * b[10];
+    out[3] = a[0] * b[3] + a[1] * b[7] + a[2] * b[11] + a[3];
+    out[4] = a[4] * b[0] + a[5] * b[4] + a[6] * b[8];
+    out[5] = a[4] * b[1] + a[5] * b[5] + a[6] * b[9];
+    out[6] = a[4] * b[2] + a[5] * b[6] + a[6] * b[10];
+    out[7] = a[4] * b[3] + a[5] * b[7] + a[6] * b[11] + a[7];
+    out[8] = a[8] * b[0] + a[9] * b[4] + a[10] * b[8];
+    out[9] = a[8] * b[1] + a[9] * b[5] + a[10] * b[9];
+    out[10] = a[8] * b[2] + a[9] * b[6] + a[10] * b[10];
+    out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
+}
+
 void AngleVectors(vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 vec_t VectorNormalize(vec3_t v);        // returns vector length
 vec_t VectorNormalize2(vec3_t v, vec3_t out);

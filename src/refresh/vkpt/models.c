@@ -801,12 +801,21 @@ fail:
 }
 #endif
 
+static void *MOD_LoadIQM_Malloc(model_t* model, size_t size)
+{
+	return MOD_Malloc(size);
+}
+
 int MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name)
 {
+	int ret;
+
 	Hunk_Begin(&model->hunk, 0x4000000);
 	model->type = MOD_ALIAS;
 
-	int res = MOD_LoadIQM_Base(model, rawdata, length, mod_name), ret;
+	CHECK(model->iqmData = MOD_Malloc(sizeof(iqm_model_t)));
+
+	int res = MOD_LoadIQM_Base(model->iqmData, rawdata, length, mod_name, MOD_LoadIQM_Malloc, model);
 
 	if (res != Q_ERR_SUCCESS)
 	{

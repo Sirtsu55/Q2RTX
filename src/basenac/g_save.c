@@ -234,6 +234,7 @@ static const save_field_t entityfields[] = {
     P(monsterinfo.melee, P_monsterinfo_melee),
     P(monsterinfo.sight, P_monsterinfo_sight),
     P(monsterinfo.checkattack, P_monsterinfo_checkattack),
+    P(monsterinfo.load, P_monsterinfo_load),
 
     I64(monsterinfo.pause_time),
     I64(monsterinfo.attack_finished_time),
@@ -1033,6 +1034,10 @@ void ReadLevel(const char *filename)
                 Z_Free(msg);
             }
         }
+
+        // load monster-specific model stuff
+        if (ent->monsterinfo.load)
+            ent->monsterinfo.load(ent);
     }
 }
 
