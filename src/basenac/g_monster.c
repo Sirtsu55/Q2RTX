@@ -372,11 +372,16 @@ void M_MoveFrame(edict_t *self)
     }
 
     index = self->s.frame - move->firstframe;
-    if (move->frame[index].aifunc) {
+    void (*aifunc) (edict_t *self, float dist) = move->frame[index].aifunc;
+
+    if (!aifunc)
+        aifunc = move->default_aifunc;
+
+    if (aifunc) {
         if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
-            move->frame[index].aifunc(self, move->frame[index].dist * self->monsterinfo.scale);
+            aifunc(self, move->frame[index].dist * self->monsterinfo.scale);
         else
-            move->frame[index].aifunc(self, 0);
+            aifunc(self, 0);
     }
 
     if (move->frame[index].thinkfunc)

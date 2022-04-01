@@ -60,89 +60,39 @@ void knight_search(edict_t *self)
         SV_StartSound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
 }
 
-mframe_t knight_frames_stand[FRAME_STAND_COUNT] = {
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL },
-    { ai_stand, 0, NULL }
+mmove_t knight_move_stand = {
+    .firstframe = FRAME_STAND_FIRST,
+    .lastframe = FRAME_STAND_LAST,
+    .frame = (mframe_t [FRAME_STAND_COUNT]) { 0 },
+    .default_aifunc = ai_stand
 };
-mmove_t knight_move_stand = {FRAME_STAND_FIRST, FRAME_STAND_LAST, knight_frames_stand, NULL};
 
 void knight_stand(edict_t *self)
 {
     self->monsterinfo.currentmove = &knight_move_stand;
 }
 
-mframe_t knight_frames_walk [FRAME_WALK_COUNT] = {
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.0, NULL },
-    { ai_walk, 1.0, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 2.0, NULL },
-    { ai_walk, 2.0, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 2.0, NULL },
-    { ai_walk, 2.0, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.0, NULL },
-    { ai_walk, 1.0, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 2.0, NULL },
-    { ai_walk, 2.0, NULL },
-    { ai_walk, 1.5, NULL },
-    { ai_walk, 1.5, NULL }
+mmove_t knight_move_walk = {
+    .firstframe = FRAME_WALK_FIRST,
+    .lastframe = FRAME_WALK_LAST,
+    .frame = (mframe_t [FRAME_WALK_COUNT]) { 0 },
+    .default_aifunc = ai_walk
 };
-mmove_t knight_move_walk = {FRAME_WALK_FIRST, FRAME_WALK_LAST, knight_frames_walk, NULL};
 
 void knight_walk(edict_t *self)
 {
     self->monsterinfo.currentmove = &knight_move_walk;
 }
 
-mframe_t knight_frames_run1 [FRAME_RUN_COUNT] = {
-    { ai_run, 8.0, knight_search },
-    { ai_run, 8.0, NULL },
-    { ai_run, 10.0, NULL },
-    { ai_run, 10.0, NULL },
-    { ai_run, 6.5, NULL },
-    { ai_run, 6.5, NULL },
-    { ai_run, 3.5, NULL },
-    { ai_run, 3.5, NULL },
-    { ai_run, 8.0, knight_search },
-    { ai_run, 8.0, NULL },
-    { ai_run, 10.0, NULL },
-    { ai_run, 10.0, NULL },
-    { ai_run, 7.0, NULL },
-    { ai_run, 7.0, NULL },
-    { ai_run, 3.0, NULL },
-    { ai_run, 3.0, NULL }
+mmove_t knight_move_run1 = {
+    .firstframe = FRAME_RUN_FIRST,
+    .lastframe = FRAME_RUN_LAST,
+    .frame = (mframe_t [FRAME_RUN_COUNT]) {
+        [0] = { .thinkfunc = knight_search },
+        [8] = { .thinkfunc = knight_search }
+    },
+    .default_aifunc = ai_run
 };
-mmove_t knight_move_run1 = {FRAME_RUN_FIRST, FRAME_RUN_LAST, knight_frames_run1, NULL};
 
 void knight_run(edict_t *self)
 {
@@ -163,31 +113,25 @@ void knight_swing(edict_t *self)
     SV_StartSound(self, CHAN_WEAPON, sound_punch, 1, ATTN_NORM, 0);
 }
 
-mframe_t knight_frames_runattack [FRAME_RUNATTACK_COUNT] = {
-    { ai_charge, 10.0, knight_swing },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, knight_attack_spike },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL },
-    { ai_charge, 10.0, NULL }
+mmove_t knight_move_attack_spike = {
+    .firstframe = FRAME_RUNATTACK_FIRST,
+    .lastframe = FRAME_RUNATTACK_LAST,
+    .frame = (mframe_t [FRAME_RUNATTACK_COUNT]) {
+        [0] = { .thinkfunc = knight_swing },
+        [8] = { .thinkfunc = knight_attack_spike },
+        [9] = { .thinkfunc = knight_attack_spike },
+        [10] = { .thinkfunc = knight_attack_spike },
+        [11] = { .thinkfunc = knight_attack_spike },
+        [12] = { .thinkfunc = knight_attack_spike },
+        [13] = { .thinkfunc = knight_attack_spike },
+        [14] = { .thinkfunc = knight_attack_spike },
+        [15] = { .thinkfunc = knight_attack_spike },
+        [16] = { .thinkfunc = knight_attack_spike },
+        [17] = { .thinkfunc = knight_attack_spike }
+    },
+    .endfunc = knight_run,
+    .default_aifunc = ai_charge
 };
-mmove_t knight_move_attack_spike = {FRAME_RUNATTACK_FIRST, FRAME_RUNATTACK_LAST, knight_frames_runattack, knight_run};
 
 void knight_attack(edict_t *self)
 {
@@ -204,72 +148,42 @@ void knight_attack(edict_t *self)
     }
 }
 
-mframe_t knight_frames_attack [FRAME_ATTACKB_COUNT] = {
-    { ai_charge, 0, knight_swing },
-    { ai_charge, 0, NULL },
-    { ai_charge, 3.5, NULL },
-    { ai_charge, 3.5, NULL },
-    { ai_charge, 2.0, NULL },
-    { ai_charge, 2.0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 0, NULL },
-    { ai_charge, 1.5, NULL },
-    { ai_charge, 1.5, NULL },
-    { ai_charge, 2.0, knight_attack_spike },
-    { ai_charge, 2.0, knight_attack_spike },
-    { ai_charge, 0.5, knight_attack_spike },
-    { ai_charge, 0.5, knight_attack_spike },
-    { ai_charge, 1.5, knight_attack_spike },
-    { ai_charge, 1.5, knight_attack_spike },
-    { ai_charge, 0.5, NULL },
-    { ai_charge, 0.5, NULL },
-    { ai_charge, 2.5, NULL },
-    { ai_charge, 2.5, NULL }
+mmove_t knight_move_attack = {
+    .firstframe = FRAME_ATTACKB_FIRST,
+    .lastframe = FRAME_ATTACKB_LAST - 2, // last frame was unused in vanilla
+    .frame = (mframe_t [FRAME_ATTACKB_COUNT]) {
+        [0] = { .thinkfunc = knight_swing },
+        [10] = { .thinkfunc = knight_attack_spike },
+        [11] = { .thinkfunc = knight_attack_spike },
+        [12] = { .thinkfunc = knight_attack_spike },
+        [13] = { .thinkfunc = knight_attack_spike },
+        [14] = { .thinkfunc = knight_attack_spike },
+        [15] = { .thinkfunc = knight_attack_spike }
+    },
+    .endfunc = knight_run,
+    .default_aifunc = ai_charge
 };
-// last frame was unused in vanilla
-mmove_t knight_move_attack = {FRAME_ATTACKB_FIRST, FRAME_ATTACKB_LAST - 2, knight_frames_attack, knight_run};
 
 void knight_melee(edict_t *self)
 {
-    self->monsterinfo.currentmove = &knight_move_attack ;
+    self->monsterinfo.currentmove = &knight_move_attack;
 }
 
-
-mframe_t knight_frames_pain1 [FRAME_PAINA_COUNT] = {
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL }
+mmove_t knight_move_pain1 = {
+    .firstframe = FRAME_PAINA_FIRST,
+    .lastframe = FRAME_PAINA_LAST,
+    .frame = (mframe_t [FRAME_PAINA_COUNT]) { 0 },
+    .endfunc = knight_run,
+    .default_aifunc = ai_move
 };
-mmove_t knight_move_pain1 = {FRAME_PAINA_FIRST, FRAME_PAINA_LAST, knight_frames_pain1, knight_run};
 
-mframe_t knight_frames_pain2 [FRAME_PAINB_COUNT] = {
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 1.5, NULL },
-    { ai_move, 1.5, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 1.0, NULL },
-    { ai_move, 1.0, NULL },
-    { ai_move, 2.0, NULL },
-    { ai_move, 2.0, NULL },
-    { ai_move, 1.0, NULL },
-    { ai_move, 1.0, NULL },
-    { ai_move, 2.5, NULL },
-    { ai_move, 2.5, NULL },
-    { ai_move, 2.5, NULL },
-    { ai_move, 2.5, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL }
+mmove_t knight_move_pain2 = {
+    .firstframe = FRAME_PAINB_FIRST,
+    .lastframe = FRAME_PAINB_LAST,
+    .frame = (mframe_t [FRAME_PAINB_COUNT]) { 0 },
+    .endfunc = knight_run,
+    .default_aifunc = ai_move
 };
-mmove_t knight_move_pain2 = {FRAME_PAINB_FIRST, FRAME_PAINB_LAST, knight_frames_pain2, knight_run};
 
 void knight_pain(edict_t *self, edict_t *other, float kick, int damage)
 {
@@ -300,56 +214,21 @@ void knight_dead(edict_t *self)
     SV_LinkEntity(self);
 }
 
-
-mframe_t knight_frames_death1 [FRAME_DEATHA_COUNT] = {
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL }
+mmove_t knight_move_death1 = {
+    .firstframe = FRAME_DEATHA_FIRST,
+    .lastframe = FRAME_DEATHA_LAST,
+    .frame = (mframe_t [FRAME_DEATHA_COUNT]) { 0 },
+    .endfunc = knight_dead,
+    .default_aifunc = ai_move
 };
-mmove_t knight_move_death1 = {FRAME_DEATHA_FIRST, FRAME_DEATHA_LAST, knight_frames_death1, knight_dead};
 
-mframe_t knight_frames_death2 [FRAME_DEATHB_COUNT] = {
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL },
-    { ai_move, 0, NULL }
+mmove_t knight_move_death2 = {
+    .firstframe = FRAME_DEATHB_FIRST,
+    .lastframe = FRAME_DEATHB_LAST,
+    .frame = (mframe_t [FRAME_DEATHB_COUNT]) { 0 },
+    .endfunc = knight_dead,
+    .default_aifunc = ai_move
 };
-mmove_t knight_move_death2 = {FRAME_DEATHB_FIRST, FRAME_DEATHB_LAST, knight_frames_death2, knight_dead};
 
 void knight_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {

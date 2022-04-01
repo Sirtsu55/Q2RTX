@@ -448,6 +448,7 @@ typedef struct {
     int         lastframe;
     mframe_t    *frame;
     void        (*endfunc)(edict_t *self);
+    void        (*default_aifunc)(edict_t *self, float dist);
 } mmove_t;
 
 typedef struct {
