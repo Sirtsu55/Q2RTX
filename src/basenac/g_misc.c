@@ -1808,10 +1808,12 @@ void SP_model_spawn(edict_t *ent)
 #define PROPERTY_SPAWNFLAG_MODEL2   16
 #define PROPERTY_SPAWNFLAG_MODEL3   32
 #define PROPERTY_SPAWNFLAG_MODEL4   64
+#define PROPERTY_SPAWNFLAG_SKINNUM  128
+#define PROPERTY_SPAWNFLAG_FRAME    256
 
 void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
 {
-    int new_modelindex, new_effects, new_renderfx, new_sound, new_modelindex2, new_modelindex3, new_modelindex4;
+    int new_modelindex, new_effects, new_renderfx, new_sound, new_modelindex2, new_modelindex3, new_modelindex4, new_skinnum, new_frame;
     
     edict_t *t = NULL;
     
@@ -1852,6 +1854,16 @@ void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
             new_modelindex4 = t->s.modelindex4;
             t->s.modelindex4 = ent->s.modelindex4;
         }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_SKINNUM)
+        {
+            new_skinnum = t->s.skinnum;
+            t->s.skinnum = ent->s.skinnum;
+        }
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_SKINNUM)
+        {
+            new_frame = t->s.frame;
+            t->s.frame = ent->s.frame;
+        }
     }
 
     if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL)
@@ -1868,6 +1880,10 @@ void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
         ent->s.modelindex3 = new_modelindex3;
     if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL4)
         ent->s.modelindex4 = new_modelindex4;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_SKINNUM)
+        ent->s.skinnum = new_skinnum;
+    if (ent->spawnflags & PROPERTY_SPAWNFLAG_FRAME)
+        ent->s.frame = new_frame;
 
     SV_LinkEntity(t);
 }

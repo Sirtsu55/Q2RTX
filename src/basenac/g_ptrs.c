@@ -450,6 +450,7 @@ extern void jorg_stand(void);
 extern void jorg_walk(void);
 extern void knight_attack(void);
 extern void knight_die(void);
+extern void knight_load(void);
 extern void knight_melee(void);
 extern void knight_pain(void);
 extern void knight_run(void);
@@ -1257,5 +1258,6 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, Makron_CheckAttack },
 { P_monsterinfo_checkattack, medic_checkattack },
 { P_monsterinfo_checkattack, mutant_checkattack },
+{ P_monsterinfo_load, knight_load },
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);
