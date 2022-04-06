@@ -290,6 +290,9 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 
 	const vec3_t view_y = { view_matrix[1], view_matrix[5], view_matrix[9] };
 
+	vec3_t fwd;
+	AngleVectors(vkpt_refdef.fd->viewangles, fwd, NULL, NULL);
+
 	// TODO: remove vkpt_refdef.fd, it's better to calculate it from the view matrix
 	const vec3_t view_origin = { vkpt_refdef.fd->vieworg[0], vkpt_refdef.fd->vieworg[1], vkpt_refdef.fd->vieworg[2] };
 
@@ -328,8 +331,9 @@ static void write_particle_geometry(const float* view_matrix, const particle_t* 
 		// if they're far away
 		vec3_t temp;
 		VectorSubtract(particle->origin, view_origin, temp);
+
 		float len = VectorLength(temp);
-		radius += len / 512.f;
+		radius += len / 800.f;
 
 		VectorScale(y_axis, radius, y_axis);
 		VectorScale(x_axis, radius, x_axis);

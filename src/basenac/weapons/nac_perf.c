@@ -183,6 +183,7 @@ static bool Perf_Firing(edict_t *ent)
 
         if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_firing) {
             Weapon_SetAnimation(ent, &weap_perf_idle);
+            return false;
         }
 
         return false;
@@ -196,7 +197,7 @@ static bool Perf_Idle(edict_t *ent)
     if (ent->client->newweapon)
     {
         Weapon_SetAnimation(ent, &weap_perf_deactivate);
-        Weapon_Activate(ent);
+        Weapon_Activate(ent, true);
         return false;
     }
 

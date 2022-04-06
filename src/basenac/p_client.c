@@ -1189,7 +1189,7 @@ void PutClientInServer(edict_t *ent)
 
     // force the current weapon up
     client->newweapon = client->pers.weapon;
-    Weapon_Activate(ent);
+    Weapon_Activate(ent, true);
 }
 
 /*
@@ -1251,6 +1251,7 @@ void ClientBegin(edict_t *ent)
         // state when the game is saved, so we need to compensate
         // with deltaangles
         VectorCopy(ent->client->ps.viewangles, ent->client->ps.pmove.delta_angles);
+        Weapon_Activate(ent, false);
     } else {
         // a spawn point will completely reinitialize the entity
         // except for the persistant data that was initialized at

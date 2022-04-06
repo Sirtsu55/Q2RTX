@@ -327,7 +327,7 @@ static bool Axe_Idle(edict_t *ent)
     if (ent->client->newweapon)
     {
         Weapon_SetAnimation(ent, &weap_axe_deactivate);
-        Weapon_Activate(ent);
+        Weapon_Activate(ent, true);
         return false;
     }
 

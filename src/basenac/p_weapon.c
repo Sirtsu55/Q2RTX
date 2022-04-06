@@ -212,12 +212,15 @@ static weapon_id_t currentWeaponId;
  * @brief Start activation of our `newweapon`.
  * @param ent 
 */
-void Weapon_Activate(edict_t *ent)
+void Weapon_Activate(edict_t *ent, bool switched)
 {
-    // set entity weapon properties
-    ent->client->pers.lastweapon = ent->client->pers.weapon;
-    ent->client->pers.weapon = ent->client->newweapon;
-    ent->client->newweapon = NULL;
+    if (switched)
+    {
+        // set entity weapon properties
+        ent->client->pers.lastweapon = ent->client->pers.weapon;
+        ent->client->pers.weapon = ent->client->newweapon;
+        ent->client->newweapon = NULL;
+    }
 
     // set visible model
     if (ent->s.modelindex == 255)
@@ -370,7 +373,7 @@ void Think_Weapon(edict_t *ent)
     // if just died, put the weapon away
     if (ent->health < 1) {
         ent->client->newweapon = NULL;
-        Weapon_Activate(ent);
+        Weapon_Activate(ent, true);
         return;
     }
 

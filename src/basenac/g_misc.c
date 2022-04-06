@@ -1864,6 +1864,8 @@ void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
             new_frame = t->s.frame;
             t->s.frame = ent->s.frame;
         }
+
+        SV_LinkEntity(t);
     }
 
     if (ent->spawnflags & PROPERTY_SPAWNFLAG_MODEL)
@@ -1885,7 +1887,7 @@ void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
     if (ent->spawnflags & PROPERTY_SPAWNFLAG_FRAME)
         ent->s.frame = new_frame;
 
-    SV_LinkEntity(t);
+    SV_LinkEntity(ent);
 }
 
 void SP_misc_property_swap(edict_t *ent)

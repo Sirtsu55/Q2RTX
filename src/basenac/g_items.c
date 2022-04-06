@@ -1600,31 +1600,22 @@ gitem_t itemlist[] = {
         0,
         /* precache */ ""
     },
-
+#endif
     /*QUAKED key_blue_key (0 .5 .8) (-16 -16 -16) (16 16 16)
     normal door key - blue
     */
     {
-        "key_blue_key",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/key/tris.md2", EF_ROTATE,
-        NULL,
-        "k_bluekey",
-        "Blue Key",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
+        .classname = "key_blue_key",
+        .pickup = Pickup_Key,
+        .drop = Drop_General,
+        .pickup_sound = "items/pkup.wav",
+        .world_model = "models/items/keys/key/tris.md2",
+        .world_model_flags = EF_ROTATE,
+        .icon = "k_bluekey",
+        .pickup_name = "Blue Key",
+        .flags = IT_STAY_COOP | IT_KEY,
     },
-
+#if 0
     /*QUAKED key_red_key (0 .5 .8) (-16 -16 -16) (16 16 16)
     normal door key - red
     */

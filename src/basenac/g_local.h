@@ -646,7 +646,7 @@ gitem_t *FindItemByClassname(char *classname);
 edict_t *Drop_Item(edict_t *ent, gitem_t *item);
 void SetRespawn(edict_t *ent, float delay);
 bool ChangeWeapon(edict_t *ent);
-void Weapon_Activate(edict_t *ent);
+void Weapon_Activate(edict_t *ent, bool switched);
 void SpawnItem(edict_t *ent, gitem_t *item);
 void Think_Weapon(edict_t *ent);
 int ArmorIndex(edict_t *ent);

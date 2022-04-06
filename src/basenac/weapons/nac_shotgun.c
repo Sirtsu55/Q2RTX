@@ -117,7 +117,7 @@ static bool Shotgun_Idle(edict_t *ent)
     if (ent->client->newweapon)
     {
         Weapon_SetAnimation(ent, &weap_shotgun_deactivate);
-        Weapon_Activate(ent);
+        Weapon_Activate(ent, true);
         return false;
     }
 
