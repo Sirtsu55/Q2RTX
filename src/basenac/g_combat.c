@@ -292,6 +292,9 @@ void M_ReactToDamage(edict_t *targ, edict_t *attacker)
     // M_ReactToDamage might still be called on them
     if (targ->svflags & SVF_DEADMONSTER)
         return;
+    // don't react if we're going to a combat point
+    else if (targ->monsterinfo.aiflags & AI_COMBAT_POINT)
+        return;
 
     // if we are a good guy monster and our attacker is a player
     // or another good guy, do not get mad at them

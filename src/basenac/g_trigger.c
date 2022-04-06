@@ -588,6 +588,12 @@ void trigger_monsterjump_touch(edict_t *self, edict_t *other, cplane_t *plane, c
     other->velocity[2] = self->movedir[2];
 }
 
+void trigger_monsterjump_toggle(edict_t *self, edict_t *other, edict_t *activator)
+{
+    self->solid = (self->solid == SOLID_NOT) ? SOLID_TRIGGER : SOLID_NOT;
+    SV_LinkEntity(self);
+}
+
 void SP_trigger_monsterjump(edict_t *self)
 {
     if (!self->speed)
@@ -597,6 +603,14 @@ void SP_trigger_monsterjump(edict_t *self)
     if (self->s.angles[YAW] == 0)
         self->s.angles[YAW] = 360;
     InitTrigger(self);
+
+    if (self->spawnflags & 1)
+    {
+        self->solid = (self->spawnflags & 2) ? SOLID_NOT : SOLID_TRIGGER;
+        self->use = trigger_monsterjump_toggle;
+        SV_LinkEntity(self);
+    }
+
     self->touch = trigger_monsterjump_touch;
     self->movedir[2] = st.height;
 }
