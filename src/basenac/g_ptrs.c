@@ -602,6 +602,7 @@ extern void trigger_elevator_use(void);
 extern void trigger_enable(void);
 extern void trigger_gravity_touch(void);
 extern void trigger_key_use(void);
+extern void trigger_monsterjump_toggle(void);
 extern void trigger_monsterjump_touch(void);
 extern void trigger_push_touch(void);
 extern void trigger_push_use(void);
@@ -766,6 +767,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, trigger_elevator_use },
 { P_use, trigger_enable },
 { P_use, trigger_key_use },
+{ P_use, trigger_monsterjump_toggle },
 { P_use, trigger_push_use },
 { P_use, trigger_relay_use },
 { P_use, Use_Areaportal },
