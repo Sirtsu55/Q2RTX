@@ -1601,18 +1601,18 @@ gitem_t itemlist[] = {
         /* precache */ ""
     },
 #endif
-    /*QUAKED key_blue_key (0 .5 .8) (-16 -16 -16) (16 16 16)
-    normal door key - blue
+    /*QUAKED key_silver_key (0 .5 .8) (-16 -16 -16) (16 16 16)
+    normal door key - silver
     */
     {
-        .classname = "key_blue_key",
+        .classname = "key_silver_key",
         .pickup = Pickup_Key,
         .drop = Drop_General,
         .pickup_sound = "items/pkup.wav",
-        .world_model = "models/items/keys/key/tris.md2",
+        .world_model = "models/items/keys/gold_key/gold_key.md3",
         .world_model_flags = EF_ROTATE,
-        .icon = "k_bluekey",
-        .pickup_name = "Blue Key",
+        .icon = "k_silverkey",
+        .pickup_name = "Silver Key",
         .flags = IT_STAY_COOP | IT_KEY,
     },
 #if 0
