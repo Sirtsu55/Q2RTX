@@ -215,8 +215,10 @@ vec4 integratePlanet(SunInfo sun, PlanetInfo planet, vec3 dirView) {
     vec2 fPlanetNearFar; 
     vec2 fAtmosphereNearFar;
 
-    bool bPlanetIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fInnerRadius2, fPlanetNearFar);
-    bool bAtmosphereIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2, fAtmosphereNearFar);
+	bool bPlanetIntersection = false; // re-comment to re-enable planet rendering, we should make this a cvar - N&C
+    bool bAtmosphereIntersection = false; // re-comment to re-enable planet rendering, we should make this a cvar - N&C
+    // bool bPlanetIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fInnerRadius2, fPlanetNearFar); // un-comment to renable planet rendering, we should make this a cvar - N&C
+    // bool bAtmosphereIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2, fAtmosphereNearFar); // un-comment to renable planet rendering, we should make this a cvar - N&C
 
     if (bPlanetIntersection) {
 
