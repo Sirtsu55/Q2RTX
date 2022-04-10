@@ -721,7 +721,7 @@ void func_explosive_explode(edict_t *self, edict_t *inflictor, edict_t *attacker
 
     mass = self->mass;
     if (!mass)
-        mass = 75;
+        mass = 800;
 
     // big chunks
     if (mass >= 100) {
@@ -799,7 +799,7 @@ void SP_func_explosive(edict_t *self)
 
     if (self->use != func_explosive_use) {
         if (!self->health)
-            self->health = 100;
+            self->health = 10;
         self->die = func_explosive_explode;
         self->takedamage = DAMAGE_YES;
     }
@@ -809,7 +809,7 @@ void SP_func_explosive(edict_t *self)
 }
 
 
-/*QUAKED misc_explobox (0 .5 .8) (-16 -16 0) (16 16 40)
+/*QUAKED misc_explobox (0 .5 .8) (-16 -16 0) (16 16 64)
 Large exploding box.  You can override its mass (100),
 health (80), and dmg (150).
 */
@@ -930,17 +930,17 @@ void SP_misc_explobox(edict_t *self)
     self->solid = SOLID_BBOX;
     self->movetype = MOVETYPE_STEP;
 
-    self->model = "models/objects/barrels/tris.md2";
+    self->model = "models/objects/explobox/explobox.iqm";
     self->s.modelindex = SV_ModelIndex(self->model);
     VectorSet(self->mins, -16, -16, 0);
-    VectorSet(self->maxs, 16, 16, 40);
+    VectorSet(self->maxs, 16, 16, 64);
 
     if (!self->mass)
-        self->mass = 400;
+        self->mass = 375;
     if (!self->health)
         self->health = 10;
     if (!self->dmg)
-        self->dmg = 150;
+        self->dmg = 250;
 
     self->die = barrel_delay;
     self->takedamage = DAMAGE_YES;
@@ -954,6 +954,44 @@ void SP_misc_explobox(edict_t *self)
     SV_LinkEntity(self);
 }
 
+void SP_misc_explobox2(edict_t* self)
+{
+    if (deathmatch.integer) {
+        // auto-remove for deathmatch
+        G_FreeEdict(self);
+        return;
+    }
+
+    SV_ModelIndex("models/objects/debris1/tris.md2");
+    SV_ModelIndex("models/objects/debris2/tris.md2");
+    SV_ModelIndex("models/objects/debris3/tris.md2");
+
+    self->solid = SOLID_BBOX;
+    self->movetype = MOVETYPE_STEP;
+
+    self->model = "models/objects/explobox/explobox2.iqm";
+    self->s.modelindex = SV_ModelIndex(self->model);
+    VectorSet(self->mins, -16, -16, 0);
+    VectorSet(self->maxs, 16, 16, 32);
+
+    if (!self->mass)
+        self->mass = 185;
+    if (!self->health)
+        self->health = 10;
+    if (!self->dmg)
+        self->dmg = 125;
+
+    self->die = barrel_delay;
+    self->takedamage = DAMAGE_YES;
+    self->monsterinfo.aiflags = AI_NOSTEP;
+
+    self->touch = barrel_touch;
+
+    self->think = M_droptofloor;
+    self->nextthink = level.time + 200;
+
+    SV_LinkEntity(self);
+}
 
 //
 // miscellaneous specialty items
