@@ -18,11 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sound.h"
 
-#if USE_FIXED_LIBAL
 #include "qal/fixed.h"
-#else
-#include "qal/dynamic.h"
-#endif
 
 // translates from AL coordinate system to quake
 #define AL_UnpackVector(v)  -v[1],v[2],-v[0]
@@ -36,13 +32,145 @@ bool streamPlaying = false;
 static ALuint s_srcnums[MAX_CHANNELS];
 static ALuint streamSource = 0;
 static int s_framecount;
+static ALuint s_effect, s_auxEffectSlot;
+static cvar_t *s_testReverb;
+static int s_activePreset = -1;
+
+static EFXEAXREVERBPROPERTIES reverb_presets[] = {
+    EFX_REVERB_PRESET_GENERIC,
+    EFX_REVERB_PRESET_PADDEDCELL,
+    EFX_REVERB_PRESET_ROOM,
+    EFX_REVERB_PRESET_BATHROOM,
+    EFX_REVERB_PRESET_LIVINGROOM,
+    EFX_REVERB_PRESET_STONEROOM,
+    EFX_REVERB_PRESET_AUDITORIUM,
+    EFX_REVERB_PRESET_CONCERTHALL,
+    EFX_REVERB_PRESET_CAVE,
+    EFX_REVERB_PRESET_ARENA,
+    EFX_REVERB_PRESET_HANGAR,
+    EFX_REVERB_PRESET_CARPETEDHALLWAY,
+    EFX_REVERB_PRESET_HALLWAY,
+    EFX_REVERB_PRESET_STONECORRIDOR,
+    EFX_REVERB_PRESET_ALLEY,
+    EFX_REVERB_PRESET_FOREST,
+    EFX_REVERB_PRESET_CITY,
+    EFX_REVERB_PRESET_MOUNTAINS,
+    EFX_REVERB_PRESET_QUARRY,
+    EFX_REVERB_PRESET_PLAIN,
+    EFX_REVERB_PRESET_PARKINGLOT,
+    EFX_REVERB_PRESET_SEWERPIPE,
+    EFX_REVERB_PRESET_UNDERWATER,
+    EFX_REVERB_PRESET_DRUGGED,
+    EFX_REVERB_PRESET_DIZZY,
+    EFX_REVERB_PRESET_PSYCHOTIC,
+
+    EFX_REVERB_PRESET_CASTLE_SMALLROOM,
+    EFX_REVERB_PRESET_CASTLE_SHORTPASSAGE,
+    EFX_REVERB_PRESET_CASTLE_MEDIUMROOM,
+    EFX_REVERB_PRESET_CASTLE_LARGEROOM,
+    EFX_REVERB_PRESET_CASTLE_LONGPASSAGE,
+    EFX_REVERB_PRESET_CASTLE_HALL,
+    EFX_REVERB_PRESET_CASTLE_CUPBOARD,
+    EFX_REVERB_PRESET_CASTLE_COURTYARD,
+    EFX_REVERB_PRESET_CASTLE_ALCOVE,
+
+    EFX_REVERB_PRESET_FACTORY_SMALLROOM,
+    EFX_REVERB_PRESET_FACTORY_SHORTPASSAGE,
+    EFX_REVERB_PRESET_FACTORY_MEDIUMROOM,
+    EFX_REVERB_PRESET_FACTORY_LARGEROOM,
+    EFX_REVERB_PRESET_FACTORY_LONGPASSAGE,
+    EFX_REVERB_PRESET_FACTORY_HALL,
+    EFX_REVERB_PRESET_FACTORY_CUPBOARD,
+    EFX_REVERB_PRESET_FACTORY_COURTYARD,
+    EFX_REVERB_PRESET_FACTORY_ALCOVE,
+
+    EFX_REVERB_PRESET_ICEPALACE_SMALLROOM,
+    EFX_REVERB_PRESET_ICEPALACE_SHORTPASSAGE,
+    EFX_REVERB_PRESET_ICEPALACE_MEDIUMROOM,
+    EFX_REVERB_PRESET_ICEPALACE_LARGEROOM,
+    EFX_REVERB_PRESET_ICEPALACE_LONGPASSAGE,
+    EFX_REVERB_PRESET_ICEPALACE_HALL,
+    EFX_REVERB_PRESET_ICEPALACE_CUPBOARD,
+    EFX_REVERB_PRESET_ICEPALACE_COURTYARD,
+    EFX_REVERB_PRESET_ICEPALACE_ALCOVE,
+
+    EFX_REVERB_PRESET_SPACESTATION_SMALLROOM,
+    EFX_REVERB_PRESET_SPACESTATION_SHORTPASSAGE,
+    EFX_REVERB_PRESET_SPACESTATION_MEDIUMROOM,
+    EFX_REVERB_PRESET_SPACESTATION_LARGEROOM,
+    EFX_REVERB_PRESET_SPACESTATION_LONGPASSAGE,
+    EFX_REVERB_PRESET_SPACESTATION_HALL,
+    EFX_REVERB_PRESET_SPACESTATION_CUPBOARD,
+    EFX_REVERB_PRESET_SPACESTATION_ALCOVE,
+
+    EFX_REVERB_PRESET_WOODEN_SMALLROOM,
+    EFX_REVERB_PRESET_WOODEN_SHORTPASSAGE,
+    EFX_REVERB_PRESET_WOODEN_MEDIUMROOM,
+    EFX_REVERB_PRESET_WOODEN_LARGEROOM,
+    EFX_REVERB_PRESET_WOODEN_LONGPASSAGE,
+    EFX_REVERB_PRESET_WOODEN_HALL,
+    EFX_REVERB_PRESET_WOODEN_CUPBOARD,
+    EFX_REVERB_PRESET_WOODEN_COURTYARD,
+    EFX_REVERB_PRESET_WOODEN_ALCOVE,
+
+    EFX_REVERB_PRESET_SPORT_EMPTYSTADIUM,
+    EFX_REVERB_PRESET_SPORT_SQUASHCOURT,
+    EFX_REVERB_PRESET_SPORT_SMALLSWIMMINGPOOL,
+    EFX_REVERB_PRESET_SPORT_LARGESWIMMINGPOOL,
+    EFX_REVERB_PRESET_SPORT_GYMNASIUM,
+    EFX_REVERB_PRESET_SPORT_FULLSTADIUM,
+    EFX_REVERB_PRESET_SPORT_STADIUMTANNOY,
+
+    EFX_REVERB_PRESET_PREFAB_WORKSHOP,
+    EFX_REVERB_PRESET_PREFAB_SCHOOLROOM,
+    EFX_REVERB_PRESET_PREFAB_PRACTISEROOM,
+    EFX_REVERB_PRESET_PREFAB_OUTHOUSE,
+    EFX_REVERB_PRESET_PREFAB_CARAVAN,
+
+    EFX_REVERB_PRESET_DOME_TOMB,
+    EFX_REVERB_PRESET_PIPE_SMALL,
+    EFX_REVERB_PRESET_DOME_SAINTPAULS,
+    EFX_REVERB_PRESET_PIPE_LONGTHIN,
+    EFX_REVERB_PRESET_PIPE_LARGE,
+    EFX_REVERB_PRESET_PIPE_RESONANT,
+
+    EFX_REVERB_PRESET_OUTDOORS_BACKYARD,
+    EFX_REVERB_PRESET_OUTDOORS_ROLLINGPLAINS,
+    EFX_REVERB_PRESET_OUTDOORS_DEEPCANYON,
+    EFX_REVERB_PRESET_OUTDOORS_CREEK,
+    EFX_REVERB_PRESET_OUTDOORS_VALLEY,
+
+    EFX_REVERB_PRESET_MOOD_HEAVEN,
+    EFX_REVERB_PRESET_MOOD_HELL,
+    EFX_REVERB_PRESET_MOOD_MEMORY,
+
+    EFX_REVERB_PRESET_DRIVING_COMMENTATOR,
+    EFX_REVERB_PRESET_DRIVING_PITGARAGE,
+    EFX_REVERB_PRESET_DRIVING_INCAR_RACER,
+    EFX_REVERB_PRESET_DRIVING_INCAR_SPORTS,
+    EFX_REVERB_PRESET_DRIVING_INCAR_LUXURY,
+    EFX_REVERB_PRESET_DRIVING_FULLGRANDSTAND,
+    EFX_REVERB_PRESET_DRIVING_EMPTYGRANDSTAND,
+    EFX_REVERB_PRESET_DRIVING_TUNNEL,
+
+    EFX_REVERB_PRESET_CITY_STREETS,
+    EFX_REVERB_PRESET_CITY_SUBWAY,
+    EFX_REVERB_PRESET_CITY_MUSEUM,
+    EFX_REVERB_PRESET_CITY_LIBRARY,
+    EFX_REVERB_PRESET_CITY_UNDERPASS,
+    EFX_REVERB_PRESET_CITY_ABANDONED,
+
+    EFX_REVERB_PRESET_DUSTYROOM,
+    EFX_REVERB_PRESET_CHAPEL,
+    EFX_REVERB_PRESET_SMALLWATERROOM
+};
 
 void AL_SoundInfo(void)
 {
-    Com_Printf("AL_VENDOR: %s\n", qalGetString(AL_VENDOR));
-    Com_Printf("AL_RENDERER: %s\n", qalGetString(AL_RENDERER));
-    Com_Printf("AL_VERSION: %s\n", qalGetString(AL_VERSION));
-    Com_Printf("AL_EXTENSIONS: %s\n", qalGetString(AL_EXTENSIONS));
+    Com_Printf("AL_VENDOR: %s\n", alGetString(AL_VENDOR));
+    Com_Printf("AL_RENDERER: %s\n", alGetString(AL_RENDERER));
+    Com_Printf("AL_VERSION: %s\n", alGetString(AL_VERSION));
+    Com_Printf("AL_EXTENSIONS: %s\n", alGetString(AL_EXTENSIONS));
     Com_Printf("Number of sources: %d\n", s_numchannels);
 }
 
@@ -52,13 +180,13 @@ void AL_SoundInfo(void)
 static void
 AL_InitStreamSource()
 {
-	qalSource3f(streamSource, AL_POSITION, 0.0, 0.0, 0.0);
-	qalSource3f(streamSource, AL_VELOCITY, 0.0, 0.0, 0.0);
-	qalSource3f(streamSource, AL_DIRECTION, 0.0, 0.0, 0.0);
-	qalSourcef(streamSource, AL_ROLLOFF_FACTOR, 0.0);
-	qalSourcei(streamSource, AL_BUFFER, 0);
-	qalSourcei(streamSource, AL_LOOPING, AL_FALSE);
-	qalSourcei(streamSource, AL_SOURCE_RELATIVE, AL_TRUE);
+	alSource3f(streamSource, AL_POSITION, 0.0, 0.0, 0.0);
+	alSource3f(streamSource, AL_VELOCITY, 0.0, 0.0, 0.0);
+	alSource3f(streamSource, AL_DIRECTION, 0.0, 0.0, 0.0);
+	alSourcef(streamSource, AL_ROLLOFF_FACTOR, 0.0);
+	alSourcei(streamSource, AL_BUFFER, 0);
+	alSourcei(streamSource, AL_LOOPING, AL_FALSE);
+	alSourcei(streamSource, AL_SOURCE_RELATIVE, AL_TRUE);
 }
 
 /*
@@ -70,16 +198,16 @@ AL_StreamDie(void)
 	int numBuffers;
 
 	streamPlaying = false;
-	qalSourceStop(streamSource);
+	alSourceStop(streamSource);
 
 	/* Un-queue any buffers, and delete them */
-	qalGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
+	alGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
 
 	while (numBuffers--)
 	{
 		ALuint buffer;
-		qalSourceUnqueueBuffers(streamSource, 1, &buffer);
-		qalDeleteBuffers(1, &buffer);
+		alSourceUnqueueBuffers(streamSource, 1, &buffer);
+		alDeleteBuffers(1, &buffer);
 		active_buffers--;
 	}
 }
@@ -94,7 +222,7 @@ AL_StreamUpdate(void)
 	int numBuffers;
 	ALint state;
 
-	qalGetSourcei(streamSource, AL_SOURCE_STATE, &state);
+	alGetSourcei(streamSource, AL_SOURCE_STATE, &state);
 
 	if (state == AL_STOPPED)
 	{
@@ -103,23 +231,23 @@ AL_StreamUpdate(void)
 	else
 	{
 		/* Un-queue any already played buffers and delete them */
-		qalGetSourcei(streamSource, AL_BUFFERS_PROCESSED, &numBuffers);
+		alGetSourcei(streamSource, AL_BUFFERS_PROCESSED, &numBuffers);
 
 		while (numBuffers--)
 		{
 			ALuint buffer;
-			qalSourceUnqueueBuffers(streamSource, 1, &buffer);
-			qalDeleteBuffers(1, &buffer);
+			alSourceUnqueueBuffers(streamSource, 1, &buffer);
+			alDeleteBuffers(1, &buffer);
 			active_buffers--;
 		}
 	}
 
 	/* Start the streamSource playing if necessary */
-	qalGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
+	alGetSourcei(streamSource, AL_BUFFERS_QUEUED, &numBuffers);
 
 	if (!streamPlaying && numBuffers)
 	{
-		qalSourcePlay(streamSource);
+		alSourcePlay(streamSource);
 		streamPlaying = true;
 	}
 }
@@ -135,16 +263,18 @@ bool AL_Init(void)
     }
 
     // check for linear distance extension
-    if (!qalIsExtensionPresent("AL_EXT_LINEAR_DISTANCE")) {
+    if (!alIsExtensionPresent("AL_EXT_LINEAR_DISTANCE")) {
         Com_SetLastError("AL_EXT_LINEAR_DISTANCE extension is missing");
         goto fail1;
     }
 
-	/* generate source names */
-	qalGetError();
-	qalGenSources(1, &streamSource);
+    s_testReverb = Cvar_Get("s_testReverb", "0", 0);
 
-	if (qalGetError() != AL_NO_ERROR)
+	/* generate source names */
+	alGetError();
+	alGenSources(1, &streamSource);
+
+	if (alGetError() != AL_NO_ERROR)
 	{
 		Com_Printf("ERROR: Couldn't get a single Source.\n");
 		QAL_Shutdown();
@@ -153,8 +283,8 @@ bool AL_Init(void)
 	else
 	{
 		for (i = 0; i < MAX_CHANNELS; i++) {
-			qalGenSources(1, &s_srcnums[i]);
-			if (qalGetError() != AL_NO_ERROR) {
+			alGenSources(1, &s_srcnums[i]);
+			if (alGetError() != AL_NO_ERROR) {
 				break;
 			}
 		}
@@ -169,6 +299,14 @@ bool AL_Init(void)
 
     s_numchannels = i;
 	AL_InitStreamSource();
+
+    alGenEffects(1, &s_effect);
+
+    alEffecti(s_effect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+
+    alGenAuxiliaryEffectSlots(1, &s_auxEffectSlot);
+
+    alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
 
     Com_Printf("OpenAL initialized.\n");
 
@@ -189,11 +327,13 @@ void AL_Shutdown(void)
 
 	AL_StopAllChannels();
 
-	qalDeleteSources(1, &streamSource);
+	alDeleteSources(1, &streamSource);
+    alDeleteEffects(1, &s_effect);
+    alDeleteAuxiliaryEffectSlots(1, &s_auxEffectSlot);
 
     if (s_numchannels) {
         // delete source names
-        qalDeleteSources(s_numchannels, s_srcnums);
+        alDeleteSources(s_numchannels, s_srcnums);
         memset(s_srcnums, 0, sizeof(s_srcnums));
         s_numchannels = 0;
     }
@@ -213,19 +353,19 @@ sfxcache_t *AL_UploadSfx(sfx_t *s)
         return NULL;
     }
 
-    qalGetError();
-    qalGenBuffers(1, &name);
-    qalBufferData(name, format, s_info.data, size, s_info.rate);
-    if (qalGetError() != AL_NO_ERROR) {
+    alGetError();
+    alGenBuffers(1, &name);
+    alBufferData(name, format, s_info.data, size, s_info.rate);
+    if (alGetError() != AL_NO_ERROR) {
         s->error = Q_ERR_LIBRARY_ERROR;
         return NULL;
     }
 
 #if 0
     // specify OpenAL-Soft style loop points
-    if (s_info.loopstart > 0 && qalIsExtensionPresent("AL_SOFT_loop_points")) {
+    if (s_info.loopstart > 0 && alIsExtensionPresent("AL_SOFT_loop_points")) {
         ALint points[2] = { s_info.loopstart, s_info.samples };
-        qalBufferiv(name, AL_LOOP_POINTS_SOFT, points);
+        alBufferiv(name, AL_LOOP_POINTS_SOFT, points);
     }
 #endif
 
@@ -251,7 +391,7 @@ void AL_DeleteSfx(sfx_t *s)
     }
 
     name = sc->bufnum;
-    qalDeleteBuffers(1, &name);
+    alDeleteBuffers(1, &name);
 }
 
 #define TONES_PER_OCTAVE	48
@@ -270,7 +410,7 @@ static void AL_Spatialize(channel_t *ch)
         CL_GetEntitySoundOrigin(ch->entnum, origin);
     }
 
-    qalSource3f(ch->srcnum, AL_POSITION, AL_UnpackVector(origin));
+    alSource3f(ch->srcnum, AL_POSITION, AL_UnpackVector(origin));
 
 	// offset pitch by sound-requested offset
     float pitch = 1.f;
@@ -280,7 +420,13 @@ static void AL_Spatialize(channel_t *ch)
 		pitch *= octaves;
 	}
 
-    qalSourcef(ch->srcnum, AL_PITCH, pitch);
+    alSourcef(ch->srcnum, AL_PITCH, pitch);
+
+    if (!ch->dist_mult) {
+        alSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+    } else {
+        alSource3i(ch->srcnum, AL_AUXILIARY_SEND_FILTER, (ALint) s_auxEffectSlot, 0, AL_FILTER_NULL);
+    }
 }
 
 void AL_StopChannel(channel_t *ch)
@@ -291,8 +437,8 @@ void AL_StopChannel(channel_t *ch)
 #endif
 
     // stop it
-    qalSourceStop(ch->srcnum);
-    qalSourcei(ch->srcnum, AL_BUFFER, AL_NONE);
+    alSourceStop(ch->srcnum);
+    alSourcei(ch->srcnum, AL_BUFFER, AL_NONE);
     memset(ch, 0, sizeof(*ch));
 }
 
@@ -306,23 +452,23 @@ void AL_PlayChannel(channel_t *ch)
 #endif
 
     ch->srcnum = s_srcnums[ch - channels];
-    qalGetError();
-    qalSourcei(ch->srcnum, AL_BUFFER, sc->bufnum);
+    alGetError();
+    alSourcei(ch->srcnum, AL_BUFFER, sc->bufnum);
     if (ch->autosound /*|| sc->loopstart >= 0*/) {
-        qalSourcei(ch->srcnum, AL_LOOPING, AL_TRUE);
+        alSourcei(ch->srcnum, AL_LOOPING, AL_TRUE);
     } else {
-        qalSourcei(ch->srcnum, AL_LOOPING, AL_FALSE);
+        alSourcei(ch->srcnum, AL_LOOPING, AL_FALSE);
     }
-    qalSourcef(ch->srcnum, AL_GAIN, ch->master_vol);
-    qalSourcef(ch->srcnum, AL_REFERENCE_DISTANCE, SOUND_FULLVOLUME);
-    qalSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192);
-    qalSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, ch->dist_mult * (8192 - SOUND_FULLVOLUME));
+    alSourcef(ch->srcnum, AL_GAIN, ch->master_vol);
+    alSourcef(ch->srcnum, AL_REFERENCE_DISTANCE, SOUND_FULLVOLUME);
+    alSourcef(ch->srcnum, AL_MAX_DISTANCE, 8192);
+    alSourcef(ch->srcnum, AL_ROLLOFF_FACTOR, ch->dist_mult * (8192 - SOUND_FULLVOLUME));
 
     AL_Spatialize(ch);
 
     // play it
-    qalSourcePlay(ch->srcnum);
-    if (qalGetError() != AL_NO_ERROR) {
+    alSourcePlay(ch->srcnum);
+    if (alGetError() != AL_NO_ERROR) {
         AL_StopChannel(ch);
     }
 }
@@ -446,8 +592,57 @@ static void AL_AddLoopSounds(void)
         if (ch2) {
             ALint offset;
 
-            qalGetSourcei(ch2->srcnum, AL_SAMPLE_OFFSET, &offset);
-            qalSourcei(ch->srcnum, AL_SAMPLE_OFFSET, offset);
+            alGetSourcei(ch2->srcnum, AL_SAMPLE_OFFSET, &offset);
+            alSourcei(ch->srcnum, AL_SAMPLE_OFFSET, offset);
+        }
+    }
+}
+
+static void AL_SetReverb(void)
+{
+    int32_t preset = 0;
+
+    if (cls.state != ca_active) {
+        preset = 0;
+    } else if (s_testReverb->integer) {
+        preset = s_testReverb->integer;
+        clamp(preset, 0, q_countof(reverb_presets) + 1);
+    } else {
+        preset = 0; // todo
+    }
+
+    if (s_activePreset != preset) {
+        if (preset == 0) {
+
+            alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+        } else {
+            EFXEAXREVERBPROPERTIES *reverb = &reverb_presets[preset - 1];
+
+            alEffectf(s_effect, AL_EAXREVERB_DENSITY, reverb->flDensity);
+            alEffectf(s_effect, AL_EAXREVERB_DIFFUSION, reverb->flDiffusion);
+            alEffectf(s_effect, AL_EAXREVERB_GAIN, reverb->flGain);
+            alEffectf(s_effect, AL_EAXREVERB_GAINHF, reverb->flGainHF);
+            alEffectf(s_effect, AL_EAXREVERB_GAINLF, reverb->flGainLF);
+            alEffectf(s_effect, AL_EAXREVERB_DECAY_TIME, reverb->flDecayTime);
+            alEffectf(s_effect, AL_EAXREVERB_DECAY_HFRATIO, reverb->flDecayHFRatio);
+            alEffectf(s_effect, AL_EAXREVERB_DECAY_LFRATIO, reverb->flDecayLFRatio);
+            alEffectf(s_effect, AL_EAXREVERB_REFLECTIONS_GAIN, reverb->flReflectionsGain);
+            alEffectf(s_effect, AL_EAXREVERB_REFLECTIONS_DELAY, reverb->flReflectionsDelay);
+            alEffectfv(s_effect, AL_EAXREVERB_REFLECTIONS_PAN, reverb->flReflectionsPan);
+            alEffectf(s_effect, AL_EAXREVERB_LATE_REVERB_GAIN, reverb->flLateReverbGain);
+            alEffectf(s_effect, AL_EAXREVERB_LATE_REVERB_DELAY, reverb->flLateReverbDelay);
+            alEffectfv(s_effect, AL_EAXREVERB_LATE_REVERB_PAN, reverb->flLateReverbPan);
+            alEffectf(s_effect, AL_EAXREVERB_ECHO_TIME, reverb->flEchoTime);
+            alEffectf(s_effect, AL_EAXREVERB_ECHO_DEPTH, reverb->flEchoDepth);
+            alEffectf(s_effect, AL_EAXREVERB_MODULATION_TIME, reverb->flModulationTime);
+            alEffectf(s_effect, AL_EAXREVERB_MODULATION_DEPTH, reverb->flModulationDepth);
+            alEffectf(s_effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, reverb->flAirAbsorptionGainHF);
+            alEffectf(s_effect, AL_EAXREVERB_HFREFERENCE, reverb->flHFReference);
+            alEffectf(s_effect, AL_EAXREVERB_LFREFERENCE, reverb->flLFReference);
+            alEffectf(s_effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, reverb->flRoomRolloffFactor);
+            alEffecti(s_effect, AL_EAXREVERB_DECAY_HFLIMIT, reverb->iDecayHFLimit);
+
+            alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, (ALint)s_effect);
         }
     }
 }
@@ -465,12 +660,12 @@ void AL_Update(void)
     paintedtime = cl.time;
 
     // set listener parameters
-    qalListener3f(AL_POSITION, AL_UnpackVector(listener_origin));
+    alListener3f(AL_POSITION, AL_UnpackVector(listener_origin));
     AL_CopyVector(listener_forward, orientation);
     AL_CopyVector(listener_up, orientation + 3);
-    qalListenerfv(AL_ORIENTATION, orientation);
-    qalListenerf(AL_GAIN, S_GetLinearVolume(s_volume->value));
-    qalDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+    alListenerfv(AL_ORIENTATION, orientation);
+    alListenerf(AL_GAIN, S_GetLinearVolume(s_volume->value));
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
     // update spatialization for dynamic sounds
     ch = channels;
@@ -487,9 +682,9 @@ void AL_Update(void)
         } else {
             ALenum state;
 
-            qalGetError();
-            qalGetSourcei(ch->srcnum, AL_SOURCE_STATE, &state);
-            if (qalGetError() != AL_NO_ERROR || state == AL_STOPPED) {
+            alGetError();
+            alGetSourcei(ch->srcnum, AL_SOURCE_STATE, &state);
+            if (alGetError() != AL_NO_ERROR || state == AL_STOPPED) {
                 AL_StopChannel(ch);
                 continue;
             }
@@ -512,6 +707,8 @@ void AL_Update(void)
 
 	AL_StreamUpdate();
     AL_IssuePlaysounds();
+
+    AL_SetReverb();
 }
 
 /*
@@ -550,8 +747,8 @@ AL_RawSamples(int samples, int rate, int width, int channels,
 	}
 
 	/* Create a buffer, and stuff the data into it */
-	qalGenBuffers(1, &buffer);
-	qalBufferData(buffer, format, (ALvoid *)data,
+	alGenBuffers(1, &buffer);
+	alBufferData(buffer, format, (ALvoid *)data,
 		(samples * width * channels), rate);
 	active_buffers++;
 
@@ -561,10 +758,10 @@ AL_RawSamples(int samples, int rate, int width, int channels,
 		volume = 1.0f;
 	}
 
-	qalSourcef(streamSource, AL_GAIN, volume);
+	alSourcef(streamSource, AL_GAIN, volume);
 
 	/* Shove the data onto the streamSource */
-	qalSourceQueueBuffers(streamSource, 1, &buffer);
+	alSourceQueueBuffers(streamSource, 1, &buffer);
 }
 
 /*

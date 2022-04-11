@@ -1,13 +1,6 @@
 cmake_minimum_required (VERSION 3.9)
 cmake_policy(SET CMP0069 NEW)
 
-if (UNIX)
-	FIND_PACKAGE(OpenAL)
-	if (NOT OPENAL_INCLUDE_DIR)
-		message(FATAL_ERROR "Can't find OpenAL. Please install the libopenal-dev package.")
-	endif()
-endif()
-
 SET(SRC_BASENAC
 	basenac/g_ai.c
 	basenac/g_chase.c
@@ -125,8 +118,7 @@ SET(SRC_CLIENT
 	client/sound/main.c
 	client/sound/mem.c
 	client/sound/ogg.c
-#	client/sound/qal/fixed.c
-	client/sound/qal/dynamic.c
+	client/sound/qal/fixed.c
 )
 
 SET(SRC_CLIENT_HTTP
@@ -137,7 +129,6 @@ SET(HEADERS_CLIENT
 	client/client.h
 	client/ui/ui.h
 	client/sound/sound.h
-	client/sound/qal/dynamic.h
 	client/sound/qal/fixed.h
 )
 
@@ -365,7 +356,7 @@ ADD_DEFINITIONS(-DVERSION_POINT=${Q2RTX_VERSION_POINT})
 ADD_DEFINITIONS(-DVERSION_SHA=${Q2RTX_VERSION_SHA})
 ADD_DEFINITIONS(-DVERSION_BRANCH=${Q2RTX_VERSION_BRANCH})
 
-ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB)
+ADD_DEFINITIONS(-DHAVE_CONFIG_H=1 -DCURL_STATICLIB -DAL_LIBTYPE_STATIC)
 
 IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
@@ -451,6 +442,7 @@ IF (TARGET client)
 
     TARGET_LINK_LIBRARIES(client stb)
     TARGET_LINK_LIBRARIES(client tinyobjloader)
+    TARGET_LINK_LIBRARIES(client OpenAL)
 ENDIF()
 
 SOURCE_GROUP("basenac\\sources" FILES ${SRC_BASENAC})
