@@ -164,9 +164,9 @@ typedef enum {
 
 // armor types
 #define ARMOR_NONE              0
-#define ARMOR_JACKET            1
-#define ARMOR_COMBAT            2
-#define ARMOR_BODY              3
+#define ARMOR_GREEN             1
+#define ARMOR_YELLOW            2
+#define ARMOR_RED               3
 #define ARMOR_SHARD             4
 
 // power armor types
@@ -282,6 +282,7 @@ typedef struct gitem_s {
     char        *world_model;
     int         world_model_flags;
     char        *view_model;
+    int         skinnum; 
 
     // client side info
     char        *icon;
@@ -496,9 +497,9 @@ extern  spawn_temp_t    st;
 extern  int sm_meat_index;
 extern  int snd_fry;
 
-//extern  int jacket_armor_index;
-//extern  int combat_armor_index;
-//extern  int body_armor_index;
+//extern  int green_armor_index;
+//extern  int yellow_armor_index;
+//extern  int red_armor_index;
 
 
 // means of death

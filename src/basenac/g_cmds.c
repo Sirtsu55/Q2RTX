@@ -203,13 +203,13 @@ void Cmd_Give_f(edict_t *ent)
     if (give_all || Q_stricmp(name, "armor") == 0) {
         gitem_armor_t   *info;
 
-        it = FindItem("Jacket Armor");
+        it = FindItem("Green Armor");
         ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-        it = FindItem("Combat Armor");
+        it = FindItem("Yellow Armor");
         ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-        it = FindItem("Body Armor");
+        it = FindItem("Red Armor");
         info = (gitem_armor_t *)it->info;
         ent->client->pers.inventory[ITEM_INDEX(it)] = info->max_count;
 

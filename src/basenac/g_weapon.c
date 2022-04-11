@@ -653,7 +653,7 @@ void fire_nail(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed)
     nail->movetype = MOVETYPE_FLYMISSILE;
     nail->clipmask = MASK_SHOT;
     nail->solid = SOLID_BBOX;
-    nail->s.modelindex = SV_ModelIndex("models/objects/nail/tris.md3");
+    nail->s.modelindex = SV_ModelIndex("models/objects/nail/nail.iqm");
     nail->owner = self;
     nail->touch = nail_touch;
     nail->nextthink = level.time + 2000;

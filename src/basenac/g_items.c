@@ -26,13 +26,13 @@ extern const weapon_animation_t weap_axe_activate;
 extern const weapon_animation_t weap_perf_activate;
 extern const weapon_animation_t weap_shotgun_activate;
 
-gitem_armor_t jacketarmor_info  = { 25,  50, .30, .00, ARMOR_JACKET};
-gitem_armor_t combatarmor_info  = { 50, 100, .60, .30, ARMOR_COMBAT};
-gitem_armor_t bodyarmor_info    = {100, 200, .80, .60, ARMOR_BODY};
+gitem_armor_t greenarmor_info  = { 25,  50, .30, .00, ARMOR_GREEN};
+gitem_armor_t yellowarmor_info  = { 50, 100, .60, .30, ARMOR_YELLOW};
+gitem_armor_t redarmor_info    = {100, 200, .80, .60, ARMOR_RED};
 
-static int  jacket_armor_index;
-static int  combat_armor_index;
-static int  body_armor_index;
+static int  green_armor_index;
+static int  yellow_armor_index;
+static int  red_armor_index;
 static int  power_screen_index;
 static int  power_shield_index;
 
@@ -521,14 +521,14 @@ int ArmorIndex(edict_t *ent)
     if (!ent->client)
         return 0;
 
-    if (ent->client->pers.inventory[jacket_armor_index] > 0)
-        return jacket_armor_index;
+    if (ent->client->pers.inventory[green_armor_index] > 0)
+        return green_armor_index;
 
-    if (ent->client->pers.inventory[combat_armor_index] > 0)
-        return combat_armor_index;
+    if (ent->client->pers.inventory[yellow_armor_index] > 0)
+        return yellow_armor_index;
 
-    if (ent->client->pers.inventory[body_armor_index] > 0)
-        return body_armor_index;
+    if (ent->client->pers.inventory[red_armor_index] > 0)
+        return red_armor_index;
 
     return 0;
 }
@@ -550,7 +550,7 @@ bool Pickup_Armor(edict_t *ent, edict_t *other)
     // handle armor shards specially
     if (ent->item->tag == ARMOR_SHARD) {
         if (!old_armor_index)
-            other->client->pers.inventory[jacket_armor_index] = 2;
+            other->client->pers.inventory[green_armor_index] = 2;
         else
             other->client->pers.inventory[old_armor_index] += 2;
     }
@@ -563,12 +563,12 @@ bool Pickup_Armor(edict_t *ent, edict_t *other)
     // use the better armor
     else {
         // get info on old armor
-        if (old_armor_index == jacket_armor_index)
-            oldinfo = &jacketarmor_info;
-        else if (old_armor_index == combat_armor_index)
-            oldinfo = &combatarmor_info;
-        else // (old_armor_index == body_armor_index)
-            oldinfo = &bodyarmor_info;
+        if (old_armor_index == green_armor_index)
+            oldinfo = &greenarmor_info;
+        else if (old_armor_index == yellow_armor_index)
+            oldinfo = &yellowarmor_info;
+        else // (old_armor_index == red_armor_index)
+            oldinfo = &redarmor_info;
 
         if (newinfo->normal_protection > oldinfo->normal_protection) {
             // calc new armor values
@@ -1011,6 +1011,7 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     ent->think = droptofloor;
     ent->s.effects = item->world_model_flags;
     ent->s.renderfx = RF_GLOW;
+    ent->s.skinnum = item->skinnum;
     if (ent->model)
         SV_ModelIndex(ent->model);
 }
@@ -1024,46 +1025,48 @@ gitem_t itemlist[] = {
     // ARMOR
     //
 
-    /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED item_armor_red (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        .classname = "item_armor_body",
+        .classname = "item_armor_red",
         .pickup = Pickup_Armor,
         .pickup_sound = "misc/ar1_pkup.wav",
-        .world_model = "models/items/armor/body/tris.md2", .world_model_flags = EF_ROTATE,
+        .world_model = "models/items/armor/armor.md3", .world_model_flags = EF_ROTATE,
+        .skinnum = 2,
         .icon = "i_bodyarmor",
-        .pickup_name = "Body Armor",
+        .pickup_name = "Red Armor",
         .flags = IT_ARMOR,
-        .info = &bodyarmor_info,
-        .tag = ARMOR_BODY
+        .info = &redarmor_info,
+        .tag = ARMOR_RED
     },
 
-    /*QUAKED item_armor_combat (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED item_armor_yellow (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        .classname = "item_armor_combat",
+        .classname = "item_armor_yellow",
         .pickup = Pickup_Armor,
         .pickup_sound = "misc/ar1_pkup.wav",
-        .world_model = "models/items/armor/combat/tris.md2", .world_model_flags = EF_ROTATE,
+        .world_model = "models/items/armor/armor.md3", .world_model_flags = EF_ROTATE,
         .icon = "i_combatarmor",
-        .pickup_name = "Combat Armor",
+        .pickup_name = "Yellow Armor",
         .flags = IT_ARMOR,
-        .info = &combatarmor_info,
-        .tag = ARMOR_COMBAT
+        .info = &yellowarmor_info,
+        .tag = ARMOR_YELLOW
     },
 
-    /*QUAKED item_armor_jacket (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED item_armor_green (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     {
-        .classname = "item_armor_jacket",
+        .classname = "item_armor_green",
         .pickup = Pickup_Armor,
         .pickup_sound = "misc/ar1_pkup.wav",
-        .world_model = "models/items/armor/jacket/tris.md2", .world_model_flags = EF_ROTATE,
+        .world_model = "models/items/armor/armor.md3", .world_model_flags = EF_ROTATE,
+        .skinnum = 1,
         .icon = "i_jacketarmor",
-        .pickup_name = "Jacket Armor",
+        .pickup_name = "Green Armor",
         .flags = IT_ARMOR,
-        .info = &jacketarmor_info,
-        .tag = ARMOR_JACKET
+        .info = &greenarmor_info,
+        .tag = ARMOR_GREEN
     },
 
     /*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -1155,7 +1158,7 @@ gitem_t itemlist[] = {
         .drop = Drop_Weapon,
         .animation = &weap_shotgun_activate,
         .pickup_sound = "misc/w_pkup.wav",
-        .world_model = "models/weapons/g_shotg/g_shotg.md3", .world_model_flags = EF_ROTATE,
+        .world_model = "models/weapons/g_shotg/g_shotg.iqm", .world_model_flags = EF_ROTATE,
         .view_model = "models/weapons/v_shotg/v_shotg.iqm",
         .icon = "w_shotgun",
         .pickup_name = "Shotgun",
@@ -1174,7 +1177,7 @@ gitem_t itemlist[] = {
         .drop = Drop_Weapon,
         .animation = &weap_perf_activate,
         .pickup_sound = "misc/w_pkup.wav",
-        .world_model = "models/weapons/g_perf/g_perf.md3", .world_model_flags = EF_ROTATE,
+        .world_model = "models/weapons/g_perf/g_perf.iqm", .world_model_flags = EF_ROTATE,
         .view_model = "models/weapons/v_perf/v_perf.iqm",
         .icon = "w_chaingun",
         .pickup_name = "Perforator",
@@ -1196,7 +1199,7 @@ gitem_t itemlist[] = {
         .pickup = Pickup_Ammo,
         .drop = Drop_Ammo,
         .pickup_sound = "misc/am_pkup.wav",
-        .world_model = "models/items/ammo/shells/shellbox_small.md3",
+        .world_model = "models/items/ammo/shells/shellbox_small.iqm",
         .icon = "a_shells",
         .pickup_name = "Shells",
         .quantity = 10,
@@ -1211,7 +1214,7 @@ gitem_t itemlist[] = {
         .pickup = Pickup_Ammo,
         .drop = Drop_Ammo,
         .pickup_sound = "misc/am_pkup.wav",
-        .world_model = "models/items/ammo/nails/nailbox.md3",
+        .world_model = "models/items/ammo/nails/nailbox.iqm",
         .icon = "a_nails",
         .pickup_name = "Nails",
         .quantity = 50,
@@ -1601,18 +1604,18 @@ gitem_t itemlist[] = {
         /* precache */ ""
     },
 #endif
-    /*QUAKED key_blue_key (0 .5 .8) (-16 -16 -16) (16 16 16)
-    normal door key - blue
+    /*QUAKED key_silver_key (0 .5 .8) (-16 -16 -16) (16 16 16)
+    normal door key - silver
     */
     {
-        .classname = "key_blue_key",
+        .classname = "key_silver_key",
         .pickup = Pickup_Key,
         .drop = Drop_General,
         .pickup_sound = "items/pkup.wav",
-        .world_model = "models/items/keys/key/tris.md2",
+        .world_model = "models/items/keys/gold_key/gold_key.md3",
         .world_model_flags = EF_ROTATE,
-        .icon = "k_bluekey",
-        .pickup_name = "Blue Key",
+        .icon = "k_silverkey",
+        .pickup_name = "Silver Key",
         .flags = IT_STAY_COOP | IT_KEY,
     },
 #if 0
@@ -1788,9 +1791,9 @@ void SetItemNames(void)
         SV_SetConfigString(CS_ITEMS + i, it->pickup_name);
     }
 
-    jacket_armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-    combat_armor_index = ITEM_INDEX(FindItem("Combat Armor"));
-    body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
+    green_armor_index = ITEM_INDEX(FindItem("Green Armor"));
+    yellow_armor_index = ITEM_INDEX(FindItem("Yellow Armor"));
+    red_armor_index   = ITEM_INDEX(FindItem("Red Armor"));
     power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
     power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
 }
