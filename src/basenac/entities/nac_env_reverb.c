@@ -24,6 +24,12 @@ void SP_env_reverb(edict_t *self)
 	if (!self->radius)
 		self->radius = 64;
 
+	if (!self->sounds) {
+		self->sounds = level.default_reverb;
+	} else if (self->sounds == -1) {
+		self->sounds = 0;
+	}
+
 	self->svflags |= SVF_NOCLIENT;
 	self->next_reverb = level.reverb_entities;
 	level.reverb_entities = self;
