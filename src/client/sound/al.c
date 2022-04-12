@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "qal/fixed.h"
 
 // translates from AL coordinate system to quake
-#define AL_UnpackVector(v)  -v[1],v[2],-v[0]
-#define AL_CopyVector(a,b)  ((b)[0]=-(a)[1],(b)[1]=(a)[2],(b)[2]=-(a)[0])
+#define AL_UnpackVector(v)   -v[1],v[2],-v[0]
+#define AL_CopyVector(a,b)   ((b)[0]=-(a)[1],(b)[1]=(a)[2],(b)[2]=-(a)[0])
 
 // OpenAL implementation should support at least this number of sources
 #define MIN_CHANNELS 16
