@@ -1144,6 +1144,8 @@ void PutClientInServer(edict_t *ent)
     else if (client->ps.fov > 160)
         client->ps.fov = 160;
 
+    client->ps.reverb = level.default_reverb;
+
     // clear entity state values
     ent->s.effects = 0;
     ent->s.modelindex = 255;        // will use the skin specified model

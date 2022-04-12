@@ -900,6 +900,11 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
         }
     }
 
+    if (from->reverb != to->reverb) {
+        *pflags |= PS_REVERB;
+        MSG_WriteByte(to->reverb);
+    }
+
     return eflags;
 }
 
@@ -1479,6 +1484,9 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
         }
     }
 
+    if (flags & PS_REVERB) {
+        to->reverb = MSG_ReadByte();
+    }
 }
 
 #endif // USE_CLIENT

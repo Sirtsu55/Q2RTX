@@ -263,6 +263,9 @@ static const save_field_t entityfields[] = {
     I(anim.count),
     I(anim.count_left),
 
+    I(radius),
+    E(next_reverb),
+
     {0}
 #undef _OFS
 };
@@ -306,6 +309,8 @@ static const save_field_t levelfields[] = {
     I(power_cubes),
 
     F(gravity),
+    I(default_reverb),
+    E(reverb_entities),
 
     {0}
 #undef _OFS
@@ -339,6 +344,7 @@ static const save_field_t clientfields[] = {
     F(ps.fov),
 
     I(ps.rdflags),
+    I(ps.reverb),
 
     SA(ps.stats, MAX_STATS),
 

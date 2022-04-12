@@ -54,6 +54,7 @@ SET(SRC_BASENAC
 	basenac/weapons/nac_perf.c
 	basenac/weapons/nac_shotgun.c
 	basenac/monsters/nac_knight.c
+	basenac/entities/nac_env_reverb.c
 )
 
 SET(HEADERS_BASENAC

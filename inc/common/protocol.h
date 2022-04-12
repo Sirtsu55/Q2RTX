@@ -138,8 +138,9 @@ typedef enum {
 #define PS_FOV              (1<<11)
 #define PS_RDFLAGS          (1<<12)
 #define PS_GUNS             (1<<13)
+#define PS_REVERB           (1<<14)
 
-#define PS_BITS             14
+#define PS_BITS             15
 #define PS_MASK             ((1<<PS_BITS)-1)
 
 #define EPS_M_VELOCITY2     (1<<0)

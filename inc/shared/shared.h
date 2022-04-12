@@ -1566,6 +1566,8 @@ typedef struct {
     int         rdflags;        // refdef flags
 
     short       stats[MAX_STATS];       // fast status bar updates
+
+    uint8_t     reverb;         // active reverb ID
 } player_state_t;
 
 #endif // SHARED_H

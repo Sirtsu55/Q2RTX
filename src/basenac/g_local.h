@@ -379,6 +379,8 @@ typedef struct {
     // Paril: level gravity change support.
     // we have to do this here for save/load support.
     float       gravity;
+    int         default_reverb;
+    edict_t     *reverb_entities;
 } level_locals_t;
 
 
@@ -404,6 +406,8 @@ typedef struct {
     float       maxyaw;
     float       minpitch;
     float       maxpitch;
+
+    int         default_reverb;
 } spawn_temp_t;
 
 
@@ -1164,6 +1168,10 @@ struct edict_s {
 
     // Paril: switchable light style
     char        *style2;
+
+    // radius key for map stuff
+    float       radius;
+    edict_t     *next_reverb;
 };
 
 // API wrappers

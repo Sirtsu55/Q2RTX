@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "qal/fixed.h"
 
 // translates from AL coordinate system to quake
-#define AL_UnpackVector(v)   -v[1],v[2],-v[0]
-#define AL_CopyVector(a,b)   ((b)[0]=-(a)[1],(b)[1]=(a)[2],(b)[2]=-(a)[0])
+#define AL_UnpackVector(v)  -v[1],v[2],-v[0]
+#define AL_CopyVector(a,b)  ((b)[0]=-(a)[1],(b)[1]=(a)[2],(b)[2]=-(a)[0])
 
 // OpenAL implementation should support at least this number of sources
 #define MIN_CHANNELS 16
@@ -307,6 +307,11 @@ bool AL_Init(void)
     alGenAuxiliaryEffectSlots(1, &s_auxEffectSlot);
 
     alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
+    // Approximate speed of sound (assumes 1 meter = 16 units)
+    alSpeedOfSound(343.3 * 16.f);
 
     Com_Printf("OpenAL initialized.\n");
 
@@ -608,7 +613,7 @@ static void AL_SetReverb(void)
         preset = s_testReverb->integer;
         clamp(preset, 0, q_countof(reverb_presets) + 1);
     } else {
-        preset = 0; // todo
+        preset = cl.frame.ps.reverb;
     }
 
     if (s_activePreset != preset) {
@@ -644,6 +649,8 @@ static void AL_SetReverb(void)
 
             alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, (ALint)s_effect);
         }
+
+        s_activePreset = preset;
     }
 }
 
@@ -665,7 +672,6 @@ void AL_Update(void)
     AL_CopyVector(listener_up, orientation + 3);
     alListenerfv(AL_ORIENTATION, orientation);
     alListenerf(AL_GAIN, S_GetLinearVolume(s_volume->value));
-    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
     // update spatialization for dynamic sounds
     ch = channels;

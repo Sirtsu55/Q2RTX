@@ -678,8 +678,8 @@ void G_SetClientEvent(edict_t *ent)
     if (ent->s.event)
         return;
 
-    if (ent->groundentity && xyspeed > 225) {
-        if ((int)(current_client->bobtime + bobmove) != bobcycle)
+    if (ent->groundentity) {
+        if ((int)(current_client->bobtime + bobmove) != (int) current_client->bobtime)
             ent->s.event = EV_FOOTSTEP;
     }
 }
@@ -720,6 +720,25 @@ void G_SetClientSound(edict_t *ent)
         ent->s.sound = ent->client->weapon_sound;
     else
         ent->s.sound = 0;
+
+    // set reverb
+    edict_t *closest_reverb = NULL;
+    float closest_reverb_dist;
+
+    for (edict_t *rev = level.reverb_entities; rev; rev = rev->next_reverb) {
+        vec3_t s;
+        VectorSubtract(ent->s.origin, rev->s.origin, s);
+        float d = VectorLengthSquared(s);
+
+        if (!closest_reverb || d < closest_reverb_dist) {
+            closest_reverb = rev;
+            closest_reverb_dist = d;
+        }
+    }
+
+    if (closest_reverb) {
+        ent->client->ps.reverb = closest_reverb->sounds;
+    }
 }
 
 /*

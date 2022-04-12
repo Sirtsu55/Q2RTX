@@ -155,6 +155,7 @@ void SP_turret_driver(edict_t *self);
 void SP_model_spawn(edict_t *ent);
 void SP_misc_property_swap(edict_t *ent);
 void SP_monster_knight(edict_t *self);
+void SP_env_reverb(edict_t *ent);
 
 static const spawn_func_t spawn_funcs[] = {
     {"item_health", SP_item_health},
@@ -286,6 +287,7 @@ static const spawn_func_t spawn_funcs[] = {
 
     // NAC
     { "monster_knight", SP_monster_knight },
+    { "env_reverb", SP_env_reverb },
 
     {NULL, NULL}
 };
@@ -347,6 +349,9 @@ static const spawn_field_t spawn_fields[] = {
     // Paril: switchable light style support
     {"style2", FOFS(style2), F_LSTRING},
 
+    // NAC; env_reverb
+    {"radius", FOFS(radius), F_FLOAT},
+
     {NULL}
 };
 
@@ -368,6 +373,8 @@ static const spawn_field_t temp_fields[] = {
     {"minpitch", STOFS(minpitch), F_FLOAT},
     {"maxpitch", STOFS(maxpitch), F_FLOAT},
     {"nextmap", STOFS(nextmap), F_LSTRING},
+
+    {"default_reverb", STOFS(default_reverb), F_INT},
 
     {NULL}
 };
@@ -944,6 +951,8 @@ void SP_worldspawn(edict_t *ent)
         Cvar_Set(&sv_gravity, 800, false);
     else
         Cvar_Set(&sv_gravity, st.gravity, false);
+
+    level.default_reverb = st.default_reverb;
 
     // Level gravity change support
     level.gravity = sv_gravity.value;
