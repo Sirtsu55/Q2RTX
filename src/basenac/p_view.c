@@ -730,7 +730,7 @@ void G_SetClientSound(edict_t *ent)
         VectorSubtract(ent->s.origin, rev->s.origin, s);
         float d = VectorLengthSquared(s);
 
-        if (!closest_reverb || d < closest_reverb_dist) {
+        if (d > rev->radius && (!closest_reverb || d < closest_reverb_dist)) {
             closest_reverb = rev;
             closest_reverb_dist = d;
         }
