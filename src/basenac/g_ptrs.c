@@ -349,6 +349,7 @@ extern void DoRespawn(void);
 extern void drop_make_touchable(void);
 extern void drop_temp_touch(void);
 extern void droptofloor(void);
+extern void env_reverb_touch(void);
 extern void flare_think(void);
 extern void flare_touch(void);
 extern void flipper_die(void);
@@ -712,6 +713,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, button_touch },
 { P_touch, door_touch },
 { P_touch, drop_temp_touch },
+{ P_touch, env_reverb_touch },
 { P_touch, flare_touch },
 { P_touch, func_object_touch },
 { P_touch, gib_touch },

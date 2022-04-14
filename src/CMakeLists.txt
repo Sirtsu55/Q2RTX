@@ -365,6 +365,14 @@ ENDIF()
 
 ADD_LIBRARY(basenac SHARED ${SRC_BASENAC} ${HEADERS_BASENAC} ${SRC_SHARED})
 
+set(FAKE_TARGET fakeTarget)
+
+add_custom_target(fakeTarget
+    cd "${CMAKE_CURRENT_SOURCE_DIR}/basenac/" && py genptr.py > g_ptrs.c
+)
+
+add_dependencies(basenac fakeTarget)
+
 IF(WIN32)
     IF(IS_64_BIT)
         ADD_EXECUTABLE(client WIN32 

@@ -19,11 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../g_local.h"
 
+void env_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other->client)
+		other->client->ps.reverb = self->sounds;
+}
+
 void SP_env_reverb(edict_t *self)
 {
-	if (!self->radius)
-		self->radius = 64;
-
 	if (!self->sounds) {
 		self->sounds = level.default_reverb;
 	} else if (self->sounds == -1) {
@@ -31,7 +34,19 @@ void SP_env_reverb(edict_t *self)
 	}
 
 	self->svflags |= SVF_NOCLIENT;
-	self->next_reverb = level.reverb_entities;
-	level.reverb_entities = self;
+
+	if (self->model && *self->model) {
+		self->solid = SOLID_TRIGGER;
+		SV_SetBrushModel(self, self->model);
+		self->touch = env_reverb_touch;
+	} else {
+		if (!self->radius) {
+			self->radius = 64;
+		}
+
+		self->next_reverb = level.reverb_entities;
+		level.reverb_entities = self;
+	}
+
 	SV_LinkEntity(self);
 }
