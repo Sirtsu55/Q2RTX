@@ -1185,7 +1185,8 @@ gitem_t itemlist[] = {
         .ammo = "nails",
         .flags = IT_WEAPON | IT_STAY_COOP,
         .tag = WEAP_CHAINGUN,
-        .precaches = "misc/lasfly.wav"
+        .precaches = "weapons/perf/perf_spin.wav",
+        .precaches = "models/objects/nail/nail.iqm",
     },
 
     //

@@ -133,7 +133,7 @@ static bool Perf_CheckSpin(edict_t *ent)
     }
     
     // attack is being held, so start spin sound
-    ent->client->weapon_sound = SV_SoundIndex("misc/lasfly.wav");
+    ent->client->weapon_sound = SV_SoundIndex("weapons/perf/perf_spin.wav");
 
     // calculate spin value
     ent->client->ps.gun[WEAPID_GUN].spin = min(MAX_ROTATION, ent->client->ps.gun[WEAPID_GUN].spin + ROTATION_SPEED);
