@@ -44,6 +44,8 @@ void SP_env_reverb(edict_t *self)
 			self->radius = 64;
 		}
 
+		self->radius *= self->radius;
+
 		self->next_reverb = level.reverb_entities;
 		level.reverb_entities = self;
 	}
