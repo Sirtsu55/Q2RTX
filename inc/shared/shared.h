@@ -244,6 +244,8 @@ typedef struct vrect_s {
     ((e)[0]=(a)[0]*(c)+(b)[0]*(d), \
      (e)[1]=(a)[1]*(c)+(b)[1]*(d), \
      (e)[2]=(a)[2]*(c)+(b)[2]*(d))
+#define Mix(a,b,c) \
+    (c*a)+((1.0f - c)*b)
 #define PlaneDiff(v,p)   (DotProduct(v,(p)->normal)-(p)->dist)
 
 #define Vector2Subtract(a,b,c)  ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1])

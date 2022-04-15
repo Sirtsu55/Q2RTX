@@ -34,9 +34,9 @@ static ALuint streamSource = 0;
 static int s_framecount;
 static ALuint s_effect, s_auxEffectSlot;
 static cvar_t *s_testReverb;
-static int s_activePreset = -1;
+static int s_activePreset = 0;
 
-static EFXEAXREVERBPROPERTIES reverb_presets[] = {
+static const EFXEAXREVERBPROPERTIES reverb_presets[] = {
     EFX_REVERB_PRESET_GENERIC,
     EFX_REVERB_PRESET_PADDEDCELL,
     EFX_REVERB_PRESET_ROOM,
@@ -164,6 +164,15 @@ static EFXEAXREVERBPROPERTIES reverb_presets[] = {
     EFX_REVERB_PRESET_CHAPEL,
     EFX_REVERB_PRESET_SMALLWATERROOM
 };
+
+static const EFXEAXREVERBPROPERTIES reverb_identity = { 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.49f, 1.0f, 1.0f, 0.0f, 0.0f, { 0.f, 0.f, 0.f }, 0.f, 0.f, { 0.f, 0.f, 0.f }, 0.075f, 0.0f, 0.04f, 0.0f, 1.0f, 5000.f, 250.f, 0.f, AL_TRUE };
+
+// reverb lerb speed
+#define REVERB_LERP_SPEED    2.0f
+
+static float s_reverbLerp = 0.f;
+static int s_lerpFromPreset = 0;
+static bool s_reverbDirty = true;
 
 void AL_SoundInfo(void)
 {
@@ -617,41 +626,98 @@ static void AL_SetReverb(void)
     }
 
     if (s_activePreset != preset) {
-        if (preset == 0) {
 
-            alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+        if (cls.state == ca_active) {
+            s_lerpFromPreset = s_activePreset;
+            s_reverbLerp = 1.0f;
         } else {
-            EFXEAXREVERBPROPERTIES *reverb = &reverb_presets[preset - 1];
-
-            alEffectf(s_effect, AL_EAXREVERB_DENSITY, reverb->flDensity);
-            alEffectf(s_effect, AL_EAXREVERB_DIFFUSION, reverb->flDiffusion);
-            alEffectf(s_effect, AL_EAXREVERB_GAIN, reverb->flGain);
-            alEffectf(s_effect, AL_EAXREVERB_GAINHF, reverb->flGainHF);
-            alEffectf(s_effect, AL_EAXREVERB_GAINLF, reverb->flGainLF);
-            alEffectf(s_effect, AL_EAXREVERB_DECAY_TIME, reverb->flDecayTime);
-            alEffectf(s_effect, AL_EAXREVERB_DECAY_HFRATIO, reverb->flDecayHFRatio);
-            alEffectf(s_effect, AL_EAXREVERB_DECAY_LFRATIO, reverb->flDecayLFRatio);
-            alEffectf(s_effect, AL_EAXREVERB_REFLECTIONS_GAIN, reverb->flReflectionsGain);
-            alEffectf(s_effect, AL_EAXREVERB_REFLECTIONS_DELAY, reverb->flReflectionsDelay);
-            alEffectfv(s_effect, AL_EAXREVERB_REFLECTIONS_PAN, reverb->flReflectionsPan);
-            alEffectf(s_effect, AL_EAXREVERB_LATE_REVERB_GAIN, reverb->flLateReverbGain);
-            alEffectf(s_effect, AL_EAXREVERB_LATE_REVERB_DELAY, reverb->flLateReverbDelay);
-            alEffectfv(s_effect, AL_EAXREVERB_LATE_REVERB_PAN, reverb->flLateReverbPan);
-            alEffectf(s_effect, AL_EAXREVERB_ECHO_TIME, reverb->flEchoTime);
-            alEffectf(s_effect, AL_EAXREVERB_ECHO_DEPTH, reverb->flEchoDepth);
-            alEffectf(s_effect, AL_EAXREVERB_MODULATION_TIME, reverb->flModulationTime);
-            alEffectf(s_effect, AL_EAXREVERB_MODULATION_DEPTH, reverb->flModulationDepth);
-            alEffectf(s_effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, reverb->flAirAbsorptionGainHF);
-            alEffectf(s_effect, AL_EAXREVERB_HFREFERENCE, reverb->flHFReference);
-            alEffectf(s_effect, AL_EAXREVERB_LFREFERENCE, reverb->flLFReference);
-            alEffectf(s_effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, reverb->flRoomRolloffFactor);
-            alEffecti(s_effect, AL_EAXREVERB_DECAY_HFLIMIT, reverb->iDecayHFLimit);
-
-            alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, (ALint)s_effect);
+            s_lerpFromPreset = q_countof(reverb_presets) - 1;
         }
 
         s_activePreset = preset;
+        s_reverbDirty = true;
     }
+
+    // reverb parameters not changed
+    if (!s_reverbDirty) {
+        return;
+    }
+
+    // simple path: no active reverb and not lerping
+    if (s_activePreset == 0 && s_lerpFromPreset == 0) {
+
+        alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+        s_reverbDirty = false;
+        return;
+    }
+
+    EFXEAXREVERBPROPERTIES activeReverb = s_activePreset ? reverb_presets[s_activePreset - 1] : reverb_identity;
+
+    if (s_reverbLerp > 0) {
+        s_reverbLerp = max(0.f, s_reverbLerp - cls.frametime * REVERB_LERP_SPEED);
+
+        const EFXEAXREVERBPROPERTIES *lerpReverb = s_lerpFromPreset ? &reverb_presets[s_lerpFromPreset - 1] : &reverb_identity;
+#define REVERB_MIX(p) activeReverb.p = Mix(lerpReverb->p, activeReverb.p, s_reverbLerp)
+        REVERB_MIX(flDensity);
+        REVERB_MIX(flDiffusion);
+        REVERB_MIX(flGain);
+        REVERB_MIX(flGainHF);
+        REVERB_MIX(flGainLF);
+        REVERB_MIX(flDecayTime);
+        REVERB_MIX(flDecayHFRatio);
+        REVERB_MIX(flDecayLFRatio);
+        REVERB_MIX(flReflectionsGain);
+        REVERB_MIX(flReflectionsDelay);
+        REVERB_MIX(flReflectionsPan[0]);
+        REVERB_MIX(flReflectionsPan[1]);
+        REVERB_MIX(flReflectionsPan[2]);
+        REVERB_MIX(flLateReverbGain);
+        REVERB_MIX(flLateReverbDelay);
+        REVERB_MIX(flLateReverbPan[0]);
+        REVERB_MIX(flLateReverbPan[1]);
+        REVERB_MIX(flLateReverbPan[2]);
+        REVERB_MIX(flEchoTime);
+        REVERB_MIX(flEchoDepth);
+        REVERB_MIX(flModulationTime);
+        REVERB_MIX(flModulationDepth);
+        REVERB_MIX(flAirAbsorptionGainHF);
+        REVERB_MIX(flHFReference);
+        REVERB_MIX(flLFReference);
+        REVERB_MIX(flRoomRolloffFactor);
+        REVERB_MIX(iDecayHFLimit);
+
+        if (s_reverbLerp == 0.f) {
+            s_reverbDirty = false;
+        }
+    } else {
+        s_reverbDirty = false;
+    }
+
+    alEffectf(s_effect, AL_EAXREVERB_DENSITY, activeReverb.flDensity);
+    alEffectf(s_effect, AL_EAXREVERB_DIFFUSION, activeReverb.flDiffusion);
+    alEffectf(s_effect, AL_EAXREVERB_GAIN, activeReverb.flGain);
+    alEffectf(s_effect, AL_EAXREVERB_GAINHF, activeReverb.flGainHF);
+    alEffectf(s_effect, AL_EAXREVERB_GAINLF, activeReverb.flGainLF);
+    alEffectf(s_effect, AL_EAXREVERB_DECAY_TIME, activeReverb.flDecayTime);
+    alEffectf(s_effect, AL_EAXREVERB_DECAY_HFRATIO, activeReverb.flDecayHFRatio);
+    alEffectf(s_effect, AL_EAXREVERB_DECAY_LFRATIO, activeReverb.flDecayLFRatio);
+    alEffectf(s_effect, AL_EAXREVERB_REFLECTIONS_GAIN, activeReverb.flReflectionsGain);
+    alEffectf(s_effect, AL_EAXREVERB_REFLECTIONS_DELAY, activeReverb.flReflectionsDelay);
+    alEffectfv(s_effect, AL_EAXREVERB_REFLECTIONS_PAN, activeReverb.flReflectionsPan);
+    alEffectf(s_effect, AL_EAXREVERB_LATE_REVERB_GAIN, activeReverb.flLateReverbGain);
+    alEffectf(s_effect, AL_EAXREVERB_LATE_REVERB_DELAY, activeReverb.flLateReverbDelay);
+    alEffectfv(s_effect, AL_EAXREVERB_LATE_REVERB_PAN, activeReverb.flLateReverbPan);
+    alEffectf(s_effect, AL_EAXREVERB_ECHO_TIME, activeReverb.flEchoTime);
+    alEffectf(s_effect, AL_EAXREVERB_ECHO_DEPTH, activeReverb.flEchoDepth);
+    alEffectf(s_effect, AL_EAXREVERB_MODULATION_TIME, activeReverb.flModulationTime);
+    alEffectf(s_effect, AL_EAXREVERB_MODULATION_DEPTH, activeReverb.flModulationDepth);
+    alEffectf(s_effect, AL_EAXREVERB_AIR_ABSORPTION_GAINHF, activeReverb.flAirAbsorptionGainHF);
+    alEffectf(s_effect, AL_EAXREVERB_HFREFERENCE, activeReverb.flHFReference);
+    alEffectf(s_effect, AL_EAXREVERB_LFREFERENCE, activeReverb.flLFReference);
+    alEffectf(s_effect, AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, activeReverb.flRoomRolloffFactor);
+    alEffecti(s_effect, AL_EAXREVERB_DECAY_HFLIMIT, activeReverb.iDecayHFLimit);
+
+    alAuxiliaryEffectSloti(s_auxEffectSlot, AL_EFFECTSLOT_EFFECT, (ALint)s_effect);
 }
 
 void AL_Update(void)

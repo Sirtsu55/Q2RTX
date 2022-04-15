@@ -85,6 +85,7 @@ target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 add_library(tinyobjloader INTERFACE)
 target_include_directories(tinyobjloader INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader-c)
 
-add_subdirectory(openal-soft)
 set(LIBTYPE STATIC)
+set(FORCE_STATIC_VCRT TRUE)
+add_subdirectory(openal-soft)
 set_target_properties(OpenAL PROPERTIES FOLDER extern)
