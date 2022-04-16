@@ -350,6 +350,7 @@ extern void drop_make_touchable(void);
 extern void drop_temp_touch(void);
 extern void droptofloor(void);
 extern void env_reverb_touch(void);
+extern void env_reverb_use(void);
 extern void flare_think(void);
 extern void flare_touch(void);
 extern void flipper_die(void);
@@ -740,6 +741,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, commander_body_use },
 { P_use, door_secret_use },
 { P_use, door_use },
+{ P_use, env_reverb_use },
 { P_use, func_clock_use },
 { P_use, func_conveyor_use },
 { P_use, func_explosive_spawn },

@@ -25,6 +25,31 @@ void env_reverb_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 		other->client->ps.reverb = self->sounds;
 }
 
+void env_reverb_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+	if (self->solid == SOLID_TRIGGER) {
+		self->solid = SOLID_NOT;
+	} else if (self->model && *self->model) {
+		self->solid = SOLID_TRIGGER;
+	} else if (self->flags) {
+		edict_t **reverbHead = &level.reverb_entities;
+
+		while (*reverbHead && *reverbHead != self)
+			reverbHead = &(*reverbHead)->next_reverb;
+
+		if (!reverbHead || !*reverbHead) {
+			Com_EPrintf("Reverb error @ %f %f %f, not linked properly\n", self->s.origin[0], self->s.origin[1], self->s.origin[2]);
+		} else {
+			*reverbHead = (*reverbHead)->next_reverb;
+			self->flags = 0;
+		}
+	} else {
+		self->next_reverb = level.reverb_entities;
+		level.reverb_entities = self;
+		self->flags = 1;
+	}
+}
+
 void SP_env_reverb(edict_t *self)
 {
 	if (!self->sounds) {
@@ -36,7 +61,7 @@ void SP_env_reverb(edict_t *self)
 	self->svflags |= SVF_NOCLIENT;
 
 	if (self->model && *self->model) {
-		self->solid = SOLID_TRIGGER;
+		self->solid = (self->spawnflags & 1) ? SOLID_NOT : SOLID_TRIGGER;
 		SV_SetBrushModel(self, self->model);
 		self->touch = env_reverb_touch;
 	} else {
@@ -46,9 +71,14 @@ void SP_env_reverb(edict_t *self)
 
 		self->radius *= self->radius;
 
-		self->next_reverb = level.reverb_entities;
-		level.reverb_entities = self;
+		if (!(self->spawnflags & 1)) {
+			self->next_reverb = level.reverb_entities;
+			level.reverb_entities = self;
+			self->flags = 1;
+		}
 	}
+
+	self->use = env_reverb_use;
 
 	SV_LinkEntity(self);
 }
