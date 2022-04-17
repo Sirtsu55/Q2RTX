@@ -352,6 +352,10 @@ static const spawn_field_t spawn_fields[] = {
     // NAC; env_reverb
     {"radius", FOFS(radius), F_FLOAT},
 
+    // lightweight triggers
+    {"mins", FOFS(mins), F_VECTOR},
+    {"maxs", FOFS(maxs), F_VECTOR},
+
     {NULL}
 };
 

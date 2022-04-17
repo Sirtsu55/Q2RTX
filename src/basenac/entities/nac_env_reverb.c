@@ -60,9 +60,13 @@ void SP_env_reverb(edict_t *self)
 
 	self->svflags |= SVF_NOCLIENT;
 
-	if (self->model && *self->model) {
+	if ((self->model && *self->model) || (!VectorEmpty(self->mins) || !VectorEmpty(self->maxs))) {
 		self->solid = (self->spawnflags & 1) ? SOLID_NOT : SOLID_TRIGGER;
-		SV_SetBrushModel(self, self->model);
+
+		if (self->model && *self->model) {
+			SV_SetBrushModel(self, self->model);
+		}
+
 		self->touch = env_reverb_touch;
 	} else {
 		if (!self->radius) {
