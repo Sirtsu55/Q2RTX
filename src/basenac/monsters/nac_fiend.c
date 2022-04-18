@@ -219,7 +219,12 @@ void fiend_attack(edict_t *self)
     VectorMA(self->s.origin, BASE_FRAMETIME_S, low, o);
 
     if (SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
+    {
+        if (solutions != 2)
+            return;
+
         VectorCopy(high, self->pos1);
+    }
     else
         VectorCopy(low, self->pos1);
 
