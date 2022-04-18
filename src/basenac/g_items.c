@@ -1075,7 +1075,7 @@ gitem_t itemlist[] = {
         .classname = "item_armor_shard",
         .pickup = Pickup_Armor,
         .pickup_sound = "misc/ar2_pkup.wav",
-        .world_model = "models/items/armor/shard/tris.md2", .world_model_flags = EF_ROTATE,
+        .world_model = "models/items/armor/armor_shard.iqm", .world_model_flags = EF_ROTATE,
         .icon = "i_jacketarmor",
         .pickup_name = "Armor Shard",
         .flags = IT_ARMOR,
