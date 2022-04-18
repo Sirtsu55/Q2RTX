@@ -219,7 +219,7 @@ int SV_FlyMove(edict_t *ent, float time, int mask)
 // modify original_velocity so it parallels all of the clip planes
 //
         for (i = 0 ; i < numplanes ; i++) {
-            ClipVelocity(original_velocity, planes[i], new_velocity, 1);
+            ClipVelocity(original_velocity, planes[i], new_velocity, 0);
 
             for (j = 0 ; j < numplanes ; j++)
                 if ((j != i) && !VectorCompare(planes[i], planes[j])) {

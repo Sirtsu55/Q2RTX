@@ -864,6 +864,9 @@ void ChaseNext(edict_t *ent);
 void ChasePrev(edict_t *ent);
 void GetChaseTarget(edict_t *ent);
 
+// NAC
+#include "monsters/nac_monster.h"
+
 //============================================================================
 
 // client_t->anim_priority
@@ -874,7 +877,6 @@ void GetChaseTarget(edict_t *ent);
 #define ANIM_ATTACK     4
 #define ANIM_DEATH      5
 #define ANIM_REVERSE    6
-
 
 // client data that stays across multiple level loads
 typedef struct {

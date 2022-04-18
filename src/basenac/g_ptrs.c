@@ -60,6 +60,13 @@ extern int chick_move_start_attack1;
 extern int chick_move_start_run;
 extern int chick_move_start_slash;
 extern int chick_move_walk;
+extern int fiend_move_attack_claw;
+extern int fiend_move_death;
+extern int fiend_move_leap;
+extern int fiend_move_pain;
+extern int fiend_move_run1;
+extern int fiend_move_stand;
+extern int fiend_move_walk;
 extern int flipper_move_attack;
 extern int flipper_move_death;
 extern int flipper_move_pain1;
@@ -351,6 +358,18 @@ extern void drop_temp_touch(void);
 extern void droptofloor(void);
 extern void env_reverb_touch(void);
 extern void env_reverb_use(void);
+extern void fiend_attack(void);
+extern void fiend_die(void);
+extern void fiend_load(void);
+extern void fiend_melee(void);
+extern void fiend_pain(void);
+extern void fiend_run(void);
+extern void fiend_search(void);
+extern void fiend_search(void);
+extern void fiend_sight(void);
+extern void fiend_stand(void);
+extern void fiend_touch(void);
+extern void fiend_walk(void);
 extern void flare_think(void);
 extern void flare_touch(void);
 extern void flipper_die(void);
@@ -715,6 +734,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, door_touch },
 { P_touch, drop_temp_touch },
 { P_touch, env_reverb_touch },
+{ P_touch, fiend_touch },
 { P_touch, flare_touch },
 { P_touch, func_object_touch },
 { P_touch, gib_touch },
@@ -795,6 +815,7 @@ const save_ptr_t save_ptrs[] = {
 { P_pain, boss2_pain },
 { P_pain, brain_pain },
 { P_pain, chick_pain },
+{ P_pain, fiend_pain },
 { P_pain, flipper_pain },
 { P_pain, floater_pain },
 { P_pain, flyer_pain },
@@ -824,6 +845,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, debris_die },
 { P_die, door_killed },
 { P_die, door_secret_die },
+{ P_die, fiend_die },
 { P_die, flipper_die },
 { P_die, floater_die },
 { P_die, flyer_die },
@@ -917,6 +939,13 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &chick_move_start_run },
 { P_monsterinfo_currentmove, &chick_move_start_slash },
 { P_monsterinfo_currentmove, &chick_move_walk },
+{ P_monsterinfo_currentmove, &fiend_move_attack_claw },
+{ P_monsterinfo_currentmove, &fiend_move_death },
+{ P_monsterinfo_currentmove, &fiend_move_leap },
+{ P_monsterinfo_currentmove, &fiend_move_pain },
+{ P_monsterinfo_currentmove, &fiend_move_run1 },
+{ P_monsterinfo_currentmove, &fiend_move_stand },
+{ P_monsterinfo_currentmove, &fiend_move_walk },
 { P_monsterinfo_currentmove, &flipper_move_attack },
 { P_monsterinfo_currentmove, &flipper_move_death },
 { P_monsterinfo_currentmove, &flipper_move_pain1 },
@@ -1126,6 +1155,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, boss2_stand },
 { P_monsterinfo_stand, brain_stand },
 { P_monsterinfo_stand, chick_stand },
+{ P_monsterinfo_stand, fiend_stand },
 { P_monsterinfo_stand, flipper_stand },
 { P_monsterinfo_stand, floater_stand },
 { P_monsterinfo_stand, flyer_stand },
@@ -1144,6 +1174,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, supertank_stand },
 { P_monsterinfo_stand, tank_stand },
 { P_monsterinfo_idle, brain_idle },
+{ P_monsterinfo_idle, fiend_search },
 { P_monsterinfo_idle, floater_idle },
 { P_monsterinfo_idle, flyer_idle },
 { P_monsterinfo_idle, gladiator_idle },
@@ -1156,6 +1187,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_search, berserk_search },
 { P_monsterinfo_search, boss2_search },
 { P_monsterinfo_search, brain_search },
+{ P_monsterinfo_search, fiend_search },
 { P_monsterinfo_search, gladiator_search },
 { P_monsterinfo_search, gunner_search },
 { P_monsterinfo_search, hover_search },
@@ -1169,6 +1201,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_walk, boss2_walk },
 { P_monsterinfo_walk, brain_walk },
 { P_monsterinfo_walk, chick_walk },
+{ P_monsterinfo_walk, fiend_walk },
 { P_monsterinfo_walk, flipper_walk },
 { P_monsterinfo_walk, floater_walk },
 { P_monsterinfo_walk, flyer_walk },
@@ -1191,6 +1224,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_run, boss2_run },
 { P_monsterinfo_run, brain_run },
 { P_monsterinfo_run, chick_run },
+{ P_monsterinfo_run, fiend_run },
 { P_monsterinfo_run, flipper_start_run },
 { P_monsterinfo_run, floater_run },
 { P_monsterinfo_run, flyer_run },
@@ -1217,6 +1251,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_attack, actor_attack },
 { P_monsterinfo_attack, boss2_attack },
 { P_monsterinfo_attack, chick_attack },
+{ P_monsterinfo_attack, fiend_attack },
 { P_monsterinfo_attack, floater_attack },
 { P_monsterinfo_attack, flyer_attack },
 { P_monsterinfo_attack, gladiator_attack },
@@ -1235,6 +1270,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_melee, berserk_melee },
 { P_monsterinfo_melee, brain_melee },
 { P_monsterinfo_melee, chick_melee },
+{ P_monsterinfo_melee, fiend_melee },
 { P_monsterinfo_melee, flipper_melee },
 { P_monsterinfo_melee, floater_melee },
 { P_monsterinfo_melee, flyer_melee },
@@ -1244,6 +1280,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_sight, berserk_sight },
 { P_monsterinfo_sight, brain_sight },
 { P_monsterinfo_sight, chick_sight },
+{ P_monsterinfo_sight, fiend_sight },
 { P_monsterinfo_sight, flipper_sight },
 { P_monsterinfo_sight, floater_sight },
 { P_monsterinfo_sight, flyer_sight },
@@ -1264,6 +1301,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, Makron_CheckAttack },
 { P_monsterinfo_checkattack, medic_checkattack },
 { P_monsterinfo_checkattack, mutant_checkattack },
+{ P_monsterinfo_load, fiend_load },
 { P_monsterinfo_load, knight_load },
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);

@@ -315,9 +315,17 @@ void Cmd_Spawn_f(edict_t *ent)
 
     edict_t *self = G_Spawn();
     self->classname = Cmd_Argv(1);
-    VectorMA(ent->s.origin, 64.f, fwd, self->s.origin);
+    VectorCopy(ent->s.origin, self->s.origin);
     self->s.angles[1] = ent->s.angles[1];
+    SV_UnlinkEntity(ent);
     ED_CallSpawn(self);
+    SV_LinkEntity(ent);
+
+    float self_radius = max(-self->mins[0], max(-self->mins[1], max(-self->mins[2], max(self->maxs[0], max(self->maxs[1], self->maxs[2])))));
+    float ent_radius = max(-ent->mins[0], max(-ent->mins[1], max(-ent->mins[2], max(ent->maxs[0], max(ent->maxs[1], ent->maxs[2])))));
+
+    VectorMA(self->s.origin, (self_radius + ent_radius) * 1.5f, fwd, self->s.origin);
+    SV_LinkEntity(self);
 }
 
 /*

@@ -53,7 +53,9 @@ SET(SRC_BASENAC
 	basenac/weapons/nac_axe.c
 	basenac/weapons/nac_perf.c
 	basenac/weapons/nac_shotgun.c
+	basenac/monsters/nac_monster.c
 	basenac/monsters/nac_knight.c
+	basenac/monsters/nac_fiend.c
 	basenac/entities/nac_env_reverb.c
 )
 
@@ -83,6 +85,7 @@ SET(HEADERS_BASENAC
 	basenac/m_soldier.h
 	basenac/m_supertank.h
 	basenac/m_tank.h
+	basenac/monsters/nac_monster.h
 )
 
 

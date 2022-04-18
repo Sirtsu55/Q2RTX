@@ -32,11 +32,6 @@ static int sound_punch;
 static int sound_sight;
 static int sound_search;
 
-#define ANIMATION(name, length) \
-    FRAME_##name##_FIRST, \
-    FRAME_##name##_COUNT = length, \
-    FRAME_##name##_LAST = (FRAME_##name##_FIRST + FRAME_##name##_COUNT) - 1
-
 enum {
     ANIMATION(STAND, 18),
     ANIMATION(RUN, 16),
@@ -258,68 +253,6 @@ void knight_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
         self->monsterinfo.currentmove = &knight_move_death1;
     else
         self->monsterinfo.currentmove = &knight_move_death2;
-}
-
-#include <shared/iqm.h>
-
-static void *G_ModelAllocate(void *arg, size_t s)
-{
-    return Z_TagMallocz(s, TAG_MODEL);
-}
-
-typedef struct {
-    iqm_model_t model;
-    int32_t root_id;
-} m_iqm_t;
-
-// TODO: check for errors
-m_iqm_t *M_InitializeIQM(const char *name)
-{
-    static m_iqm_t iqm;
-    void *buf;
-    int ret = G_LoadFile("models/monsters/knight/knight.iqm", &buf);
-    int iqmret = MOD_LoadIQM_Base(&iqm.model, buf, ret, "models/monsters/knight/knight.iqm", G_ModelAllocate, NULL);
-    G_FreeFile(buf);
-
-    // find the root joint
-    int32_t root_id = -1;
-
-    for (uint32_t i = 0; i < iqm.model.num_joints; i++)
-    {
-        if (Q_strcasecmp(iqm.model.jointNames[i], "root") == 0)
-        {
-            root_id = i;
-            break;
-        }
-    }
-
-    if (root_id == -1)
-        Com_Errorf(ERR_DROP, "Missing required model data for %s", name);
-
-    return &iqm;
-}
-
-void M_FreeIQM(m_iqm_t *iqm)
-{
-    Z_FreeTags(TAG_MODEL);
-}
-
-void M_SetupIQMDists(m_iqm_t *iqm, mmove_t *animations[])
-{
-    for (mmove_t **anim = animations; *anim; anim++)
-    {
-        vec3_t offsetFrom = { 0, 0, 0 };
-        mframe_t *frame = (*anim)->frame;
-
-        for (int32_t i = (*anim)->firstframe; i < (*anim)->lastframe; i++, frame++)
-        {
-            vec3_t d;
-            const iqm_transform_t *pose = &iqm->model.poses[i * iqm->model.num_poses];
-            VectorSubtract(offsetFrom, pose->translate, d);
-            VectorCopy(pose->translate, offsetFrom);
-            frame->dist = VectorLength(d);
-        }
-    }
 }
 
 static bool knight_inititalized = false;
