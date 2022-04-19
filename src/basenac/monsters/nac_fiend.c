@@ -103,7 +103,7 @@ void fiend_run(edict_t *self)
 
 void fiend_attack_claw(edict_t *self)
 {
-    static  vec3_t  aim = {MELEE_DISTANCE * 1.25f, 0, 0};
+    vec3_t  aim = {self->monsterinfo.melee_distance, 0, 0};
     fire_hit(self, aim, 25, 5);
 }
 
@@ -235,7 +235,7 @@ void fiend_attack(edict_t *self)
     vec3_t o;
     VectorMA(self->s.origin, BASE_FRAMETIME_S, low, o);
 
-    if ((solutions == 2 && frand() > 0.5f) || SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
+    if (SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
     {
         if (solutions != 2)
             return;
@@ -383,6 +383,8 @@ void SP_monster_fiend(edict_t *self)
 
     self->monsterinfo.currentmove = &fiend_move_stand;
     self->monsterinfo.load = fiend_load;
+
+    self->monsterinfo.melee_distance = 100;
 
     SV_LinkEntity(self);
 

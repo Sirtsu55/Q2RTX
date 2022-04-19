@@ -518,6 +518,9 @@ bool monster_start(edict_t *self)
     if (!self->monsterinfo.scale)
         self->monsterinfo.scale = 1.0;
 
+    if (!self->monsterinfo.melee_distance)
+        self->monsterinfo.melee_distance = MELEE_DISTANCE;
+
     self->nextthink = level.time + 1;
     self->svflags |= SVF_MONSTER;
     self->s.renderfx |= RF_FRAMELERP;

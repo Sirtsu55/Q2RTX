@@ -247,7 +247,7 @@ int range(edict_t *self, edict_t *other)
 
     VectorSubtract(self->s.origin, other->s.origin, v);
     len = VectorLength(v);
-    if (len < MELEE_DISTANCE)
+    if (len < self->monsterinfo.melee_distance)
         return RANGE_MELEE;
     if (len < 500)
         return RANGE_NEAR;

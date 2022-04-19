@@ -489,6 +489,8 @@ typedef struct {
     int         power_armor_power;
 
     void        (*load)(edict_t *self);
+
+    float       melee_distance;
 } monsterinfo_t;
 
 
