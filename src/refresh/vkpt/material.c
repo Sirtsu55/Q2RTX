@@ -749,6 +749,9 @@ pbr_material_t* MAT_Find(const char* name, imagetype_t type, imageflags_t flags)
 		return mat;
 	}
 
+	if (flags & IF_NO_NEW_MAT)
+		return mat;
+
 	mat = allocate_material();
 
 	pbr_material_t* matdef = find_material_sorted(mat_name_no_ext, r_global_materials, num_global_materials);

@@ -860,13 +860,27 @@ int MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, const ch
 			mesh->indices[triangle_idx * 3 + 2] = tri[0] - (int)iqm_mesh->first_vertex;
 		}
 
-	    char filename[MAX_QPATH];
-		Q_snprintf(filename, sizeof(filename), "%s/%s.pcx", base_path, iqm_mesh->material);
-		pbr_material_t* mat = MAT_Find(filename, IT_SKIN, IF_NONE);
-		assert(mat); // it's either found or created
+		unsigned skin_idx = 0;
+		char filename[MAX_QPATH];
+
+		for (; skin_idx < q_countof(mesh->materials); skin_idx++) {
+			Q_snprintf(filename, sizeof(filename), "%s/%s_%u.pcx", base_path, iqm_mesh->material, skin_idx);
+			pbr_material_t* mat = MAT_Find(filename, IT_SKIN, skin_idx == 0 ? IF_NO_NEW_MAT : IF_NONE);
+
+			if (skin_idx == 0 && !mat) {
+				Q_snprintf(filename, sizeof(filename), "%s/%s.pcx", base_path, iqm_mesh->material);
+				mat = MAT_Find(filename, IT_SKIN, IF_NONE);
+				assert(mat);
+			}
+
+			if (!mat) {
+				break;
+			}
 		
-		mesh->materials[0] = mat;
-		mesh->numskins = 1; // looks like IQM only supports one skin?
+			mesh->materials[skin_idx] = mat;
+		}
+
+		mesh->numskins = skin_idx;
 	}
 
 	compute_missing_model_tangents(model);

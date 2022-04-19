@@ -143,24 +143,25 @@ void fiend_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
         return;
     }
 
-    if (other->takedamage) {
-        if (VectorLength(self->velocity) > 200) {
-            vec3_t  point;
-            vec3_t  normal;
-            int     damage;
+    if (other->takedamage && other == self->enemy) {
+        vec3_t  point;
+        vec3_t  normal;
+        int     damage;
 
-            VectorCopy(self->velocity, normal);
-            VectorNormalize(normal);
-            VectorMA(self->s.origin, self->maxs[0], normal, point);
-            damage = 40 + 10 * random();
-            T_Damage(other, self, self, self->velocity, point, normal, damage, damage, 0, MOD_UNKNOWN);
-        }
+        VectorCopy(self->velocity, normal);
+        VectorNormalize(normal);
+        VectorMA(self->s.origin, self->maxs[0], normal, point);
+        damage = 40 + 10 * random();
+        T_Damage(other, self, self, self->velocity, point, normal, damage, damage, 0, MOD_UNKNOWN);
+        self->touch = NULL;
     }
 
     M_CheckBottom(self);
 
-    self->touch = NULL;
-    VectorClear(self->velocity);
+    if (self->groundentity) {
+        self->touch = NULL;
+        VectorClear(self->velocity);
+    }
 }
 
 void fiend_leap(edict_t *self)
