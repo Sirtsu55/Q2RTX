@@ -40,7 +40,8 @@ enum {
     ANIMATION(LEAP, 24),
     ANIMATION(PAIN, 12),
     ANIMATION(DEATH, 18),
-    ANIMATION(ATTACKA, 29)
+    ANIMATION(ATTACKA, 29),
+    ANIMATION(LEAP_LOOP, 13)
 };
 
 void fiend_sight(edict_t *self, edict_t *other)
@@ -128,12 +129,39 @@ void fiend_leap_early_land(edict_t *self)
         self->monsterinfo.nextframe = FRAME_LEAP_FIRST + 20;
 }
 
+void fiend_leap_wait(edict_t *self);
+
+mmove_t fiend_move_leap_loop = {
+    .firstframe = FRAME_LEAP_LOOP_FIRST,
+    .lastframe = FRAME_LEAP_LOOP_LAST,
+    .frame = (mframe_t [FRAME_LEAP_LOOP_COUNT]) {
+        [0] = { .thinkfunc = fiend_leap_wait },
+        [1] = { .thinkfunc = fiend_leap_wait },
+        [2] = { .thinkfunc = fiend_leap_wait },
+        [3] = { .thinkfunc = fiend_leap_wait },
+        [4] = { .thinkfunc = fiend_leap_wait },
+        [5] = { .thinkfunc = fiend_leap_wait },
+        [6] = { .thinkfunc = fiend_leap_wait },
+        [7] = { .thinkfunc = fiend_leap_wait },
+        [8] = { .thinkfunc = fiend_leap_wait },
+        [9] = { .thinkfunc = fiend_leap_wait },
+        [10] = { .thinkfunc = fiend_leap_wait },
+        [11] = { .thinkfunc = fiend_leap_wait },
+        [12] = { .thinkfunc = fiend_leap_wait }
+    },
+    .default_aifunc = ai_move,
+};
+
+extern mmove_t fiend_move_leap;
+
 void fiend_leap_wait(edict_t *self)
 {
-    if (self->groundentity)
+    if (self->groundentity) {
         self->monsterinfo.nextframe = FRAME_LEAP_FIRST + 20;
-    else
-        self->monsterinfo.nextframe = self->s.frame;
+        self->monsterinfo.currentmove = &fiend_move_leap;
+    } else {
+        self->monsterinfo.currentmove = &fiend_move_leap_loop;
+    }
 }
 
 void fiend_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
@@ -181,20 +209,8 @@ mmove_t fiend_move_leap = {
     .firstframe = FRAME_LEAP_FIRST,
     .lastframe = FRAME_LEAP_LAST,
     .frame = (mframe_t [FRAME_LEAP_COUNT]) {
-        [6] = { .thinkfunc = fiend_leap },
-        [7] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [8] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [9] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [10] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [11] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [12] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [13] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [14] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [15] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [16] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [17] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [18] = { .thinkfunc = fiend_leap_early_land, .aifunc = ai_move },
-        [19] = { .thinkfunc = fiend_leap_wait, .aifunc = ai_move }
+        [3] = { .thinkfunc = fiend_leap },
+        [4] = { .thinkfunc = fiend_leap_wait, .aifunc = ai_move }
     },
     .endfunc = fiend_run,
     .default_aifunc = ai_charge
@@ -219,7 +235,7 @@ void fiend_attack(edict_t *self)
     vec3_t o;
     VectorMA(self->s.origin, BASE_FRAMETIME_S, low, o);
 
-    if (SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
+    if ((solutions == 2 && frand() > 0.5f) || SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
     {
         if (solutions != 2)
             return;
