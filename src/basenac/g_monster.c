@@ -384,6 +384,8 @@ void M_MoveFrame(edict_t *self)
             aifunc(self, 0);
     }
 
+    if (move->thinkfunc)
+        move->thinkfunc(self);
     if (move->frame[index].thinkfunc)
         move->frame[index].thinkfunc(self);
 }

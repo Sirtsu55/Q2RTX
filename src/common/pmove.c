@@ -57,36 +57,6 @@ static const float  pm_wateraccelerate = 10;
 static const float  pm_waterspeed = 400;
 
 /*
-  walking up a step should kill some velocity
-*/
-
-/*
-==================
-PM_ClipVelocity
-
-Slide off of the impacting object
-returns the blocked flags (1 = floor, 2 = step / wall)
-==================
-*/
-#define STOP_EPSILON    0.1f
-
-static void PM_ClipVelocity(vec3_t in, vec3_t normal, vec3_t out, float overbounce)
-{
-    float   backoff;
-    float   change;
-    int     i;
-
-    backoff = DotProduct(in, normal) * overbounce;
-
-    for (i = 0; i < 3; i++) {
-        change = normal[i] * backoff;
-        out[i] = in[i] - change;
-        if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
-            out[i] = 0;
-    }
-}
-
-/*
 ==================
 PM_StepSlideMove
 
@@ -100,104 +70,24 @@ Does not modify any world state?
 #define MIN_STEP_NORMAL 0.7f    // can't step up onto very steep slopes
 #define MAX_CLIP_PLANES 5
 
-static void PM_StepSlideMove_(void)
+static void Pm_StepSlideMove_Trace(trace_t *tr, vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t end, void *arg)
 {
-    int         bumpcount, numbumps;
-    vec3_t      dir;
-    float       d;
-    int         numplanes;
-    vec3_t      planes[MAX_CLIP_PLANES];
-    vec3_t      primal_velocity;
-    int         i, j;
-    trace_t trace;
-    vec3_t      end;
-    float       time_left;
+    pm->trace(tr, origin, mins, maxs, end);
+}
 
-    numbumps = 4;
-
-    VectorCopy(pml.velocity, primal_velocity);
-    numplanes = 0;
-
-    time_left = pml.frametime;
-
-    for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
-        for (i = 0; i < 3; i++)
-            end[i] = pml.origin[i] + time_left * pml.velocity[i];
-
-        pm->trace(&trace, pml.origin, pm->mins, pm->maxs, end);
-
-        if (trace.allsolid) {
-            // entity is trapped in another solid
-            pml.velocity[2] = 0;    // don't build up falling damage
-            return;
-        }
-
-        if (trace.fraction > 0) {
-            // actually covered some distance
-            VectorCopy(trace.endpos, pml.origin);
-            numplanes = 0;
-        }
-
-        if (trace.fraction == 1)
-            break;     // moved the entire distance
-
-        // save entity for contact
-        if (pm->numtouch < MAXTOUCH && trace.ent) {
-            pm->touchents[pm->numtouch] = trace.ent;
-            pm->numtouch++;
-        }
-
-        time_left -= time_left * trace.fraction;
-
-        // slide along this plane
-        if (numplanes >= MAX_CLIP_PLANES) {
-            // this shouldn't really happen
-            VectorClear(pml.velocity);
-            break;
-        }
-
-        VectorCopy(trace.plane.normal, planes[numplanes]);
-        numplanes++;
-
-//
-// modify original_velocity so it parallels all of the clip planes
-//
-        for (i = 0; i < numplanes; i++) {
-            PM_ClipVelocity(pml.velocity, planes[i], pml.velocity, 1.01f);
-            for (j = 0; j < numplanes; j++)
-                if (j != i) {
-                    if (DotProduct(pml.velocity, planes[j]) < 0)
-                        break;  // not ok
-                }
-            if (j == numplanes)
-                break;
-        }
-
-        if (i != numplanes) {
-            // go along this plane
-        } else {
-            // go along the crease
-            if (numplanes != 2) {
-                VectorClear(pml.velocity);
-                break;
-            }
-            CrossProduct(planes[0], planes[1], dir);
-            d = DotProduct(dir, pml.velocity);
-            VectorScale(dir, d, pml.velocity);
-        }
-
-        //
-        // if velocity is against the original velocity, stop dead
-        // to avoid tiny occilations in sloping corners
-        //
-        if (DotProduct(pml.velocity, primal_velocity) <= 0) {
-            VectorClear(pml.velocity);
-            break;
-        }
+static bool Pm_StepSlideMove_Impact(struct edict_s *ent, void *arg)
+{
+    // save entity for contact
+    if (pm->numtouch < MAXTOUCH && ent) {
+        pm->touchents[pm->numtouch] = ent;
+        pm->numtouch++;
     }
+    return false;
+}
 
-    if (pm->s.pm_time)
-        VectorCopy(primal_velocity, pml.velocity);
+static inline void PM_StepSlideMove_(void)
+{
+    StepSlideMove(pml.origin, pm->mins, pm->maxs, pml.velocity, pml.frametime, !!pm->s.pm_time, Pm_StepSlideMove_Trace, Pm_StepSlideMove_Impact, NULL);
 }
 
 /*

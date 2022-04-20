@@ -63,6 +63,7 @@ extern int chick_move_walk;
 extern int fiend_move_attack_claw;
 extern int fiend_move_death;
 extern int fiend_move_leap;
+extern int fiend_move_leap_climb;
 extern int fiend_move_leap_loop;
 extern int fiend_move_pain;
 extern int fiend_move_run1;
@@ -943,6 +944,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &fiend_move_attack_claw },
 { P_monsterinfo_currentmove, &fiend_move_death },
 { P_monsterinfo_currentmove, &fiend_move_leap },
+{ P_monsterinfo_currentmove, &fiend_move_leap_climb },
 { P_monsterinfo_currentmove, &fiend_move_leap_loop },
 { P_monsterinfo_currentmove, &fiend_move_pain },
 { P_monsterinfo_currentmove, &fiend_move_run1 },

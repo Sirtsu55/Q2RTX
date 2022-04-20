@@ -455,6 +455,7 @@ typedef struct {
     mframe_t    *frame;
     void        (*endfunc)(edict_t *self);
     void        (*default_aifunc)(edict_t *self, float dist);
+    void        (*thinkfunc)(edict_t *self);
 } mmove_t;
 
 typedef struct {

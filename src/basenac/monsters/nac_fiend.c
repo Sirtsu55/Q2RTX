@@ -41,7 +41,8 @@ enum {
     ANIMATION(PAIN, 12),
     ANIMATION(DEATH, 18),
     ANIMATION(ATTACKA, 29),
-    ANIMATION(LEAP_LOOP, 13)
+    ANIMATION(LEAP_LOOP, 13),
+    ANIMATION(LEAP_CLIMB, 23)
 };
 
 void fiend_sight(edict_t *self, edict_t *other)
@@ -154,13 +155,132 @@ mmove_t fiend_move_leap_loop = {
 
 extern mmove_t fiend_move_leap;
 
+static bool fiend_leap_check_ledge(edict_t *self, vec3_t wall_normal)
+{
+    // check that we're blocked in front of us
+    vec3_t fwd;
+    AngleVectors(self->s.angles, fwd, NULL, NULL);
+
+    vec3_t end;
+    VectorMA(self->s.origin, 12.f, fwd, end);
+
+    trace_t tr = SV_Trace(self->s.origin, self->mins, self->maxs, end, NULL, MASK_SOLID);
+
+    if (tr.fraction == 1.0f)
+        return false;
+
+    VectorCopy(tr.plane.normal, wall_normal);
+
+    // check that the area a full bbox up + forward of us is free
+    for (int i = 0; i < 3; i++)
+        end[i] = self->s.origin[i] + (i == 2 ? (self->maxs[2] - self->mins[2]) : (self->size[i] * fwd[i]));
+
+    tr = SV_Trace(end, self->mins, self->maxs, end, NULL, MASK_SOLID);
+
+    if (tr.startsolid || tr.allsolid || tr.fraction != 1.0f)
+        return false;
+
+    // check that we're free above us
+    end[0] = self->s.origin[0];
+    end[1] = self->s.origin[1];
+
+    tr = SV_Trace(end, self->mins, self->maxs, end, NULL, MASK_SOLID);
+
+    if (tr.startsolid || tr.allsolid || tr.fraction != 1.0f)
+        return false;
+
+    return true;
+}
+
+#define FIEND_AIFLAG_CLIMB_WAIT_PUSH (1 << 30)
+
+void fiend_leap_climb_push(edict_t *self)
+{
+    // already pushed
+    if (!(self->monsterinfo.aiflags & FIEND_AIFLAG_CLIMB_WAIT_PUSH)) {
+        return;
+    }
+
+    // check if we can move forward yet
+    vec3_t fwd;
+    AngleVectors(self->s.angles, fwd, NULL, NULL);
+
+    vec3_t end;
+    for (int i = 0; i < 3; i++)
+        end[i] = self->s.origin[i] + (i == 2 ? 0 : (self->size[i] * fwd[i]));
+
+    trace_t tr = SV_Trace(self->s.origin, self->mins, self->maxs, end, NULL, MASK_SOLID);
+
+    if (tr.fraction == 1.f) {
+        // good!
+        self->monsterinfo.aiflags &= ~FIEND_AIFLAG_CLIMB_WAIT_PUSH;
+        VectorMA(self->velocity, 300.f, fwd, self->velocity);
+
+        vec3_t absmin, absmax;
+        VectorAdd(end, self->mins, absmin);
+        VectorAdd(end, self->maxs, absmax);
+
+        // push away anything that is in front of us, just to ensure
+        // we can get up here
+        edict_t *ents[8];
+        size_t num_ents = SV_AreaEdicts(absmin, absmax, ents, q_countof(ents), AREA_SOLID);
+
+        // add some upwards momentum
+        fwd[2] = 0.3f;
+        VectorNormalize(fwd);
+
+        for (size_t i = 0; i < num_ents; i++) {
+            if (ents[i] == self) {
+                continue;
+            }
+
+            T_Damage(ents[i], self, self, fwd, ents[i]->s.origin, fwd, 5, 180, DAMAGE_RADIUS, MOD_UNKNOWN);
+        }
+    }
+
+    Com_Printf("%s\n", vtos(self->velocity));
+}
+
+void fiend_leap_climb_end(edict_t *self)
+{
+    self->monsterinfo.aiflags &= ~FIEND_AIFLAG_CLIMB_WAIT_PUSH;
+    fiend_run(self);
+}
+
+mmove_t fiend_move_leap_climb = {
+    .firstframe = FRAME_LEAP_CLIMB_FIRST,
+    .lastframe = FRAME_LEAP_CLIMB_LAST,
+    .frame = (mframe_t [FRAME_LEAP_CLIMB_COUNT]) {
+        [16] = { .thinkfunc = fiend_attack_claw }
+    },
+    .thinkfunc = fiend_leap_climb_push,
+    .endfunc = fiend_leap_climb_end
+};
+
 void fiend_leap_wait(edict_t *self)
 {
     if (self->groundentity) {
         self->monsterinfo.nextframe = FRAME_LEAP_FIRST + 20;
         self->monsterinfo.currentmove = &fiend_move_leap;
     } else {
-        self->monsterinfo.currentmove = &fiend_move_leap_loop;
+        vec3_t wall_normal;
+
+        if (fiend_leap_check_ledge(self, wall_normal)) {
+            Com_Print("fiend can ledge\n");
+
+            self->touch = NULL;
+
+            VectorInverse(wall_normal);
+            vectoangles(wall_normal, self->s.angles);
+            self->s.angles[0] = self->s.angles[2] = 0;
+
+            self->monsterinfo.aiflags |= FIEND_AIFLAG_CLIMB_WAIT_PUSH;
+            VectorSet(self->velocity, 0, 0, 300.f);
+
+            self->monsterinfo.currentmove = &fiend_move_leap_climb;
+        } else {
+            self->monsterinfo.currentmove = &fiend_move_leap_loop;
+        }
     }
 }
 

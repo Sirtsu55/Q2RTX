@@ -327,7 +327,7 @@ void UnionBounds(vec3_t a[2], vec3_t b[2], vec3_t c[2]);
 ==================
 ClipVelocity
 
-Slide off of the impacting object.
+Slide off of the impacting object. Q3 style (bouncing objects).
 ==================
 */
 static inline void ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out, float overbounce)
@@ -1571,5 +1571,130 @@ typedef struct {
 
     uint8_t     reverb;         // active reverb ID
 } player_state_t;
+
+
+
+/*
+==================
+PM_ClipVelocity
+
+Slide off of the impacting object. Q2 style (better for sliding objects).
+==================
+*/
+#define STOP_EPSILON    0.1f
+
+static inline void ClipVelocitySlide(const vec3_t in, const vec3_t normal, vec3_t out, float overbounce)
+{
+    float backoff = DotProduct(in, normal) * overbounce;
+
+    for (int i = 0; i < 3; i++) {
+        float change = normal[i] * backoff;
+        out[i] = in[i] - change;
+        if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
+            out[i] = 0;
+    }
+}
+
+#define MAX_CLIP_PLANES 5
+
+typedef void (*StepSlideMoveTrace) (trace_t *tr, vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t end, void *arg);
+typedef bool (*StepSlideMoveImpact) (struct edict_s *ent, void *arg);
+
+static void StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t velocity, float time_left, bool copy_primal, StepSlideMoveTrace trace_func, StepSlideMoveImpact impact_func, void *callback_arg)
+{
+    int         bumpcount, numbumps;
+    vec3_t      dir;
+    float       d;
+    int         numplanes;
+    vec3_t      planes[MAX_CLIP_PLANES];
+    vec3_t      primal_velocity;
+    int         i, j;
+    trace_t     trace;
+    vec3_t      end;
+
+    numbumps = 4;
+
+    VectorCopy(velocity, primal_velocity);
+    numplanes = 0;
+
+    for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
+        for (i = 0; i < 3; i++)
+            end[i] = origin[i] + time_left * velocity[i];
+
+        trace_func(&trace, origin, mins, maxs, end, callback_arg);
+        //pm->trace(&trace, pml.origin, pm->mins, pm->maxs, end);
+
+        if (trace.allsolid) {
+            // entity is trapped in another solid
+            velocity[2] = 0;    // don't build up falling damage
+            return;
+        }
+
+        if (trace.fraction > 0) {
+            // actually covered some distance
+            VectorCopy(trace.endpos, origin);
+            numplanes = 0;
+        }
+
+        if (trace.fraction == 1)
+            break;     // moved the entire distance
+
+        // save entity for contact
+        if (impact_func(trace.ent, callback_arg)) {
+            break;
+        }
+
+        time_left -= time_left * trace.fraction;
+
+        // slide along this plane
+        if (numplanes >= MAX_CLIP_PLANES) {
+            // this shouldn't really happen
+            VectorClear(velocity);
+            break;
+        }
+
+        VectorCopy(trace.plane.normal, planes[numplanes]);
+        numplanes++;
+
+        //
+        // modify original_velocity so it parallels all of the clip planes
+        //
+        for (i = 0; i < numplanes; i++) {
+            ClipVelocitySlide(velocity, planes[i], velocity, 1.01f);
+            for (j = 0; j < numplanes; j++)
+                if (j != i) {
+                    if (DotProduct(velocity, planes[j]) < 0)
+                        break;  // not ok
+                }
+            if (j == numplanes)
+                break;
+        }
+
+        if (i != numplanes) {
+            // go along this plane
+        } else {
+            // go along the crease
+            if (numplanes != 2) {
+                VectorClear(velocity);
+                break;
+            }
+            CrossProduct(planes[0], planes[1], dir);
+            d = DotProduct(dir, velocity);
+            VectorScale(dir, d, velocity);
+        }
+
+        //
+        // if velocity is against the original velocity, stop dead
+        // to avoid tiny occilations in sloping corners
+        //
+        if (DotProduct(velocity, primal_velocity) <= 0) {
+            VectorClear(velocity);
+            break;
+        }
+    }
+
+    if (copy_primal)
+        VectorCopy(primal_velocity, velocity);
+}
 
 #endif // SHARED_H

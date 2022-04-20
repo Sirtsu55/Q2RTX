@@ -134,128 +134,30 @@ Returns the clipflags if the velocity was modified (hit something solid)
 4 = dead stop
 ============
 */
-#define MAX_CLIP_PLANES 5
-int SV_FlyMove(edict_t *ent, float time, int mask)
+typedef struct {
+    int mask;
+    edict_t *self;
+    trace_t *tr;
+} fly_move_args;
+
+void SV_FlyMove_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, void *arg)
 {
-    edict_t     *hit;
-    int         bumpcount, numbumps;
-    vec3_t      dir;
-    float       d;
-    int         numplanes;
-    vec3_t      planes[MAX_CLIP_PLANES];
-    vec3_t      primal_velocity, original_velocity, new_velocity;
-    int         i, j;
-    trace_t     trace;
-    vec3_t      end;
-    float       time_left;
-    int         blocked;
+    fly_move_args *args = arg;
+    args->tr = tr;
+    *tr = SV_Trace(start, mins, maxs, end, args->self, args->mask);
+}
 
-    numbumps = 4;
+bool SV_FlyMove_Impact(edict_t *ent, void *arg)
+{
+    fly_move_args *args = arg;
+    SV_Impact(args->self, args->tr);
+    return !args->self->inuse; // removed by the impact function?
+}
 
-    blocked = 0;
-    VectorCopy(ent->velocity, original_velocity);
-    VectorCopy(ent->velocity, primal_velocity);
-    numplanes = 0;
-
-    time_left = time;
-
-    ent->groundentity = NULL;
-    for (bumpcount = 0 ; bumpcount < numbumps ; bumpcount++) {
-        for (i = 0 ; i < 3 ; i++)
-            end[i] = ent->s.origin[i] + time_left * ent->velocity[i];
-
-        trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, end, ent, mask);
-
-        if (trace.allsolid) {
-            // entity is trapped in another solid
-            VectorClear(ent->velocity);
-            return 3;
-        }
-
-        if (trace.fraction > 0) {
-            // actually covered some distance
-            VectorCopy(trace.endpos, ent->s.origin);
-            VectorCopy(ent->velocity, original_velocity);
-            numplanes = 0;
-        }
-
-        if (trace.fraction == 1)
-            break;     // moved the entire distance
-
-        hit = trace.ent;
-
-        if (trace.plane.normal[2] > 0.7f) {
-            blocked |= 1;       // floor
-            if (hit->solid == SOLID_BSP) {
-                ent->groundentity = hit;
-                ent->groundentity_linkcount = hit->linkcount;
-            }
-        }
-        if (!trace.plane.normal[2]) {
-            blocked |= 2;       // step
-        }
-
-//
-// run the impact function
-//
-        SV_Impact(ent, &trace);
-        if (!ent->inuse)
-            break;      // removed by the impact function
-
-
-        time_left -= time_left * trace.fraction;
-
-        // clipped to another plane
-        if (numplanes >= MAX_CLIP_PLANES) {
-            // this shouldn't really happen
-            VectorClear(ent->velocity);
-            return 3;
-        }
-
-        VectorCopy(trace.plane.normal, planes[numplanes]);
-        numplanes++;
-
-//
-// modify original_velocity so it parallels all of the clip planes
-//
-        for (i = 0 ; i < numplanes ; i++) {
-            ClipVelocity(original_velocity, planes[i], new_velocity, 0);
-
-            for (j = 0 ; j < numplanes ; j++)
-                if ((j != i) && !VectorCompare(planes[i], planes[j])) {
-                    if (DotProduct(new_velocity, planes[j]) < 0)
-                        break;  // not ok
-                }
-            if (j == numplanes)
-                break;
-        }
-
-        if (i != numplanes) {
-            // go along this plane
-            VectorCopy(new_velocity, ent->velocity);
-        } else {
-            // go along the crease
-            if (numplanes != 2) {
-//              gi.dprintf ("clip velocity, numplanes == %i\n",numplanes);
-                VectorClear(ent->velocity);
-                return 7;
-            }
-            CrossProduct(planes[0], planes[1], dir);
-            d = DotProduct(dir, ent->velocity);
-            VectorScale(dir, d, ent->velocity);
-        }
-
-//
-// if original velocity is against the original velocity, stop dead
-// to avoid tiny occilations in sloping corners
-//
-        if (DotProduct(ent->velocity, primal_velocity) <= 0) {
-            VectorClear(ent->velocity);
-            return blocked;
-        }
-    }
-
-    return blocked;
+static inline void SV_FlyMove(edict_t *ent, float time, int mask)
+{
+    fly_move_args args = { mask, ent, NULL };
+    StepSlideMove(ent->s.origin, ent->mins, ent->maxs, ent->velocity, time, false, SV_FlyMove_Trace, SV_FlyMove_Impact, &args);
 }
 
 
@@ -835,6 +737,8 @@ void SV_Physics_Step(edict_t *ent)
         else
             mask = MASK_SOLID;
         SV_FlyMove(ent, BASE_FRAMETIME_S, mask);
+        if (!ent->groundentity)
+            M_CheckGround(ent);
 
         SV_LinkEntity(ent);
         G_TouchTriggers(ent);
