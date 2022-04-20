@@ -250,6 +250,7 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
             return true;
         }
         VectorCopy(oldorg, ent->s.origin);
+        ent->monsterinfo.aiflags |= AI_JUMP_IMMEDIATELY;
         return false;
     }
 

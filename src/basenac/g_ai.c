@@ -553,6 +553,9 @@ bool M_CheckAttack(edict_t *self)
     vec3_t  spot1, spot2;
     float   chance;
     trace_t tr;
+    bool    jump_now = self->monsterinfo.aiflags & AI_JUMP_IMMEDIATELY;
+
+    self->monsterinfo.aiflags &= ~AI_JUMP_IMMEDIATELY;
 
     if (self->enemy->health > 0) {
         // see if any entities are in the way of the shot
@@ -584,30 +587,34 @@ bool M_CheckAttack(edict_t *self)
     if (!self->monsterinfo.attack)
         return false;
 
-    if (level.time < self->monsterinfo.attack_finished_time)
-        return false;
-
-    if (enemy_range == RANGE_FAR)
-        return false;
-
-    if (self->monsterinfo.aiflags & AI_STAND_GROUND) {
-        chance = 0.4f;
-    } else if (enemy_range == RANGE_MELEE) {
-        chance = 0.2f;
-    } else if (enemy_range == RANGE_NEAR) {
-        chance = 0.1f;
-    } else if (enemy_range == RANGE_MID) {
-        chance = 0.02f;
+    if (jump_now && (self->enemy->s.origin[2] - self->s.origin[2]) < -24.f) {
+        chance = 1.0f;
     } else {
-        return false;
+        if (level.time < self->monsterinfo.attack_finished_time)
+            return false;
+
+        if (enemy_range == RANGE_FAR)
+            return false;
+
+        if (self->monsterinfo.aiflags & AI_STAND_GROUND) {
+            chance = 0.4f;
+        } else if (enemy_range == RANGE_MELEE) {
+            chance = 0.2f;
+        } else if (enemy_range == RANGE_NEAR) {
+            chance = 0.1f;
+        } else if (enemy_range == RANGE_MID) {
+            chance = 0.02f;
+        } else {
+            return false;
+        }
+
+        if (skill.integer == 0)
+            chance *= 0.5f;
+        else if (skill.integer >= 2)
+            chance *= 2;
     }
 
-    if (skill.integer == 0)
-        chance *= 0.5f;
-    else if (skill.integer >= 2)
-        chance *= 2;
-
-    if (random() < chance) {
+    if (chance == 1.0f || random() < chance) {
         self->monsterinfo.attack_state = AS_MISSILE;
         self->monsterinfo.attack_finished_time = level.time + G_SecToMs(2 * random());
         return true;

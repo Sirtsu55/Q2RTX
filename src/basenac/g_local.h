@@ -155,6 +155,7 @@ typedef enum {
 #define AI_MEDIC                0x00002000
 #define AI_RESURRECTING         0x00004000
 #define AI_HIGH_TICK_RATE       0x00008000
+#define AI_JUMP_IMMEDIATELY     0x00010000
 
 //monster attack state
 #define AS_STRAIGHT             1

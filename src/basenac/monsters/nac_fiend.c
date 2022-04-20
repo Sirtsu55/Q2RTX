@@ -224,12 +224,21 @@ void fiend_attack(edict_t *self)
     vec3_t low, high;
     int solutions = solve_ballistic_arc1(self->s.origin, 600.f, self->enemy->s.origin, 800.f, low, high);
 
-    if (!solutions && self->enemy->s.origin[2] > self->s.origin[2])
-    {
-        int solutions = solve_ballistic_arc1(self->s.origin, 750.f, self->enemy->s.origin, 800.f, low, high);
+    if (!solutions) {
+        float diff = self->enemy->s.origin[2] - self->s.origin[2];
 
-        if (!solutions)
-            return;
+        // if we're above them and we have no solution, give them an extra boost
+        if (diff > 24.f) {
+            int solutions = solve_ballistic_arc1(self->s.origin, 750.f, self->enemy->s.origin, 800.f, low, high);
+
+            if (!solutions)
+                return;
+        // if we're below them, just do a jump forward
+        } else if (diff < -24.f) {
+            solutions = 1;
+            AngleVectors(self->s.angles, low, NULL, NULL);
+            VectorScale(low, 600.f, low);
+        }
     }
 
     vec3_t o;
