@@ -237,8 +237,6 @@ void fiend_leap_climb_push(edict_t *self)
             T_Damage(ents[i], self, self, fwd, ents[i]->s.origin, fwd, 5, 180, DAMAGE_RADIUS, MOD_UNKNOWN);
         }
     }
-
-    Com_Printf("%s\n", vtos(self->velocity));
 }
 
 void fiend_leap_climb_end(edict_t *self)
@@ -266,8 +264,6 @@ void fiend_leap_wait(edict_t *self)
         vec3_t wall_normal;
 
         if (fiend_leap_check_ledge(self, wall_normal)) {
-            Com_Print("fiend can ledge\n");
-
             self->touch = NULL;
 
             VectorInverse(wall_normal);
