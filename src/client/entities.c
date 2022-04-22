@@ -872,7 +872,7 @@ static void CL_AddPacketEntities(void)
                // origin[2] += offset;
 
                // V_AddLightEx(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
-                V_AddLightEx(origin, 6000.f, 1.6f, 0.7f, 0.2f, 0.8f);
+                V_AddLightEx(origin, 6000.f, 1.6f, 0.7f, 0.2f, 0.5f);
             } else if (effects & EF_PLASMA) {
                 if (effects & EF_ANIM_ALLFAST) {
                     CL_BlasterTrail(cent->lerp_origin, ent.origin);
