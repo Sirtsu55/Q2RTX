@@ -302,6 +302,7 @@ void SP_monster_knight(edict_t *self)
     self->gib_health = -60;
     self->mass = 85;
     self->monsterinfo.aiflags |= AI_HIGH_TICK_RATE;
+    self->yaw_speed = 25;
 
     self->pain = knight_pain;
     self->die = knight_die;

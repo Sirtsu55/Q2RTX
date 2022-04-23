@@ -493,6 +493,7 @@ void SP_monster_fiend(edict_t *self)
     self->gib_health = -60;
     self->mass = 145;
     self->monsterinfo.aiflags |= AI_HIGH_TICK_RATE;
+    self->yaw_speed = 40;
 
     self->pain = fiend_pain;
     self->die = fiend_die;
