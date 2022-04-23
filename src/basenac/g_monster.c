@@ -563,6 +563,9 @@ void monster_start_go(edict_t *self)
     if (self->health <= 0)
         return;
 
+    if (self->monsterinfo.aiflags & AI_HIGH_TICK_RATE)
+        self->yaw_speed /= 2;
+
     // check for target to combat_point and change to combattarget
     if (self->target) {
         bool        notcombat;
