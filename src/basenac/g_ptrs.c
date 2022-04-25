@@ -279,7 +279,6 @@ extern void berserk_walk(void);
 extern void bfg_explode(void);
 extern void bfg_think(void);
 extern void bfg_touch(void);
-extern void blaster_think(void);
 extern void blaster_touch(void);
 extern void body_die(void);
 extern void boss2_attack(void);
@@ -642,7 +641,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, barrel_explode },
 { P_think, bfg_explode },
 { P_think, bfg_think },
-{ P_think, blaster_think },
 { P_think, BossExplode },
 { P_think, button_return },
 { P_think, commander_body_drop },

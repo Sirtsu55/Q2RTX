@@ -139,11 +139,9 @@ void SV_CleanClient(client_t *client)
     }
 
     // free baselines allocated for this client
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        if (client->baselines[i]) {
-            Z_Free(client->baselines[i]);
-            client->baselines[i] = NULL;
-        }
+    if (client->baselines) {
+        Z_Free(client->baselines);
+        client->baselines = NULL;
     }
 }
 

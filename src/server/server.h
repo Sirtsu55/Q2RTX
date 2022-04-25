@@ -59,11 +59,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SV_DPrintf(...)
 #endif
 
-#define SV_BASELINES_SHIFT      6
-#define SV_BASELINES_PER_CHUNK  (1 << SV_BASELINES_SHIFT)
-#define SV_BASELINES_MASK       (SV_BASELINES_PER_CHUNK - 1)
-#define SV_BASELINES_CHUNKS     (MAX_PACKET_ENTITIES >> SV_BASELINES_SHIFT)
-
 #define SV_InfoSet(var, val) \
     Cvar_FullSet(var, val, CVAR_SERVERINFO|CVAR_ROM, FROM_CODE)
 
@@ -262,7 +257,8 @@ typedef struct client_s {
     unsigned            msg_dynamic_bytes;      // total size of dynamic memory allocated
 
     // per-client baseline chunks
-    entity_state_t      *baselines[SV_BASELINES_CHUNKS];
+    entity_state_t      *baselines;
+    int                 num_baselines, allocated_baselines;
 
     // netchan
     netchan_t       *netchan;

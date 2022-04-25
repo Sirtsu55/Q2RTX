@@ -43,21 +43,22 @@ baseline will be transmitted
 */
 static void SV_CreateBaselines(void)
 {
-    int        i;
-    edict_t    *ent;
-    entity_state_t *base, **chunk;
-
     // clear baselines from previous level
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->baselines[i];
-        if (!base) {
-            continue;
+    if (sv_client->baselines) {
+        if (ge->num_entities[ENT_PACKET] > sv_client->allocated_baselines) {
+            sv_client->allocated_baselines = ge->num_entities[ENT_PACKET];
+            sv_client->baselines = Z_Realloc(sv_client->baselines, sizeof(*sv_client->baselines) * sv_client->allocated_baselines);
         }
-        memset(base, 0, sizeof(*base) * SV_BASELINES_PER_CHUNK);
+
+        sv_client->num_baselines = ge->num_entities[ENT_PACKET];
+        memset(sv_client->baselines, 0, sizeof(*sv_client->baselines) * sv_client->num_baselines);
+    } else {
+        sv_client->num_baselines = sv_client->allocated_baselines = ge->num_entities[ENT_PACKET];
+        sv_client->baselines = SV_Mallocz(sizeof(*sv_client->baselines) * sv_client->num_baselines);
     }
 
-    for (i = 1; i < ge->num_entities[ENT_PACKET]; i++) {
-        ent = EDICT_NUM(i);
+    for (int i = 1; i < ge->num_entities[ENT_PACKET]; i++) {
+        edict_t *ent = EDICT_NUM(i);
 
         if ((g_features->integer & GMF_PROPERINUSE) && !ent->inuse) {
             continue;
@@ -67,13 +68,7 @@ static void SV_CreateBaselines(void)
             continue;
         }
 
-        chunk = &sv_client->baselines[i >> SV_BASELINES_SHIFT];
-        if (*chunk == NULL) {
-            *chunk = SV_Mallocz(sizeof(*base) * SV_BASELINES_PER_CHUNK);
-        }
-
-        base = *chunk + (i & SV_BASELINES_MASK);
-        *base = ent->s;
+        sv_client->baselines[i] = ent->s;
     }
 }
 
@@ -109,16 +104,9 @@ static void write_gamestate(void)
     MSG_WriteShort(MAX_CONFIGSTRINGS);   // end of configstrings
 
     // write baselines
-    for (i = 0; i < SV_BASELINES_CHUNKS; i++) {
-        base = sv_client->baselines[i];
-        if (!base) {
-            continue;
-        }
-        for (j = 0; j < SV_BASELINES_PER_CHUNK; j++) {
-            if (base->number) {
-                write_baseline(base);
-            }
-            base++;
+    for (i = 0, base = sv_client->baselines; i < sv_client->num_baselines; i++, base++) {
+        if (base->number) {
+            write_baseline(base);
         }
     }
     MSG_WriteShort(0);   // end of baselines

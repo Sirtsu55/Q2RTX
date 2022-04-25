@@ -97,9 +97,8 @@ static void SV_EmitPacketEntities(client_t         *client,
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
             flags = client->esFlags | MSG_ES_FORCE | MSG_ES_NEWENTITY;
-            oldent = client->baselines[newnum >> SV_BASELINES_SHIFT];
-            if (oldent) {
-                oldent += (newnum & SV_BASELINES_MASK);
+            if (newnum < client->num_baselines) {
+                oldent = &client->baselines[newnum];
             } else {
                 oldent = &nullEntityState;
             }
