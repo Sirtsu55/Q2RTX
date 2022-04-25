@@ -106,7 +106,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_MODEL_INSTANCES      8192 // MAX_ENTITIES * (some number of geometries per model, usually 1)
 #define MAX_RESERVED_INSTANCES   16   // TLAS instances reserved for skinned geometry, particles and the like
 #define MAX_TLAS_INSTANCES       (MAX_MODEL_INSTANCES + MAX_RESERVED_INSTANCES)
-#define MAX_LIGHT_SOURCES        32
+#define MAX_LIGHT_SOURCES        256
 #define MAX_LIGHT_STYLES         64
 
 #define TLAS_INDEX_GEOMETRY      0
