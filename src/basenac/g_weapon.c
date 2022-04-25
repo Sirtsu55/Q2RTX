@@ -287,8 +287,6 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 
     if (other == self->owner)
         return;
- 
-    Com_Printf("touch blaster bolt %i\n%i %i %i\n", self->s.number, globals.num_entities[0], globals.num_entities[1], globals.num_entities[2]);
 
     if (surf && (surf->flags & SURF_SKY)) {
         G_FreeEdict(self);
@@ -318,12 +316,6 @@ void blaster_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
     G_FreeEdict(self);
 }
 
-void blaster_think(edict_t *self)
-{ 
-    Com_Printf("think blaster bolt %i\n%i %i %i\n", self->s.number, globals.num_entities[0], globals.num_entities[1], globals.num_entities[2]);
-    self->nextthink = level.time + 1;
-}
-
 void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, bool hyper)
 {
     edict_t *bolt;
@@ -332,7 +324,6 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     VectorNormalize(dir);
 
     bolt = G_Spawn();
-    Com_Printf("spawn blaster bolt %i\n%i %i %i\n", bolt->s.number, globals.num_entities[0], globals.num_entities[1], globals.num_entities[2]);
     bolt->svflags = SVF_DEADMONSTER;
     // yes, I know it looks weird that projectiles are deadmonsters
     // what this means is that when prediction is used against the object
@@ -355,8 +346,6 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     bolt->touch = blaster_touch;
     bolt->nextthink = level.time + 2000;
     bolt->think = G_FreeEdict;
-    bolt->think = blaster_think;
-    bolt->nextthink = level.time + 1;
     bolt->dmg = damage;
     bolt->classname = "bolt";
     if (hyper)
