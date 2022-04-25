@@ -71,7 +71,35 @@ typedef int qhandle_t;
 // per-level limits
 //
 #define MAX_CLIENTS         256     // absolute limit
-#define MAX_EDICTS          1024    // must change protocol to increase more
+
+// maximum number of packet entities. these are sent over
+// to clients every frame, delta compressed from the previous frame,
+// and included in the packet even if they aren't changing. These
+// are for active entities that clients should be keeping close track of
+// every frame.
+#define MAX_PACKET_ENTITIES     1024
+
+// maximum number of ambient entities. these are sent over
+// to clients on connection, and will only be re-synced if
+// they change. The deltas will be sent every few frames until
+// the client acknowledges that they've received the last update.
+#define MAX_AMBIENT_ENTITIES    1024
+
+// maximum number of private entities. private entities
+// stay on the server, and are never synced to clients.
+// they are similar to SVF_NOCLIENT-flagged entities, but
+// can only ever exist on the server and are illegal to be
+// sent over the network
+#define MAX_PRIVATE_ENTITIES    2048
+
+static inline bool Ent_IsPacket(int number) { return number >= 0 && number < MAX_PACKET_ENTITIES; }
+static inline bool Ent_IsAmbient(int number) { return number >= MAX_PACKET_ENTITIES && number < (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES); }
+static inline bool Ent_IsPrivate(int number) { return number >= MAX_PRIVATE_ENTITIES && number < (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES); }
+
+// total number of entities that will be allocated by
+// the game DLL
+#define MAX_EDICTS (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES)
+
 #define MAX_LIGHTSTYLES     256
 #define MAX_MODELS          256     // these are sent over the net as bytes
 #define MAX_SOUNDS          256     // so they cannot be blindly increased
@@ -893,7 +921,10 @@ typedef struct usercmd_s {
     byte    lightlevel;     // light level the player is standing on
 } usercmd_t;
 
+// this controls the maximum number of entities that can
+// be gathered in a single area at the same time.
 #define MAXTOUCH    32
+
 typedef struct {
     // state (in / out)
     pmove_state_t   s;
@@ -1530,11 +1561,13 @@ typedef struct entity_state_s {
     unsigned int  bbox;           // for client side prediction;
                                   // SV_LinkEntity sets this properly
     int     sound;          // for looping sounds, to guarantee shutoff
-    int     event;          // impulse events -- muzzle flashes, footsteps, etc
-                            // events only go out for a single frame, they
-                            // are automatically cleared each frame
-
     int     sound_pitch;    // pitch offset for looping sounds
+    /**
+     * @brief impulse events -- muzzle flashes, footsteps, etc.
+     * events only go out for a single frame, they are
+     * automatically cleared each frame. For packet entities only.
+     */
+    int     event;
 } entity_state_t;
 
 //==============================================

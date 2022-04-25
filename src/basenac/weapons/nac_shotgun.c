@@ -46,7 +46,7 @@ static void Shotgun_Fire(edict_t *ent)
 
     // send muzzle flash
     SV_WriteByte(svc_muzzleflash);
-    SV_WriteShort(ent - g_edicts);
+    SV_WriteEntity(ent);
     SV_WriteByte(MZ_SHOTGUN);
     SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 

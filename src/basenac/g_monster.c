@@ -31,7 +31,7 @@ void monster_fire_bullet(edict_t *self, vec3_t start, vec3_t dir, int damage, in
     fire_bullet(self, start, dir, damage, kick, hspread, vspread, MOD_UNKNOWN);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -41,7 +41,7 @@ void monster_fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage
     fire_shotgun(self, start, aimdir, damage, kick, hspread, vspread, count, MOD_UNKNOWN);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -51,7 +51,7 @@ void monster_fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, i
     fire_blaster(self, start, dir, damage, speed, effect, false);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -61,7 +61,7 @@ void monster_fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage
     fire_grenade(self, start, aimdir, damage, speed, 2.5f, damage + 40);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -71,7 +71,7 @@ void monster_fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, in
     fire_rocket(self, start, dir, damage, speed, damage + 20, damage);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -81,7 +81,7 @@ void monster_fire_railgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage
     fire_rail(self, start, aimdir, damage, kick);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -91,7 +91,7 @@ void monster_fire_bfg(edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
     fire_bfg(self, start, aimdir, damage, speed, damage_radius);
 
     SV_WriteByte(svc_muzzleflash2);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WriteByte(flashtype);
     SV_Multicast(start, MULTICAST_PVS, false);
 }
@@ -223,7 +223,7 @@ void M_WorldEffects(edict_t *ent)
                     dmg = 2 + 2 * G_MsToSec(level.time - ent->air_finished_time);
                     if (dmg > 15)
                         dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    T_Damage(ent, game.world, game.world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
                     ent->pain_debounce_time = level.time + 1000;
                 }
             }
@@ -236,7 +236,7 @@ void M_WorldEffects(edict_t *ent)
                     dmg = 2 + 2 * G_MsToSec(level.time - ent->air_finished_time);
                     if (dmg > 15)
                         dmg = 15;
-                    T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                    T_Damage(ent, game.world, game.world, vec3_origin, ent->s.origin, vec3_origin, dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
                     ent->pain_debounce_time = level.time + 1000;
                 }
             }
@@ -254,13 +254,13 @@ void M_WorldEffects(edict_t *ent)
     if ((ent->watertype & CONTENTS_LAVA) && !(ent->flags & FL_IMMUNE_LAVA)) {
         if (ent->damage_debounce_time < level.time) {
             ent->damage_debounce_time = level.time + 200;
-            T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 10 * ent->waterlevel, 0, 0, MOD_LAVA);
+            T_Damage(ent, game.world, game.world, vec3_origin, ent->s.origin, vec3_origin, 10 * ent->waterlevel, 0, 0, MOD_LAVA);
         }
     }
     if ((ent->watertype & CONTENTS_SLIME) && !(ent->flags & FL_IMMUNE_SLIME)) {
         if (ent->damage_debounce_time < level.time) {
             ent->damage_debounce_time = level.time + 100;
-            T_Damage(ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4 * ent->waterlevel, 0, 0, MOD_SLIME);
+            T_Damage(ent, game.world, game.world, vec3_origin, ent->s.origin, vec3_origin, 4 * ent->waterlevel, 0, 0, MOD_SLIME);
         }
     }
 

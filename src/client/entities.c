@@ -1366,7 +1366,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
     centity_t   *ent;
     mmodel_t    *cm;
 
-    if (entnum < 0 || entnum >= MAX_EDICTS) {
+    if (entnum < 0 || entnum >= (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)) {
         Com_Errorf(ERR_DROP, "%s: bad entnum: %d", __func__, entnum);
     }
 

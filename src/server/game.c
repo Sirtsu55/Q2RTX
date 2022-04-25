@@ -878,10 +878,5 @@ void SV_InitGameProgs(void)
     if (ge->edict_size < sizeof(edict_t) || ge->edict_size > (unsigned)INT_MAX / MAX_EDICTS) {
         Com_Error(ERR_DROP, "Game library returned bad size of edict_t");
     }
-
-    // sanitize max_edicts
-    if (ge->max_edicts <= sv_maxclients->integer || ge->max_edicts > MAX_EDICTS) {
-        Com_Error(ERR_DROP, "Game library returned bad number of max_edicts");
-    }
 }
 

@@ -21,7 +21,6 @@ SET(SRC_BASENAC
 	basenac/g_turret.c
 	basenac/g_utils.c
 	basenac/g_weapon.c
-	basenac/m_actor.c
 	basenac/m_berserk.c
 	basenac/m_boss2.c
 	basenac/m_boss3.c
@@ -62,7 +61,6 @@ SET(SRC_BASENAC
 SET(HEADERS_BASENAC
 	basenac/g_local.h
 	basenac/g_ptrs.h
-	basenac/m_actor.h
 	basenac/m_berserk.h
 	basenac/m_boss2.h
 	basenac/m_boss31.h

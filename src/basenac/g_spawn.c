@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct {
     char    *name;
     void (*spawn)(edict_t *ent);
+    entity_type_t type;
 } spawn_func_t;
 
 typedef struct {
@@ -82,7 +83,6 @@ void SP_target_crosslevel_trigger(edict_t *ent);
 void SP_target_crosslevel_target(edict_t *ent);
 void SP_target_laser(edict_t *self);
 void SP_target_help(edict_t *ent);
-void SP_target_actor(edict_t *ent);
 void SP_target_lightramp(edict_t *self);
 void SP_target_earthquake(edict_t *ent);
 void SP_target_character(edict_t *ent);
@@ -92,7 +92,6 @@ void SP_target_string(edict_t *ent);
 void SP_target_gravity(edict_t *ent);
 
 void SP_worldspawn(edict_t *ent);
-void SP_viewthing(edict_t *ent);
 
 void SP_light(edict_t *self);
 void SP_light_mine1(edict_t *ent);
@@ -106,7 +105,6 @@ void SP_misc_explobox(edict_t *self);
 void SP_misc_explobox2(edict_t* self);
 void SP_misc_banner(edict_t *self);
 void SP_misc_satellite_dish(edict_t *self);
-void SP_misc_actor(edict_t *self);
 void SP_misc_gib_arm(edict_t *self);
 void SP_misc_gib_leg(edict_t *self);
 void SP_misc_gib_head(edict_t *self);
@@ -164,10 +162,10 @@ static const spawn_func_t spawn_funcs[] = {
     {"item_health_large", SP_item_health_large},
     {"item_health_mega", SP_item_health_mega},
 
-    {"info_player_start", SP_info_player_start},
+    {"info_player_start", SP_info_player_start, ENT_PRIVATE},
     {"info_player_deathmatch", SP_info_player_deathmatch},
-    {"info_player_coop", SP_info_player_coop},
-    {"info_player_intermission", SP_info_player_intermission},
+    {"info_player_coop", SP_info_player_coop, ENT_PRIVATE},
+    {"info_player_intermission", SP_info_player_intermission, ENT_PRIVATE},
 
     {"func_plat", SP_func_plat},
     {"func_button", SP_func_button},
@@ -178,65 +176,62 @@ static const spawn_func_t spawn_funcs[] = {
     {"func_train", SP_func_train},
     {"func_water", SP_func_water},
     {"func_conveyor", SP_func_conveyor},
-    {"func_areaportal", SP_func_areaportal},
-    {"func_clock", SP_func_clock},
+    {"func_areaportal", SP_func_areaportal, ENT_PRIVATE},
+    {"func_clock", SP_func_clock, ENT_PRIVATE},
     {"func_wall", SP_func_wall},
     {"func_object", SP_func_object},
-    {"func_timer", SP_func_timer},
+    {"func_timer", SP_func_timer, ENT_PRIVATE},
     {"func_explosive", SP_func_explosive},
-    {"func_killbox", SP_func_killbox},
+    {"func_killbox", SP_func_killbox, ENT_PRIVATE},
 
-    {"trigger_always", SP_trigger_always},
-    {"trigger_once", SP_trigger_once},
-    {"trigger_multiple", SP_trigger_multiple},
-    {"trigger_relay", SP_trigger_relay},
-    {"trigger_push", SP_trigger_push},
-    {"trigger_hurt", SP_trigger_hurt},
-    {"trigger_key", SP_trigger_key},
-    {"trigger_counter", SP_trigger_counter},
-    {"trigger_elevator", SP_trigger_elevator},
-    {"trigger_gravity", SP_trigger_gravity},
-    {"trigger_monsterjump", SP_trigger_monsterjump},
+    {"trigger_always", SP_trigger_always, ENT_PRIVATE},
+    {"trigger_once", SP_trigger_once, ENT_PRIVATE},
+    {"trigger_multiple", SP_trigger_multiple, ENT_PRIVATE},
+    {"trigger_relay", SP_trigger_relay, ENT_PRIVATE},
+    {"trigger_push", SP_trigger_push, ENT_PRIVATE},
+    {"trigger_hurt", SP_trigger_hurt, ENT_PRIVATE},
+    {"trigger_key", SP_trigger_key, ENT_PRIVATE},
+    {"trigger_counter", SP_trigger_counter, ENT_PRIVATE},
+    {"trigger_elevator", SP_trigger_elevator, ENT_PRIVATE},
+    {"trigger_gravity", SP_trigger_gravity, ENT_PRIVATE},
+    {"trigger_monsterjump", SP_trigger_monsterjump, ENT_PRIVATE},
 
-    {"target_temp_entity", SP_target_temp_entity},
+    {"target_temp_entity", SP_target_temp_entity, ENT_PRIVATE},
     {"target_speaker", SP_target_speaker},
-    {"target_explosion", SP_target_explosion},
-    {"target_changelevel", SP_target_changelevel},
-    {"target_secret", SP_target_secret},
+    {"target_explosion", SP_target_explosion, ENT_PRIVATE},
+    {"target_changelevel", SP_target_changelevel, ENT_PRIVATE},
+    {"target_secret", SP_target_secret, ENT_PRIVATE},
     {"target_goal", SP_target_goal},
-    {"target_splash", SP_target_splash},
-    {"target_spawner", SP_target_spawner},
-    {"target_blaster", SP_target_blaster},
-    {"target_crosslevel_trigger", SP_target_crosslevel_trigger},
-    {"target_crosslevel_target", SP_target_crosslevel_target},
+    {"target_splash", SP_target_splash, ENT_PRIVATE},
+    {"target_spawner", SP_target_spawner, ENT_PRIVATE},
+    {"target_blaster", SP_target_blaster, ENT_PRIVATE},
+    {"target_crosslevel_trigger", SP_target_crosslevel_trigger, ENT_PRIVATE},
+    {"target_crosslevel_target", SP_target_crosslevel_target, ENT_PRIVATE},
     {"target_laser", SP_target_laser},
-    {"target_help", SP_target_help},
-    {"target_actor", SP_target_actor},
-    {"target_lightramp", SP_target_lightramp},
-    {"target_earthquake", SP_target_earthquake},
+    {"target_help", SP_target_help, ENT_PRIVATE},
+    {"target_lightramp", SP_target_lightramp, ENT_PRIVATE},
+    {"target_earthquake", SP_target_earthquake, ENT_PRIVATE},
     {"target_character", SP_target_character},
-    {"target_string", SP_target_string},
+    {"target_string", SP_target_string, ENT_PRIVATE},
 
     // Paril: gravity change support
     {"target_gravity", SP_target_gravity},
 
     {"worldspawn", SP_worldspawn},
-    {"viewthing", SP_viewthing},
 
-    {"light", SP_light},
+    {"light", SP_light, ENT_PRIVATE},
     {"light_mine1", SP_light_mine1},
     {"light_mine2", SP_light_mine2},
     {"info_null", SP_info_null},
     {"func_group", SP_info_null},
-    {"info_notnull", SP_info_notnull},
-    {"path_corner", SP_path_corner},
-    {"point_combat", SP_point_combat},
+    {"info_notnull", SP_info_notnull, ENT_PRIVATE},
+    {"path_corner", SP_path_corner, ENT_PRIVATE},
+    {"point_combat", SP_point_combat, ENT_PRIVATE},
 
     {"misc_explobox", SP_misc_explobox},
     {"misc_explobox2", SP_misc_explobox2},
     {"misc_banner", SP_misc_banner},
     {"misc_satellite_dish", SP_misc_satellite_dish},
-    {"misc_actor", SP_misc_actor},
     {"misc_gib_arm", SP_misc_gib_arm},
     {"misc_gib_leg", SP_misc_gib_leg},
     {"misc_gib_head", SP_misc_gib_head},
@@ -284,12 +279,12 @@ static const spawn_func_t spawn_funcs[] = {
 
     // Paril
     { "model_spawn", SP_model_spawn },
-    { "misc_property_swap", SP_misc_property_swap },
+    { "misc_property_swap", SP_misc_property_swap, ENT_PRIVATE },
 
     // NAC
     { "monster_knight", SP_monster_knight },
     { "monster_fiend", SP_monster_fiend },
-    { "env_reverb", SP_env_reverb },
+    { "env_reverb", SP_env_reverb, ENT_PRIVATE },
 
     {NULL, NULL}
 };
@@ -385,15 +380,24 @@ static const spawn_field_t temp_fields[] = {
     {NULL}
 };
 
+static edict_t *ED_ChangeType(edict_t *ent, entity_type_t type)
+{
+    edict_t *n = G_SpawnType(type);
+    memcpy(n, ent, sizeof(edict_t));
+    n->s.number = n - globals.entities;
+    G_FreeEdict(ent);
+    return n;
+}
 
 /*
 ===============
 ED_CallSpawn
 
-Finds the spawn function for the entity and calls it
+Finds the spawn function for the entity and calls it.
+Might change entity ptr if the entity type is different.
 ===============
 */
-void ED_CallSpawn(edict_t *ent)
+edict_t *ED_CallSpawn(edict_t *ent)
 {
     const spawn_func_t *s;
     gitem_t *item;
@@ -401,7 +405,8 @@ void ED_CallSpawn(edict_t *ent)
 
     if (!ent->classname) {
         Com_WPrint("ED_CallSpawn: NULL classname\n");
-        return;
+        G_FreeEdict(ent);
+        return ent;
     }
 
     // check item spawn functions
@@ -412,7 +417,7 @@ void ED_CallSpawn(edict_t *ent)
             // found it
             ent->classname = item->classname;
             SpawnItem(ent, item);
-            return;
+            return ent;
         }
     }
 
@@ -420,12 +425,21 @@ void ED_CallSpawn(edict_t *ent)
     for (s = spawn_funcs ; s->name ; s++) {
         if (!strcmp(s->name, ent->classname)) {
             // found it
+            // are we changing entity types?
+            if ((s->type == ENT_PACKET && !Ent_IsPacket(ent->s.number)) ||
+                (s->type == ENT_AMBIENT && !Ent_IsAmbient(ent->s.number)) ||
+                (s->type == ENT_PRIVATE && !Ent_IsPrivate(ent->s.number))) {
+                ent = ED_ChangeType(ent, s->type);
+            }
             ent->classname = s->name;
             s->spawn(ent);
-            return;
+            return ent;
         }
     }
+
     Com_WPrintf("%s doesn't have a spawn function\n", ent->classname);
+    G_FreeEdict(ent);
+    return ent;
 }
 
 /*
@@ -578,24 +592,19 @@ All but the last will have the teamchain field set to the next one
 */
 void G_FindTeams(void)
 {
-    edict_t *e, *e2, *chain;
-    int     i, j;
-    int     c, c2;
+    int c = 0;
+    int c2 = 0;
 
-    c = 0;
-    c2 = 0;
-    for (i = 1, e = g_edicts + i ; i < globals.num_edicts ; i++, e++) {
-        if (!e->inuse)
-            continue;
+    for (edict_t *e = globals.entities + game.maxclients + BODY_QUEUE_SIZE + 1; e; e = G_NextEnt(e)) { 
         if (!e->team)
             continue;
         if (e->flags & FL_TEAMSLAVE)
             continue;
-        chain = e;
+        edict_t *chain = e;
         e->teammaster = e;
         c++;
         c2++;
-        for (j = i + 1, e2 = e + 1 ; j < globals.num_edicts ; j++, e2++) {
+        for (edict_t *e2 = G_NextEnt(e); e2; e2 = G_NextEnt(e2)) {
             if (!e2->inuse)
                 continue;
             if (!e2->team)
@@ -640,14 +649,14 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
     Z_FreeTags(TAG_LEVEL);
 
     memset(&level, 0, sizeof(level));
-    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
+    G_InitEntityList(globals.entities);
 
     Q_strlcpy(level.mapname, mapname, sizeof(level.mapname));
     Q_strlcpy(game.spawnpoint, spawnpoint, sizeof(game.spawnpoint));
 
     // set client fields on player ents
     for (i = 0 ; i < game.maxclients ; i++)
-        g_edicts[i + 1].client = game.clients + i;
+        globals.entities[i + 1].client = game.clients + i;
 
     ent = NULL;
     inhibit = 0;
@@ -662,9 +671,10 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             Com_Errorf(ERR_DROP, "ED_LoadFromFile: found %s when expecting {", com_token);
 
         if (!ent)
-            ent = g_edicts;
+            ent = game.world;
         else
             ent = G_Spawn();
+
         ED_ParseEdict(&entities, ent);
 
         // yet another map hack
@@ -672,7 +682,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             ent->spawnflags &= ~SPAWNFLAG_NOT_HARD;
 
         // remove things (except the world) from different skill levels or deathmatch
-        if (ent != g_edicts) {
+        if (ent != game.world) {
 			if (nomonsters.integer && (strstr(ent->classname, "monster") || strstr(ent->classname, "misc_deadsoldier") || strstr(ent->classname, "misc_insane"))) {
 				G_FreeEdict(ent);
 				inhibit++;
@@ -704,20 +714,10 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
             }
         }
 
-        ED_CallSpawn(ent);
+        ent = ED_CallSpawn(ent);
     }
 
     Com_Printf("%i entities inhibited\n", inhibit);
-
-#ifdef DEBUG
-    i = 1;
-    ent = EDICT_NUM(i);
-    while (i < globals.num_edicts) {
-        if (ent->inuse != 0 || ent->inuse != 1)
-            Com_DPrintf("Invalid entity %d\n", i);
-        i++, ent++;
-    }
-#endif
 
     G_FindTeams();
 

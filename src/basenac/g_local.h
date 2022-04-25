@@ -322,7 +322,6 @@ typedef struct {
 
     // store latched cvars here that we want to get at often
     int         maxclients;
-    int         maxentities;
 
     // cross level triggers
     int         serverflags;
@@ -331,6 +330,9 @@ typedef struct {
     int         num_items;
 
     bool        autosaved;
+
+    // world entity ptr
+    edict_t     *world;
 } game_locals_t;
 
 
@@ -549,9 +551,6 @@ extern  int snd_fry;
 
 extern  int meansOfDeath;
 
-
-extern  edict_t         *g_edicts;
-
 #define FOFS(x) q_offsetof(edict_t, x)
 #define STOFS(x) q_offsetof(spawn_temp_t, x)
 #define LLOFS(x) q_offsetof(level_locals_t, x)
@@ -598,8 +597,6 @@ extern  cvarRef_t  flood_waitdelay;
 extern  cvarRef_t  sv_maplist;
 
 extern  cvarRef_t  sv_features;
-
-#define world   (&g_edicts[0])
 
 // item spawnflags
 #define ITEM_TRIGGER_SPAWN      0x00000001
@@ -669,6 +666,7 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 //
 bool    KillBox(edict_t *ent);
 void    G_ProjectSource(const vec3_t point, const vec3_t distance, const vec3_t forward, const vec3_t right, vec3_t result);
+edict_t *G_NextEnt(edict_t *from);
 edict_t *G_Find(edict_t *from, int fieldofs, char *match);
 edict_t *findradius(edict_t *from, vec3_t org, float rad);
 edict_t *G_PickTarget(char *targetname);
@@ -677,10 +675,10 @@ void    G_SetMovedir(vec3_t angles, vec3_t movedir);
 
 void    G_InitEdict(edict_t *e);
 edict_t *G_Spawn(void);
+edict_t *G_SpawnType(entity_type_t type);
 void    G_FreeEdict(edict_t *e);
 
 void    G_TouchTriggers(edict_t *ent);
-void    G_TouchSolids(edict_t *ent);
 
 float   *tv(float x, float y, float z);
 char    *vtos(vec3_t v);
@@ -859,6 +857,8 @@ void G_RunEntity(edict_t *ent);
 //
 void SaveClientData(void);
 void FetchClientEntData(edict_t *ent);
+edict_t *G_CreateEntityList(void);
+void G_InitEntityList(edict_t *list);
 
 //
 // g_chase.c
@@ -1247,6 +1247,7 @@ void SV_Unicast(edict_t *ent, bool reliable);
 void SV_WriteChar(int c);
 void SV_WriteByte(int c);
 void SV_WriteShort(int c);
+void SV_WriteEntity(edict_t *ent);
 void SV_WriteLong(int c);
 void SV_WriteString(const char *s);
 void SV_WritePos(const vec3_t pos);

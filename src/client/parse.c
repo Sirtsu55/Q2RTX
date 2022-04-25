@@ -32,14 +32,7 @@ static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
                                        entity_state_t  *old,
                                        int             bits)
 {
-    entity_state_t    *state;
-
-    // suck up to MAX_EDICTS for servers that don't cap at MAX_PACKET_ENTITIES
-    if (frame->numEntities >= MAX_EDICTS) {
-        Com_Errorf(ERR_DROP, "%s: MAX_EDICTS exceeded", __func__);
-    }
-
-    state = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
+    entity_state_t    *state = &cl.entityStates[cl.numEntityStates & PARSE_ENTITIES_MASK];
     cl.numEntityStates++;
     frame->numEntities++;
 
@@ -86,7 +79,7 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
 
     while (1) {
         newnum = MSG_ParseEntityBits(&bits);
-        if (newnum < 0 || newnum >= MAX_EDICTS) {
+        if (newnum < 0 || newnum >= MAX_PACKET_ENTITIES) {
             Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, newnum);
         }
 
@@ -390,7 +383,7 @@ static void CL_ParseConfigstring(int index)
 
 static void CL_ParseBaseline(int index, int bits)
 {
-    if (index < 1 || index >= MAX_EDICTS) {
+    if (index < 1 || index >= MAX_PACKET_ENTITIES) {
         Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
@@ -645,7 +638,7 @@ static void CL_ParseMuzzleFlashPacket(int mask)
     int entity, weapon;
 
     entity = MSG_ReadShort();
-    if (entity < 1 || entity >= MAX_EDICTS)
+    if (entity < 1 || entity >= (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES))
         Com_Errorf(ERR_DROP, "%s: bad entity", __func__);
 
     weapon = MSG_ReadByte();
@@ -680,7 +673,7 @@ static void CL_ParseStartSoundPacket(void)
         // entity relative
         channel = MSG_ReadShort();
         entity = channel >> 3;
-        if (entity < 0 || entity >= MAX_EDICTS)
+        if (entity < 0 || entity >= (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES))
             Com_Errorf(ERR_DROP, "%s: bad entity: %d", __func__, entity);
         snd.entity = entity;
         snd.channel = channel & 7;

@@ -50,14 +50,14 @@ void AI_SetSightClient(void)
     if (level.sight_client == NULL)
         start = 1;
     else
-        start = level.sight_client - g_edicts;
+        start = level.sight_client - globals.entities;
 
     check = start;
     while (1) {
         check++;
         if (check > game.maxclients)
             check = 1;
-        ent = &g_edicts[check];
+        ent = &globals.entities[check];
         if (ent->inuse
             && ent->health > 0
             && !(ent->flags & FL_NOTARGET)) {
@@ -387,11 +387,6 @@ bool FindTarget(edict_t *self)
     int         r;
 
     if (self->monsterinfo.aiflags & AI_GOOD_GUY) {
-        if (self->goalentity && self->goalentity->inuse && self->goalentity->classname) {
-            if (strcmp(self->goalentity->classname, "target_actor") == 0)
-                return false;
-        }
-
         //FIXME look for monsters?
         return false;
     }

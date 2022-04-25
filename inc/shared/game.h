@@ -186,6 +186,15 @@ typedef struct {
     int (*FS_LoadFileEx)(const char *path, void **buffer, unsigned flags, unsigned tag);
 } game_import_t;
 
+// entity type ID
+typedef enum {
+    ENT_PACKET,
+    ENT_AMBIENT,
+    ENT_PRIVATE,
+
+    ENT_TOTAL
+} entity_type_t;
+
 //
 // functions exported by the game subsystem
 //
@@ -236,10 +245,9 @@ typedef struct {
     // can vary in size from one game to another.
     //
     // The size will be fixed when ge->Init() is called
-    struct edict_s  *edicts;
-    int         edict_size;
-    int         num_edicts;     // current number, <= max_edicts
-    int         max_edicts;
+    int           edict_size;
+    edict_t       *entities;
+    int           num_entities[ENT_TOTAL];
 } game_export_t;
 
 #endif // GAME_H

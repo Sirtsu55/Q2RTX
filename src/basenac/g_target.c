@@ -267,12 +267,12 @@ void use_target_changelevel(edict_t *self, edict_t *other, edict_t *activator)
         return;     // already activated
 
     if (!deathmatch.integer && !coop.integer) {
-        if (g_edicts[1].health <= 0)
+        if (globals.entities[1].health <= 0)
             return;
     }
 
     // if noexit, do a ton of damage to other
-    if (deathmatch.integer && !(dmflags.integer & DF_ALLOW_EXIT) && other != world) {
+    if (deathmatch.integer && !(dmflags.integer & DF_ALLOW_EXIT) && other != game.world) {
         T_Damage(other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, 0, MOD_EXIT);
         return;
     }
@@ -746,17 +746,12 @@ All players and monsters are affected.
 
 void target_earthquake_think(edict_t *self)
 {
-    int     i;
-    edict_t *e;
-
     if (self->last_move_time < level.time) {
         SV_PositionedSound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0f, ATTN_NONE, 0);
         self->last_move_time = level.time + 500;
     }
 
-    for (i = 1, e = g_edicts + i; i < globals.num_edicts; i++, e++) {
-        if (!e->inuse)
-            continue;
+    for (edict_t *e = G_NextEnt(game.world); e; e = G_NextEnt(e)) {
         if (!e->client)
             continue;
         if (!e->groundentity)

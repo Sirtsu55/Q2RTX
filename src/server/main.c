@@ -1520,7 +1520,7 @@ static void SV_PrepWorldFrame(void)
     edict_t    *ent;
     int        i;
 
-    for (i = 1; i < ge->num_edicts; i++) {
+    for (i = 1; i < ge->num_entities[ENT_PACKET]; i++) {
         ent = EDICT_NUM(i);
 
         // events only last for a single keyframe

@@ -68,7 +68,7 @@ void SP_CreateCoopSpots(edict_t *self)
     edict_t *spot;
 
     if (Q_stricmp(level.mapname, "security") == 0) {
-        spot = G_Spawn();
+        spot = G_SpawnType(ENT_PRIVATE);
         spot->classname = "info_player_coop";
         spot->s.origin[0] = 188 - 64;
         spot->s.origin[1] = -164;
@@ -76,7 +76,7 @@ void SP_CreateCoopSpots(edict_t *self)
         spot->targetname = "jail3";
         spot->s.angles[1] = 90;
 
-        spot = G_Spawn();
+        spot = G_SpawnType(ENT_PRIVATE);
         spot->classname = "info_player_coop";
         spot->s.origin[0] = 188 + 64;
         spot->s.origin[1] = -164;
@@ -84,7 +84,7 @@ void SP_CreateCoopSpots(edict_t *self)
         spot->targetname = "jail3";
         spot->s.angles[1] = 90;
 
-        spot = G_Spawn();
+        spot = G_SpawnType(ENT_PRIVATE);
         spot->classname = "info_player_coop";
         spot->s.origin[0] = 188 + 128;
         spot->s.origin[1] = -164;
@@ -159,7 +159,7 @@ void SP_info_player_coop(edict_t *self)
 The deathmatch intermission point will be at one of these
 Use 'angles' instead of 'angle', so you can set pitch or roll as well as yaw.  'pitch yaw roll'
 */
-void SP_info_player_intermission(void)
+void SP_info_player_intermission(edict_t *ent)
 {
 }
 
@@ -444,9 +444,9 @@ void LookAtKiller(edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
     vec3_t      dir;
 
-    if (attacker && attacker != world && attacker != self) {
+    if (attacker && attacker != game.world && attacker != self) {
         VectorSubtract(attacker->s.origin, self->s.origin, dir);
-    } else if (inflictor && inflictor != world && inflictor != self) {
+    } else if (inflictor && inflictor != game.world && inflictor != self) {
         VectorSubtract(inflictor->s.origin, self->s.origin, dir);
     } else {
         self->client->killer_yaw = self->s.angles[YAW];
@@ -619,7 +619,7 @@ void SaveClientData(void)
     edict_t *ent;
 
     for (i = 0 ; i < game.maxclients ; i++) {
-        ent = &g_edicts[1 + i];
+        ent = &globals.entities[1 + i];
         if (!ent->inuse)
             continue;
         game.clients[i].pers.health = ent->health;
@@ -668,7 +668,7 @@ float   PlayersRangeFromSpot(edict_t *spot)
     bestplayerdistance = 9999999;
 
     for (n = 1; n <= game.maxclients; n++) {
-        player = &g_edicts[n];
+        player = &globals.entities[n];
 
         if (!player->inuse)
             continue;
@@ -898,7 +898,7 @@ void CopyToBodyQue(edict_t *ent)
     SV_UnlinkEntity(ent);
 
     // grab a body que and cycle to the next one
-    body = &g_edicts[game.maxclients + level.body_que + 1];
+    body = &globals.entities[game.maxclients + level.body_que + 1];
     level.body_que = (level.body_que + 1) % BODY_QUEUE_SIZE;
 
     // send an effect on the removed body
@@ -912,7 +912,7 @@ void CopyToBodyQue(edict_t *ent)
 
     SV_UnlinkEntity(body);
     body->s = ent->s;
-    body->s.number = body - g_edicts;
+    body->s.number = body - globals.entities;
     body->s.event = EV_OTHER_TELEPORT;
 
     body->svflags = ent->svflags;
@@ -986,7 +986,7 @@ void spectator_respawn(edict_t *ent)
 
         // count spectators
         for (i = 1, numspec = 0; i <= game.maxclients; i++)
-            if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
+            if (globals.entities[i].inuse && globals.entities[i].client->pers.spectator)
                 numspec++;
 
         if (numspec >= maxspectators.integer) {
@@ -1023,7 +1023,7 @@ void spectator_respawn(edict_t *ent)
     if (!ent->client->pers.spectator)  {
         // send effect
         SV_WriteByte(svc_muzzleflash);
-        SV_WriteShort(ent - g_edicts);
+        SV_WriteEntity(ent);
         SV_WriteByte(MZ_LOGIN);
         SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 
@@ -1066,7 +1066,7 @@ void PutClientInServer(edict_t *ent)
     // ranging doesn't count this client
     SelectSpawnPoint(ent, spawn_origin, spawn_angles);
 
-    index = ent - g_edicts - 1;
+    index = ent - globals.entities - 1;
     client = ent->client;
 
     // deathmatch wipes most client data every spawn
@@ -1152,7 +1152,7 @@ void PutClientInServer(edict_t *ent)
     ent->s.modelindex2 = 255;       // custom gun model
     // sknum is player num and weapon number
     // weapon number will be added in changeweapon
-    ent->s.skinnum = ent - g_edicts - 1;
+    ent->s.skinnum = ent - globals.entities - 1;
 
     ent->s.frame = 0;
     VectorCopy(client->ps.pmove.origin, ent->s.origin);
@@ -1216,7 +1216,7 @@ void ClientBeginDeathmatch(edict_t *ent)
     } else {
         // send effect
         SV_WriteByte(svc_muzzleflash);
-        SV_WriteShort(ent - g_edicts);
+        SV_WriteEntity(ent);
         SV_WriteByte(MZ_LOGIN);
         SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
     }
@@ -1238,7 +1238,7 @@ to be placed into the game.  This will happen every level load.
 */
 void ClientBegin(edict_t *ent)
 {
-    ent->client = game.clients + (ent - g_edicts - 1);
+    ent->client = game.clients + (ent - globals.entities - 1);
 
     if (deathmatch.integer) {
         ClientBeginDeathmatch(ent);
@@ -1270,7 +1270,7 @@ void ClientBegin(edict_t *ent)
         // send effect if in a multiplayer game
         if (game.maxclients > 1) {
             SV_WriteByte(svc_muzzleflash);
-            SV_WriteShort(ent - g_edicts);
+            SV_WriteEntity(ent);
             SV_WriteByte(MZ_LOGIN);
             SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 
@@ -1317,7 +1317,7 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo)
     // set skin
     s = Info_ValueForKey(userinfo, "skin");
 
-    playernum = ent - g_edicts - 1;
+    playernum = ent - globals.entities - 1;
 
     // combine name and skin into a configstring
     SV_SetConfigString(CS_PLAYERSKINS + playernum, va("%s\\%s", ent->client->pers.netname, s));
@@ -1377,7 +1377,7 @@ bool ClientConnect(edict_t *ent, char *userinfo)
 
         // count spectators
         for (i = numspec = 0; i < game.maxclients; i++)
-            if (g_edicts[i + 1].inuse && g_edicts[i + 1].client->pers.spectator)
+            if (globals.entities[i + 1].inuse && globals.entities[i + 1].client->pers.spectator)
                 numspec++;
 
         if (numspec >= maxspectators.integer) {
@@ -1395,7 +1395,7 @@ bool ClientConnect(edict_t *ent, char *userinfo)
     }
 
     // they can connect
-    ent->client = game.clients + (ent - g_edicts - 1);
+    ent->client = game.clients + (ent - globals.entities - 1);
 
     // if there is already a body waiting for us (a loadgame), just
     // take it, otherwise spawn one from scratch
@@ -1436,7 +1436,7 @@ void ClientDisconnect(edict_t *ent)
     // send effect
     if (ent->inuse) {
         SV_WriteByte(svc_muzzleflash);
-        SV_WriteShort(ent - g_edicts);
+        SV_WriteEntity(ent);
         SV_WriteByte(MZ_LOGOUT);
         SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
     }
@@ -1625,7 +1625,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 
     // update chase cam if being followed
     for (i = 1; i <= game.maxclients; i++) {
-        other = g_edicts + i;
+        other = globals.entities + i;
         if (other->inuse && other->client->chase_target == ent)
             UpdateChaseCam(other);
     }

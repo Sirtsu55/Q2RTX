@@ -240,7 +240,7 @@ void trigger_key_use(edict_t *self, edict_t *other, edict_t *activator)
                 if (activator->client->pers.power_cubes & (1 << cube))
                     break;
             for (player = 1; player <= game.maxclients; player++) {
-                ent = &g_edicts[player];
+                ent = &globals.entities[player];
                 if (!ent->inuse)
                     continue;
                 if (!ent->client)
@@ -252,7 +252,7 @@ void trigger_key_use(edict_t *self, edict_t *other, edict_t *activator)
             }
         } else {
             for (player = 1; player <= game.maxclients; player++) {
-                ent = &g_edicts[player];
+                ent = &globals.entities[player];
                 if (!ent->inuse)
                     continue;
                 if (!ent->client)

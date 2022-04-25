@@ -823,7 +823,7 @@ void Cmd_Say_f(edict_t *ent, bool team, bool arg0)
         Com_LPrint(PRINT_TALK, text);
 
     for (j = 1; j <= game.maxclients; j++) {
-        other = &g_edicts[j];
+        other = &globals.entities[j];
         if (!other->inuse)
             continue;
         if (!other->client)
@@ -845,7 +845,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 
     // connect time, ping, score, name
     *text = 0;
-    for (i = 0, e2 = g_edicts + 1; i < game.maxclients; i++, e2++) {
+    for (i = 0, e2 = globals.entities + 1; i < game.maxclients; i++, e2++) {
         if (!e2->inuse)
             continue;
 

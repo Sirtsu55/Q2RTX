@@ -336,7 +336,7 @@ void parasite_drain_attack(edict_t *self)
 
     SV_WriteByte(svc_temp_entity);
     SV_WriteByte(TE_PARASITE_ATTACK);
-    SV_WriteShort(self - g_edicts);
+    SV_WriteEntity(self);
     SV_WritePos(start);
     SV_WritePos(end);
     SV_Multicast(self->s.origin, MULTICAST_PVS, false);

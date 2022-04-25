@@ -56,7 +56,7 @@ edict_t *SV_TestEntityPosition(edict_t *ent)
     trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
 
     if (trace.startsolid)
-        return g_edicts;
+        return game.world;
 
     return NULL;
 }
@@ -249,7 +249,7 @@ otherwise riders would continue to slide.
 */
 bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 {
-    int         i, e;
+    int         i;
     edict_t     *check, *block;
     vec3_t      mins, maxs;
     pushed_t    *p;
@@ -292,10 +292,7 @@ bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
     SV_LinkEntity(pusher);
 
 // see if any solid entities are inside the final position
-    check = g_edicts + 1;
-    for (e = 1; e < globals.num_edicts; e++, check++) {
-        if (!check->inuse)
-            continue;
+    for (check = G_NextEnt(game.world); check; check = G_NextEnt(check)) {
         if (check->movetype == MOVETYPE_PUSH
             || check->movetype == MOVETYPE_STOP
             || check->movetype == MOVETYPE_NONE
@@ -592,9 +589,9 @@ void SV_Physics_Toss(edict_t *ent)
         ent->waterlevel = 0;
 
     if (!wasinwater && isinwater)
-        SV_PositionedSound(old_origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
+        SV_PositionedSound(old_origin, game.world, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
     else if (wasinwater && !isinwater)
-        SV_PositionedSound(ent->s.origin, g_edicts, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
+        SV_PositionedSound(ent->s.origin, game.world, CHAN_AUTO, SV_SoundIndex("misc/h2ohit1.wav"), 1, ATTN_NORM, 0);
 
 // move teamslaves
     for (slave = ent->teamchain; slave; slave = slave->teamchain) {

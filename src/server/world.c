@@ -248,8 +248,9 @@ void PF_LinkEdict(edict_t *ent)
     server_entity_t *sent;
     int entnum;
 
-    if (ent == ge->edicts)
-        return;        // don't add the world
+    // world is allowed to be (silently) ignored
+    if (ent == ge->entities)
+        return;
 
     entnum = NUM_FOR_EDICT(ent);
     sent = &sv.entities[entnum];
@@ -335,7 +336,7 @@ static void SV_AreaEdicts_r(areanode_t *node)
         start = &node->trigger_edicts;
 
     LIST_FOR_EACH(server_entity_t, check_sent, start, area) {
-        edict_t *check = EDICT_POOL(check_sent - sv.entities);
+        edict_t *check = EDICT_NUM(check_sent - sv.entities);
         if (check->solid == SOLID_NOT)
             continue;        // deactivated
         if (check->absmin[0] > area_maxs[0]
@@ -418,7 +419,7 @@ SV_PointContents
 */
 int SV_PointContents(vec3_t p)
 {
-    edict_t     *touch[MAX_EDICTS], *hit;
+    edict_t     *touch[MAXTOUCH * 4], *hit;
     int         i, num;
     int         contents;
 
@@ -430,7 +431,7 @@ int SV_PointContents(vec3_t p)
     contents = CM_PointContents(p, sv.cm.cache->nodes);
 
     // or in contents from all the other entities
-    num = SV_AreaEdicts(p, p, touch, MAX_EDICTS, AREA_SOLID);
+    num = SV_AreaEdicts(p, p, touch, q_countof(touch), AREA_SOLID);
 
     for (i = 0; i < num; i++) {
         hit = touch[i];
@@ -454,7 +455,7 @@ static void SV_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
 {
     vec3_t      boxmins, boxmaxs;
     int         i, num;
-    edict_t     *touchlist[MAX_EDICTS], *touch;
+    edict_t     *touchlist[MAXTOUCH * 4], *touch;
     trace_t     trace;
 
     // create the bounding box of the entire move
@@ -468,7 +469,7 @@ static void SV_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
         }
     }
 
-    num = SV_AreaEdicts(boxmins, boxmaxs, touchlist, MAX_EDICTS, AREA_SOLID);
+    num = SV_AreaEdicts(boxmins, boxmaxs, touchlist, q_countof(touchlist), AREA_SOLID);
 
     // be careful, it is possible to have an entity in this
     // list removed before we get to it (killtriggered)
@@ -523,7 +524,7 @@ void SV_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
     // clip to world
     CM_BoxTrace(tr, start, end, mins, maxs, sv.cm.cache->nodes, contentmask);
 
-    tr->ent = ge->edicts;
+    tr->ent = ge->entities;
 
     if (tr->fraction != 0.f) {
         // not blocked by the world

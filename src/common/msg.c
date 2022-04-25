@@ -425,7 +425,7 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
         if (!from)
             Com_Errorf(ERR_DROP, "%s: NULL", __func__);
 
-        if (from->number < 1 || from->number >= MAX_EDICTS)
+        if (from->number < 1 || from->number >= MAX_PACKET_ENTITIES)
             Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, from->number);
 
         uint32_t bits = U_REMOVE;
@@ -444,7 +444,7 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
         return; // remove entity
     }
 
-    if (to->number < 1 || to->number >= MAX_EDICTS)
+    if (to->number < 1 || to->number >= MAX_PACKET_ENTITIES)
         Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, to->number);
 
     if (!from)
@@ -1256,7 +1256,7 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
         Com_Errorf(ERR_DROP, "%s: NULL", __func__);
     }
 
-    if (number < 1 || number >= MAX_EDICTS) {
+    if (number < 1 || number >= MAX_PACKET_ENTITIES) {
         Com_Errorf(ERR_DROP, "%s: bad entity number: %d", __func__, number);
     }
 

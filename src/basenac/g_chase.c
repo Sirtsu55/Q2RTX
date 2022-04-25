@@ -110,12 +110,12 @@ void ChaseNext(edict_t *ent)
     if (!ent->client->chase_target)
         return;
 
-    i = ent->client->chase_target - g_edicts;
+    i = ent->client->chase_target - globals.entities;
     do {
         i++;
         if (i > game.maxclients)
             i = 1;
-        e = g_edicts + i;
+        e = globals.entities + i;
         if (!e->inuse)
             continue;
         if (!e->client->resp.spectator)
@@ -134,12 +134,12 @@ void ChasePrev(edict_t *ent)
     if (!ent->client->chase_target)
         return;
 
-    i = ent->client->chase_target - g_edicts;
+    i = ent->client->chase_target - globals.entities;
     do {
         i--;
         if (i < 1)
             i = game.maxclients;
-        e = g_edicts + i;
+        e = globals.entities + i;
         if (!e->inuse)
             continue;
         if (!e->client->resp.spectator)
@@ -156,7 +156,7 @@ void GetChaseTarget(edict_t *ent)
     edict_t *other;
 
     for (i = 1; i <= game.maxclients; i++) {
-        other = g_edicts + i;
+        other = globals.entities + i;
         if (other->inuse && !other->client->resp.spectator) {
             ent->client->chase_target = other;
             ent->client->update_chase = true;

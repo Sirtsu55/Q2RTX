@@ -30,6 +30,48 @@ void G_ProjectSource(const vec3_t point, const vec3_t distance, const vec3_t for
 // Paril: multi-target support
 #define MULTI_TARGET_CHAR   ','
 
+// Fetch the next inuse entity from the appropriate
+// parts of the entity list. returns null when we have
+// nothing left to consume.
+edict_t *G_NextEnt(edict_t *from)
+{
+    if (!from)
+        return globals.entities; // world is always valid
+
+    from++;
+
+    while (true)
+    {
+        int n = from - globals.entities;
+
+        if (n >= MAX_EDICTS)
+            return NULL; // nothing left
+
+        // check if we've stepped into an unallocated range
+        if (n < MAX_PACKET_ENTITIES && n >= globals.num_entities[ENT_PACKET])
+        {
+            from = globals.entities + MAX_PACKET_ENTITIES; // start from ambient entities
+            n = from - globals.entities;
+        }
+        
+        if (n < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES && n >= MAX_PACKET_ENTITIES + globals.num_entities[ENT_AMBIENT])
+        {
+            from = globals.entities + MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES; // start from private entities
+            n = from - globals.entities;
+        }
+
+        if (n >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + globals.num_entities[ENT_PRIVATE])
+            return NULL; // end of private entities
+
+        // if we're in-use, good to go
+        if (from->inuse)
+            return from;
+
+        // check next entity
+        from++;
+    }
+}
+
 /*
 =============
 G_Find
@@ -44,53 +86,39 @@ NULL will be returned if the end of the list is reached.
 */
 edict_t *G_Find(edict_t *from, int fieldofs, char *match)
 {
-    char    *s;
-
-    if (!from)
-        from = g_edicts;
-    else
-        from++;
-
-    // Paril: multi-target support
-    bool is_multi_target = !!strchr(match, MULTI_TARGET_CHAR);
-
-    for (; from < &g_edicts[globals.num_edicts] ; from++) {
-        if (!from->inuse)
-            continue;
-        s = *(char **)((byte *)from + fieldofs);
+    for (from = G_NextEnt(from); from; from = G_NextEnt(from))
+    {
+        const char *s = *(char **)((byte *)from + fieldofs);
+        
         if (!s)
             continue;
+
         // Paril: multi-target support
-        if (is_multi_target)
+        const char *start = match, *end = strchr(match, MULTI_TARGET_CHAR);
+
+        while (true)
         {
-            const char *start = match, *end = strchr(match, MULTI_TARGET_CHAR);
+            if (!start || !*start)
+                break;
 
-            while (true)
+            if (end)
             {
-                if (!start || !*start)
-                    break;
-
-                if (end)
-                {
-                    if (!Q_strncasecmp(s, start, end - start))
-                        return from;
-                }
-                else
-                {
-                    if (!Q_strcasecmp(s, start))
-                        return from;
-                }
-
-                start = ((end && *end) ? end + 1 : end);
-
-                if (start)
-                    end = strchr(start, MULTI_TARGET_CHAR);
-                else
-                    end = NULL;
+                if (!Q_strncasecmp(s, start, end - start))
+                    return from;
             }
+            else
+            {
+                if (!Q_strcasecmp(s, start))
+                    return from;
+            }
+
+            start = ((end && *end) ? end + 1 : end);
+
+            if (start)
+                end = strchr(start, MULTI_TARGET_CHAR);
+            else
+                end = NULL;
         }
-        else if (!Q_stricmp(s, match))
-            return from;
     }
 
     return NULL;
@@ -108,19 +136,13 @@ findradius (origin, radius)
 */
 edict_t *findradius(edict_t *from, vec3_t org, float rad)
 {
-    vec3_t  eorg;
-    int     j;
+    vec3_t eorg;
 
-    if (!from)
-        from = g_edicts;
-    else
-        from++;
-    for (; from < &g_edicts[globals.num_edicts]; from++) {
-        if (!from->inuse)
-            continue;
+    while (from = G_NextEnt(from))
+    {
         if (from->solid == SOLID_NOT)
             continue;
-        for (j = 0 ; j < 3 ; j++)
+        for (int j = 0 ; j < 3 ; j++)
             eorg[j] = org[j] - (from->s.origin[j] + (from->mins[j] + from->maxs[j]) * 0.5f);
         if (VectorLength(eorg) > rad)
             continue;
@@ -418,7 +440,7 @@ void G_InitEdict(edict_t *e)
     e->inuse = true;
     e->classname = "noclass";
     e->gravity = 1.0f;
-    e->s.number = e - g_edicts;
+    e->s.number = e - globals.entities;
 }
 
 /*
@@ -432,13 +454,32 @@ instead of being removed and recreated, which can cause interpolated
 angles and bad trails.
 =================
 */
-edict_t *G_Spawn(void)
+edict_t *G_SpawnType(entity_type_t type)
 {
     int         i;
-    edict_t     *e;
+    int         start, end;
 
-    e = &g_edicts[game.maxclients + 1];
-    for (i = game.maxclients + 1 ; i < globals.num_edicts ; i++, e++) {
+    switch (type)
+    {
+    case ENT_PACKET:
+        start = game.maxclients + 1;
+        end = MAX_PACKET_ENTITIES;
+        break;
+    case ENT_AMBIENT:
+        start = MAX_PACKET_ENTITIES;
+        end = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
+        break;
+    case ENT_PRIVATE:
+        start = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
+        end = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES;
+        break;
+    default:
+        Com_Error(ERR_DROP, "G_SpawnType: bad type");
+    }
+
+    edict_t *e;
+
+    for (i = start, e = &globals.entities[start]; i < start + globals.num_entities[type]; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!e->inuse && (e->free_time < 2000 || level.time - e->free_time > 500)) {
@@ -447,13 +488,26 @@ edict_t *G_Spawn(void)
         }
     }
 
-    if (i == game.maxentities)
+    if (i == end)
         Com_Error(ERR_DROP, "ED_Alloc: no free edicts");
 
-    globals.num_edicts++;
+    globals.num_entities[type]++;
     G_InitEdict(e);
     return e;
 }
+
+/*
+=================
+G_Spawn
+
+Either finds a free edict, or allocates a new one.
+Try to avoid reusing an entity that was recently freed, because it
+can cause the client to think the entity morphed into something else
+instead of being removed and recreated, which can cause interpolated
+angles and bad trails.
+=================
+*/
+edict_t *G_Spawn(void) { return G_SpawnType(ENT_PACKET); }
 
 /*
 =================
@@ -466,7 +520,7 @@ void G_FreeEdict(edict_t *ed)
 {
     SV_UnlinkEntity(ed);        // unlink from world
 
-    if ((ed - g_edicts) <= (game.maxclients + BODY_QUEUE_SIZE)) {
+    if ((ed - globals.entities) <= (game.maxclients + BODY_QUEUE_SIZE)) {
         Com_WPrint("tried to free special edict\n");
         return;
     }
@@ -475,6 +529,7 @@ void G_FreeEdict(edict_t *ed)
     ed->classname = "freed";
     ed->free_time = level.time;
     ed->inuse = false;
+    ed->s.number = ed - globals.entities;
 }
 
 
@@ -487,14 +542,14 @@ G_TouchTriggers
 void G_TouchTriggers(edict_t *ent)
 {
     int         i, num;
-    edict_t     *touch[MAX_EDICTS], *hit;
+    edict_t     *touch[MAXTOUCH * 4], *hit;
 
     // dead things don't activate triggers!
     if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
         return;
 
     num = SV_AreaEdicts(ent->absmin, ent->absmax, touch
-                        , MAX_EDICTS, AREA_TRIGGERS);
+                        , q_countof(touch), AREA_TRIGGERS);
 
     if (!num)
         return;
@@ -519,38 +574,6 @@ void G_TouchTriggers(edict_t *ent)
         hit->touch(hit, ent, NULL, NULL);
     }
 }
-
-/*
-============
-G_TouchSolids
-
-Call after linking a new trigger in during gameplay
-to force all entities it covers to immediately touch it
-============
-*/
-void    G_TouchSolids(edict_t *ent)
-{
-    int         i, num;
-    edict_t     *touch[MAX_EDICTS], *hit;
-
-    num = SV_AreaEdicts(ent->absmin, ent->absmax, touch
-                        , MAX_EDICTS, AREA_SOLID);
-
-    // be careful, it is possible to have an entity in this
-    // list removed before we get to it (killtriggered)
-    for (i = 0 ; i < num ; i++) {
-        hit = touch[i];
-        if (!hit->inuse)
-            continue;
-        if (ent->touch)
-            ent->touch(hit, ent, NULL, NULL);
-        if (!ent->inuse)
-            break;
-    }
-}
-
-
-
 
 /*
 ==============================================================================

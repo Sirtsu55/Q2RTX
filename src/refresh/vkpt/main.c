@@ -299,7 +299,7 @@ vkpt_initialize_all(VkptInitFlags_t init_flags)
 			return VK_RESULT_MAX_ENUM;
 	}
 
-	vkpt_textures_prefetch();
+	//vkpt_textures_prefetch();
 
 	water_normal_texture = IMG_Find("textures/water_n.tga", IT_SKIN, IF_PERMANENT);
 

@@ -438,7 +438,6 @@ static const save_field_t gamefields[] = {
     SZ(helpmessage2, 512),
 
     I(maxclients),
-    I(maxentities),
 
     I(serverflags),
 
@@ -583,7 +582,7 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        write_index(f, *(void **)p, sizeof(edict_t), g_edicts, MAX_EDICTS - 1);
+        write_index(f, *(void **)p, sizeof(edict_t), globals.entities, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
         write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
@@ -776,7 +775,7 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         break;
 
     case F_EDICT:
-        *(edict_t **)p = read_index(f, sizeof(edict_t), g_edicts, game.maxentities - 1);
+        *(edict_t **)p = read_index(f, sizeof(edict_t), globals.entities, MAX_EDICTS - 1);
         break;
     case F_CLIENT:
         *(gclient_t **)p = read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1);
@@ -883,14 +882,11 @@ void ReadGame(const char *filename)
         fclose(f);
         Com_Error(ERR_DROP, "Savegame has bad maxclients");
     }
-    if (game.maxentities <= game.maxclients || game.maxentities > MAX_EDICTS) {
-        fclose(f);
-        Com_Error(ERR_DROP, "Savegame has bad maxentities");
-    }
 
-    g_edicts = Z_TagMallocz(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
-    globals.edicts = g_edicts;
-    globals.max_edicts = game.maxentities;
+    globals.entities = G_CreateEntityList();
+    game.world = globals.entities;
+    globals.num_entities[ENT_PACKET] = game.maxclients + 1;
+    globals.num_entities[ENT_AMBIENT] = globals.num_entities[ENT_PRIVATE] = 0;
 
     game.clients = Z_TagMallocz(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
     for (i = 0; i < game.maxclients; i++) {
@@ -911,8 +907,6 @@ WriteLevel
 */
 void WriteLevel(const char *filename)
 {
-    int     i;
-    edict_t *ent;
     FILE    *f;
 
     f = fopen(filename, "wb");
@@ -926,11 +920,8 @@ void WriteLevel(const char *filename)
     write_fields(f, levelfields, &level);
 
     // write out all the entities
-    for (i = 0; i < globals.num_edicts; i++) {
-        ent = &g_edicts[i];
-        if (!ent->inuse)
-            continue;
-        write_int(f, i);
+    for (edict_t *ent = globals.entities; ent; ent = G_NextEnt(ent)) {
+        write_int(f, ent->s.number);
         write_fields(f, entityfields, ent);
     }
     write_int(f, -1);
@@ -972,8 +963,10 @@ void ReadLevel(const char *filename)
         Com_Errorf(ERR_DROP, "Couldn't open %s", filename);
 
     // wipe all the entities
-    memset(g_edicts, 0, game.maxentities * sizeof(g_edicts[0]));
-    globals.num_edicts = game.maxclients + 1;
+    G_InitEntityList(globals.entities);
+
+    globals.num_entities[ENT_PACKET] = game.maxclients + 1;
+    globals.num_entities[ENT_AMBIENT] = globals.num_entities[ENT_PRIVATE] = 0;
 
     i = read_int(f);
     if (i != SAVE_MAGIC2) {
@@ -995,14 +988,29 @@ void ReadLevel(const char *filename)
         entnum = read_int(f);
         if (entnum == -1)
             break;
-        if (entnum < 0 || entnum >= game.maxentities) {
+        if (entnum < 0 || entnum >= MAX_EDICTS) {
             fclose(f);
             Com_Errorf(ERR_DROP, "%s: bad entity number", __func__);
         }
-        if (entnum >= globals.num_edicts)
-            globals.num_edicts = entnum + 1;
 
-        ent = &g_edicts[entnum];
+        int *num, start;
+
+        if (Ent_IsPacket(entnum)) {
+            start = 0;
+            num = &globals.num_entities[ENT_PACKET];
+        } else if (Ent_IsAmbient(entnum)) {
+            start = MAX_PACKET_ENTITIES;
+            num = &globals.num_entities[ENT_AMBIENT];
+        } else if (Ent_IsPrivate(entnum)) {
+            start = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
+            num = &globals.num_entities[ENT_PRIVATE];
+        } else {
+            Com_Errorf(ERR_DROP, "Entity number out of range (%i)\n", entnum);
+        }
+
+        *num = max(*num, entnum - start);
+
+        ent = &globals.entities[entnum];
         read_fields(f, entityfields, ent);
         ent->inuse = true;
         ent->s.number = entnum;
@@ -1015,18 +1023,13 @@ void ReadLevel(const char *filename)
 
     // mark all clients as unconnected
     for (i = 0 ; i < game.maxclients ; i++) {
-        ent = &g_edicts[i + 1];
+        ent = &globals.entities[i + 1];
         ent->client = game.clients + i;
         ent->client->pers.connected = false;
     }
 
     // do any load time things at this point
-    for (i = 0 ; i < globals.num_edicts ; i++) {
-        ent = &g_edicts[i];
-
-        if (!ent->inuse)
-            continue;
-
+    for (ent = globals.entities; ent; ent = G_NextEnt(ent)) {
         // fire any cross-level triggers
         if (ent->classname)
             if (strcmp(ent->classname, "target_crosslevel_target") == 0)

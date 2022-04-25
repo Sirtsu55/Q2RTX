@@ -417,7 +417,7 @@ static void CL_Record_f(void)
     }
 
     // baselines
-    for (i = 1; i < MAX_EDICTS; i++) {
+    for (i = 1; i < MAX_PACKET_ENTITIES; i++) {
         ent = &cl.baselines[i];
         if (!ent->number)
             continue;

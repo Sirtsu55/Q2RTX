@@ -455,33 +455,6 @@ void SP_point_combat(edict_t *self)
     SV_LinkEntity(self);
 }
 
-
-/*QUAKED viewthing (0 .5 .8) (-8 -8 -8) (8 8 8)
-Just for the debugging level.  Don't use
-*/
-void TH_viewthing(edict_t *ent)
-{
-    ent->s.frame = (ent->s.frame + 1) % 7;
-    ent->nextthink = level.time + 1;
-}
-
-void SP_viewthing(edict_t *ent)
-{
-    Com_Print("viewthing spawned\n");
-
-    ent->movetype = MOVETYPE_NONE;
-    ent->solid = SOLID_BBOX;
-    ent->s.renderfx = RF_FRAMELERP;
-    VectorSet(ent->mins, -16, -16, -24);
-    VectorSet(ent->maxs, 16, 16, 32);
-    ent->s.modelindex = SV_ModelIndex("models/objects/banner/tris.md2");
-    SV_LinkEntity(ent);
-    ent->nextthink = level.time + G_SecToMs(0.5f);
-    ent->think = TH_viewthing;
-    return;
-}
-
-
 /*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
 Used as a positional target for spotlights, etc.
 */
@@ -1719,7 +1692,7 @@ void SP_func_clock(edict_t *self)
     }
 
     if ((self->spawnflags & 1) && (!self->count))
-        self->count = 60 * 60;;
+        self->count = 60 * 60;
 
     func_clock_reset(self);
 

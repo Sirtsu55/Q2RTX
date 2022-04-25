@@ -110,7 +110,7 @@ static void Perf_Fire(edict_t *ent)
     fire_nail(ent, start, forward, 12, 2000);
 
     SV_WriteByte(svc_muzzleflash);
-    SV_WriteShort(ent - g_edicts);
+    SV_WriteEntity(ent);
     SV_WriteByte(MZ_HYPERBLASTER);
     SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 

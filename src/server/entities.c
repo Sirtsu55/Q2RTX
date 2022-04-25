@@ -334,8 +334,8 @@ void SV_BuildClientFrame(client_t *client)
     frame->num_entities = 0;
     frame->first_entity = svs.next_entity;
 
-    for (e = 1; e < ge->num_edicts; e++) {
-        ent = EDICT_POOL(e);
+    for (e = 1; e < ge->num_entities[ENT_PACKET]; e++) {
+        ent = EDICT_NUM(e);
 
         // ignore entities not in use
         if (!ent->inuse && (g_features->integer & GMF_PROPERINUSE)) {

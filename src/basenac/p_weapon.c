@@ -231,7 +231,7 @@ void Weapon_Activate(edict_t *ent, bool switched)
             i = ((ent->client->pers.weapon->weapmodel & 0xff) << 8);
         else
             i = 0;
-        ent->s.skinnum = (ent - g_edicts - 1) | i;
+        ent->s.skinnum = (ent - globals.entities - 1) | i;
     }
 
     // set ammo index

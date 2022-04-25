@@ -56,8 +56,8 @@ static void SV_CreateBaselines(void)
         memset(base, 0, sizeof(*base) * SV_BASELINES_PER_CHUNK);
     }
 
-    for (i = 1; i < ge->num_edicts; i++) {
-        ent = EDICT_POOL(i);
+    for (i = 1; i < ge->num_entities[ENT_PACKET]; i++) {
+        ent = EDICT_NUM(i);
 
         if ((g_features->integer & GMF_PROPERINUSE) && !ent->inuse) {
             continue;
@@ -66,8 +66,6 @@ static void SV_CreateBaselines(void)
         if (!ES_INUSE(&ent->s)) {
             continue;
         }
-
-        ent->s.number = i;
 
         chunk = &sv_client->baselines[i >> SV_BASELINES_SHIFT];
         if (*chunk == NULL) {

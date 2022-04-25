@@ -75,7 +75,7 @@ void BeginIntermission(edict_t *targ)
 
     // respawn any dead clients
     for (i = 0 ; i < game.maxclients ; i++) {
-        client = g_edicts + 1 + i;
+        client = globals.entities + 1 + i;
         if (!client->inuse)
             continue;
         if (client->health <= 0)
@@ -88,7 +88,7 @@ void BeginIntermission(edict_t *targ)
     if (strstr(level.changemap, "*")) {
         if (coop.integer) {
             for (i = 0 ; i < game.maxclients ; i++) {
-                client = g_edicts + 1 + i;
+                client = globals.entities + 1 + i;
                 if (!client->inuse)
                     continue;
                 // strip players of all keys between units
@@ -129,7 +129,7 @@ void BeginIntermission(edict_t *targ)
 
     // move all clients to the intermission point
     for (i = 0 ; i < game.maxclients ; i++) {
-        client = g_edicts + 1 + i;
+        client = globals.entities + 1 + i;
         if (!client->inuse)
             continue;
         MoveClientToIntermission(client);
@@ -160,7 +160,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
     // sort the clients by score
     total = 0;
     for (i = 0 ; i < game.maxclients ; i++) {
-        cl_ent = g_edicts + 1 + i;
+        cl_ent = globals.entities + 1 + i;
         if (!cl_ent->inuse || game.clients[i].resp.spectator)
             continue;
         score = game.clients[i].resp.score;
@@ -188,7 +188,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 
     for (i = 0 ; i < total ; i++) {
         cl = &game.clients[sorted[i]];
-        cl_ent = g_edicts + 1 + sorted[i];
+        cl_ent = globals.entities + 1 + sorted[i];
 
         x = (i >= 6) ? 160 : 0;
         y = 32 + 32 * (i % 6);
@@ -484,11 +484,11 @@ void G_CheckChaseStats(edict_t *ent)
     gclient_t *cl;
 
     for (i = 1; i <= game.maxclients; i++) {
-        cl = g_edicts[i].client;
-        if (!g_edicts[i].inuse || cl->chase_target != ent)
+        cl = globals.entities[i].client;
+        if (!globals.entities[i].inuse || cl->chase_target != ent)
             continue;
         memcpy(cl->ps.stats, ent->client->ps.stats, sizeof(cl->ps.stats));
-        G_SetSpectatorStats(g_edicts + i);
+        G_SetSpectatorStats(globals.entities + i);
     }
 }
 
@@ -515,7 +515,7 @@ void G_SetSpectatorStats(edict_t *ent)
 
     if (cl->chase_target && cl->chase_target->inuse)
         cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS +
-                                   (cl->chase_target - g_edicts) - 1;
+                                   (cl->chase_target - globals.entities) - 1;
     else
         cl->ps.stats[STAT_CHASE] = 0;
 }

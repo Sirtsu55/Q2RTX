@@ -28,8 +28,6 @@ int sm_meat_index;
 int snd_fry;
 int meansOfDeath;
 
-edict_t     *g_edicts;
-
 cvarRef_t   deathmatch;
 cvarRef_t   coop;
 cvarRef_t   dmflags;
@@ -91,6 +89,22 @@ void ShutdownGame(void)
 
     Z_FreeTags(TAG_LEVEL);
     Z_FreeTags(TAG_GAME);
+}
+
+void G_InitEntityList(edict_t *list)
+{
+    memset(list, 0, MAX_EDICTS * globals.edict_size);
+
+    for (int i = 0; i < MAX_EDICTS; i++, list++) {
+        list->s.number = i;
+    }
+}
+
+edict_t *G_CreateEntityList(void)
+{
+    edict_t *list = Z_TagMalloc(MAX_EDICTS * globals.edict_size, TAG_GAME);
+    G_InitEntityList(list);
+    return list;
 }
 
 /*
@@ -168,22 +182,19 @@ void InitGame(void)
     game.helpmessage1[0] = 0;
     game.helpmessage2[0] = 0;
 
-    cvarRef_t maxentities, maxclients;
+    cvarRef_t maxclients;
 
-    Cvar_Get(&maxentities, "maxentities", "1024", CVAR_LATCH);
     Cvar_Get(&maxclients, "maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
+    game.maxclients = maxclients.integer;
 
     // initialize all entities for this game
-    game.maxentities = maxentities.integer;
-    clamp(game.maxentities, maxclients.integer + 1, MAX_EDICTS);
-    g_edicts = Z_TagMallocz(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
-    globals.edicts = g_edicts;
-    globals.max_edicts = game.maxentities;
+    globals.entities = G_CreateEntityList();
+    game.world = globals.entities;
+    globals.num_entities[ENT_PACKET] = game.maxclients + 1;
+    globals.num_entities[ENT_AMBIENT] = globals.num_entities[ENT_PRIVATE] = 0;
 
     // initialize all clients for this game
-    game.maxclients = maxclients.integer;
     game.clients = Z_TagMallocz(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
-    globals.num_edicts = game.maxclients + 1;
 }
 
 
@@ -240,7 +251,7 @@ void ClientEndServerFrames(void)
     // calc the player views now that all pushing
     // and damage has been added
     for (i = 0 ; i < game.maxclients; i++) {
-        ent = g_edicts + 1 + i;
+        ent = globals.entities + 1 + i;
         if (!ent->inuse || !ent->client)
             continue;
         ClientEndServerFrame(ent);
@@ -379,7 +390,7 @@ void CheckDMRules(void)
     if (fraglimit.integer) {
         for (i = 0 ; i < game.maxclients ; i++) {
             cl = game.clients + i;
-            if (!g_edicts[i + 1].inuse)
+            if (!globals.entities[i + 1].inuse)
                 continue;
 
             if (cl->resp.score >= fraglimit.integer) {
@@ -411,7 +422,7 @@ void ExitLevel(void)
 
     // clear some things before going to next level
     for (i = 0 ; i < game.maxclients; i++) {
-        ent = g_edicts + 1 + i;
+        ent = globals.entities + 1 + i;
         if (!ent->inuse)
             continue;
         if (ent->health > ent->client->pers.max_health)
@@ -458,9 +469,6 @@ Advances the world by 0.1 seconds
 */
 void G_RunFrame(void)
 {
-    int     i;
-    edict_t *ent;
-
     G_UpdateCvars();
 
     level.time += BASE_FRAMETIME;
@@ -479,11 +487,8 @@ void G_RunFrame(void)
     // treat each object in turn
     // even the world gets a chance to think
     //
-    ent = &g_edicts[0];
-    for (i = 0 ; i < globals.num_edicts ; i++, ent++) {
-        if (!ent->inuse)
-            continue;
-
+    for (edict_t *ent = globals.entities; ent; ent = G_NextEnt(ent))
+    {
         level.current_entity = ent;
 
         VectorCopy(ent->s.origin, ent->s.old_origin);
@@ -496,12 +501,11 @@ void G_RunFrame(void)
             }
         }
 
-        if (i > 0 && i <= game.maxclients) {
+        if (ent->client) {
             ClientBeginServerFrame(ent);
-            continue;
+        } else {
+            G_RunEntity(ent);
         }
-
-        G_RunEntity(ent);
     }
 
     // see if it is time to end a deathmatch
@@ -712,6 +716,10 @@ void SV_PositionedSound(vec3_t origin, edict_t *entity, int channel,
                         int soundindex, float volume,
                         float attenuation, int pitch_shift)
 {
+    if (entity && (!entity->inuse || entity->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)) {
+        Com_Error(ERR_DROP, "Attempted to write private entity to network message");
+    }
+
     gi.SV_StartSound(origin, entity, channel, soundindex, volume, attenuation, pitch_shift);
 }
 
@@ -719,6 +727,10 @@ void SV_StartSound(edict_t *entity, int channel,
                    int soundindex, float volume,
                    float attenuation, int pitch_shift)
 {
+    if (!entity || !entity->inuse || entity->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        Com_Error(ERR_DROP, "Attempted to write private entity to network message");
+    }
+
     gi.SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, pitch_shift);
 }
 
@@ -759,6 +771,10 @@ void SV_Multicast(vec3_t origin, multicast_t to, bool reliable)
 
 void SV_Unicast(edict_t *ent, bool reliable)
 {
+    if (!ent || !ent->inuse || ent->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        Com_Error(ERR_DROP, "Attempted to write private entity to network message");
+    }
+
     gi.SV_Unicast(ent, reliable);
 }
 
@@ -775,6 +791,15 @@ void SV_WriteByte(int c)
 void SV_WriteShort(int c)
 {
     gi.WriteShort(c);
+}
+
+void SV_WriteEntity(edict_t *ent)
+{
+    if (!ent || !ent->inuse || ent->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        Com_Error(ERR_DROP, "Attempted to write private entity to network message");
+    }
+
+    gi.WriteShort(ent - globals.entities);
 }
 
 void SV_WriteLong(int c)

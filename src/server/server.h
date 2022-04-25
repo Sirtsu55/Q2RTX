@@ -62,7 +62,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SV_BASELINES_SHIFT      6
 #define SV_BASELINES_PER_CHUNK  (1 << SV_BASELINES_SHIFT)
 #define SV_BASELINES_MASK       (SV_BASELINES_PER_CHUNK - 1)
-#define SV_BASELINES_CHUNKS     (MAX_EDICTS >> SV_BASELINES_SHIFT)
+#define SV_BASELINES_CHUNKS     (MAX_PACKET_ENTITIES >> SV_BASELINES_SHIFT)
 
 #define SV_InfoSet(var, val) \
     Cvar_FullSet(var, val, CVAR_SERVERINFO|CVAR_ROM, FROM_CODE)
@@ -117,11 +117,6 @@ typedef struct {
 
     int         maxclients;
 } server_t;
-
-#define EDICT_POOL(n) ((edict_t *)((byte *)ge->edicts + ge->edict_size*(n)))
-
-#define EDICT_NUM(n) ((edict_t *)((byte *)ge->edicts + ge->edict_size*(n)))
-#define NUM_FOR_EDICT(e) ((int)(((byte *)(e) - (byte *)ge->edicts) / ge->edict_size))
 
 #define MAX_TOTAL_ENT_LEAFS        128
 
@@ -185,13 +180,6 @@ typedef struct {
     unsigned    credit_cap;
     unsigned    cost;
 } ratelimit_t;
-
-typedef struct {
-    struct edict_s  *edicts;
-    int         edict_size;
-    int         num_edicts;     // current number, <= max_edicts
-    int         max_edicts;
-} edict_pool_t;
 
 typedef struct client_s {
     list_t          entry;
@@ -550,9 +538,18 @@ void SV_WriteFrameToClient(client_t *client);
 //
 extern    game_export_t    *ge;
 
+static inline edict_t *EDICT_NUM(int n)
+{
+    return (edict_t *) (((byte *) ge->entities) + (ge->edict_size * n));
+}
+
+static inline int NUM_FOR_EDICT(edict_t *e)
+{
+    return e->s.number;
+}
+
 void SV_InitGameProgs(void);
 void SV_ShutdownGameProgs(void);
-void SV_InitEdict(edict_t *e);
 
 void PF_Pmove(pmove_t *pm);
 

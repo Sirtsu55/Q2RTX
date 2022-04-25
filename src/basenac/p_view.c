@@ -463,7 +463,7 @@ void P_FallingDamage(edict_t *ent)
         VectorSet(dir, 0, 0, 1);
 
         if (!deathmatch.integer || !(dmflags.integer & DF_NO_FALLING))
-            T_Damage(ent, world, world, dir, ent->s.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
+            T_Damage(ent, game.world, game.world, dir, ent->s.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
     } else {
         ent->s.event = EV_FALLSHORT;
         return;
@@ -583,7 +583,7 @@ void P_WorldEffects(void)
 
                 current_player->pain_debounce_time = level.time;
 
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
+                T_Damage(current_player, game.world, game.world, vec3_origin, current_player->s.origin, vec3_origin, current_player->dmg, 0, DAMAGE_NO_ARMOR, MOD_WATER);
             }
         }
     } else {
@@ -607,15 +607,15 @@ void P_WorldEffects(void)
             }
 
             if (envirosuit) // take 1/3 damage with envirosuit
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_LAVA);
+                T_Damage(current_player, game.world, game.world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_LAVA);
             else
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3 * waterlevel, 0, 0, MOD_LAVA);
+                T_Damage(current_player, game.world, game.world, vec3_origin, current_player->s.origin, vec3_origin, 3 * waterlevel, 0, 0, MOD_LAVA);
         }
 
         if (current_player->watertype & CONTENTS_SLIME) {
             if (!envirosuit) {
                 // no damage from slime with envirosuit
-                T_Damage(current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_SLIME);
+                T_Damage(current_player, game.world, game.world, vec3_origin, current_player->s.origin, vec3_origin, 1 * waterlevel, 0, 0, MOD_SLIME);
             }
         }
     }

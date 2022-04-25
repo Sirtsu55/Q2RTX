@@ -171,7 +171,7 @@ typedef struct client_state_s {
     centity_t       *solidEntities[MAX_PACKET_ENTITIES];
     int             numSolidEntities;
 
-    entity_state_t  baselines[MAX_EDICTS];
+    entity_state_t  baselines[MAX_PACKET_ENTITIES];
 
     entity_state_t  entityStates[MAX_PARSE_ENTITIES];
     int             numEntityStates;

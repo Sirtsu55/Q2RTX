@@ -485,6 +485,10 @@ do the apropriate things.
 */
 _Noreturn void Com_Error(error_type_t code, const char *message)
 {
+#if _DEBUG
+    __debugbreak();
+#endif
+
     // may not be entered recursively
     if (com_errorEntered) {
 #ifdef _DEBUG
