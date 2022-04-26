@@ -822,6 +822,18 @@ void S_BuildSoundList(entity_sound_t *sounds)
             sounds[i].pitch = ent->sound_pitch;
         }
     }
+
+    for (i = MAX_PACKET_ENTITIES; i < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES; i++) {
+        ent = &cl.ambients[i - MAX_PACKET_ENTITIES];
+        if (s_ambient->integer == 2 && !ent->modelindex) {
+            sounds[i].sound = 0;
+        } else if (s_ambient->integer == 3 && ent->number != listener_entnum) {
+            sounds[i].sound = 0;
+        } else {
+            sounds[i].sound = ent->sound;
+            sounds[i].pitch = ent->sound_pitch;
+        }
+    }
 }
 
 void S_RawSamples(int samples, int rate, int width,

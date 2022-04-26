@@ -128,8 +128,6 @@ void SV_RemoveClient(client_t *client)
 
 void SV_CleanClient(client_t *client)
 {
-    int i;
-
     // close any existing donwload
     SV_CloseDownload(client);
 
@@ -142,6 +140,11 @@ void SV_CleanClient(client_t *client)
     if (client->baselines) {
         Z_Free(client->baselines);
         client->baselines = NULL;
+    }
+
+    if (client->ambients) {
+        Z_Free(client->ambients);
+        client->ambients = NULL;
     }
 }
 
@@ -1670,6 +1673,30 @@ static void SV_MasterShutdown(void)
     }
 }
 
+static void SV_CheckAmbientEntities(void)
+{
+    bool changes = false;
+
+    // something has changed, write out the delta from the last
+    // received ambients to the current ambients
+    for (int32_t i = 0; i < ge->num_entities[ENT_AMBIENT]; i++) {
+        entity_state_t *from = &sv.ambient_states[i];
+        const entity_state_t *to = &EDICT_NUM(MAX_PACKET_ENTITIES + i)->s;
+        uint32_t bits = MSG_EntityWillWrite(from, to, 0);
+
+        // something changed!
+        // copy over current ambient state
+        if (bits) {
+            changes = true;
+            *from = *to;
+        }
+    }
+
+    if (changes) {
+        sv.ambient_state_id++;
+    }
+}
+
 /*
 ==================
 SV_Frame
@@ -1720,6 +1747,9 @@ unsigned SV_Frame(unsigned msec)
 
         // let everything in the world think and move
         SV_RunGameFrame();
+
+        // calculate ambient entity changes
+        SV_CheckAmbientEntities();
 
         // send messages back to the UDP clients
         SV_SendClientMessages();

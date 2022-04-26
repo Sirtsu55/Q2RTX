@@ -571,6 +571,10 @@ static void write_datagram(client_t *client)
 {
     size_t cursize;
 
+    // build ambient entity packet; this is unreliable
+    // and may be dropped, but that's okay.
+    SV_WriteAmbientsToClient(client);
+
     // send over all the relevant entity_state_t
     // and the player_state_t
     SV_WriteFrameToClient(client);

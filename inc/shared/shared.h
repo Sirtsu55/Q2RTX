@@ -92,6 +92,9 @@ typedef int qhandle_t;
 // sent over the network
 #define MAX_PRIVATE_ENTITIES    2048
 
+#define MAX_TOTAL_ENT_LEAFS     128
+#define MAX_ENT_CLUSTERS        16
+
 static inline bool Ent_IsPacket(int number) { return number >= 0 && number < MAX_PACKET_ENTITIES; }
 static inline bool Ent_IsAmbient(int number) { return number >= MAX_PACKET_ENTITIES && number < (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES); }
 static inline bool Ent_IsPrivate(int number) { return number >= MAX_PRIVATE_ENTITIES && number < (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES); }

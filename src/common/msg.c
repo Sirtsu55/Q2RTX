@@ -409,48 +409,16 @@ int MSG_WriteDeltaUsercmd(const usercmd_t *from,
 
 void MSG_WriteDir(const vec3_t dir)
 {
-    int     best;
-
-    best = DirToByte(dir);
-    MSG_WriteByte(best);
+    MSG_WriteByte(DirToByte(dir));
 }
 
-void MSG_WriteDeltaEntity(const entity_state_t *from,
-                          const entity_state_t *to,
-                          msgEsFlags_t         flags)
+uint32_t MSG_EntityWillWrite(const entity_state_t *from,
+                             const entity_state_t *to,
+                             msgEsFlags_t         flags)
 {
-    uint32_t    bits;
+    uint32_t bits;
 
-    if (!to) {
-        if (!from)
-            Com_Errorf(ERR_DROP, "%s: NULL", __func__);
-
-        if (from->number < 1 || from->number >= MAX_PACKET_ENTITIES)
-            Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, from->number);
-
-        uint32_t bits = U_REMOVE;
-        if (from->number & 0xff00)
-            bits |= U_NUMBER16 | U_MOREBITS1;
-
-        MSG_WriteByte(bits & 255);
-        if (bits & 0x0000ff00)
-            MSG_WriteByte((bits >> 8) & 255);
-
-        if (bits & U_NUMBER16)
-            MSG_WriteShort(from->number);
-        else
-            MSG_WriteByte(from->number);
-
-        return; // remove entity
-    }
-
-    if (to->number < 1 || to->number >= MAX_PACKET_ENTITIES)
-        Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, to->number);
-
-    if (!from)
-        from = &nullEntityState;
-
-// send an update
+    // send an update
     bits = 0;
 
     if (!(flags & MSG_ES_FIRSTPERSON)) {
@@ -535,15 +503,22 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
     if (to->sound_pitch != from->sound_pitch)
         bits |= U_SOUNDPITCH;
 
+    return bits;
+}
+
+void MSG_WriteDeltaEntity(const entity_state_t *from,
+    const entity_state_t *to,
+    msgEsFlags_t         flags)
+{
+    uint32_t bits = MSG_EntityWillWrite(from, to, flags);
+
     //
     // write the message
     //
     if (!bits && !(flags & MSG_ES_FORCE))
         return;     // nothing to send!
 
-    //----------
-
-    if (to->number & 0xff00)
+    if (to->number & 0xff00 || (flags & MSG_ES_AMBIENT))
         bits |= U_NUMBER16;     // number8 is implicit otherwise
 
     if (bits & 0xff000000)
@@ -636,6 +611,60 @@ void MSG_WriteDeltaEntity(const entity_state_t *from,
         MSG_WriteChar(to->sound_pitch);
 }
 
+void MSG_WriteDeltaPacketEntity(const entity_state_t *from,
+    const entity_state_t *to,
+    msgEsFlags_t         flags)
+{
+    if (!to) {
+        if (!from)
+            Com_Errorf(ERR_DROP, "%s: NULL", __func__);
+
+        if (from->number < 1 || from->number >= MAX_PACKET_ENTITIES)
+            Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, from->number);
+
+        // remove entity
+        uint32_t bits = U_REMOVE;
+        if (from->number & 0xff00)
+            bits |= U_NUMBER16 | U_MOREBITS1;
+
+        MSG_WriteByte(bits & 255);
+        if (bits & 0x0000ff00)
+            MSG_WriteByte((bits >> 8) & 255);
+
+        if (bits & U_NUMBER16)
+            MSG_WriteShort(from->number);
+        else
+            MSG_WriteByte(from->number);
+
+        return;
+    }
+
+    if (to->number < 1 || to->number >= MAX_PACKET_ENTITIES)
+        Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, to->number);
+
+    if (!from)
+        from = &nullEntityState;
+
+    MSG_WriteDeltaEntity(from, to, flags);
+}
+
+void MSG_WriteDeltaAmbientEntity(const entity_state_t *from,
+    const entity_state_t *to,
+    msgEsFlags_t         flags)
+{
+    if (!to || !from) {
+        Com_Errorf(ERR_DROP, "%s: NULL", __func__);
+    }
+
+    if (to->number < MAX_PACKET_ENTITIES || to->number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)
+        Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, to->number);
+
+    if (!from)
+        from = &nullEntityState;
+
+    MSG_WriteDeltaEntity(from, to, flags | MSG_ES_AMBIENT);
+}
+
 static inline int OFFSET2SHORT(float x)
 {
     return FLOAT2COMPRESS(x, 1024.f);
@@ -643,9 +672,6 @@ static inline int OFFSET2SHORT(float x)
 
 static inline void MSG_WriteOffset(vec3_t v)
 {
-    //MSG_WriteChar(OFFSET2CHAR(v[0]));
-    //MSG_WriteChar(OFFSET2CHAR(v[1]));
-    //MSG_WriteChar(OFFSET2CHAR(v[2]));
     MSG_WriteShort(OFFSET2SHORT(v[0]));
     MSG_WriteShort(OFFSET2SHORT(v[1]));
     MSG_WriteShort(OFFSET2SHORT(v[2]));
@@ -1210,7 +1236,7 @@ MSG_ParseEntityBits
 Returns the entity number and the header bits
 =================
 */
-int MSG_ParseEntityBits(int *bits)
+int MSG_ParseEntityBits(int *bits, msgEsFlags_t flags)
 {
     unsigned    b, total;
     int         number;
@@ -1229,7 +1255,7 @@ int MSG_ParseEntityBits(int *bits)
         total |= b << 24;
     }
 
-    if (total & U_NUMBER16)
+    if ((total & U_NUMBER16) || (flags & MSG_ES_AMBIENT))
         number = MSG_ReadShort();
     else
         number = MSG_ReadByte();
@@ -1247,17 +1273,13 @@ Can go from either a baseline or a previous packet_entity
 ==================
 */
 void MSG_ParseDeltaEntity(const entity_state_t *from,
-                          entity_state_t *to,
-                          int            number,
-                          int            bits,
-                          msgEsFlags_t   flags)
+    entity_state_t *to,
+    int            number,
+    int            bits,
+    msgEsFlags_t   flags)
 {
     if (!to) {
         Com_Errorf(ERR_DROP, "%s: NULL", __func__);
-    }
-
-    if (number < 1 || number >= MAX_PACKET_ENTITIES) {
-        Com_Errorf(ERR_DROP, "%s: bad entity number: %d", __func__, number);
     }
 
     // set everything to the state we are delta'ing from
@@ -1349,6 +1371,46 @@ void MSG_ParseDeltaEntity(const entity_state_t *from,
     if (bits & U_SOUNDPITCH) {
         to->sound_pitch = MSG_ReadChar();
     }
+}
+
+/*
+==================
+MSG_ParseDeltaPacketEntity
+
+Can go from either a baseline or a previous packet_entity
+==================
+*/
+void MSG_ParseDeltaPacketEntity(const entity_state_t *from,
+    entity_state_t *to,
+    int            number,
+    int            bits,
+    msgEsFlags_t   flags)
+{
+    if (number < 1 || number >= MAX_PACKET_ENTITIES) {
+        Com_Errorf(ERR_DROP, "%s: bad entity number: %d", __func__, number);
+    }
+
+    MSG_ParseDeltaEntity(from, to, number, bits, flags);
+}
+
+/*
+==================
+MSG_ParseDeltaAmbientEntity
+
+Can go from either a baseline or a previous packet_entity
+==================
+*/
+void MSG_ParseDeltaAmbientEntity(const entity_state_t *from,
+    entity_state_t *to,
+    int            number,
+    int            bits,
+    msgEsFlags_t   flags)
+{
+    if (number < MAX_PACKET_ENTITIES || number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        Com_Errorf(ERR_DROP, "%s: bad entity number: %d", __func__, number);
+    }
+
+    MSG_ParseDeltaEntity(from, to, number, bits, flags);
 }
 
 #endif // USE_CLIENT
@@ -1626,9 +1688,8 @@ const char *MSG_ServerCommandString(int cmd)
         S(centerprint)
         S(download)
         S(playerinfo)
-        S(packetentities)
-        S(deltapacketentities)
         S(frame)
+        S(ambient)
         S(zpacket)
         S(zdownload)
         S(gamestate)

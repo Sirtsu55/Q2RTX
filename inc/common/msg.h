@@ -34,7 +34,8 @@ typedef enum {
 typedef enum {
     MSG_ES_FORCE        = (1 << 0),
     MSG_ES_NEWENTITY    = (1 << 1),
-    MSG_ES_FIRSTPERSON  = (1 << 2)
+    MSG_ES_FIRSTPERSON  = (1 << 2),
+    MSG_ES_AMBIENT      = (1 << 3) // always short
 } msgEsFlags_t;
 
 extern sizebuf_t    msg_write;
@@ -65,7 +66,18 @@ void    MSG_WriteBits(int value, int bits);
 int     MSG_WriteDeltaUsercmd(const usercmd_t *from, const usercmd_t *cmd);
 #endif
 void    MSG_WriteDir(const vec3_t vector);
-void    MSG_WriteDeltaEntity(const entity_state_t *from, const entity_state_t *to, msgEsFlags_t flags);
+uint32_t MSG_EntityWillWrite(const entity_state_t *from,
+                             const entity_state_t *to,
+                             msgEsFlags_t         flags);
+void MSG_WriteDeltaEntity(const entity_state_t *from,
+                          const entity_state_t *to,
+                          msgEsFlags_t         flags);
+void MSG_WriteDeltaPacketEntity(const entity_state_t *from,
+                                const entity_state_t *to,
+                                msgEsFlags_t         flags);
+void MSG_WriteDeltaAmbientEntity(const entity_state_t *from,
+                                 const entity_state_t *to,
+                                 msgEsFlags_t         flags);
 int     MSG_WriteDeltaPlayerstate(const player_state_t *from, player_state_t *to, msgPsFlags_t flags);
 
 static inline void *MSG_WriteData(const void *data, size_t len)
@@ -95,8 +107,10 @@ void    MSG_ReadDir(vec3_t vector);
 #endif
 int     MSG_ReadBits(int bits);
 void    MSG_ReadDeltaUsercmd(const usercmd_t *from, usercmd_t *to);
-int     MSG_ParseEntityBits(int *bits);
+int     MSG_ParseEntityBits(int *bits, msgEsFlags_t flags);
 void    MSG_ParseDeltaEntity(const entity_state_t *from, entity_state_t *to, int number, int bits, msgEsFlags_t flags);
+void    MSG_ParseDeltaPacketEntity(const entity_state_t *from, entity_state_t *to, int number, int bits, msgEsFlags_t flags);
+void    MSG_ParseDeltaAmbientEntity(const entity_state_t *from, entity_state_t *to, int number, int bits, msgEsFlags_t flags);
 #if USE_CLIENT
 void    MSG_ParseDeltaPlayerstate(const player_state_t *from, player_state_t *to, int flags, int extraflags);
 #endif

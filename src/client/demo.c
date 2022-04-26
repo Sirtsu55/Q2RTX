@@ -111,7 +111,7 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
             // not changed at all. Note that players are always 'newentities',
             // this updates their old_origin always and prevents warping in case
             // of packet loss.
-            MSG_WriteDeltaEntity(oldent, newent,
+            MSG_WriteDeltaPacketEntity(oldent, newent,
                                  newent->number <= cl.maxclients ? MSG_ES_NEWENTITY : 0);
             oldindex++;
             newindex++;
@@ -120,14 +120,14 @@ static void emit_packet_entities(server_frame_t *from, server_frame_t *to)
 
         if (newnum < oldnum) {
             // this is a new entity, send it from the baseline
-            MSG_WriteDeltaEntity(&cl.baselines[newnum], newent, MSG_ES_FORCE | MSG_ES_NEWENTITY);
+            MSG_WriteDeltaPacketEntity(&cl.baselines[newnum], newent, MSG_ES_FORCE | MSG_ES_NEWENTITY);
             newindex++;
             continue;
         }
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_WriteDeltaEntity(oldent, NULL, MSG_ES_FORCE);
+            MSG_WriteDeltaPacketEntity(oldent, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
         }
@@ -428,7 +428,7 @@ static void CL_Record_f(void)
         }
 
         MSG_WriteByte(svc_spawnbaseline);
-        MSG_WriteDeltaEntity(NULL, ent, MSG_ES_FORCE);
+        MSG_WriteDeltaPacketEntity(NULL, ent, MSG_ES_FORCE);
     }
 
     MSG_WriteByte(svc_stufftext);

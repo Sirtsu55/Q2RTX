@@ -43,7 +43,7 @@ static inline void CL_ParseDeltaEntity(server_frame_t  *frame,
     }
 #endif
 
-    MSG_ParseDeltaEntity(old, state, newnum, bits, cl.esFlags);
+    MSG_ParseDeltaPacketEntity(old, state, newnum, bits, cl.esFlags);
 
     // shuffle previous origin to old
     if (!(bits & U_OLDORIGIN) && !(state->renderfx & RF_BEAM))
@@ -78,7 +78,7 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
     }
 
     while (1) {
-        newnum = MSG_ParseEntityBits(&bits);
+        newnum = MSG_ParseEntityBits(&bits, 0);
         if (newnum < 0 || newnum >= MAX_PACKET_ENTITIES) {
             Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, newnum);
         }
@@ -158,7 +158,6 @@ static void CL_ParsePacketEntities(server_frame_t *oldframe,
             }
             continue;
         }
-
     }
 
     // any remaining entities in the old frame are copied over
@@ -339,6 +338,39 @@ static void CL_ParseFrame(int extrabits)
         CL_DeltaFrame();
 }
 
+static void CL_ParseAmbients(void)
+{
+    cl.ambient_state_id = MSG_ReadByte();
+
+    // delta from the entities present in oldframe
+    while (1) {
+        uint32_t bits;
+        int32_t num = MSG_ParseEntityBits(&bits, MSG_ES_AMBIENT);
+        if (num < MAX_PACKET_ENTITIES || num > MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+            Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, num);
+        }
+
+        if (msg_read.readcount > msg_read.cursize) {
+            Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
+        }
+
+        if (num == MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+            break;
+        }
+
+        // delta from ambient info
+        SHOWNET(2, "   ambient: %i ", num);
+        MSG_ParseDeltaAmbientEntity(&cl.ambients[num - MAX_PACKET_ENTITIES], &cl.ambients[num - MAX_PACKET_ENTITIES], num, bits, MSG_ES_AMBIENT);
+        if (!bits) {
+            SHOWNET(2, "\n");
+        }
+    }
+
+    MSG_WriteByte(clc_ambient);
+    MSG_WriteByte(cl.ambient_state_id);
+    MSG_FlushTo(&cls.netchan->message);
+}
+
 /*
 =====================================================================
 
@@ -392,7 +424,21 @@ static void CL_ParseBaseline(int index, int bits)
         Com_LPrintf(PRINT_DEVELOPER, "\n");
     }
 #endif
-    MSG_ParseDeltaEntity(NULL, &cl.baselines[index], index, bits, cl.esFlags);
+    MSG_ParseDeltaPacketEntity(NULL, &cl.baselines[index], index, bits, cl.esFlags);
+}
+
+static void CL_ParseAmbient(int index, int bits)
+{
+    if (index < MAX_PACKET_ENTITIES || index >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
+    }
+#ifdef _DEBUG
+    if (cl_shownet->integer > 2) {
+        MSG_ShowDeltaEntityBits(bits);
+        Com_LPrintf(PRINT_DEVELOPER, "\n");
+    }
+#endif
+    MSG_ParseDeltaAmbientEntity(NULL, &cl.ambients[index - MAX_PACKET_ENTITIES], index, bits, cl.esFlags | MSG_ES_AMBIENT);
 }
 
 // instead of wasting space for svc_configstring and svc_spawnbaseline
@@ -410,12 +456,22 @@ static void CL_ParseGamestate(void)
     }
 
     while (msg_read.readcount < msg_read.cursize) {
-        index = MSG_ParseEntityBits(&bits);
+        index = MSG_ParseEntityBits(&bits, 0);
         if (!index) {
             break;
         }
         CL_ParseBaseline(index, bits);
     }
+
+    while (msg_read.readcount < msg_read.cursize) {
+        index = MSG_ParseEntityBits(&bits, MSG_ES_AMBIENT);
+        if (index == MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+            break;
+        }
+        CL_ParseAmbient(index, bits);
+    }
+
+    cl.ambient_state_id = MSG_ReadByte();
 }
 
 static void CL_ParseServerData(void)
@@ -1056,7 +1112,7 @@ void CL_ParseServerMessage(void)
             break;
 
         case svc_spawnbaseline:
-            index = MSG_ParseEntityBits(&bits);
+            index = MSG_ParseEntityBits(&bits, 0);
             CL_ParseBaseline(index, bits);
             break;
 
@@ -1081,6 +1137,10 @@ void CL_ParseServerMessage(void)
 
         case svc_frame:
             CL_ParseFrame(extrabits);
+            continue;
+
+        case svc_ambient:
+            CL_ParseAmbients();
             continue;
 
         case svc_inventory:

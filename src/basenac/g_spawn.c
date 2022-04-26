@@ -181,7 +181,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"func_wall", SP_func_wall},
     {"func_object", SP_func_object},
     {"func_timer", SP_func_timer, ENT_PRIVATE},
-    {"func_explosive", SP_func_explosive},
+    {"func_explosive", SP_func_explosive, ENT_AMBIENT},
     {"func_killbox", SP_func_killbox, ENT_PRIVATE},
 
     {"trigger_always", SP_trigger_always, ENT_PRIVATE},
@@ -197,7 +197,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"trigger_monsterjump", SP_trigger_monsterjump, ENT_PRIVATE},
 
     {"target_temp_entity", SP_target_temp_entity, ENT_PRIVATE},
-    {"target_speaker", SP_target_speaker},
+    {"target_speaker", SP_target_speaker, ENT_AMBIENT},
     {"target_explosion", SP_target_explosion, ENT_PRIVATE},
     {"target_changelevel", SP_target_changelevel, ENT_PRIVATE},
     {"target_secret", SP_target_secret, ENT_PRIVATE},

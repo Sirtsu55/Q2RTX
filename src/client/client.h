@@ -94,6 +94,12 @@ typedef struct centity_s {
     int             fly_stoptime;
 
     int             id;
+
+    // for ambient entities only
+    int areanum, areanum2;
+    int num_clusters;
+    int clusternums[MAX_ENT_CLUSTERS];
+    int headnode;
 } centity_t;
 
 extern centity_t    cl_entities[MAX_EDICTS];
@@ -168,10 +174,13 @@ typedef struct client_state_s {
     vec3_t      prediction_error;
 
     // rebuilt each valid frame
-    centity_t       *solidEntities[MAX_PACKET_ENTITIES];
+    centity_t       *solidEntities[MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES];
     int             numSolidEntities;
 
     entity_state_t  baselines[MAX_PACKET_ENTITIES];
+
+    entity_state_t  ambients[MAX_AMBIENT_ENTITIES];
+    uint8_t         ambient_state_id;
 
     entity_state_t  entityStates[MAX_PARSE_ENTITIES];
     int             numEntityStates;
@@ -270,6 +279,9 @@ typedef struct client_state_s {
 
     float gunspin[2];
     int gunweapon[2];
+
+    byte clientpvs[VIS_MAX_BYTES];
+    int last_valid_cluster;
 } client_state_t;
 
 extern    client_state_t    cl;

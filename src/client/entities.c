@@ -46,6 +46,76 @@ static inline bool entity_is_optimized(const entity_state_t *state)
 }
 
 static inline void
+link_ambient_entity(centity_t *ent, const entity_state_t *state)
+{
+    // link to PVS leafs
+    ent->areanum = 0;
+    ent->areanum2 = 0;
+
+    vec3_t absmin, absmax;
+    VectorAdd(state->origin, ent->mins, absmin);
+    VectorAdd(state->origin, ent->maxs, absmax);
+
+    mleaf_t     *leafs[MAX_TOTAL_ENT_LEAFS];
+    int         clusters[MAX_TOTAL_ENT_LEAFS];
+    int         num_leafs;
+    int         i, j;
+    int         area;
+    mnode_t     *topnode;
+    cm_t        cm = { cl.bsp };
+
+    //get all leafs, including solids
+    num_leafs = CM_BoxLeafs(&cm, absmin, absmax,
+        leafs, MAX_TOTAL_ENT_LEAFS, &topnode);
+
+    // set areas
+    for (i = 0; i < num_leafs; i++) {
+        clusters[i] = leafs[i]->cluster;
+        area = leafs[i]->area;
+        if (area) {
+            // doors may legally straggle two areas,
+            // but nothing should evern need more than that
+            if (ent->areanum && ent->areanum != area) {
+                if (ent->areanum2 && ent->areanum2 != area) {
+                    Com_DPrintf("Object touching 3 areas at %f %f %f\n",
+                        absmin[0], absmin[1], absmin[2]);
+                }
+                ent->areanum2 = area;
+            } else
+                ent->areanum = area;
+        }
+    }
+
+    // link clusters
+    ent->num_clusters = 0;
+
+    if (num_leafs >= MAX_TOTAL_ENT_LEAFS) {
+        // assume we missed some leafs, and mark by headnode
+        ent->num_clusters = -1;
+        ent->headnode = CM_NumNode(&cm, topnode);
+    } else {
+        ent->num_clusters = 0;
+        for (i = 0; i < num_leafs; i++) {
+            if (clusters[i] == -1)
+                continue;        // not a visible leaf
+            for (j = 0; j < i; j++)
+                if (clusters[j] == clusters[i])
+                    break;
+            if (j == i) {
+                if (ent->num_clusters == MAX_ENT_CLUSTERS) {
+                    // assume we missed some leafs, and mark by headnode
+                    ent->num_clusters = -1;
+                    ent->headnode = CM_NumNode(&cm, topnode);
+                    break;
+                }
+
+                ent->clusternums[ent->num_clusters++] = clusters[i];
+            }
+        }
+    }
+}
+
+static inline void
 entity_update_new(centity_t *ent, const entity_state_t *state, const vec_t *origin)
 {
     static int entity_ctr;
@@ -54,6 +124,10 @@ entity_update_new(centity_t *ent, const entity_state_t *state, const vec_t *orig
 
     // duplicate the current state so lerping doesn't hurt anything
     ent->prev = *state;
+
+    if (Ent_IsAmbient(state->number)) {
+        link_ambient_entity(ent, state);
+    }
 
     if (state->event == EV_PLAYER_TELEPORT ||
         state->event == EV_OTHER_TELEPORT ||
@@ -73,6 +147,12 @@ static inline void
 entity_update_old(centity_t *ent, const entity_state_t *state, const vec_t *origin)
 {
     int event = state->event;
+
+    if (Ent_IsAmbient(state->number) &&
+            (state->bbox != ent->current.bbox ||
+            !VectorCompare(origin, ent->current.origin))) {
+        link_ambient_entity(ent, state);
+    }
 
     if (state->modelindex != ent->current.modelindex
         || state->modelindex2 != ent->current.modelindex2
@@ -98,19 +178,27 @@ entity_update_old(centity_t *ent, const entity_state_t *state, const vec_t *orig
     ent->prev = ent->current;
 }
 
-static inline bool entity_is_new(const centity_t *ent)
+static inline bool ambient_entity_is_new(const centity_t *ent)
 {
-    if (!cl.oldframe.valid)
-        return true;    // last received frame was invalid
-
     if (ent->serverframe != cl.oldframe.number)
-        return true;    // wasn't in last received frame
+        return true;    // wasn't in last rendered frame
 
     if (cl_nolerp->integer == 2)
         return true;    // developer option, always new
 
     if (cl_nolerp->integer == 3)
         return false;   // developer option, lerp from last received frame
+
+    return false;
+}
+
+static inline bool entity_is_new(const centity_t *ent)
+{
+    if (!cl.oldframe.valid)
+        return true;    // last received frame was invalid
+
+    if (ambient_entity_is_new(ent))
+        return true;
 
     if (cl.oldframe.number != cl.frame.number - 1)
         return true;    // previous server frame was dropped
@@ -126,7 +214,7 @@ static void parse_entity_update(const entity_state_t *state)
 
     // if entity is solid, decode mins/maxs and add to the list
     if (state->bbox && state->number != cl.frame.clientNum + 1
-        && cl.numSolidEntities < MAX_PACKET_ENTITIES) {
+        && cl.numSolidEntities < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = ent;
         if (state->bbox != BBOX_BMODEL) {
             // encoded bbox
@@ -156,6 +244,37 @@ static void parse_entity_update(const entity_state_t *state)
     if (entity_is_optimized(state)) {
         Com_PlayerToEntityState(&cl.frame.ps, &ent->current);
     }
+}
+
+static void parse_ambient_entity(const entity_state_t *state)
+{
+    centity_t *ent = &cl_entities[state->number];
+
+    // if entity is solid, decode mins/maxs and add to the list
+    if (state->bbox && cl.numSolidEntities < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        cl.solidEntities[cl.numSolidEntities++] = ent;
+        if (state->bbox != BBOX_BMODEL) {
+            // encoded bbox
+            MSG_UnpackBBox(state->bbox, ent->mins, ent->maxs);
+        } else {
+            const mmodel_t *model = (cl.bsp->models + (state->modelindex - 1));
+            VectorCopy(model->mins, ent->mins);
+            VectorCopy(model->maxs, ent->maxs);
+        }
+    } else {
+        VectorClear(ent->mins);
+        VectorClear(ent->maxs);
+    }
+
+    if (!ent->current.number || ambient_entity_is_new(ent)) {
+        // wasn't in last update, so initialize some things
+        entity_update_new(ent, state, state->origin);
+    } else {
+        entity_update_old(ent, state, state->origin);
+    }
+
+    ent->serverframe = cl.frame.number;
+    ent->current = *state;
 }
 
 // an entity has just been parsed that has an event value
@@ -336,6 +455,14 @@ void CL_DeltaFrame(void)
         parse_entity_event(state->number);
     }
 
+    for (i = 0; i < MAX_AMBIENT_ENTITIES; i++) {
+        state = &cl.ambients[i];
+
+        if (state->number) {
+            parse_ambient_entity(state);
+        }
+    }
+
     if (cls.demo.recording && !cls.demo.paused && !cls.demo.seeking) {
         CL_EmitDemoFrame();
     }
@@ -435,6 +562,434 @@ static int adjust_shell_fx(int renderfx)
 	return renderfx;
 }
 
+static float autorotate;
+static int   autoanim, autoanim_10, autoanim_20;
+
+static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
+{
+    static entity_t ent;
+
+    int                 i;
+    clientinfo_t        *ci;
+    unsigned int        effects, renderfx;
+
+    ent.id = cent->id + RESERVED_ENTITIY_COUNT;
+
+    effects = s1->effects;
+    renderfx = s1->renderfx;
+
+    // set frame
+    if (effects & EF_ANIM01)
+        ent.frame = autoanim & 1;
+    else if (effects & EF_ANIM23)
+        ent.frame = 2 + (autoanim & 1);
+    else if (effects & EF_ANIM_ALL)
+        ent.frame = autoanim_10;
+    else if (effects & EF_ANIM_ALLFAST)
+        ent.frame = autoanim_20;
+    else
+        ent.frame = s1->frame;
+
+    ent.alpha = 1;
+
+    // quad and pent can do different things on client
+    if (effects & EF_PENT) {
+        effects &= ~EF_PENT;
+        effects |= EF_COLOR_SHELL;
+        renderfx |= RF_SHELL_RED;
+    }
+
+    if (effects & EF_QUAD) {
+        effects &= ~EF_QUAD;
+        effects |= EF_COLOR_SHELL;
+        renderfx |= RF_SHELL_BLUE;
+    }
+
+    if (effects & EF_DOUBLE) {
+        effects &= ~EF_DOUBLE;
+        effects |= EF_COLOR_SHELL;
+        renderfx |= RF_SHELL_DOUBLE;
+    }
+
+    if (effects & EF_HALF_DAMAGE) {
+        effects &= ~EF_HALF_DAMAGE;
+        effects |= EF_COLOR_SHELL;
+        renderfx |= RF_SHELL_HALF_DAM;
+    }
+
+    // optionally remove the glowing effect
+    if (cl_noglow->integer)
+        renderfx &= ~RF_GLOW;
+
+    ent.oldframe = cent->prev.frame;
+    ent.backlerp = 1.0f - cl.lerpfrac;
+
+    if (renderfx & RF_FRAMELERP) {
+        // step origin discretely, because the frames
+        // do the animation properly
+        VectorCopy(cent->current.origin, ent.origin);
+        VectorCopy(cent->current.old_origin, ent.oldorigin);  // FIXME
+    } else if (renderfx & RF_BEAM) {
+        // interpolate start and end points for beams
+        LerpVector(cent->prev.origin, cent->current.origin,
+            cl.lerpfrac, ent.origin);
+        LerpVector(cent->prev.old_origin, cent->current.old_origin,
+            cl.lerpfrac, ent.oldorigin);
+    } else {
+        if (s1->number == cl.frame.clientNum + 1) {
+            // use predicted origin
+            VectorCopy(cl.playerEntityOrigin, ent.origin);
+            VectorCopy(cl.playerEntityOrigin, ent.oldorigin);
+        } else {
+            // interpolate origin
+            LerpVector(cent->prev.origin, cent->current.origin,
+                cl.lerpfrac, ent.origin);
+            VectorCopy(ent.origin, ent.oldorigin);
+        }
+    }
+
+    // create a new entity
+
+    // tweak the color of beams
+    if (renderfx & RF_BEAM) {
+        // the four beam colors are encoded in 32 bits of skinnum (hack)
+        ent.alpha = 0.30f;
+        ent.skinnum = (s1->skinnum >> ((Q_rand() % 4) * 8)) & 0xff;
+        ent.model = 0;
+    } else {
+        // set skin
+        if (s1->modelindex == 255) {
+            // use custom player skin
+            ent.skinnum = 0;
+            ci = &cl.clientinfo[s1->skinnum & 0xff];
+            ent.skin = ci->skin;
+            ent.model = ci->model;
+            if (!ent.skin || !ent.model) {
+                ent.skin = cl.baseclientinfo.skin;
+                ent.model = cl.baseclientinfo.model;
+                ci = &cl.baseclientinfo;
+            }
+            if (renderfx & RF_USE_DISGUISE) {
+                char buffer[MAX_QPATH];
+
+                Q_concat(buffer, sizeof(buffer), "players/", ci->model_name, "/disguise.pcx");
+                ent.skin = R_RegisterSkin(buffer);
+            }
+        } else {
+            ent.skinnum = s1->skinnum;
+            ent.skin = 0;
+            ent.model = cl.model_draw[s1->modelindex];
+            if (ent.model == cl_mod_laser || ent.model == cl_mod_dmspot)
+                renderfx |= RF_NOSHADOW;
+        }
+    }
+
+    // only used for black hole model right now, FIXME: do better
+    if ((renderfx & RF_TRANSLUCENT) && !(renderfx & RF_BEAM))
+        ent.alpha = 0.70f;
+
+    // render effects (fullbright, translucent, etc)
+    if ((effects & EF_COLOR_SHELL))
+        ent.flags = renderfx & RF_FRAMELERP;    // renderfx go on color shell entity
+    else
+        ent.flags = renderfx;
+
+    // calculate angles
+    if (effects & EF_ROTATE) {  // some bonus items auto-rotate
+        ent.angles[0] = 0;
+        ent.angles[1] = autorotate;
+        ent.angles[2] = 0;
+    } else if (effects & EF_SPINNINGLIGHTS) {
+        vec3_t forward;
+        vec3_t start;
+
+        ent.angles[0] = 0;
+        ent.angles[1] = anglemod(cl.time / 2) + s1->angles[1];
+        ent.angles[2] = 180;
+
+        AngleVectors(ent.angles, forward, NULL, NULL);
+        VectorMA(ent.origin, 64, forward, start);
+        V_AddLight(start, 100, 1, 0, 0);
+    } else if (s1->number == cl.frame.clientNum + 1) {
+        VectorCopy(cl.playerEntityAngles, ent.angles);      // use predicted angles
+    } else { // interpolate angles
+        LerpAngles(cent->prev.angles, cent->current.angles,
+            cl.lerpfrac, ent.angles);
+
+        // mimic original ref_gl "leaning" bug (uuugly!)
+        if (s1->modelindex == 255 && cl_rollhack->integer) {
+            ent.angles[ROLL] = -ent.angles[ROLL];
+        }
+    }
+
+    int base_entity_flags = 0;
+
+    if (s1->number == cl.frame.clientNum + 1) {
+        if (effects & EF_FLAG1)
+            V_AddLight(ent.origin, 225, 1.0f, 0.1f, 0.1f);
+        else if (effects & EF_FLAG2)
+            V_AddLight(ent.origin, 225, 0.1f, 0.1f, 1.0f);
+        else if (effects & EF_TAGTRAIL)
+            V_AddLight(ent.origin, 225, 1.0f, 1.0f, 0.0f);
+        else if (effects & EF_TRACKERTRAIL)
+            V_AddLight(ent.origin, 225, -1.0f, -1.0f, -1.0f);
+
+        if (!cl.thirdPersonView)
+        {
+            if(vid_rtx->integer)
+                base_entity_flags |= RF_VIEWERMODEL;    // only draw from mirrors
+            else
+                goto skip;
+        }
+
+        // don't tilt the model - looks weird
+        ent.angles[0] = 0.f;
+
+        // offset the model back a bit to make the view point located in front of the head
+        vec3_t angles = { 0.f, ent.angles[1], 0.f };
+        vec3_t forward;
+        AngleVectors(angles, forward, NULL, NULL);
+
+        float offset = -15.f;
+        VectorMA(ent.origin, offset, forward, ent.origin);
+        VectorMA(ent.oldorigin, offset, forward, ent.oldorigin);
+    }
+
+    // if set to invisible, skip
+    if (!s1->modelindex) {
+        goto skip;
+    }
+
+    if (effects & EF_BFG) {
+        ent.flags |= RF_TRANSLUCENT;
+        ent.alpha = 0.30f;
+    }
+
+    if (effects & EF_PLASMA) {
+        ent.flags |= RF_TRANSLUCENT;
+        ent.alpha = 0.6f;
+    }
+
+    if (effects & EF_SPHERETRANS) {
+        ent.flags |= RF_TRANSLUCENT;
+        if (effects & EF_TRACKERTRAIL)
+            ent.alpha = 0.6f;
+        else
+            ent.alpha = 0.3f;
+    }
+
+    ent.flags |= base_entity_flags;
+
+    // in rtx mode, the base entity has the renderfx for shells
+    if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
+        renderfx = adjust_shell_fx(renderfx);
+        ent.flags |= renderfx;
+    }
+
+    // add to refresh list
+    V_AddEntity(&ent);
+
+    // add dlights for flares
+    model_t* model;
+    if (ent.model && !(ent.model & 0x80000000) &&
+        (model = MOD_ForHandle(ent.model)))
+    {
+        if (model->model_class == MCLASS_FLARE)
+        {
+            float phase = (float)cl.time * 0.03f + (float)ent.id;
+            float anim = sinf(phase);
+
+            float offset = anim * 1.5f + 5.f;
+            float brightness = anim * 0.2f + 0.8f;
+
+            vec3_t origin;
+            VectorCopy(ent.origin, origin);
+            origin[2] += offset;
+
+            V_AddLightEx(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
+        }
+    }
+
+    // color shells generate a separate entity for the main model
+    if ((effects & EF_COLOR_SHELL) && !vid_rtx->integer) {
+        renderfx = adjust_shell_fx(renderfx);
+        ent.flags = renderfx | RF_TRANSLUCENT | base_entity_flags;
+        ent.alpha = 0.30f;
+        V_AddEntity(&ent);
+    }
+
+    ent.skin = 0;       // never use a custom skin on others
+    ent.skinnum = 0;
+    ent.flags = base_entity_flags;
+    ent.alpha = 0;
+
+    // duplicate for linked models
+    if (s1->modelindex2) {
+        if (s1->modelindex2 == 255) {
+            // custom weapon
+            ci = &cl.clientinfo[s1->skinnum & 0xff];
+            i = (s1->skinnum >> 8); // 0 is default weapon model
+            if (i < 0 || i > cl.numWeaponModels - 1)
+                i = 0;
+            ent.model = ci->weaponmodel[i];
+            if (!ent.model) {
+                if (i != 0)
+                    ent.model = ci->weaponmodel[0];
+                if (!ent.model)
+                    ent.model = cl.baseclientinfo.weaponmodel[0];
+            }
+        } else
+            ent.model = cl.model_draw[s1->modelindex2];
+
+        // PMM - check for the defender sphere shell .. make it translucent
+        if (!Q_strcasecmp(cl.configstrings[CS_MODELS + (s1->modelindex2)], "models/items/shell/tris.md2")) {
+            ent.alpha = 0.32f;
+            ent.flags = RF_TRANSLUCENT;
+        }
+
+        if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
+            ent.flags |= renderfx;
+        }
+
+        V_AddEntity(&ent);
+
+        //PGM - make sure these get reset.
+        ent.flags = base_entity_flags;
+        ent.alpha = 0;
+    }
+
+    if (s1->modelindex3) {
+        ent.model = cl.model_draw[s1->modelindex3];
+        V_AddEntity(&ent);
+    }
+
+    if (s1->modelindex4) {
+        ent.model = cl.model_draw[s1->modelindex4];
+        V_AddEntity(&ent);
+    }
+
+    if (effects & EF_POWERSCREEN) {
+        ent.model = cl_mod_powerscreen;
+        ent.oldframe = 0;
+        ent.frame = 0;
+        ent.flags |= (RF_TRANSLUCENT | RF_SHELL_GREEN);
+        ent.alpha = 0.30f;
+        V_AddEntity(&ent);
+    }
+
+    // add automatic particle trails
+    if (effects & ~EF_ROTATE) {
+        if (effects & EF_ROCKET) {
+            if (!(cl_disable_particles->integer & NOPART_ROCKET_TRAIL)) {
+                CL_RocketTrail(cent->lerp_origin, ent.origin, cent);
+            }
+            V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
+        } else if (effects & EF_BLASTER) {
+            if (effects & EF_TRACKER) {
+                CL_BlasterTrail2(cent->lerp_origin, ent.origin);
+                V_AddLight(ent.origin, 200, 0.1f, 0.4f, 0.12f);
+            } else {
+                CL_BlasterTrail(cent->lerp_origin, ent.origin);
+                V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
+            }
+        } else if (effects & EF_HYPERBLASTER) {
+            if (effects & EF_TRACKER)
+                V_AddLight(ent.origin, 200, 0.1f, 0.4f, 0.12f);
+            else
+                V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
+        } else if (effects & EF_GIB) {
+            CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
+        } else if (effects & EF_GRENADE) {
+            if (!(cl_disable_particles->integer & NOPART_GRENADE_TRAIL)) {
+                CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
+            }
+        } else if (effects & EF_FLIES) {
+            CL_FlyEffect(cent, ent.origin);
+        } else if (effects & EF_BFG) {
+            if (effects & EF_ANIM_ALLFAST) {
+                CL_BfgParticles(&ent);
+#if USE_DLIGHTS
+                i = 100;
+            } else {
+                static const int bfg_lightramp[6] = {300, 400, 600, 300, 150, 75};
+
+                i = s1->frame; clamp(i, 0, 5);
+                i = bfg_lightramp[i];
+#endif
+            }
+            const vec3_t nvgreen = { 0.2716f, 0.5795f, 0.04615f };
+            V_AddLightEx(ent.origin, i, nvgreen[0], nvgreen[1], nvgreen[2], 20.f);
+        } else if (effects & EF_TRAP) {
+            ent.origin[2] += 32;
+            CL_TrapParticles(cent, ent.origin);
+#if USE_DLIGHTS
+            i = (Q_rand() % 100) + 100;
+            V_AddLight(ent.origin, i, 1, 0.8f, 0.1f);
+#endif
+        } else if (effects & EF_FLAG1) {
+            CL_FlagTrail(cent->lerp_origin, ent.origin, 242);
+            V_AddLight(ent.origin, 225, 1, 0.1f, 0.1f);
+        } else if (effects & EF_FLAG2) {
+            CL_FlagTrail(cent->lerp_origin, ent.origin, 115);
+            V_AddLight(ent.origin, 225, 0.1f, 0.1f, 1);
+        } else if (effects & EF_TAGTRAIL) {
+            CL_TagTrail(cent->lerp_origin, ent.origin, 220);
+            V_AddLight(ent.origin, 225, 1.0f, 1.0f, 0.0f);
+        } else if (effects & EF_TRACKERTRAIL) {
+            if (effects & EF_TRACKER) {
+#if USE_DLIGHTS
+                float intensity;
+
+                intensity = 50 + (500 * (sin(cl.time / 500.0f) + 1.0f));
+                V_AddLight(ent.origin, intensity, -1.0f, -1.0f, -1.0f);
+#endif
+            } else {
+                CL_Tracker_Shell(cent->lerp_origin);
+                V_AddLight(ent.origin, 155, -1.0f, -1.0f, -1.0f);
+            }
+        } else if (effects & EF_TRACKER) {
+            CL_TrackerTrail(cent->lerp_origin, ent.origin, 0);
+            V_AddLight(ent.origin, 200, -1, -1, -1);
+        } else if (effects & EF_GREENGIB) {
+            CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
+        }
+        else if (effects & EF_IONRIPPER) { // N&C - Turned into flickering candle light
+                                           // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.2)) / (3.24356 - (frand() / 3.24356));
+
+                                           //  float offset = anim * 0.0f;
+                                           // float brightness = anim * 1.2f + 1.6f;
+
+            vec3_t origin;
+            VectorCopy(ent.origin, origin);
+            // origin[2] += offset;
+
+            // V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
+            V_AddLightEx(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
+        }
+        else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
+                                                  // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
+
+                                                  //  float offset = anim * 0.0f;
+                                                  //  float brightness = anim * 1.2f + 1.6f;
+
+            vec3_t origin;
+            VectorCopy(ent.origin, origin);
+            // origin[2] += offset;
+
+            // V_AddLightEx(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
+            V_AddLightEx(origin, 6000.f, 1.6f, 0.7f, 0.2f, 0.5f);
+        } else if (effects & EF_PLASMA) {
+            if (effects & EF_ANIM_ALLFAST) {
+                CL_BlasterTrail(cent->lerp_origin, ent.origin);
+            }
+            V_AddLight(ent.origin, 130, 1, 0.5f, 0.5f);
+        }
+    }
+
+skip:
+    VectorCopy(ent.origin, cent->lerp_origin);
+}
+
 /*
 ===============
 CL_AddPacketEntities
@@ -443,446 +998,41 @@ CL_AddPacketEntities
 */
 static void CL_AddPacketEntities(void)
 {
-    entity_t            ent;
-    entity_state_t      *s1;
-    float               autorotate;
-    int                 i;
-    int                 pnum;
-    centity_t           *cent;
-    int                 autoanim, autoanim_10, autoanim_20;
-    clientinfo_t        *ci;
-    unsigned int        effects, renderfx;
+    for (int pnum = 0; pnum < cl.frame.numEntities; pnum++) {
+        int i = (cl.frame.firstEntity + pnum) & PARSE_ENTITIES_MASK;
+        entity_state_t *s1 = &cl.entityStates[i];
 
-    // bonus items rotate at a fixed rate
-    autorotate = anglemod(cl.time * 0.1f);
+        CL_AddEntity(&cl_entities[s1->number], s1);
+    }
+}
 
-    // brush models can auto animate their frames
-    autoanim = 2 * cl.time / 1000;
-    autoanim_10 = 10 * cl.time / 1000;
-    autoanim_20 = 20 * cl.time / 1000;
+static void CL_AddAmbientEntities(void)
+{
+    cm_t cm = { cl.bsp };
+    for (int e = 0; e < MAX_AMBIENT_ENTITIES; e++) {
+        entity_state_t *s1 = &cl.ambients[e];
 
-    memset(&ent, 0, sizeof(ent));
-
-    for (pnum = 0; pnum < cl.frame.numEntities; pnum++) {
-        i = (cl.frame.firstEntity + pnum) & PARSE_ENTITIES_MASK;
-        s1 = &cl.entityStates[i];
-
-        cent = &cl_entities[s1->number];
-        ent.id = cent->id + RESERVED_ENTITIY_COUNT;
-
-        effects = s1->effects;
-        renderfx = s1->renderfx;
-
-        // set frame
-        if (effects & EF_ANIM01)
-            ent.frame = autoanim & 1;
-        else if (effects & EF_ANIM23)
-            ent.frame = 2 + (autoanim & 1);
-        else if (effects & EF_ANIM_ALL)
-            ent.frame = autoanim_10;
-        else if (effects & EF_ANIM_ALLFAST)
-            ent.frame = autoanim_20;
-        else
-            ent.frame = s1->frame;
-
-        ent.alpha = 1;
-
-        // quad and pent can do different things on client
-        if (effects & EF_PENT) {
-            effects &= ~EF_PENT;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_RED;
+        if (!s1->number || (!s1->modelindex && !s1->effects)) {
+            continue;
         }
 
-        if (effects & EF_QUAD) {
-            effects &= ~EF_QUAD;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_BLUE;
-        }
+        centity_t *cent = &cl_entities[s1->number];
 
-        if (effects & EF_DOUBLE) {
-            effects &= ~EF_DOUBLE;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_DOUBLE;
-        }
-
-        if (effects & EF_HALF_DAMAGE) {
-            effects &= ~EF_HALF_DAMAGE;
-            effects |= EF_COLOR_SHELL;
-            renderfx |= RF_SHELL_HALF_DAM;
-        }
-
-        // optionally remove the glowing effect
-        if (cl_noglow->integer)
-            renderfx &= ~RF_GLOW;
-
-        ent.oldframe = cent->prev.frame;
-        ent.backlerp = 1.0f - cl.lerpfrac;
-
-        if (renderfx & RF_FRAMELERP) {
-            // step origin discretely, because the frames
-            // do the animation properly
-            VectorCopy(cent->current.origin, ent.origin);
-            VectorCopy(cent->current.old_origin, ent.oldorigin);  // FIXME
-        } else if (renderfx & RF_BEAM) {
-            // interpolate start and end points for beams
-            LerpVector(cent->prev.origin, cent->current.origin,
-                       cl.lerpfrac, ent.origin);
-            LerpVector(cent->prev.old_origin, cent->current.old_origin,
-                       cl.lerpfrac, ent.oldorigin);
+        if (cent->num_clusters == -1) {
+            // too many leafs for individual check, go by headnode
+            if (!CM_HeadnodeVisible(CM_NodeNum(&cm, cent->headnode), cl.clientpvs))
+                continue;
         } else {
-            if (s1->number == cl.frame.clientNum + 1) {
-                // use predicted origin
-                VectorCopy(cl.playerEntityOrigin, ent.origin);
-                VectorCopy(cl.playerEntityOrigin, ent.oldorigin);
-            } else {
-                // interpolate origin
-                LerpVector(cent->prev.origin, cent->current.origin,
-                           cl.lerpfrac, ent.origin);
-                VectorCopy(ent.origin, ent.oldorigin);
-            }
+            int i;
+            // check individual leafs
+            for (i = 0; i < cent->num_clusters; i++)
+                if (Q_IsBitSet(cl.clientpvs, cent->clusternums[i]))
+                    break;
+            if (i == cent->num_clusters)
+                continue;       // not visible
         }
-
-        // create a new entity
-
-        // tweak the color of beams
-        if (renderfx & RF_BEAM) {
-            // the four beam colors are encoded in 32 bits of skinnum (hack)
-            ent.alpha = 0.30f;
-            ent.skinnum = (s1->skinnum >> ((Q_rand() % 4) * 8)) & 0xff;
-            ent.model = 0;
-        } else {
-            // set skin
-            if (s1->modelindex == 255) {
-                // use custom player skin
-                ent.skinnum = 0;
-                ci = &cl.clientinfo[s1->skinnum & 0xff];
-                ent.skin = ci->skin;
-                ent.model = ci->model;
-                if (!ent.skin || !ent.model) {
-                    ent.skin = cl.baseclientinfo.skin;
-                    ent.model = cl.baseclientinfo.model;
-                    ci = &cl.baseclientinfo;
-                }
-                if (renderfx & RF_USE_DISGUISE) {
-                    char buffer[MAX_QPATH];
-
-                    Q_concat(buffer, sizeof(buffer), "players/", ci->model_name, "/disguise.pcx");
-                    ent.skin = R_RegisterSkin(buffer);
-                }
-            } else {
-                ent.skinnum = s1->skinnum;
-                ent.skin = 0;
-                ent.model = cl.model_draw[s1->modelindex];
-                if (ent.model == cl_mod_laser || ent.model == cl_mod_dmspot)
-                    renderfx |= RF_NOSHADOW;
-            }
-        }
-
-        // only used for black hole model right now, FIXME: do better
-        if ((renderfx & RF_TRANSLUCENT) && !(renderfx & RF_BEAM))
-            ent.alpha = 0.70f;
-
-        // render effects (fullbright, translucent, etc)
-        if ((effects & EF_COLOR_SHELL))
-            ent.flags = renderfx & RF_FRAMELERP;    // renderfx go on color shell entity
-        else
-            ent.flags = renderfx;
-
-        // calculate angles
-        if (effects & EF_ROTATE) {  // some bonus items auto-rotate
-            ent.angles[0] = 0;
-            ent.angles[1] = autorotate;
-            ent.angles[2] = 0;
-        } else if (effects & EF_SPINNINGLIGHTS) {
-            vec3_t forward;
-            vec3_t start;
-
-            ent.angles[0] = 0;
-            ent.angles[1] = anglemod(cl.time / 2) + s1->angles[1];
-            ent.angles[2] = 180;
-
-            AngleVectors(ent.angles, forward, NULL, NULL);
-            VectorMA(ent.origin, 64, forward, start);
-            V_AddLight(start, 100, 1, 0, 0);
-        } else if (s1->number == cl.frame.clientNum + 1) {
-            VectorCopy(cl.playerEntityAngles, ent.angles);      // use predicted angles
-        } else { // interpolate angles
-            LerpAngles(cent->prev.angles, cent->current.angles,
-                       cl.lerpfrac, ent.angles);
-
-            // mimic original ref_gl "leaning" bug (uuugly!)
-            if (s1->modelindex == 255 && cl_rollhack->integer) {
-                ent.angles[ROLL] = -ent.angles[ROLL];
-            }
-        }
-
-        int base_entity_flags = 0;
-
-        if (s1->number == cl.frame.clientNum + 1) {
-            if (effects & EF_FLAG1)
-                V_AddLight(ent.origin, 225, 1.0f, 0.1f, 0.1f);
-            else if (effects & EF_FLAG2)
-                V_AddLight(ent.origin, 225, 0.1f, 0.1f, 1.0f);
-            else if (effects & EF_TAGTRAIL)
-                V_AddLight(ent.origin, 225, 1.0f, 1.0f, 0.0f);
-            else if (effects & EF_TRACKERTRAIL)
-                V_AddLight(ent.origin, 225, -1.0f, -1.0f, -1.0f);
-
-			if (!cl.thirdPersonView)
-			{
-				if(vid_rtx->integer)
-					base_entity_flags |= RF_VIEWERMODEL;    // only draw from mirrors
-				else
-                goto skip;
-            }
-
-			// don't tilt the model - looks weird
-			ent.angles[0] = 0.f;
-
-			// offset the model back a bit to make the view point located in front of the head
-			vec3_t angles = { 0.f, ent.angles[1], 0.f };
-			vec3_t forward;
-			AngleVectors(angles, forward, NULL, NULL);
-
-			float offset = -15.f;
-			VectorMA(ent.origin, offset, forward, ent.origin);
-			VectorMA(ent.oldorigin, offset, forward, ent.oldorigin);
-        }
-
-        // if set to invisible, skip
-        if (!s1->modelindex) {
-            goto skip;
-        }
-
-        if (effects & EF_BFG) {
-            ent.flags |= RF_TRANSLUCENT;
-            ent.alpha = 0.30f;
-        }
-
-        if (effects & EF_PLASMA) {
-            ent.flags |= RF_TRANSLUCENT;
-            ent.alpha = 0.6f;
-        }
-
-        if (effects & EF_SPHERETRANS) {
-            ent.flags |= RF_TRANSLUCENT;
-            if (effects & EF_TRACKERTRAIL)
-                ent.alpha = 0.6f;
-            else
-                ent.alpha = 0.3f;
-        }
-
-        ent.flags |= base_entity_flags;
-
-		// in rtx mode, the base entity has the renderfx for shells
-		if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
-			renderfx = adjust_shell_fx(renderfx);
-			ent.flags |= renderfx;
-		}
-
-        // add to refresh list
-        V_AddEntity(&ent);
-
-		// add dlights for flares
-		model_t* model;
-		if (ent.model && !(ent.model & 0x80000000) &&
-			(model = MOD_ForHandle(ent.model)))
-		{
-			if (model->model_class == MCLASS_FLARE)
-			{
-				float phase = (float)cl.time * 0.03f + (float)ent.id;
-				float anim = sinf(phase);
-
-				float offset = anim * 1.5f + 5.f;
-				float brightness = anim * 0.2f + 0.8f;
-
-				vec3_t origin;
-				VectorCopy(ent.origin, origin);
-				origin[2] += offset;
-
-				V_AddLightEx(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
-                    }
-                }
-
-        // color shells generate a separate entity for the main model
-        if ((effects & EF_COLOR_SHELL) && !vid_rtx->integer) {
-			renderfx = adjust_shell_fx(renderfx);
-            ent.flags = renderfx | RF_TRANSLUCENT | base_entity_flags;
-            ent.alpha = 0.30f;
-            V_AddEntity(&ent);
-        }
-
-        ent.skin = 0;       // never use a custom skin on others
-        ent.skinnum = 0;
-        ent.flags = base_entity_flags;
-        ent.alpha = 0;
-
-        // duplicate for linked models
-        if (s1->modelindex2) {
-            if (s1->modelindex2 == 255) {
-                // custom weapon
-                ci = &cl.clientinfo[s1->skinnum & 0xff];
-                i = (s1->skinnum >> 8); // 0 is default weapon model
-                if (i < 0 || i > cl.numWeaponModels - 1)
-                    i = 0;
-                ent.model = ci->weaponmodel[i];
-                if (!ent.model) {
-                    if (i != 0)
-                        ent.model = ci->weaponmodel[0];
-                    if (!ent.model)
-                        ent.model = cl.baseclientinfo.weaponmodel[0];
-                }
-            } else
-                ent.model = cl.model_draw[s1->modelindex2];
-
-            // PMM - check for the defender sphere shell .. make it translucent
-            if (!Q_strcasecmp(cl.configstrings[CS_MODELS + (s1->modelindex2)], "models/items/shell/tris.md2")) {
-                ent.alpha = 0.32f;
-                ent.flags = RF_TRANSLUCENT;
-            }
-
-			if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
-				ent.flags |= renderfx;
-			}
-
-            V_AddEntity(&ent);
-
-            //PGM - make sure these get reset.
-            ent.flags = base_entity_flags;
-            ent.alpha = 0;
-        }
-
-        if (s1->modelindex3) {
-            ent.model = cl.model_draw[s1->modelindex3];
-            V_AddEntity(&ent);
-        }
-
-        if (s1->modelindex4) {
-            ent.model = cl.model_draw[s1->modelindex4];
-            V_AddEntity(&ent);
-        }
-
-        if (effects & EF_POWERSCREEN) {
-            ent.model = cl_mod_powerscreen;
-            ent.oldframe = 0;
-            ent.frame = 0;
-            ent.flags |= (RF_TRANSLUCENT | RF_SHELL_GREEN);
-            ent.alpha = 0.30f;
-            V_AddEntity(&ent);
-        }
-
-        // add automatic particle trails
-        if (effects & ~EF_ROTATE) {
-            if (effects & EF_ROCKET) {
-                if (!(cl_disable_particles->integer & NOPART_ROCKET_TRAIL)) {
-                    CL_RocketTrail(cent->lerp_origin, ent.origin, cent);
-                }
-                V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-            } else if (effects & EF_BLASTER) {
-                if (effects & EF_TRACKER) {
-                    CL_BlasterTrail2(cent->lerp_origin, ent.origin);
-                    V_AddLight(ent.origin, 200, 0.1f, 0.4f, 0.12f);
-                } else {
-                    CL_BlasterTrail(cent->lerp_origin, ent.origin);
-                    V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-                }
-            } else if (effects & EF_HYPERBLASTER) {
-                if (effects & EF_TRACKER)
-                    V_AddLight(ent.origin, 200, 0.1f, 0.4f, 0.12f);
-                else
-                    V_AddLight(ent.origin, 200, 0.6f, 0.4f, 0.12f);
-            } else if (effects & EF_GIB) {
-                CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-            } else if (effects & EF_GRENADE) {
-                if (!(cl_disable_particles->integer & NOPART_GRENADE_TRAIL)) {
-                    CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-                }
-            } else if (effects & EF_FLIES) {
-                CL_FlyEffect(cent, ent.origin);
-            } else if (effects & EF_BFG) {
-                if (effects & EF_ANIM_ALLFAST) {
-                    CL_BfgParticles(&ent);
-#if USE_DLIGHTS
-                    i = 100;
-                } else {
-                    static const int bfg_lightramp[6] = {300, 400, 600, 300, 150, 75};
-
-                    i = s1->frame; clamp(i, 0, 5);
-                    i = bfg_lightramp[i];
-#endif
-                }
-				const vec3_t nvgreen = { 0.2716f, 0.5795f, 0.04615f };
-				V_AddLightEx(ent.origin, i, nvgreen[0], nvgreen[1], nvgreen[2], 20.f);
-            } else if (effects & EF_TRAP) {
-                ent.origin[2] += 32;
-                CL_TrapParticles(cent, ent.origin);
-#if USE_DLIGHTS
-                i = (Q_rand() % 100) + 100;
-                V_AddLight(ent.origin, i, 1, 0.8f, 0.1f);
-#endif
-            } else if (effects & EF_FLAG1) {
-                CL_FlagTrail(cent->lerp_origin, ent.origin, 242);
-                V_AddLight(ent.origin, 225, 1, 0.1f, 0.1f);
-            } else if (effects & EF_FLAG2) {
-                CL_FlagTrail(cent->lerp_origin, ent.origin, 115);
-                V_AddLight(ent.origin, 225, 0.1f, 0.1f, 1);
-            } else if (effects & EF_TAGTRAIL) {
-                CL_TagTrail(cent->lerp_origin, ent.origin, 220);
-                V_AddLight(ent.origin, 225, 1.0f, 1.0f, 0.0f);
-            } else if (effects & EF_TRACKERTRAIL) {
-                if (effects & EF_TRACKER) {
-#if USE_DLIGHTS
-                    float intensity;
-
-                    intensity = 50 + (500 * (sin(cl.time / 500.0f) + 1.0f));
-                    V_AddLight(ent.origin, intensity, -1.0f, -1.0f, -1.0f);
-#endif
-                } else {
-                    CL_Tracker_Shell(cent->lerp_origin);
-                    V_AddLight(ent.origin, 155, -1.0f, -1.0f, -1.0f);
-                }
-            } else if (effects & EF_TRACKER) {
-                CL_TrackerTrail(cent->lerp_origin, ent.origin, 0);
-                V_AddLight(ent.origin, 200, -1, -1, -1);
-            } else if (effects & EF_GREENGIB) {
-                CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
-            }
-            else if (effects & EF_IONRIPPER) { // N&C - Turned into flickering candle light
-               // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.2)) / (3.24356 - (frand() / 3.24356));
-
-              //  float offset = anim * 0.0f;
-               // float brightness = anim * 1.2f + 1.6f;
-
-                vec3_t origin;
-                VectorCopy(ent.origin, origin);
-               // origin[2] += offset;
-
-               // V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
-                V_AddLightEx(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
-            }
-            else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
-               // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
-
-              //  float offset = anim * 0.0f;
-              //  float brightness = anim * 1.2f + 1.6f;
-
-                vec3_t origin;
-                VectorCopy(ent.origin, origin);
-               // origin[2] += offset;
-
-               // V_AddLightEx(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
-                V_AddLightEx(origin, 6000.f, 1.6f, 0.7f, 0.2f, 0.5f);
-            } else if (effects & EF_PLASMA) {
-                if (effects & EF_ANIM_ALLFAST) {
-                    CL_BlasterTrail(cent->lerp_origin, ent.origin);
-                }
-                V_AddLight(ent.origin, 130, 1, 0.5f, 0.5f);
-            }
-        }
-
-skip:
-        VectorCopy(ent.origin, cent->lerp_origin);
+        
+        CL_AddEntity(&cl_entities[s1->number], s1);
     }
 }
 
@@ -1332,6 +1482,20 @@ void CL_AddTestModel(void)
     }
 }
 
+static void CL_CalculatePVS(void)
+{
+    mleaf_t *leaf = BSP_PointLeaf(cl.bsp->nodes, cl.refdef.vieworg);
+    int clientarea = leaf->area;
+    int clientcluster = leaf->cluster;
+
+    if (clientcluster >= 0) {
+        CM_FatPVS(& (cm_t) { .cache = cl.bsp }, cl.clientpvs, cl.refdef.vieworg, DVIS_PVS2);
+        cl.last_valid_cluster = clientcluster;
+    } else {
+        BSP_ClusterVis(cl.bsp, cl.clientpvs, cl.last_valid_cluster, DVIS_PVS2);
+    }
+ }
+
 /*
 ===============
 CL_AddEntities
@@ -1343,7 +1507,21 @@ void CL_AddEntities(void)
 {
     CL_CalcViewValues();
     CL_FinishViewValues();
+
+    // bonus items rotate at a fixed rate
+    autorotate = anglemod(cl.time * 0.1f);
+
+    // brush models can auto animate their frames
+    autoanim = 2 * cl.time / 1000;
+    autoanim_10 = 10 * cl.time / 1000;
+    autoanim_20 = 20 * cl.time / 1000;
+
     CL_AddPacketEntities();
+
+    CL_CalculatePVS();
+
+    CL_AddAmbientEntities();
+
     CL_AddTEnts();
     CL_AddParticles();
 #if USE_DLIGHTS

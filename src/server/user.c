@@ -72,15 +72,41 @@ static void SV_CreateBaselines(void)
     }
 }
 
+static void SV_CreateAmbients(void)
+{
+    sv_client->ambients = Z_Mallocz(sizeof(*sv_client->ambients) * MAX_AMBIENT_ENTITIES);
+
+    for (int i = 0; i < ge->num_entities[ENT_AMBIENT]; i++) {
+        edict_t *ent = EDICT_NUM(MAX_PACKET_ENTITIES + i);
+
+        if ((g_features->integer & GMF_PROPERINUSE) && !ent->inuse) {
+            continue;
+        }
+
+        if (!ES_INUSE(&ent->s)) {
+            continue;
+        }
+
+        sv_client->ambients[i] = ent->s;
+    }
+
+    sv_client->ambient_state_id = sv.ambient_state_id;
+}
+
 static void write_baseline(entity_state_t *base)
 {
-    MSG_WriteDeltaEntity(NULL, base, sv_client->esFlags | MSG_ES_FORCE);
+    MSG_WriteDeltaPacketEntity(NULL, base, sv_client->esFlags | MSG_ES_FORCE);
+}
+
+static void write_ambient(entity_state_t *base)
+{
+    MSG_WriteDeltaAmbientEntity(&nullEntityState, base, sv_client->esFlags | MSG_ES_FORCE);
 }
 
 static void write_gamestate(void)
 {
     entity_state_t  *base;
-    int         i, j;
+    int         i;
     size_t      length;
     char        *string;
 
@@ -110,6 +136,16 @@ static void write_gamestate(void)
         }
     }
     MSG_WriteShort(0);   // end of baselines
+
+    // write ambients
+    for (i = 0, base = sv_client->ambients; i < ge->num_entities[ENT_AMBIENT]; i++, base++) {
+        if (base->number) {
+            write_ambient(base);
+        }
+    }
+    MSG_WriteByte(0);
+    MSG_WriteShort(MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES); // end of ambients
+    MSG_WriteByte(sv.ambient_state_id); // sync ambient ID
 
     SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
 }
@@ -214,6 +250,8 @@ void SV_New_f(void)
 
     // create baselines for this client
     SV_CreateBaselines();
+
+    SV_CreateAmbients();
 
     // send the serverdata
     MSG_WriteByte(svc_serverdata);
@@ -1130,6 +1168,15 @@ static void SV_ParseFullUserinfo(void)
     userinfoUpdateCount++;
 }
 
+static void SV_ParseAmbientId(void)
+{
+    sv_client->ambient_state_id = MSG_ReadByte();
+
+    if (sv_client->ambient_state_id == sv.ambient_state_id) {
+        memcpy(sv_client->ambients, sv.ambient_states, sizeof(sv.ambient_states));
+    }
+}
+
 static void SV_ParseDeltaUserinfo(void)
 {
     char key[MAX_INFO_KEY], value[MAX_INFO_VALUE];
@@ -1272,6 +1319,10 @@ void SV_ExecuteClientMessage(client_t *client)
 
         case clc_userinfo_delta:
             SV_ParseDeltaUserinfo();
+            break;
+
+        case clc_ambient:
+            SV_ParseAmbientId();
             break;
         }
 

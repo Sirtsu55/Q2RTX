@@ -462,15 +462,16 @@ edict_t *G_SpawnType(entity_type_t type)
     switch (type)
     {
     case ENT_PACKET:
-        start = game.maxclients + 1;
+        i = game.maxclients + 1;
+        start = 0;
         end = MAX_PACKET_ENTITIES;
         break;
     case ENT_AMBIENT:
-        start = MAX_PACKET_ENTITIES;
+        i = start = MAX_PACKET_ENTITIES;
         end = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
         break;
     case ENT_PRIVATE:
-        start = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
+        i = start = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
         end = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES;
         break;
     default:
@@ -479,7 +480,7 @@ edict_t *G_SpawnType(entity_type_t type)
 
     edict_t *e;
 
-    for (i = start, e = &globals.entities[start]; i < start + globals.num_entities[type]; i++, e++) {
+    for (e = &globals.entities[i]; i < start + globals.num_entities[type]; i++, e++) {
         // the first couple seconds of server time can involve a lot of
         // freeing and allocating, so relax the replacement policy
         if (!e->inuse && (e->free_time < 2000 || level.time - e->free_time > 500)) {

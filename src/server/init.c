@@ -108,6 +108,13 @@ fail1:
                 buffer, Q_ErrorString(ret));
 }
 
+static void SV_SetupAmbientEntities(void)
+{
+    for (int32_t i = 0; i < MAX_AMBIENT_ENTITIES; i++)
+        sv.ambient_states[i] = EDICT_NUM(MAX_PACKET_ENTITIES + i)->s;
+
+    sv.ambient_state_id = 0;
+}
 
 /*
 ================
@@ -209,6 +216,9 @@ void SV_SpawnServer(mapcmd_t *cmd)
 
     // check for a savegame
     SV_CheckForSavegame(cmd);
+
+    // set up ambient entity state
+    SV_SetupAmbientEntities();
 
     // all precaches are complete
     sv.state = cmd->state;

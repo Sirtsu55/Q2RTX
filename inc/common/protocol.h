@@ -86,14 +86,14 @@ typedef enum {
     svc_centerprint,            // [string] to put in center of the screen
     svc_download,               // [short] size [size bytes]
     svc_playerinfo,             // variable
-    svc_packetentities,         // [...]
-    svc_deltapacketentities,    // [...]
     svc_frame,
 
     svc_zpacket,
     svc_zdownload,
     svc_gamestate,
     svc_setting,
+
+    svc_ambient,
 
     svc_num_types
 } svc_ops_t;
@@ -108,6 +108,7 @@ typedef enum {
     clc_nop,
     clc_userinfo,           // [userinfo string]
     clc_stringcmd,          // [string] message
+    clc_ambient,
 
     // r1q2 specific operations
     clc_setting,

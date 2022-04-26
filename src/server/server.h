@@ -110,10 +110,11 @@ typedef struct {
 
     server_entity_t entities[MAX_EDICTS];
 
+    entity_state_t ambient_states[MAX_AMBIENT_ENTITIES];
+    uint8_t ambient_state_id;
+
     int         maxclients;
 } server_t;
-
-#define MAX_TOTAL_ENT_LEAFS        128
 
 typedef enum {
     cs_free,        // can be reused for a new connection
@@ -256,9 +257,13 @@ typedef struct client_s {
     unsigned            msg_unreliable_bytes;   // total size of unreliable datagram
     unsigned            msg_dynamic_bytes;      // total size of dynamic memory allocated
 
-    // per-client baseline chunks
+    // per-client baselines
     entity_state_t      *baselines;
     int                 num_baselines, allocated_baselines;
+
+    // per-client ambient states
+    entity_state_t      *ambients;
+    uint8_t             ambient_state_id;
 
     // netchan
     netchan_t       *netchan;
@@ -528,6 +533,7 @@ void SV_PrintMiscInfo(void);
 
 void SV_BuildClientFrame(client_t *client);
 void SV_WriteFrameToClient(client_t *client);
+void SV_WriteAmbientsToClient(client_t *client);
 
 //
 // sv_game.c

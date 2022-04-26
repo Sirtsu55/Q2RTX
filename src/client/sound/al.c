@@ -536,10 +536,10 @@ static channel_t *AL_FindLoopingSound(int entnum, sfx_t *sfx)
     return NULL;
 }
 
-static void AL_AddLoopSounds(void)
+static entity_sound_t sounds[MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES];
+
+static void AL_AddLoopSound(int32_t i)
 {
-    int         i;
-    static entity_sound_t sounds[MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES];
     channel_t   *ch, *ch2;
     sfx_t       *sfx;
     sfxcache_t  *sc;
@@ -548,67 +548,80 @@ static void AL_AddLoopSounds(void)
     vec3_t      origin;
     float       dist;
 
+    if (!sounds[i].sound)
+        return;
+
+    sfx = S_SfxForHandle(cl.sound_precache[sounds[i].sound]);
+    if (!sfx)
+        return;       // bad sound effect
+    sc = sfx->cache;
+    if (!sc)
+        return;
+
+    if (Ent_IsPacket(i)) {
+        num = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
+        ent = &cl.entityStates[num];
+    } else {
+        ent = &cl.ambients[i - MAX_PACKET_ENTITIES];
+    }
+
+    ch = AL_FindLoopingSound(ent->number, sfx);
+    if (ch) {
+        ch->autoframe = s_framecount;
+        ch->end = paintedtime + sc->length;
+        ch->pitch = sounds[i].pitch;
+        return;
+    }
+
+    // check attenuation before playing the sound
+    CL_GetEntitySoundOrigin(ent->number, origin);
+    VectorSubtract(origin, listener_origin, origin);
+    dist = VectorNormalize(origin);
+    dist = (dist - SOUND_FULLVOLUME) * SOUND_LOOPATTENUATE;
+    if(dist >= 1.f)
+        return; // completely attenuated
+
+                  // allocate a channel
+    ch = S_PickChannel(0, 0);
+    if (!ch)
+        return;
+
+    ch2 = AL_FindLoopingSound(0, sfx);
+
+    ch->autosound = true;   // remove next frame
+    ch->autoframe = s_framecount;
+    ch->sfx = sfx;
+    ch->entnum = ent->number;
+    ch->master_vol = 1;
+    ch->dist_mult = SOUND_LOOPATTENUATE;
+    ch->end = paintedtime + sc->length;
+    ch->pitch = sounds[i].pitch;
+
+    AL_PlayChannel(ch);
+
+    // attempt to synchronize with existing sounds of the same type
+    if (ch2) {
+        ALint offset;
+
+        alGetSourcei(ch2->srcnum, AL_SAMPLE_OFFSET, &offset);
+        alSourcei(ch->srcnum, AL_SAMPLE_OFFSET, offset);
+    }
+}
+
+static void AL_AddLoopSounds(void)
+{
     if (cls.state != ca_active || sv_paused->integer || !s_ambient->integer) {
         return;
     }
 
     S_BuildSoundList(sounds);
 
-    for (i = 0; i < cl.frame.numEntities; i++) {
-        if (!sounds[i].sound)
-            continue;
+    for (int i = 0; i < cl.frame.numEntities; i++) {
+        AL_AddLoopSound(i);
+    }
 
-        sfx = S_SfxForHandle(cl.sound_precache[sounds[i].sound]);
-        if (!sfx)
-            continue;       // bad sound effect
-        sc = sfx->cache;
-        if (!sc)
-            continue;
-
-        num = (cl.frame.firstEntity + i) & PARSE_ENTITIES_MASK;
-        ent = &cl.entityStates[num];
-
-        ch = AL_FindLoopingSound(ent->number, sfx);
-        if (ch) {
-            ch->autoframe = s_framecount;
-            ch->end = paintedtime + sc->length;
-            ch->pitch = sounds[i].pitch;
-            continue;
-        }
-
-        // check attenuation before playing the sound
-        CL_GetEntitySoundOrigin(ent->number, origin);
-        VectorSubtract(origin, listener_origin, origin);
-        dist = VectorNormalize(origin);
-        dist = (dist - SOUND_FULLVOLUME) * SOUND_LOOPATTENUATE;
-        if(dist >= 1.f)
-            continue; // completely attenuated
-        
-        // allocate a channel
-        ch = S_PickChannel(0, 0);
-        if (!ch)
-            continue;
-
-        ch2 = AL_FindLoopingSound(0, sfx);
-
-        ch->autosound = true;   // remove next frame
-        ch->autoframe = s_framecount;
-        ch->sfx = sfx;
-        ch->entnum = ent->number;
-        ch->master_vol = 1;
-        ch->dist_mult = SOUND_LOOPATTENUATE;
-        ch->end = paintedtime + sc->length;
-        ch->pitch = sounds[i].pitch;
-
-        AL_PlayChannel(ch);
-
-        // attempt to synchronize with existing sounds of the same type
-        if (ch2) {
-            ALint offset;
-
-            alGetSourcei(ch2->srcnum, AL_SAMPLE_OFFSET, &offset);
-            alSourcei(ch->srcnum, AL_SAMPLE_OFFSET, offset);
-        }
+    for (int i = MAX_PACKET_ENTITIES; i < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES; i++) {
+        AL_AddLoopSound(i);
     }
 }
 

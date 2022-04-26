@@ -53,8 +53,6 @@ typedef enum {
 
 //===============================================================
 
-#define MAX_ENT_CLUSTERS    16
-
 
 typedef struct edict_s edict_t;
 typedef struct gclient_s gclient_t;

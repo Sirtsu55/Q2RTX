@@ -88,7 +88,7 @@ static void SV_EmitPacketEntities(client_t         *client,
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
-            MSG_WriteDeltaEntity(oldent, newent, flags);
+            MSG_WriteDeltaPacketEntity(oldent, newent, flags);
             oldindex++;
             newindex++;
             continue;
@@ -107,14 +107,14 @@ static void SV_EmitPacketEntities(client_t         *client,
                 VectorCopy(oldent->origin, newent->origin);
                 VectorCopy(oldent->angles, newent->angles);
             }
-            MSG_WriteDeltaEntity(oldent, newent, flags);
+            MSG_WriteDeltaPacketEntity(oldent, newent, flags);
             newindex++;
             continue;
         }
 
         if (newnum > oldnum) {
             // the old entity isn't present in the new message
-            MSG_WriteDeltaEntity(oldent, NULL, MSG_ES_FORCE);
+            MSG_WriteDeltaPacketEntity(oldent, NULL, MSG_ES_FORCE);
             oldindex++;
             continue;
         }
@@ -249,6 +249,37 @@ void SV_WriteFrameToClient(client_t *client)
 
     // delta encode the entities
     SV_EmitPacketEntities(client, oldframe, frame, clientEntityNum);
+}
+
+void SV_WriteAmbientsToClient(client_t *client)
+{
+#if _DEBUG
+    // sanity
+    if (msg_write.cursize != 0)
+        Sys_DebugBreak();
+#endif
+
+    // nothing to write
+    if (client->ambient_state_id == sv.ambient_state_id) {
+        return;
+    }
+
+    MSG_WriteByte(svc_ambient);
+    MSG_WriteByte(sv.ambient_state_id);
+
+    // something has changed, write out the delta from the last
+    // received ambients to the current ambients
+    for (int32_t i = 0; i < ge->num_entities[ENT_AMBIENT]; i++) {
+        const entity_state_t *from = &client->ambients[i];
+        const entity_state_t *to = &sv.ambient_states[i];
+        MSG_WriteDeltaAmbientEntity(from, to, MSG_ES_AMBIENT);
+    }
+
+    // end of ambients
+    MSG_WriteByte(0);
+    MSG_WriteShort(MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES);
+
+    SV_ClientAddMessage(client, MSG_CLEAR);
 }
 
 /*
