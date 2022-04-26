@@ -302,7 +302,7 @@ static void CL_AddExplosionLight(explosion_t *ex, float phase)
 	VectorMA(color, w0, s0->color, color);
 	VectorMA(color, w1, s1->color, color);
 
-	V_AddLightEx(origin, 500.f, color[0], color[1], color[2], radius);
+	V_AddSphereLight(origin, 500.f, color[0], color[1], color[2], radius);
 }
 
 static void CL_AddExplosions(void)
@@ -383,7 +383,7 @@ static void CL_AddExplosions(void)
         if (ex->type == ex_free)
             continue;
 
-		if (vid_rtx->integer)
+		if (cls.ref_type == REF_TYPE_VKPT)
 			CL_AddExplosionLight(ex, frac / (ex->frames - 1));
 		else
 		{

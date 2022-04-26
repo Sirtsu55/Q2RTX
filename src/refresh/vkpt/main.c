@@ -1657,23 +1657,29 @@ static void fill_model_instance(ModelInstance* instance, const entity_t* entity,
 static void
 add_dlights(const dlight_t* lights, int num_lights, QVKUniformBuffer_t* ubo)
 {
-	ubo->num_sphere_lights = 0;
+	ubo->num_dyn_lights = 0;
 
 	for (int i = 0; i < num_lights; i++)
 	{
 		const dlight_t* light = lights + i;
 
-		float* dynlight_data = (float*)(ubo->sphere_light_data + ubo->num_sphere_lights * 2);
-		float* center = dynlight_data;
-		float* radius = dynlight_data + 3;
-		float* color = dynlight_data + 4;
-		dynlight_data[7] = 0.f;
+		DynLightData* dynlight_data = ubo->dyn_light_data + ubo->num_dyn_lights;
+		VectorCopy(light->origin, dynlight_data->center);
+		VectorScale(light->color, light->intensity / 25.f, dynlight_data->color);
+		dynlight_data->radius = light->radius;
+		switch(light->light_type) {
+		case DLIGHT_SPHERE:
+			dynlight_data->type = DYNLIGHT_SPHERE;
+			break;
+		case DLIGHT_SPOT:
+			dynlight_data->type = DYNLIGHT_SPOT;
+			// Copy spot data
+			VectorCopy(light->spot.direction, dynlight_data->spot_direction);
+			dynlight_data->spot_falloff = floatToHalf(light->spot.cos_total_width) | (floatToHalf(light->spot.cos_falloff_start) << 16);
+			break;
+		}
 
-		VectorCopy(light->origin, center);
-		VectorScale(light->color, light->intensity / 25.f, color);
-		*radius = light->radius;
-
-		ubo->num_sphere_lights++;
+		ubo->num_dyn_lights++;
 	}
 }
 
@@ -1926,7 +1932,7 @@ static void process_regular_entity(
 			if (!(mesh_filter & MESH_FILTER_MASKED))
 				continue;
 		}
-		else if (MAT_IsTransparent(material_id))
+		else if (MAT_IsTransparent(material_id) || (alpha < 1.0f))
 		{
 			if(contains_transparent)
 				*contains_transparent = true;
@@ -2040,7 +2046,7 @@ prepare_entities(EntityUploadInfo* upload_info, refdef_t *fd)
 				viewer_model_indices[viewer_model_num++] = i;
 			else if (entity->flags & RF_WEAPONMODEL)
 				viewer_weapon_indices[viewer_weapon_num++] = i;
-			else if (model->model_class == MCLASS_EXPLOSION || model->model_class == MCLASS_SMOKE)
+			else if (model->model_class == MCLASS_EXPLOSION || model->model_class == MCLASS_FLASH)
 				explosion_indices[explosion_num++] = i;
 			else
 			{
@@ -3503,14 +3509,14 @@ static void ray_tracing_api_g(genctx_t *ctx)
 }
 
 /* called when the library is loaded */
-bool
+ref_type_t
 R_Init_RTX(bool total)
 {
 	registration_sequence = 1;
 
 	if (!VID_Init(GAPI_VULKAN)) {
 		Com_Error(ERR_FATAL, "VID_Init failed\n");
-		return false;
+		return REF_TYPE_NONE;
 	}
 
 	extern SDL_Window *sdl_window;
@@ -3651,7 +3657,7 @@ R_Init_RTX(bool total)
 	
 	if(!init_vulkan()) {
 		Com_Error(ERR_FATAL, "Couldn't initialize Vulkan.\n");
-		return false;
+		return REF_TYPE_NONE;
 	}
 
 	_VK(create_command_pool_and_fences());
@@ -3681,7 +3687,7 @@ R_Init_RTX(bool total)
 		taa_samples[i][1] = halton(3, i + 1) - 0.5f;
 	}
 
-	return true;
+	return REF_TYPE_VKPT;
 }
 
 /* called before the library is unloaded */

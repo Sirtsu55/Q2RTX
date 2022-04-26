@@ -287,7 +287,7 @@ void CL_MuzzleFlash(void)
     else
         dl->radius = 200 + (Q_rand() & 31);
     //dl->minlight = 32;
-    dl->die = cl.time; // + 0.1;
+    dl->die = cl.time + 16;
 #define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
 #define DL_RADIUS(r)        (dl->radius = r)
 #define DL_DIE(t)           (dl->die = cl.time + t)
@@ -336,7 +336,6 @@ void CL_MuzzleFlash(void)
     case MZ_CHAINGUN2:
         DL_RADIUS(225 + (Q_rand() & 31));
         DL_COLOR(1, 0.5f, 0);
-        DL_DIE(0.1f);   // long delay
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (Q_rand() % 5) + 1);
         S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0, 0);
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (Q_rand() % 5) + 1);
@@ -345,7 +344,6 @@ void CL_MuzzleFlash(void)
     case MZ_CHAINGUN3:
         DL_RADIUS(250 + (Q_rand() & 31));
         DL_COLOR(1, 1, 0);
-        DL_DIE(0.1f);   // long delay
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (Q_rand() % 5) + 1);
         S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0, 0);
         Q_snprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (Q_rand() % 5) + 1);
@@ -373,19 +371,16 @@ void CL_MuzzleFlash(void)
         break;
     case MZ_LOGIN:
         DL_COLOR(0, 1, 0);
-        DL_DIE(1.0f);
         S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0, 0);
         CL_LogoutEffect(pl->current.origin, mz.weapon);
         break;
     case MZ_LOGOUT:
         DL_COLOR(1, 0, 0);
-        DL_DIE(1.0f);
         S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0, 0);
         CL_LogoutEffect(pl->current.origin, mz.weapon);
         break;
     case MZ_RESPAWN:
         DL_COLOR(1, 1, 0);
-        DL_DIE(1.0f);
         S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), 1, ATTN_NORM, 0, 0);
         CL_LogoutEffect(pl->current.origin, mz.weapon);
         break;
@@ -446,7 +441,7 @@ void CL_MuzzleFlash(void)
 	// Q2RTX
     }
 
-	if (vid_rtx->integer)
+	if (cls.ref_type == REF_TYPE_VKPT)
 	{
 		// don't add muzzle flashes in RTX mode
 		DL_RADIUS(0.f);
@@ -483,7 +478,7 @@ void CL_MuzzleFlash2(void)
     VectorCopy(origin,  dl->origin);
     dl->radius = 200 + (Q_rand() & 31);
     //dl->minlight = 32;
-    dl->die = cl.time;  // + 0.1;
+    dl->die = cl.time + 16;
 #endif
 
     switch (mz.weapon) {

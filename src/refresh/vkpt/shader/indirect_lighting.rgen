@@ -348,6 +348,7 @@ indirect_lighting(
 
 
 		vec3 emissive = sample_emissive_texture(triangle.material_id, bounce_minfo, tex_coord, vec2(0), vec2(0), is_specular_ray ? 2 : 3);
+		emissive *= triangle.emissive_factor;
 
     	emissive += get_emissive_shell(triangle.material_id) * bounce_base_color;
 
@@ -413,7 +414,7 @@ indirect_lighting(
 				false, // enable_caustics
 				0.0, // direct_specular_weight
 		    	global_ubo.pt_indirect_polygon_lights > 0,
-		    	global_ubo.pt_indirect_sphere_lights > 0,
+		    	global_ubo.pt_indirect_dyn_lights > 0,
 		    	is_gradient,
 		    	1, // bounce
 		    	bounce_diffuse,
