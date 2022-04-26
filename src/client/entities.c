@@ -859,7 +859,7 @@ static void CL_AddPacketEntities(void)
                // origin[2] += offset;
 
                // V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
-                V_AddLightEx(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
+                V_AddSphereLight(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
             }
             else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
                // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
@@ -872,7 +872,7 @@ static void CL_AddPacketEntities(void)
                // origin[2] += offset;
 
                // V_AddLightEx(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
-                V_AddLightEx(origin, 5500.f, 1.6f, 0.7f, 0.2f, 0.5f);
+                V_AddSphereLight(origin, 5500.f, 1.6f, 0.7f, 0.2f, 0.5f);
             } else if (effects & EF_PLASMA) {
                 if (effects & EF_ANIM_ALLFAST) {
                     CL_BlasterTrail(cent->lerp_origin, ent.origin);
@@ -936,7 +936,9 @@ void CL_AdjustGunPosition(vec3_t viewangles, vec3_t *gun_origin, float *alpha)
         VectorMA(trace.endpos, -gun_length, view_dir, *gun_origin);
         VectorMA(*gun_origin, -gun_right, right_dir, *gun_origin);
         VectorMA(*gun_origin, -gun_up, up_dir, *gun_origin);
-		alpha = min(alpha, trace.fraction);
+        if (alpha) {
+    		*alpha = min(*alpha, trace.fraction);
+        }
     }
 }
 
@@ -1041,9 +1043,6 @@ static void CL_AddViewWeapon(void)
         // SPIN
 
         V_AddEntity(&gun);
-
-            V_AddEntity(&gun);
-        }
     }
 }
 

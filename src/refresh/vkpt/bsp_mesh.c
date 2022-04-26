@@ -135,7 +135,7 @@ compute_emissive(mtexinfo_t *texinfo)
 
 	const float bsp_emissive = (float)texinfo->radiance * cvar_pt_bsp_radiance_scale->value;
 
-	const qboolean is_emissive_fake = texinfo->material->image_emissive && ((texinfo->material->image_emissive->flags & IF_FAKE_EMISSIVE) != 0);
+	const bool is_emissive_fake = texinfo->material->image_emissive && ((texinfo->material->image_emissive->flags & IF_FAKE_EMISSIVE) != 0);
 
 	// If emissive is "fake", treat absence of SURF_LIGHT flag as "not emissive"
 	// If emissive is not "fake" (ie explicit image), treat absence of SURF_LIGHT flag as "fully emissive"

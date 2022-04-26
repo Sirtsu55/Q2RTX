@@ -616,6 +616,13 @@ static inline uint32_t LongSwap(uint32_t l)
     return l;
 }
 
+static inline uint64_t LongLongSwap(uint64_t l)
+{
+    l = ((l << 8) & 0xff00ff00ff00ff00ull) | ((l >> 8) & 0x00ff00ff00ff00ffull);
+    l = ((l << 16) & 0xffff0000ffff0000ull) | ((l >> 16) & 0x0000ffff0000ffffull);
+    return (l << 32) | (l >> 32);
+}
+
 static inline float FloatSwap(float f)
 {
     union {
@@ -634,6 +641,7 @@ static inline float FloatSwap(float f)
 #define BigFloat    FloatSwap
 #define LittleShort(x)    ((uint16_t)(x))
 #define LittleLong(x)     ((uint32_t)(x))
+#define LittleLongLong(x) ((uint64_t)(x))
 #define LittleFloat(x)    ((float)(x))
 #define MakeRawLong(b1,b2,b3,b4) (((unsigned)(b4)<<24)|((b3)<<16)|((b2)<<8)|(b1))
 #define MakeRawShort(b1,b2) (((b2)<<8)|(b1))
@@ -641,9 +649,10 @@ static inline float FloatSwap(float f)
 #define BigShort(x)     ((uint16_t)(x))
 #define BigLong(x)      ((uint32_t)(x))
 #define BigFloat(x)     ((float)(x))
-#define LittleShort ShortSwap
-#define LittleLong  LongSwap
-#define LittleFloat FloatSwap
+#define LittleShort     ShortSwap
+#define LittleLong      LongSwap
+#define LittleLongLong  LongLongSwap
+#define LittleFloat     FloatSwap
 #define MakeRawLong(b1,b2,b3,b4) (((unsigned)(b1)<<24)|((b2)<<16)|((b3)<<8)|(b4))
 #define MakeRawShort(b1,b2) (((b1)<<8)|(b2))
 #else
