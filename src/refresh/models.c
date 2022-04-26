@@ -220,7 +220,7 @@ get_model_class(const char *name)
 	else if (!strcmp(name, "models/objects/r_explode/tris.md2"))
 		return MCLASS_EXPLOSION;
 	else if (!strcmp(name, "models/objects/flash/tris.md2"))
-		return MCLASS_SMOKE;
+		return MCLASS_FLASH;
 	else if (!strcmp(name, "models/objects/smoke/tris.md2"))
 		return MCLASS_SMOKE;
 	else if (!strcmp(name, "models/objects/minelite/light2/tris.md2"))
@@ -349,7 +349,8 @@ qhandle_t R_RegisterModel(const char *name)
             fs_flags = try_location == TRY_MODEL_SRC_GAME ? FS_PATH_GAME : FS_PATH_BASE;
 
         char* extension = normalized + namelen - 4;
-        if (namelen > 4 && (strcmp(extension, ".md2") == 0) && (vid_rtx->integer || gl_use_hd_assets->integer))
+        bool try_md3 = cls.ref_type == REF_TYPE_VKPT || (cls.ref_type == REF_TYPE_GL && gl_use_hd_assets->integer);
+        if (namelen > 4 && (strcmp(extension, ".md2") == 0) && try_md3)
         {
             memcpy(extension, ".md3", 4);
 

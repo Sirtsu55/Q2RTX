@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/cvar.h"
 #include "common/error.h"
 
-#define MAX_DLIGHTS     32
+#define MAX_DLIGHTS     256
 #define MAX_ENTITIES    (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) * 2
 #define MAX_PARTICLES   16384
 #define MAX_LIGHTSTYLES 256
@@ -94,6 +94,12 @@ typedef struct entity_s {
     float spin_angle;
 } entity_t;
 
+typedef enum dlight_type_e
+{
+    DLIGHT_SPHERE = 0,
+    DLIGHT_SPOT
+} dlight_type;
+
 typedef struct dlight_s {
     vec3_t  origin;
 #if USE_REF == REF_GL
@@ -102,6 +108,14 @@ typedef struct dlight_s {
     vec3_t  color;
     float   intensity;
 	float   radius;
+
+    // VKPT light types support
+    dlight_type light_type;
+    struct {
+        vec3_t  direction;
+        float   cos_total_width;
+        float   cos_falloff_start;
+    } spot;
 } dlight_t;
 
 typedef struct particle_s {
@@ -230,8 +244,15 @@ typedef enum {
     IT_MAX
 } imagetype_t;
 
+typedef enum ref_type_e
+{
+    REF_TYPE_NONE = 0,
+    REF_TYPE_GL,
+    REF_TYPE_VKPT
+} ref_type_t;
+
 // called when the library is loaded
-extern bool        (*R_Init)(bool total);
+extern ref_type_t  (*R_Init)(bool total);
 
 // called before the library is unloaded
 extern void        (*R_Shutdown)(bool total);

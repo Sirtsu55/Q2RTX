@@ -1,6 +1,12 @@
 cmake_minimum_required (VERSION 3.9)
 cmake_policy(SET CMP0069 NEW)
 
+if (UNIX)
+	FIND_PACKAGE(OpenAL)
+	if (NOT OPENAL_INCLUDE_DIR)
+		message(FATAL_ERROR "Can't find OpenAL. Please install the libopenal-dev package.")
+	endif()
+endif()
 SET(SRC_BASENAC
 	basenac/g_ai.c
 	basenac/g_chase.c

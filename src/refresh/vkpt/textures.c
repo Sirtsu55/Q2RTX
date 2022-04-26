@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <assert.h>
 
+#include "color.h"
 #include "material.h"
 #include "../stb/stb_image.h"
 #include "../stb/stb_image_resize.h"
@@ -517,28 +518,6 @@ get_num_miplevels(int w, int h)
 IMG_Load
 ================
 */
-
-static inline float decode_srgb(byte pix)
-{
-	float x = (float)pix / 255.f;
-	
-	if (x < 0.04045f)
-		return x / 12.92f;
-
-	return powf((x + 0.055f) / 1.055f, 2.4f);
-}
-
-static inline byte encode_srgb(float x)
-{
-    if (x <= 0.0031308f)
-        x *= 12.92f;
-    else
-        x = 1.055f * powf(x, 1.f / 2.4f) - 0.055f;
-     
-    x = max(0.f, min(1.f, x));
-
-    return (byte)roundf(x * 255.f);
-}
 
 struct filterscratch_s
 {
@@ -2029,6 +2008,17 @@ destroy_readback_image(VkImage *image, VkDeviceMemory *memory, VkDeviceSize *mem
 	*memory_size = 0;
 }
 
+static VkDeviceSize available_video_memory()
+{
+	VkDeviceSize mem = 0;
+	for (uint32_t heap_num = 0; heap_num < qvk.mem_properties.memoryHeapCount; heap_num++)
+	{
+		if((qvk.mem_properties.memoryHeaps[heap_num].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0)
+			mem += qvk.mem_properties.memoryHeaps[heap_num].size;
+	}
+	return mem;
+}
+
 VkResult
 vkpt_create_images()
 {
@@ -2141,7 +2131,19 @@ LIST_IMAGES_A_B
 #endif
 	}
 
-	Com_DPrintf("Screen-space image memory: %.2f MB\n", (float)total_size / megabyte);
+	VkDeviceSize video_memory_size = available_video_memory();
+	if(total_size > video_memory_size / 2)
+	{
+		Com_WPrintf("Warning: The renderer uses %.2f MB for internal screen-space resources, which is\n"
+		            "more than half of the available video memory (%.2f MB). This may cause poor performance.\n"
+		            "Consider limiting the maximum dynamic resolution scale, using a lower fixed resolution\n"
+		            "scale, or lowering the output resolution.\n",
+		            (float)total_size / megabyte, (float)video_memory_size / megabyte);
+	}
+	else
+	{
+		Com_DPrintf("Screen-space image memory: %.2f MB\n", (float)total_size / megabyte);
+	}
 
 	/* attach labels to images */
 #define IMG_DO(_name, _binding, ...) \

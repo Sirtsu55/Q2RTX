@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common/common.h"
 #include "common/cvar.h"
 #include "common/files.h"
+#include "../client/client.h"
 #include "refresh/images.h"
 #include "system/system.h"
 #include "format/pcx.h"
@@ -409,6 +410,18 @@ static int IMG_SavePNG(screenshot_t *s)
 	return Q_ERR_LIBRARY_ERROR;
 }
 
+static int IMG_SaveHDR(screenshot_t *s)
+{
+	stbi_flip_vertically_on_write(1);
+	// NOTE: The 'pixels' point is byte*, but HDR writing needs float*!
+	int ret = stbi_write_hdr_to_func(stbi_write, s, s->width, s->height, 3, (float*)s->pixels);
+
+	if (ret)
+		return Q_ERR_SUCCESS;
+
+	return Q_ERR_LIBRARY_ERROR;
+}
+
 /*
 =========================================================
 
@@ -422,19 +435,39 @@ static cvar_t *r_screenshot_quality;
 static cvar_t *r_screenshot_async;
 static cvar_t* r_screenshot_compression;
 static cvar_t* r_screenshot_message;
+static cvar_t *r_screenshot_template;
+
+static int suffix_pos(const char *s, int ch)
+{
+    int pos = strlen(s);
+    while (pos > 0 && s[pos - 1] == ch)
+        pos--;
+    return pos;
+}
+
+static int parse_template(cvar_t *var, char *buffer, size_t size)
+{
+    if (FS_NormalizePathBuffer(buffer, var->string, size) < size) {
+        FS_CleanupPath(buffer);
+        int start = suffix_pos(buffer, 'X');
+        int width = strlen(buffer) - start;
+        buffer[start] = 0;
+        if (width >= 3 && width <= 9)
+            return width;
+    }
+
+    Com_WPrintf("Bad value '%s' for '%s'. Falling back to '%s'.\n",
+                var->string, var->name, var->default_string);
+    Cvar_Reset(var);
+    Q_strlcpy(buffer, "quake", size);
+    return 3;
+}
 
 static int create_screenshot(char *buffer, size_t size, FILE **f,
                              const char *name, const char *ext)
 {
     char temp[MAX_OSPATH];
-    int i, ret;
-
-    if (Q_snprintf(temp, sizeof(temp), "%s/screenshots/", fs_gamedir) >= sizeof(temp)) {
-        return Q_ERR(ENAMETOOLONG);
-    }
-    if ((ret = FS_CreatePath(temp)) < 0) {
-        return ret;
-    }
+    int i, ret, width, count;
 
     if (name && *name) {
         // save to user supplied name
@@ -445,16 +478,33 @@ static int create_screenshot(char *buffer, size_t size, FILE **f,
         if (Q_snprintf(buffer, size, "%s/screenshots/%s%s", fs_gamedir, temp, ext) >= size) {
             return Q_ERR(ENAMETOOLONG);
         }
+        if ((ret = FS_CreatePath(buffer)) < 0) {
+            return ret;
+        }
         if (!(*f = fopen(buffer, "wb"))) {
             return Q_ERRNO;
         }
         return 0;
     }
 
+    width = parse_template(r_screenshot_template, temp, sizeof(temp));
+
+    // create the directory
+    if (Q_snprintf(buffer, size, "%s/screenshots/%s", fs_gamedir, temp) >= size) {
+        return Q_ERR(ENAMETOOLONG);
+    }
+    if ((ret = FS_CreatePath(buffer)) < 0) {
+        return ret;
+    }
+
+    count = 1;
+    for (i = 0; i < width; i++)
+        count *= 10;
+
     // find a file name to save it to
-    for (i = 0; i < 1000; i++) {
-        if (Q_snprintf(buffer, size, "%s/screenshots/quake%03d%s", fs_gamedir, i, ext) >= size) {
-            return -ENAMETOOLONG;
+    for (i = 0; i < count; i++) {
+        if (Q_snprintf(buffer, size, "%s/screenshots/%s%0*d%s", fs_gamedir, temp, width, i, ext) >= size) {
+            return Q_ERR(ENAMETOOLONG);
         }
         if ((*f = Q_fopen(buffer, "wxb"))) {
             return 0;
@@ -510,7 +560,7 @@ static void make_screenshot(const char *name, const char *ext,
     int         w, h, ret, row_stride;
     
     if(is_render_hdr()) {
-        Com_WPrintf("Screenshot format not supported in HDR mode");
+        Com_WPrintf("Screenshot format not supported in HDR mode\n");
         return;
     }
     ret = create_screenshot(buffer, sizeof(buffer), &fp, name, ext);
@@ -550,7 +600,7 @@ static void make_screenshot(const char *name, const char *ext,
     }
 }
 
-static void make_screenshot_hdr(const char *name)
+static void make_screenshot_hdr(const char *name, bool async)
 {
     char        buffer[MAX_OSPATH];
     float       *pixels;
@@ -559,7 +609,8 @@ static void make_screenshot_hdr(const char *name)
     int         w, h;
 
     if(!is_render_hdr()) {
-        Com_WPrintf("Screenshot format supported in HDR mode only");
+        Com_WPrintf("Screenshot format supported in HDR mode only\n");
+        return;
     }
 
     ret = create_screenshot(buffer, sizeof(buffer), &fp, name, ".hdr");
@@ -568,18 +619,31 @@ static void make_screenshot_hdr(const char *name)
         return;
     }
 
-    // TODO: async support
     pixels = IMG_ReadPixelsHDR(&w, &h);
-    stbi_flip_vertically_on_write(1);
-    ret = stbi_write_hdr_to_func(stbi_write, fp, w, h, 3, pixels);
-    FS_FreeTempMem(pixels);
 
-    fclose(fp);
+    screenshot_t s = {
+        .save_cb = IMG_SaveHDR,
+        .pixels = (byte*)pixels,
+        .fp = fp,
+        .filename = async ? Z_CopyString(buffer) : buffer,
+        .width = w,
+        .height = h,
+        .row_stride = 0,
+        .status = -1,
+        .param = 0,
+        .async = async,
+    };
 
-    if (ret < 0) {
-        Com_EPrintf("Couldn't write %s: %s\n", buffer, Q_ErrorString(ret));
-    } else if(r_screenshot_message->integer) {
-        Com_Printf("Wrote %s\n", buffer);
+    if (async) {
+        asyncwork_t work = {
+            .work_cb = screenshot_work_cb,
+            .done_cb = screenshot_done_cb,
+            .cb_arg = Z_CopyStruct(&s),
+        };
+        Sys_QueueAsyncWork(&work);
+    } else {
+        screenshot_work_cb(&s);
+        screenshot_done_cb(&s);
     }
 }
 
@@ -612,7 +676,7 @@ static void IMG_ScreenShot_f(void)
     }
 
     if (*s == 'h') {
-        make_screenshot_hdr(NULL);
+        make_screenshot_hdr(NULL, r_screenshot_async->integer > 0);
         return;
     }
 
@@ -697,7 +761,7 @@ static void IMG_ScreenShotHDR_f(void)
         return;
     }
 
-    make_screenshot_hdr(Cmd_Argv(1));
+    make_screenshot_hdr(Cmd_Argv(1), r_screenshot_async->integer > 0);
 }
 
 /*
@@ -1283,7 +1347,7 @@ static int find_or_load_image(const char *name, size_t len,
     }
 
 	int override_textures = !!r_override_textures->integer;
-	if (!vid_rtx->integer && (type != IT_PIC) && !gl_use_hd_assets->integer)
+	if (cls.ref_type == REF_TYPE_GL && (type != IT_PIC) && !gl_use_hd_assets->integer)
 		override_textures = 0;
     if (flags & IF_EXACT)
         override_textures = 0;
@@ -1732,6 +1796,7 @@ void IMG_Init(void)
     r_screenshot_quality = Cvar_Get("gl_screenshot_quality", "100", CVAR_ARCHIVE);
     r_screenshot_compression = Cvar_Get("gl_screenshot_compression", "6", CVAR_ARCHIVE);
     r_screenshot_message = Cvar_Get("gl_screenshot_message", "0", CVAR_ARCHIVE);
+    r_screenshot_template = Cvar_Get("gl_screenshot_template", "quakeXXX", 0);
 
     Cmd_Register(img_cmd);
 

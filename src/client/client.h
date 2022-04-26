@@ -351,6 +351,7 @@ typedef struct client_static_s {
     active_t    active;
 
     bool        ref_initialized;
+    ref_type_t  ref_type;
     unsigned    disable_screen;
 
     int         userinfo_modified;
@@ -658,6 +659,8 @@ void CL_SeekDemoMessage(void);
 //
 void CL_DeltaFrame(void);
 void CL_AddEntities(void);
+// Adjust a gun origin so that the gun doesn't intersect with walls. Used for view weapons.
+void CL_AdjustGunPosition(vec3_t viewangles, vec3_t *gun_origin, float *alpha);
 void CL_CalcViewValues(void);
 
 #ifdef _DEBUG
@@ -682,10 +685,12 @@ void V_AddEntity(entity_t *ent);
 void V_AddParticle(particle_t *p);
 #if USE_DLIGHTS
 void V_AddLight(vec3_t org, float intensity, float r, float g, float b);
-void V_AddLightEx(vec3_t org, float intensity, float r, float g, float b, float radius);
+void V_AddSphereLight(vec3_t org, float intensity, float r, float g, float b, float radius);
+void V_AddSpotLight(vec3_t org, vec3_t dir, float intensity, float r, float g, float b, float width_angle, float falloff_angle);
 #else
 #define V_AddLight(org, intensity, r, g, b)
-#define V_AddLightEx(org, intensity, r, g, b, radius)
+#define V_AddSphereLight(org, intensity, r, g, b, radius)
+#define V_AddSpotLight(org, dir, intensity, r, g, b,width_angle, falloff_angle)
 #endif
 void V_AddLightStyle(int style, vec4_t value);
 

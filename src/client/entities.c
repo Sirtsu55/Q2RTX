@@ -736,7 +736,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
 
         if (!cl.thirdPersonView)
         {
-            if(vid_rtx->integer)
+			if(cls.ref_type == REF_TYPE_VKPT)
                 base_entity_flags |= RF_VIEWERMODEL;    // only draw from mirrors
             else
                 goto skip;
@@ -781,7 +781,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
     ent.flags |= base_entity_flags;
 
     // in rtx mode, the base entity has the renderfx for shells
-    if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
+	if ((effects & EF_COLOR_SHELL) && cls.ref_type == REF_TYPE_VKPT) {
         renderfx = adjust_shell_fx(renderfx);
         ent.flags |= renderfx;
     }
@@ -806,12 +806,12 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             VectorCopy(ent.origin, origin);
             origin[2] += offset;
 
-            V_AddLightEx(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
+			V_AddSphereLight(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
         }
     }
 
     // color shells generate a separate entity for the main model
-    if ((effects & EF_COLOR_SHELL) && !vid_rtx->integer) {
+    if ((effects & EF_COLOR_SHELL) && cls.ref_type != REF_TYPE_VKPT) {
         renderfx = adjust_shell_fx(renderfx);
         ent.flags = renderfx | RF_TRANSLUCENT | base_entity_flags;
         ent.alpha = 0.30f;
@@ -847,7 +847,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             ent.flags = RF_TRANSLUCENT;
         }
 
-        if ((effects & EF_COLOR_SHELL) && vid_rtx->integer) {
+		if ((effects & EF_COLOR_SHELL) && cls.ref_type == REF_TYPE_VKPT) {
             ent.flags |= renderfx;
         }
 
@@ -918,7 +918,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
 #endif
             }
             const vec3_t nvgreen = { 0.2716f, 0.5795f, 0.04615f };
-            V_AddLightEx(ent.origin, i, nvgreen[0], nvgreen[1], nvgreen[2], 20.f);
+			V_AddSphereLight(ent.origin, i, nvgreen[0], nvgreen[1], nvgreen[2], 20.f);
         } else if (effects & EF_TRAP) {
             ent.origin[2] += 32;
             CL_TrapParticles(cent, ent.origin);
@@ -964,7 +964,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             // origin[2] += offset;
 
             // V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
-            V_AddLightEx(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
+            V_AddSphereLight(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
         }
         else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
                                                   // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
@@ -977,7 +977,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             // origin[2] += offset;
 
             // V_AddLightEx(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
-            V_AddLightEx(origin, 6000.f, 1.6f, 0.7f, 0.2f, 0.5f);
+            V_AddSphereLight(origin, 5500.f, 1.6f, 0.7f, 0.2f, 0.5f);
         } else if (effects & EF_PLASMA) {
             if (effects & EF_ANIM_ALLFAST) {
                 CL_BlasterTrail(cent->lerp_origin, ent.origin);
@@ -1063,6 +1063,35 @@ static int shell_effect_hack(void)
     return flags;
 }
 
+void CL_AdjustGunPosition(vec3_t viewangles, vec3_t *gun_origin, float *alpha)
+{
+    vec3_t view_dir, right_dir, up_dir;
+    vec3_t gun_real_pos, gun_tip;
+    const float gun_length = 28.f;
+    const float gun_right = 10.f;
+    const float gun_up = -5.f;
+    trace_t trace;
+    static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
+
+    AngleVectors(viewangles, view_dir, right_dir, up_dir);
+    VectorMA(*gun_origin, gun_right, right_dir, gun_real_pos);
+    VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
+    VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
+
+    CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl.bsp->nodes, MASK_SOLID);
+    CL_ClipMoveToEntities(gun_real_pos, mins, maxs, gun_tip, &trace, MASK_PLAYERSOLID & ~CONTENTS_PLAYERCLIP);
+
+    if (trace.fraction != 1.0f)
+    {
+        VectorMA(trace.endpos, -gun_length, view_dir, *gun_origin);
+        VectorMA(*gun_origin, -gun_right, right_dir, *gun_origin);
+        VectorMA(*gun_origin, -gun_up, up_dir, *gun_origin);
+        if (alpha) {
+    		*alpha = min(*alpha, trace.fraction);
+        }
+    }
+}
+
 /*
 ==============
 CL_AddViewWeapon
@@ -1102,32 +1131,7 @@ static void CL_AddViewWeapon(void)
     float alpha = cl_gunalpha->value;
 
 	// adjust the gun origin so that the gun doesn't intersect with walls
-	{
-		vec3_t view_dir, right_dir, up_dir;
-		vec3_t gun_real_pos, gun_tip;
-		const float gun_length = 28.f;
-		const float gun_right = 10.f;
-		const float gun_up = -5.f;
-		trace_t trace;
-		static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
-
-		AngleVectors(cl.refdef.viewangles, view_dir, right_dir, up_dir);
-		VectorMA(gun.origin, gun_right, right_dir, gun_real_pos);
-		VectorMA(gun_real_pos, gun_up, up_dir, gun_real_pos);
-		VectorMA(gun_real_pos, gun_length, view_dir, gun_tip);
-
-		CM_BoxTrace(&trace, gun_real_pos, gun_tip, mins, maxs, cl.bsp->nodes, MASK_PLAYERSOLID & ~CONTENTS_PLAYERCLIP);
-        CL_ClipMoveToEntities(gun_real_pos, mins, maxs, gun_tip, &trace, MASK_PLAYERSOLID & ~CONTENTS_PLAYERCLIP);
-
-		if (trace.fraction != 1.0f) 
-		{
-			VectorMA(trace.endpos, -gun_length, view_dir, gun.origin);
-			VectorMA(gun.origin, -gun_right, right_dir, gun.origin);
-			VectorMA(gun.origin, -gun_up, up_dir, gun.origin);
-
-            alpha = min(alpha, trace.fraction);
-		}
-	}
+    CL_AdjustGunPosition(cl.refdef.viewangles, &gun.origin, &alpha);
 
     VectorCopy(gun.origin, gun.oldorigin);      // don't lerp at all
 
@@ -1136,7 +1140,7 @@ static void CL_AddViewWeapon(void)
         gun.flags |= RF_LEFTHAND;
     }
 
-    if (alpha != 1) {
+    if (alpha != 1.0) {
         gun.alpha = alpha;
         gun.flags |= RF_TRANSLUCENT;
     }
@@ -1145,7 +1149,7 @@ static void CL_AddViewWeapon(void)
 	shell_flags = shell_effect_hack();
 
 	// same entity in rtx mode
-	if (vid_rtx->integer) {
+	if (cls.ref_type == REF_TYPE_VKPT) {
 		gun.flags |= shell_flags;
     }
 
@@ -1189,15 +1193,8 @@ static void CL_AddViewWeapon(void)
         // SPIN
 
         V_AddEntity(&gun);
-
-	    // separate entity in non-rtx mode
-        if (shell_flags && !vid_rtx->integer) {
-            gun.alpha = 0.30f * cl_gunalpha->value;
-            gun.flags |= shell_flags | RF_TRANSLUCENT;
-            V_AddEntity(&gun);
         }
     }
-}
 
 static void CL_SetupFirstPersonView(void)
 {

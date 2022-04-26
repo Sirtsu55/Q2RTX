@@ -471,6 +471,12 @@ static void write_int(FILE *f, int v)
     write_data(&v, sizeof(v), f);
 }
 
+static void write_int64(FILE *f, int64_t v)
+{
+    v = LongLongSwap(v);
+    write_data(&v, sizeof(v), f);
+}
+
 static void write_float(FILE *f, float v)
 {
     v = LittleFloat(v);
@@ -595,6 +601,12 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_pointer(f, *(void **)p, field->size);
         break;
 
+    case F_INT64:
+        for (i = 0; i < field->size; i++) {
+            write_int64(f, ((int64_t *)p)[i]);
+        }
+        break;
+
     default:
         Com_Errorf(ERR_DROP, "%s: unknown field type", __func__);
     }
@@ -633,6 +645,16 @@ static int read_int(FILE *f)
 
     read_data(&v, sizeof(v), f);
     v = LittleLong(v);
+
+    return v;
+}
+
+static int read_int64(FILE *f)
+{
+    int64_t v;
+
+    read_data(&v, sizeof(v), f);
+    v = LittleLongLong(v);
 
     return v;
 }
@@ -786,6 +808,12 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
 
     case F_POINTER:
         *(void **)p = read_pointer(f, field->size);
+        break;
+
+    case F_INT64:
+        for (i = 0; i < field->size; i++) {
+            ((int64_t *)p)[i] = read_int64(f);
+        }
         break;
 
     default:
