@@ -251,7 +251,7 @@ static void parse_ambient_entity(const entity_state_t *state)
     centity_t *ent = &cl_entities[state->number];
 
     // if entity is solid, decode mins/maxs and add to the list
-    if (state->bbox && cl.numSolidEntities < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+    if (state->bbox && cl.numSolidEntities < OFFSET_PRIVATE_ENTITIES) {
         cl.solidEntities[cl.numSolidEntities++] = ent;
         if (state->bbox != BBOX_BMODEL) {
             // encoded bbox
@@ -455,7 +455,7 @@ void CL_DeltaFrame(void)
         parse_entity_event(state->number);
     }
 
-    for (i = 0; i < MAX_AMBIENT_ENTITIES; i++) {
+    for (i = 0; i < cl.num_ambient_entities; i++) {
         state = &cl.ambients[i];
 
         if (state->number) {
@@ -1009,7 +1009,7 @@ static void CL_AddPacketEntities(void)
 static void CL_AddAmbientEntities(void)
 {
     cm_t cm = { cl.bsp };
-    for (int e = 0; e < MAX_AMBIENT_ENTITIES; e++) {
+    for (int e = 0; e < cl.num_ambient_entities; e++) {
         entity_state_t *s1 = &cl.ambients[e];
 
         if (!s1->number || (!s1->modelindex && !s1->effects)) {
@@ -1544,7 +1544,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
     centity_t   *ent;
     mmodel_t    *cm;
 
-    if (entnum < 0 || entnum >= (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)) {
+    if (entnum < 0 || entnum >= OFFSET_PRIVATE_ENTITIES) {
         Com_Errorf(ERR_DROP, "%s: bad entnum: %d", __func__, entnum);
     }
 

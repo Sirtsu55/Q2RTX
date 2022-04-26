@@ -823,8 +823,8 @@ void S_BuildSoundList(entity_sound_t *sounds)
         }
     }
 
-    for (i = MAX_PACKET_ENTITIES; i < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES; i++) {
-        ent = &cl.ambients[i - MAX_PACKET_ENTITIES];
+    for (i = OFFSET_AMBIENT_ENTITIES; i < OFFSET_AMBIENT_ENTITIES + cl.num_ambient_entities; i++) {
+        ent = &cl.ambients[i - OFFSET_AMBIENT_ENTITIES];
         if (s_ambient->integer == 2 && !ent->modelindex) {
             sounds[i].sound = 0;
         } else if (s_ambient->integer == 3 && ent->number != listener_entnum) {

@@ -996,13 +996,13 @@ void ReadLevel(const char *filename)
         int *num, start;
 
         if (Ent_IsPacket(entnum)) {
-            start = 0;
+            start = OFFSET_PACKET_ENTITIES;
             num = &globals.num_entities[ENT_PACKET];
         } else if (Ent_IsAmbient(entnum)) {
-            start = MAX_PACKET_ENTITIES;
+            start = OFFSET_AMBIENT_ENTITIES;
             num = &globals.num_entities[ENT_AMBIENT];
         } else if (Ent_IsPrivate(entnum)) {
-            start = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
+            start = OFFSET_PRIVATE_ENTITIES;
             num = &globals.num_entities[ENT_PRIVATE];
         } else {
             Com_Errorf(ERR_DROP, "Entity number out of range (%i)\n", entnum);

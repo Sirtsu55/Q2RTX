@@ -181,6 +181,7 @@ typedef struct client_state_s {
 
     entity_state_t  ambients[MAX_AMBIENT_ENTITIES];
     uint8_t         ambient_state_id;
+    uint16_t        num_ambient_entities;
 
     entity_state_t  entityStates[MAX_PARSE_ENTITIES];
     int             numEntityStates;

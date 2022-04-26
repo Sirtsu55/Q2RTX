@@ -716,7 +716,7 @@ void SV_PositionedSound(vec3_t origin, edict_t *entity, int channel,
                         int soundindex, float volume,
                         float attenuation, int pitch_shift)
 {
-    if (entity && (!entity->inuse || entity->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)) {
+    if (entity && (!entity->inuse || entity->s.number >= OFFSET_PRIVATE_ENTITIES)) {
         Com_Error(ERR_DROP, "Attempted to write private entity to network message");
     }
 
@@ -727,7 +727,7 @@ void SV_StartSound(edict_t *entity, int channel,
                    int soundindex, float volume,
                    float attenuation, int pitch_shift)
 {
-    if (!entity || !entity->inuse || entity->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+    if (!entity || !entity->inuse || entity->s.number >= OFFSET_PRIVATE_ENTITIES) {
         Com_Error(ERR_DROP, "Attempted to write private entity to network message");
     }
 
@@ -771,7 +771,7 @@ void SV_Multicast(vec3_t origin, multicast_t to, bool reliable)
 
 void SV_Unicast(edict_t *ent, bool reliable)
 {
-    if (!ent || !ent->inuse || ent->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+    if (!ent || !ent->inuse || ent->s.number >= OFFSET_PRIVATE_ENTITIES) {
         Com_Error(ERR_DROP, "Attempted to write private entity to network message");
     }
 
@@ -795,7 +795,7 @@ void SV_WriteShort(int c)
 
 void SV_WriteEntity(edict_t *ent)
 {
-    if (!ent || !ent->inuse || ent->s.number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+    if (!ent || !ent->inuse || ent->s.number >= OFFSET_PRIVATE_ENTITIES) {
         Com_Error(ERR_DROP, "Attempted to write private entity to network message");
     }
 

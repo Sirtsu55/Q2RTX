@@ -620,7 +620,7 @@ static void AL_AddLoopSounds(void)
         AL_AddLoopSound(i);
     }
 
-    for (int i = MAX_PACKET_ENTITIES; i < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES; i++) {
+    for (int i = OFFSET_AMBIENT_ENTITIES; i < OFFSET_AMBIENT_ENTITIES + cl.num_ambient_entities; i++) {
         AL_AddLoopSound(i);
     }
 }

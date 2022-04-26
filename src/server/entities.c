@@ -266,6 +266,7 @@ void SV_WriteAmbientsToClient(client_t *client)
 
     MSG_WriteByte(svc_ambient);
     MSG_WriteByte(sv.ambient_state_id);
+    MSG_WriteShort(ge->num_entities[ENT_AMBIENT]);
 
     // something has changed, write out the delta from the last
     // received ambients to the current ambients
@@ -277,7 +278,7 @@ void SV_WriteAmbientsToClient(client_t *client)
 
     // end of ambients
     MSG_WriteByte(0);
-    MSG_WriteShort(MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES);
+    MSG_WriteShort(OFFSET_PRIVATE_ENTITIES);
 
     SV_ClientAddMessage(client, MSG_CLEAR);
 }

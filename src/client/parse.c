@@ -341,12 +341,13 @@ static void CL_ParseFrame(int extrabits)
 static void CL_ParseAmbients(void)
 {
     cl.ambient_state_id = MSG_ReadByte();
+    cl.num_ambient_entities = MSG_ReadWord();
 
     // delta from the entities present in oldframe
     while (1) {
         uint32_t bits;
         int32_t num = MSG_ParseEntityBits(&bits, MSG_ES_AMBIENT);
-        if (num < MAX_PACKET_ENTITIES || num > MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        if (num < OFFSET_AMBIENT_ENTITIES || num > OFFSET_PRIVATE_ENTITIES) {
             Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, num);
         }
 
@@ -354,7 +355,7 @@ static void CL_ParseAmbients(void)
             Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
         }
 
-        if (num == MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        if (num == OFFSET_PRIVATE_ENTITIES) {
             break;
         }
 
@@ -429,7 +430,7 @@ static void CL_ParseBaseline(int index, int bits)
 
 static void CL_ParseAmbient(int index, int bits)
 {
-    if (index < MAX_PACKET_ENTITIES || index >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+    if (index < OFFSET_AMBIENT_ENTITIES || index >= OFFSET_PRIVATE_ENTITIES) {
         Com_Errorf(ERR_DROP, "%s: bad index: %d", __func__, index);
     }
 #ifdef _DEBUG
@@ -465,13 +466,14 @@ static void CL_ParseGamestate(void)
 
     while (msg_read.readcount < msg_read.cursize) {
         index = MSG_ParseEntityBits(&bits, MSG_ES_AMBIENT);
-        if (index == MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+        if (index == OFFSET_PRIVATE_ENTITIES) {
             break;
         }
         CL_ParseAmbient(index, bits);
     }
 
     cl.ambient_state_id = MSG_ReadByte();
+    cl.num_ambient_entities = MSG_ReadWord();
 }
 
 static void CL_ParseServerData(void)
@@ -694,7 +696,7 @@ static void CL_ParseMuzzleFlashPacket(int mask)
     int entity, weapon;
 
     entity = MSG_ReadShort();
-    if (entity < 1 || entity >= (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES))
+    if (entity < 1 || entity >= OFFSET_PRIVATE_ENTITIES)
         Com_Errorf(ERR_DROP, "%s: bad entity", __func__);
 
     weapon = MSG_ReadByte();
@@ -729,7 +731,7 @@ static void CL_ParseStartSoundPacket(void)
         // entity relative
         channel = MSG_ReadShort();
         entity = channel >> 3;
-        if (entity < 0 || entity >= (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES))
+        if (entity < 0 || entity >= OFFSET_PRIVATE_ENTITIES)
             Com_Errorf(ERR_DROP, "%s: bad entity: %d", __func__, entity);
         snd.entity = entity;
         snd.channel = channel & 7;

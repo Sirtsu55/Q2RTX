@@ -111,7 +111,7 @@ fail1:
 static void SV_SetupAmbientEntities(void)
 {
     for (int32_t i = 0; i < MAX_AMBIENT_ENTITIES; i++)
-        sv.ambient_states[i] = EDICT_NUM(MAX_PACKET_ENTITIES + i)->s;
+        sv.ambient_states[i] = EDICT_NUM(OFFSET_AMBIENT_ENTITIES + i)->s;
 
     sv.ambient_state_id = 0;
 }

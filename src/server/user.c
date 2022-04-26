@@ -77,7 +77,7 @@ static void SV_CreateAmbients(void)
     sv_client->ambients = Z_Mallocz(sizeof(*sv_client->ambients) * MAX_AMBIENT_ENTITIES);
 
     for (int i = 0; i < ge->num_entities[ENT_AMBIENT]; i++) {
-        edict_t *ent = EDICT_NUM(MAX_PACKET_ENTITIES + i);
+        edict_t *ent = EDICT_NUM(OFFSET_AMBIENT_ENTITIES + i);
 
         if ((g_features->integer & GMF_PROPERINUSE) && !ent->inuse) {
             continue;
@@ -144,8 +144,9 @@ static void write_gamestate(void)
         }
     }
     MSG_WriteByte(0);
-    MSG_WriteShort(MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES); // end of ambients
+    MSG_WriteShort(OFFSET_PRIVATE_ENTITIES); // end of ambients
     MSG_WriteByte(sv.ambient_state_id); // sync ambient ID
+    MSG_WriteShort(ge->num_entities[ENT_AMBIENT]);
 
     SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
 }

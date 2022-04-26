@@ -656,7 +656,7 @@ void MSG_WriteDeltaAmbientEntity(const entity_state_t *from,
         Com_Errorf(ERR_DROP, "%s: NULL", __func__);
     }
 
-    if (to->number < MAX_PACKET_ENTITIES || to->number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)
+    if (to->number < OFFSET_AMBIENT_ENTITIES || to->number >= OFFSET_PRIVATE_ENTITIES)
         Com_Errorf(ERR_DROP, "%s: bad number: %d", __func__, to->number);
 
     if (!from)
@@ -1406,7 +1406,7 @@ void MSG_ParseDeltaAmbientEntity(const entity_state_t *from,
     int            bits,
     msgEsFlags_t   flags)
 {
-    if (number < MAX_PACKET_ENTITIES || number >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES) {
+    if (number < OFFSET_AMBIENT_ENTITIES || number >= OFFSET_PRIVATE_ENTITIES) {
         Com_Errorf(ERR_DROP, "%s: bad entity number: %d", __func__, number);
     }
 

@@ -48,19 +48,19 @@ edict_t *G_NextEnt(edict_t *from)
             return NULL; // nothing left
 
         // check if we've stepped into an unallocated range
-        if (n < MAX_PACKET_ENTITIES && n >= globals.num_entities[ENT_PACKET])
+        if (n < OFFSET_AMBIENT_ENTITIES && n >= globals.num_entities[ENT_PACKET])
         {
-            from = globals.entities + MAX_PACKET_ENTITIES; // start from ambient entities
+            from = globals.entities + OFFSET_AMBIENT_ENTITIES; // start from ambient entities
             n = from - globals.entities;
         }
         
-        if (n < MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES && n >= MAX_PACKET_ENTITIES + globals.num_entities[ENT_AMBIENT])
+        if (n < OFFSET_PRIVATE_ENTITIES && n >= OFFSET_AMBIENT_ENTITIES + globals.num_entities[ENT_AMBIENT])
         {
-            from = globals.entities + MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES; // start from private entities
+            from = globals.entities + OFFSET_PRIVATE_ENTITIES; // start from private entities
             n = from - globals.entities;
         }
 
-        if (n >= MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + globals.num_entities[ENT_PRIVATE])
+        if (n >= OFFSET_PRIVATE_ENTITIES + globals.num_entities[ENT_PRIVATE])
             return NULL; // end of private entities
 
         // if we're in-use, good to go
@@ -463,16 +463,16 @@ edict_t *G_SpawnType(entity_type_t type)
     {
     case ENT_PACKET:
         i = game.maxclients + 1;
-        start = 0;
-        end = MAX_PACKET_ENTITIES;
+        start = OFFSET_PACKET_ENTITIES;
+        end = OFFSET_AMBIENT_ENTITIES;
         break;
     case ENT_AMBIENT:
-        i = start = MAX_PACKET_ENTITIES;
-        end = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
+        i = start = OFFSET_AMBIENT_ENTITIES;
+        end = OFFSET_PRIVATE_ENTITIES;
         break;
     case ENT_PRIVATE:
-        i = start = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES;
-        end = MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES;
+        i = start = OFFSET_PRIVATE_ENTITIES;
+        end = MAX_EDICTS;
         break;
     default:
         Com_Error(ERR_DROP, "G_SpawnType: bad type");

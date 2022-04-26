@@ -95,13 +95,20 @@ typedef int qhandle_t;
 #define MAX_TOTAL_ENT_LEAFS     128
 #define MAX_ENT_CLUSTERS        16
 
-static inline bool Ent_IsPacket(int number) { return number >= 0 && number < MAX_PACKET_ENTITIES; }
-static inline bool Ent_IsAmbient(int number) { return number >= MAX_PACKET_ENTITIES && number < (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES); }
-static inline bool Ent_IsPrivate(int number) { return number >= MAX_PRIVATE_ENTITIES && number < (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES); }
+// offset to start of packet entities
+#define OFFSET_PACKET_ENTITIES 0
+// offset to start of ambient entities
+#define OFFSET_AMBIENT_ENTITIES (MAX_PACKET_ENTITIES)
+// offset to start of private entities
+#define OFFSET_PRIVATE_ENTITIES (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES)
 
 // total number of entities that will be allocated by
 // the game DLL
 #define MAX_EDICTS (MAX_PACKET_ENTITIES + MAX_AMBIENT_ENTITIES + MAX_PRIVATE_ENTITIES)
+
+static inline bool Ent_IsPacket(int number) { return number >= OFFSET_PACKET_ENTITIES && number < OFFSET_AMBIENT_ENTITIES; }
+static inline bool Ent_IsAmbient(int number) { return number >= OFFSET_AMBIENT_ENTITIES && number < OFFSET_PRIVATE_ENTITIES; }
+static inline bool Ent_IsPrivate(int number) { return number >= OFFSET_PRIVATE_ENTITIES && number < MAX_EDICTS; }
 
 #define MAX_LIGHTSTYLES     256
 #define MAX_MODELS          256     // these are sent over the net as bytes
