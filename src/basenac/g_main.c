@@ -516,8 +516,6 @@ void G_RunFrame(void)
 
     // build the playerstate_t structures for all players
     ClientEndServerFrames();
-
-    Com_Printf("%i %i %i\n", globals.num_entities[0], globals.num_entities[1], globals.num_entities[2]);
 }
 
 // API wrappers
