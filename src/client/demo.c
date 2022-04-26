@@ -1061,6 +1061,7 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     MSG_ReadByte();
     MSG_ReadByte();
 
+    // load configstrings
     while (1) {
         c = MSG_ReadByte();
         if (c == -1) {

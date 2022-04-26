@@ -95,32 +95,6 @@ extern cvar_t* cvar_pt_nearest;
 extern cvar_t* cvar_pt_bilerp_chars;
 extern cvar_t* cvar_pt_bilerp_pics;
 
-void vkpt_textures_prefetch()
-{
-    char * buffer = NULL;
-    int buffer_size = 0;
-    char const * filename = "prefetch.txt";
-    buffer_size = FS_LoadFile(filename, (void**)&buffer);
-    if (buffer == NULL)
-    {
-        Com_EPrintf("Can't load '%s'\n", filename);
-        return;
-    }
-
-    char const * ptr = buffer;
-	char linebuf[MAX_QPATH];
-	while (sgets(linebuf, sizeof(linebuf), &ptr))
-	{
-		char* line = strtok(linebuf, " \t\r\n");
-		if (!line)
-			continue;
-
-		MAT_Find(line, IT_SKIN, IF_PERMANENT);
-	}
-    // Com_Printf("Loaded '%s'\n", filename);
-    FS_FreeFile(buffer);
-}
-
 void vkpt_invalidate_texture_descriptors()
 {
 	for (int index = 0; index < MAX_FRAMES_IN_FLIGHT; index++)

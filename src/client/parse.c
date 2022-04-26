@@ -1117,7 +1117,6 @@ void CL_ParseServerMessage(void)
             index = MSG_ParseEntityBits(&bits, 0);
             CL_ParseBaseline(index, bits);
             break;
-
         case svc_temp_entity:
             CL_ParseTEntPacket();
             CL_ParseTEnt();
@@ -1272,6 +1271,10 @@ void CL_SeekDemoMessage(void)
 
         case svc_frame:
             CL_ParseFrame(extrabits);
+            continue;
+
+        case svc_ambient:
+            CL_ParseAmbients();
             continue;
 
         case svc_inventory:

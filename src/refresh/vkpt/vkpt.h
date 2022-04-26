@@ -542,7 +542,6 @@ void vkpt_textures_destroy_unused();
 void vkpt_textures_update_descriptor_set();
 image_t *vkpt_fake_emissive_texture(image_t *image, int bright_threshold_int);
 void vkpt_extract_emissive_texture_info(image_t *image);
-void vkpt_textures_prefetch();
 void vkpt_invalidate_texture_descriptors();
 void vkpt_init_light_textures();
 
