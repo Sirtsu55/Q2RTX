@@ -131,7 +131,7 @@ entity_update_new(centity_t *ent, const entity_state_t *state, const vec_t *orig
 
     if (state->event == EV_PLAYER_TELEPORT ||
         state->event == EV_OTHER_TELEPORT ||
-        (state->renderfx & (RF_FRAMELERP | RF_BEAM))) {
+        (state->renderfx & (RF_FRAMELERP | RF_MASK_BEAMLIKE))) {
         // no lerping if teleported
         VectorCopy(origin, ent->lerp_origin);
         return;
@@ -573,6 +573,17 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
     clientinfo_t        *ci;
     unsigned int        effects, renderfx;
 
+    // spotlight doesn't add entity, only fx
+    if (s1->renderfx & RF_SPOTLIGHT) {
+        vec3_t dir, s, e;
+        LerpVector(cent->prev.old_origin, cent->current.old_origin, cl.lerpfrac, s);
+        LerpVector(cent->prev.origin, cent->current.origin, cl.lerpfrac, e);
+        VectorSubtract(s, e, dir);
+        VectorNormalize(dir);
+        V_AddSpotLight(s1->origin, dir, s1->frame, s1->skinnum & 0xFF0000, s1->skinnum & 0xFF00, s1->skinnum & 0xFF, s1->angles[0], s1->angles[1]);
+        return;
+    }
+
     ent.id = cent->id + RESERVED_ENTITIY_COUNT;
 
     effects = s1->effects;
@@ -629,7 +640,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
         // do the animation properly
         VectorCopy(cent->current.origin, ent.origin);
         VectorCopy(cent->current.old_origin, ent.oldorigin);  // FIXME
-    } else if (renderfx & RF_BEAM) {
+    } else if (renderfx & RF_MASK_BEAMLIKE) {
         // interpolate start and end points for beams
         LerpVector(cent->prev.origin, cent->current.origin,
             cl.lerpfrac, ent.origin);
@@ -1193,8 +1204,8 @@ static void CL_AddViewWeapon(void)
         // SPIN
 
         V_AddEntity(&gun);
-        }
     }
+}
 
 static void CL_SetupFirstPersonView(void)
 {
@@ -1556,7 +1567,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
 
     LerpVector(ent->prev.origin, ent->current.origin, cl.lerpfrac, org);
 
-    if (ent->current.renderfx & RF_BEAM) {
+    if (ent->current.renderfx & RF_MASK_BEAMLIKE) {
         // beam entities use closest point on line
         vec3_t vec, oldOrg, p;
 

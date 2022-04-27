@@ -1378,8 +1378,9 @@ void SP_func_water(edict_t *self)
 #define TRAIN_START_ON      1
 #define TRAIN_TOGGLE        2
 #define TRAIN_BLOCK_STOPS   4
+#define TRAIN_ORIGIN        8
 
-/*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS
+/*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS TRAIN_ORIGIN
 Trains are moving platforms that players can ride.
 The targets origin specifies the min point of the train at each corner.
 The train spawns at the first target it is pointing at.
@@ -1478,7 +1479,11 @@ again:
             return;
         }
         first = false;
-        VectorSubtract(ent->s.origin, self->mins, self->s.origin);
+        if (self->spawnflags & TRAIN_ORIGIN) {
+            VectorCopy(ent->s.origin, self->s.origin);
+        } else {
+            VectorSubtract(ent->s.origin, self->mins, self->s.origin);
+        }
         VectorCopy(self->s.origin, self->s.old_origin);
         self->s.event = EV_OTHER_TELEPORT;
         SV_LinkEntity(self);
@@ -1494,7 +1499,11 @@ again:
         self->s.sound = self->moveinfo.sound_middle;
     }
 
-    VectorSubtract(ent->s.origin, self->mins, dest);
+    if (self->spawnflags & TRAIN_ORIGIN) {
+        VectorCopy(ent->s.origin, dest);
+    } else {
+        VectorSubtract(ent->s.origin, self->mins, dest);
+    }
     self->moveinfo.state = STATE_TOP;
     VectorCopy(self->s.origin, self->moveinfo.start_origin);
     VectorCopy(dest, self->moveinfo.end_origin);
@@ -1509,7 +1518,11 @@ void train_resume(edict_t *self)
 
     ent = self->target_ent;
 
-    VectorSubtract(ent->s.origin, self->mins, dest);
+    if (self->spawnflags & TRAIN_ORIGIN) {
+        VectorCopy(ent->s.origin, dest);
+    } else {
+        VectorSubtract(ent->s.origin, self->mins, dest);
+    }
     self->moveinfo.state = STATE_TOP;
     VectorCopy(self->s.origin, self->moveinfo.start_origin);
     VectorCopy(dest, self->moveinfo.end_origin);
@@ -1532,7 +1545,11 @@ void func_train_find(edict_t *self)
     }
     self->target = ent->target;
 
-    VectorSubtract(ent->s.origin, self->mins, self->s.origin);
+    if (self->spawnflags & TRAIN_ORIGIN) {
+        VectorCopy(ent->s.origin, self->s.origin);
+    } else {
+        VectorSubtract(ent->s.origin, self->mins, self->s.origin);
+    }
     SV_LinkEntity(self);
 
     // if not triggered, start immediately

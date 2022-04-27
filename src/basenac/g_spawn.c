@@ -150,6 +150,7 @@ void SP_misc_property_swap(edict_t *ent);
 void SP_monster_knight(edict_t *self);
 void SP_monster_fiend(edict_t *self);
 void SP_env_reverb(edict_t *ent);
+void SP_target_spotlight(edict_t *self);
 
 static const spawn_func_t spawn_funcs[] = {
     {"info_player_start", SP_info_player_start, ENT_PRIVATE},
@@ -197,7 +198,8 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_blaster", SP_target_blaster, ENT_PRIVATE},
     {"target_crosslevel_trigger", SP_target_crosslevel_trigger, ENT_PRIVATE},
     {"target_crosslevel_target", SP_target_crosslevel_target, ENT_PRIVATE},
-    {"target_laser", SP_target_laser, ENT_AMBIENT},
+    {"target_laser", SP_target_laser},
+    {"target_spotlight", SP_target_spotlight},
     {"target_help", SP_target_help, ENT_PRIVATE},
     {"target_lightramp", SP_target_lightramp, ENT_PRIVATE},
     {"target_earthquake", SP_target_earthquake, ENT_PRIVATE},
@@ -367,6 +369,11 @@ static const spawn_field_t temp_fields[] = {
 
     {"default_reverb", STOFS(default_reverb), F_INT},
 
+    {"color", STOFS(color), F_COLOR},
+    {"intensity", STOFS(intensity), F_INT},
+    {"width_angle", STOFS(width_angle), F_FLOAT},
+    {"falloff_angle", STOFS(falloff_angle), F_FLOAT},
+
     {NULL}
 };
 
@@ -488,10 +495,19 @@ static bool ED_ParseField(const spawn_field_t *fields, const char *key, const ch
                 *(char **)(b + f->ofs) = ED_NewString(value);
                 break;
             case F_VECTOR:
+            case F_COLOR:
                 if (sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
                     Com_WPrintf("%s: couldn't parse '%s'\n", __func__, key);
                     VectorClear(vec);
                 }
+
+                // expand float colors to bytes
+                if (f->type == F_COLOR && vec[0] <= 1.f && vec[1] <= 1.f && vec[2] <= 1.f) {
+                    vec[0] *= 255.f;
+                    vec[1] *= 255.f;
+                    vec[2] *= 255.f;
+                }
+
                 ((float *)(b + f->ofs))[0] = vec[0];
                 ((float *)(b + f->ofs))[1] = vec[1];
                 ((float *)(b + f->ofs))[2] = vec[2];

@@ -495,7 +495,7 @@ uint32_t MSG_EntityWillWrite(const entity_state_t *from,
 
     if (to->renderfx & RF_FRAMELERP) {
         bits |= U_OLDORIGIN;
-    } else if (to->renderfx & RF_BEAM) {
+    } else if (to->renderfx & RF_MASK_BEAMLIKE) {
         if (!VectorCompare(to->old_origin, from->old_origin))
             bits |= U_OLDORIGIN;
     }

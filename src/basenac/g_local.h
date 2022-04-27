@@ -422,6 +422,10 @@ typedef struct {
     float       maxpitch;
 
     int         default_reverb;
+
+    vec3_t      color;
+    int         intensity;
+    float       width_angle, falloff_angle;
 } spawn_temp_t;
 
 
@@ -629,7 +633,6 @@ typedef enum {
     F_GSTRING,          // string on disk, pointer in memory, TAG_GAME
     F_ZSTRING,          // string on disk, string in memory
     F_VECTOR,
-    F_ANGLEHACK,
     F_EDICT,            // index on disk, pointer in memory
     F_ITEM,             // string on disk, pointer in memory
     F_ITEM_ID,          // string on disk, gitem_id_t in memory
@@ -637,7 +640,11 @@ typedef enum {
     F_FUNCTION,
     F_POINTER,
     F_IGNORE,
-    F_INT64
+    F_INT64,
+
+    // parsing only
+    F_ANGLEHACK,
+    F_COLOR
 } fieldtype_t;
 
 //

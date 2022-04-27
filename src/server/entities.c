@@ -400,7 +400,7 @@ void SV_BuildClientFrame(client_t *client)
                 server_entity_t *sent = &sv.entities[e];
 
                 // beams just check one point for PHS
-                if (ent->s.renderfx & RF_BEAM) {
+                if (ent->s.renderfx & RF_MASK_BEAMLIKE) {
                     if (!Q_IsBitSet(clientphs, sent->clusternums[0]))
                         ent_visible = false;
                 }

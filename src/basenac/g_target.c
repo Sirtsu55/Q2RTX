@@ -516,10 +516,14 @@ void target_laser_think(edict_t *self)
     VectorCopy(self->s.origin, start);
     VectorMA(start, 2048, self->movedir, end);
     while (1) {
-        tr = SV_Trace(start, NULL, NULL, end, ignore, CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER);
+        tr = SV_Trace(start, NULL, NULL, end, ignore, self->dmg ? (CONTENTS_SOLID | CONTENTS_MONSTER | CONTENTS_DEADMONSTER) : CONTENTS_SOLID);
 
         if (!tr.ent)
             break;
+
+        if (!self->dmg) {
+            break;
+        }
 
         // hurt it if we can
         if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER))
@@ -580,8 +584,45 @@ void target_laser_start(edict_t *self)
 
     self->movetype = MOVETYPE_NONE;
     self->solid = SOLID_NOT;
-    self->s.renderfx |= RF_BEAM | RF_TRANSLUCENT;
+    self->s.renderfx |= self->dmg ? RF_BEAM : (RF_SPOTLIGHT | RF_TRANSLUCENT);
     self->s.modelindex = 1;         // must be non-zero
+
+    // Paril - origin follow
+    if (self->combattarget) {
+        self->oldenemy = G_Find(NULL, FOFS(targetname), self->combattarget);
+
+        if (self->oldenemy) {
+            VectorMA(self->oldenemy->absmin, 0.5, self->oldenemy->size, self->s.origin);
+        }
+    }
+
+    if (!self->enemy) {
+        if (self->target) {
+            ent = G_Find(NULL, FOFS(targetname), self->target);
+            if (!ent)
+                Com_WPrintf("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
+            self->enemy = ent;
+        } else {
+            G_SetMovedir(self->s.angles, self->movedir);
+        }
+    }
+    self->use = target_laser_use;
+    self->think = target_laser_think;
+
+    VectorSet(self->mins, -8, -8, -8);
+    VectorSet(self->maxs, 8, 8, 8);
+    SV_LinkEntity(self);
+
+    if (self->spawnflags & 1)
+        target_laser_on(self);
+    else
+        target_laser_off(self);
+}
+
+void SP_target_laser(edict_t *self)
+{
+    if (!self->dmg)
+        self->dmg = 1;
 
     // set the beam diameter
     // Paril: multi-size fatness
@@ -608,43 +649,36 @@ void target_laser_start(edict_t *self)
     else if (self->spawnflags & 32)
         self->s.skinnum = 0xe0e1e2e3;
 
-    // Paril - origin follow
-    if (self->combattarget) {
-        self->oldenemy = G_Find(NULL, FOFS(targetname), self->combattarget);
-
-        if (self->oldenemy) {
-            VectorMA(self->oldenemy->absmin, 0.5, self->oldenemy->size, self->s.origin);
-        }
-    }
-
-    if (!self->enemy) {
-        if (self->target) {
-            ent = G_Find(NULL, FOFS(targetname), self->target);
-            if (!ent)
-                Com_WPrintf("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
-            self->enemy = ent;
-        } else {
-            G_SetMovedir(self->s.angles, self->movedir);
-        }
-    }
-    self->use = target_laser_use;
-    self->think = target_laser_think;
-
-    if (!self->dmg)
-        self->dmg = 1;
-
-    VectorSet(self->mins, -8, -8, -8);
-    VectorSet(self->maxs, 8, 8, 8);
-    SV_LinkEntity(self);
-
-    if (self->spawnflags & 1)
-        target_laser_on(self);
-    else
-        target_laser_off(self);
+    // let everything else get spawned before we start firing
+    self->think = target_laser_start;
+    self->nextthink = level.time + 1000;
 }
 
-void SP_target_laser(edict_t *self)
+void SP_target_spotlight(edict_t *self)
 {
+    self->dmg = 0;
+
+    if (VectorEmpty(st.color)) {
+        self->s.skinnum = MakeRawLong(255, 255, 255, 0);
+    } else {
+        self->s.skinnum = MakeRawLong((uint8_t) st.color[0], (uint8_t) st.color[1], (uint8_t) st.color[2], 0);
+    }
+    if (st.intensity) {
+        self->s.frame = st.intensity;
+    } else {
+        self->s.frame = 10000;
+    }
+    if (st.width_angle) {
+        self->s.angles[0] = st.width_angle;
+    } else {
+        self->s.angles[0] = 30.f;
+    }
+    if (st.falloff_angle) {
+        self->s.angles[1] = st.falloff_angle;
+    } else {
+        self->s.angles[1] = 15.f;
+    }
+
     // let everything else get spawned before we start firing
     self->think = target_laser_start;
     self->nextthink = level.time + 1000;
