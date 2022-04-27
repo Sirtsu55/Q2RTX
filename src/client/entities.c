@@ -580,7 +580,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
         LerpVector(cent->prev.origin, cent->current.origin, cl.lerpfrac, e);
         VectorSubtract(s, e, dir);
         VectorNormalize(dir);
-        V_AddSpotLight(s1->origin, dir, s1->frame, s1->skinnum & 0xFF, (s1->skinnum >> 8) & 0xFF, (s1->skinnum >> 16) & 0xFF, s1->angles[0], s1->angles[1]);
+        V_AddSpotLight(s1->origin, dir, s1->frame, (s1->skinnum & 0xFF) / 255.f, ((s1->skinnum >> 8) & 0xFF) / 255.f, ((s1->skinnum >> 16) & 0xFF) / 255.f, s1->angles[0], s1->angles[1]);
         return;
     }
 
