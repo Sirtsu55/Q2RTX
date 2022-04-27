@@ -367,9 +367,11 @@ static void CL_ParseAmbients(void)
         }
     }
 
-    MSG_WriteByte(clc_ambient);
-    MSG_WriteByte(cl.ambient_state_id);
-    MSG_FlushTo(&cls.netchan->message);
+    if (!cls.demo.playback) {
+        MSG_WriteByte(clc_ambient);
+        MSG_WriteByte(cl.ambient_state_id);
+        MSG_FlushTo(&cls.netchan->message);
+    }
 }
 
 /*
@@ -1036,7 +1038,7 @@ void CL_ParseServerMessage(void)
 {
     int         cmd, extrabits;
     size_t      readcount;
-    int         index, bits;
+    int         index;
 
 #ifdef _DEBUG
     if (cl_shownet->integer == 1) {
@@ -1113,10 +1115,6 @@ void CL_ParseServerMessage(void)
             S_ParseStartSound();
             break;
 
-        case svc_spawnbaseline:
-            index = MSG_ParseEntityBits(&bits, 0);
-            CL_ParseBaseline(index, bits);
-            break;
         case svc_temp_entity:
             CL_ParseTEntPacket();
             CL_ParseTEnt();
@@ -1142,7 +1140,7 @@ void CL_ParseServerMessage(void)
 
         case svc_ambient:
             CL_ParseAmbients();
-            continue;
+            break;
 
         case svc_inventory:
             CL_ParseInventory();

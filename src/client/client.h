@@ -438,6 +438,7 @@ typedef struct client_static_s {
         bool        paused;
         bool        seeking;
         bool        eof;
+        entity_state_t last_ambients[MAX_AMBIENT_ENTITIES];
     } demo;
 } client_static_t;
 

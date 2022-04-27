@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 
-static byte     demo_buffer[MAX_PACKETLEN];
+static byte     demo_buffer[MAX_MSGLEN];
 
 static cvar_t   *cl_demosnaps;
 static cvar_t   *cl_demomsglen;
@@ -334,10 +334,6 @@ Begins recording a demo from the current position
 static void CL_Record_f(void)
 {
     char    buffer[MAX_OSPATH];
-    int     i;
-    size_t  len;
-    entity_state_t  *ent;
-    char            *s;
     qhandle_t       f;
 
     if (cls.demo.recording) {
@@ -374,7 +370,7 @@ static void CL_Record_f(void)
     // the first frame will be delta uncompressed
     cls.demo.last_server_frame = -1;
 
-    SZ_Init(&cls.demo.buffer, demo_buffer, MAX_PACKETLEN_WRITABLE);
+    SZ_Init(&cls.demo.buffer, demo_buffer, MAX_MSGLEN - PACKET_HEADER);
 
     // clear dirty configstrings
     memset(cl.dcs, 0, sizeof(cl.dcs));
@@ -395,41 +391,8 @@ static void CL_Record_f(void)
     MSG_WriteShort(cl.clientNum);
     MSG_WriteString(cl.configstrings[CS_NAME]);
 
-    // configstrings
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-        s = cl.configstrings[i];
-        if (!*s)
-            continue;
-
-        len = strlen(s);
-        if (len > MAX_QPATH)
-            len = MAX_QPATH;
-
-        if (msg_write.cursize + len + 4 > MAX_PACKETLEN_WRITABLE) {
-            if (!CL_WriteDemoMessage(&msg_write))
-                return;
-        }
-
-        MSG_WriteByte(svc_configstring);
-        MSG_WriteShort(i);
-        MSG_WriteData(s, len);
-        MSG_WriteByte(0);
-    }
-
-    // baselines
-    for (i = 1; i < MAX_PACKET_ENTITIES; i++) {
-        ent = &cl.baselines[i];
-        if (!ent->number)
-            continue;
-
-        if (msg_write.cursize + 64 > MAX_PACKETLEN_WRITABLE) {
-            if (!CL_WriteDemoMessage(&msg_write))
-                return;
-        }
-
-        MSG_WriteByte(svc_spawnbaseline);
-        MSG_WriteDeltaPacketEntity(NULL, ent, MSG_ES_FORCE);
-    }
+    // send the gamestate
+    MSG_WriteGamestate((char *) cl.configstrings, cl.baselines, MAX_PACKET_ENTITIES, cl.ambients, cl.num_ambient_entities, cl.ambient_state_id, 0);
 
     MSG_WriteByte(svc_stufftext);
     MSG_WriteString("precache\n");
@@ -478,13 +441,39 @@ static void resume_record(void)
     }
 
     // write delta uncompressed frame
-    //cls.demo.last_server_frame = -1;
     CL_EmitDemoFrame();
-
-    // FIXME: write layout if it fits? most likely it won't
 
     // write it to the demo file
     CL_WriteDemoMessage(&cls.demo.buffer);
+
+    if (msg_write.cursize != 0)
+        Sys_DebugBreak();
+
+    // write delta uncompressed ambient data
+    MSG_WriteByte(svc_ambient);
+    MSG_WriteByte(cl.ambient_state_id);
+    MSG_WriteShort(cl.num_ambient_entities);
+
+    // something has changed, write out the delta from the last
+    // received ambients to the current ambients
+    for (int32_t i = 0; i < cl.num_ambient_entities; i++) {
+        const entity_state_t *to = &cl.ambients[i];
+
+        if (to->number) {
+            MSG_WriteDeltaAmbientEntity(&cls.demo.last_ambients[i], to, MSG_ES_AMBIENT);
+        }
+    }
+
+    // end of ambients
+    MSG_WriteByte(0);
+    MSG_WriteShort(OFFSET_PRIVATE_ENTITIES);
+
+    // write layout
+    MSG_WriteByte(svc_layout);
+    MSG_WriteString(cl.layout);
+
+    // write it to the demo file
+    CL_WriteDemoMessage(&msg_write);
 }
 
 static void CL_Suspend_f(void)
@@ -497,6 +486,7 @@ static void CL_Suspend_f(void)
     if (!cls.demo.paused) {
         Com_Printf("Suspended demo recording.\n");
         cls.demo.paused = true;
+        memcpy(cls.demo.last_ambients, cl.ambients, sizeof(*cls.demo.last_ambients) * cl.num_ambient_entities);
         return;
     }
 
@@ -532,7 +522,6 @@ static int read_first_message(qhandle_t f)
     }
     msglen = LittleLong(ul);
 
-    // if (msglen < 64 || msglen > sizeof(msg_read_buffer)) {
     if (msglen > sizeof(msg_read_buffer)) {
         return Q_ERR_INVALID_FORMAT;
     }
@@ -1031,7 +1020,7 @@ CL_GetDemoInfo
 demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
 {
     qhandle_t f;
-    int c, index;
+    int index;
     char string[MAX_QPATH];
     int clientNum, type;
 
@@ -1062,22 +1051,15 @@ demoInfo_t *CL_GetDemoInfo(const char *path, demoInfo_t *info)
     MSG_ReadByte();
 
     // load configstrings
-    while (1) {
-        c = MSG_ReadByte();
-        if (c == -1) {
-            if (read_next_message(f) <= 0) {
-                break;
-            }
-            continue; // parse new message
-        }
-        if (c != svc_configstring) {
-            break;
-        }
+    while (msg_read.readcount < msg_read.cursize) {
         index = MSG_ReadShort();
-        if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+        if (index == MAX_CONFIGSTRINGS) {
+            break;
+        } else if (index < 0 || index >= MAX_CONFIGSTRINGS) {
             goto fail;
         }
-        MSG_ReadString(string, sizeof(string));
+        size_t maxlen = CS_SIZE(index);
+        size_t len = MSG_ReadString(string, maxlen);
         parse_info_string(info, clientNum, index, string);
     }
 

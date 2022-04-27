@@ -93,61 +93,9 @@ static void SV_CreateAmbients(void)
     sv_client->ambient_state_id = sv.ambient_state_id;
 }
 
-static void write_baseline(entity_state_t *base)
-{
-    MSG_WriteDeltaPacketEntity(NULL, base, sv_client->esFlags | MSG_ES_FORCE);
-}
-
-static void write_ambient(entity_state_t *base)
-{
-    MSG_WriteDeltaAmbientEntity(&nullEntityState, base, sv_client->esFlags | MSG_ES_FORCE);
-}
-
 static void write_gamestate(void)
 {
-    entity_state_t  *base;
-    int         i;
-    size_t      length;
-    char        *string;
-
-    MSG_WriteByte(svc_gamestate);
-
-    // write configstrings
-    string = (char *) sv.configstrings;
-    for (i = 0; i < MAX_CONFIGSTRINGS; i++, string += MAX_QPATH) {
-        if (!string[0]) {
-            continue;
-        }
-        length = strlen(string);
-        if (length > MAX_QPATH) {
-            length = MAX_QPATH;
-        }
-
-        MSG_WriteShort(i);
-        MSG_WriteData(string, length);
-        MSG_WriteByte(0);
-    }
-    MSG_WriteShort(MAX_CONFIGSTRINGS);   // end of configstrings
-
-    // write baselines
-    for (i = 0, base = sv_client->baselines; i < sv_client->num_baselines; i++, base++) {
-        if (base->number) {
-            write_baseline(base);
-        }
-    }
-    MSG_WriteShort(0);   // end of baselines
-
-    // write ambients
-    for (i = 0, base = sv_client->ambients; i < ge->num_entities[ENT_AMBIENT]; i++, base++) {
-        if (base->number) {
-            write_ambient(base);
-        }
-    }
-    MSG_WriteByte(0);
-    MSG_WriteShort(OFFSET_PRIVATE_ENTITIES); // end of ambients
-    MSG_WriteByte(sv.ambient_state_id); // sync ambient ID
-    MSG_WriteShort(ge->num_entities[ENT_AMBIENT]);
-
+    MSG_WriteGamestate((char *) sv.configstrings, sv_client->baselines, sv_client->num_baselines, sv_client->ambients, ge->num_entities[ENT_AMBIENT], sv.ambient_state_id, sv_client->esFlags);
     SV_ClientAddMessage(sv_client, MSG_GAMESTATE);
 }
 

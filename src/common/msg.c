@@ -665,6 +665,62 @@ void MSG_WriteDeltaAmbientEntity(const entity_state_t *from,
     MSG_WriteDeltaEntity(from, to, flags | MSG_ES_AMBIENT);
 }
 
+static void write_baseline(entity_state_t *base, msgEsFlags_t esFlags)
+{
+    MSG_WriteDeltaPacketEntity(NULL, base, esFlags | MSG_ES_FORCE);
+}
+
+static void write_ambient(entity_state_t *base, msgEsFlags_t esFlags)
+{
+    MSG_WriteDeltaAmbientEntity(&nullEntityState, base, esFlags | MSG_ES_FORCE);
+}
+
+void MSG_WriteGamestate(char *configstrings, entity_state_t *baselines, size_t num_baselines, entity_state_t *ambients, uint16_t num_ambients, uint8_t ambient_state_id, msgEsFlags_t esFlags)
+{
+    entity_state_t  *base;
+    int         i;
+    size_t      length;
+    char        *string;
+
+    MSG_WriteByte(svc_gamestate);
+
+    // write configstrings
+    string = (char *) configstrings;
+    for (i = 0; i < MAX_CONFIGSTRINGS; i++, string += MAX_QPATH) {
+        if (!string[0]) {
+            continue;
+        }
+        length = strlen(string);
+        if (length > MAX_QPATH) {
+            length = MAX_QPATH;
+        }
+
+        MSG_WriteShort(i);
+        MSG_WriteData(string, length);
+        MSG_WriteByte(0);
+    }
+    MSG_WriteShort(MAX_CONFIGSTRINGS);   // end of configstrings
+
+    // write baselines
+    for (i = 0, base = baselines; i < num_baselines; i++, base++) {
+        if (base->number) {
+            write_baseline(base, esFlags);
+        }
+    }
+    MSG_WriteShort(0);   // end of baselines
+
+    // write ambients
+    for (i = 0, base = ambients; i < num_ambients; i++, base++) {
+        if (base->number) {
+            write_ambient(base, esFlags);
+        }
+    }
+    MSG_WriteByte(0);
+    MSG_WriteShort(OFFSET_PRIVATE_ENTITIES); // end of ambients
+    MSG_WriteByte(ambient_state_id); // sync ambient ID
+    MSG_WriteShort(num_ambients);
+}
+
 static inline int OFFSET2SHORT(float x)
 {
     return FLOAT2COMPRESS(x, 1024.f);
@@ -1684,7 +1740,6 @@ const char *MSG_ServerCommandString(int cmd)
         S(stufftext)
         S(serverdata)
         S(configstring)
-        S(spawnbaseline)
         S(centerprint)
         S(download)
         S(playerinfo)

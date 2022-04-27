@@ -79,6 +79,7 @@ void MSG_WriteDeltaAmbientEntity(const entity_state_t *from,
                                  const entity_state_t *to,
                                  msgEsFlags_t         flags);
 int     MSG_WriteDeltaPlayerstate(const player_state_t *from, player_state_t *to, msgPsFlags_t flags);
+void MSG_WriteGamestate(char *configstrings, entity_state_t *baselines, size_t num_baselines, entity_state_t *ambients, uint16_t num_ambients, uint8_t ambient_state_id, msgEsFlags_t esFlags);
 
 static inline void *MSG_WriteData(const void *data, size_t len)
 {
