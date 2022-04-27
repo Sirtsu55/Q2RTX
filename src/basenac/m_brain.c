@@ -441,7 +441,6 @@ mmove_t brain_move_attack1 = {FRAME_attak101, FRAME_attak118, brain_frames_attac
 
 void brain_chest_open(edict_t *self) {
     self->spawnflags &= ~65536;
-    self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
     SV_StartSound(self, CHAN_BODY, sound_chest_open, 1, ATTN_NORM, 0);
 }
 
@@ -455,7 +454,6 @@ void brain_tentacle_attack(edict_t *self) {
 }
 
 void brain_chest_closed(edict_t *self) {
-    self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
     if (self->spawnflags & 65536) {
         self->spawnflags &= ~65536;
         self->monsterinfo.currentmove = &brain_move_attack1;
@@ -513,7 +511,6 @@ mframe_t brain_frames_run [] =
 mmove_t brain_move_run = {FRAME_walk101, FRAME_walk111, brain_frames_run, NULL};
 
 void brain_run(edict_t *self) {
-    self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
     if (self->monsterinfo.aiflags & AI_STAND_GROUND)
         self->monsterinfo.currentmove = &brain_move_stand;
     else
@@ -562,16 +559,15 @@ void brain_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     int     n;
 
     self->s.effects = 0;
-    self->monsterinfo.power_armor_type = POWER_ARMOR_NONE;
 
 // check for gib
     if (self->health <= self->gib_health) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
-            ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
+        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -634,9 +630,6 @@ void SP_monster_brain(edict_t *self) {
     self->monsterinfo.sight = brain_sight;
     self->monsterinfo.search = brain_search;
     self->monsterinfo.idle = brain_idle;
-
-    self->monsterinfo.power_armor_type = POWER_ARMOR_SCREEN;
-    self->monsterinfo.power_armor_power = 100;
 
     SV_LinkEntity(self);
 

@@ -507,8 +507,8 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
         // clear inventory
         // this is kind of ugly, but it's how we want to handle keys in coop
-        for (n = 0; n < game.num_items; n++) {
-            if (coop.integer && itemlist[n].flags & IT_KEY)
+        for (n = 0; n < ITEM_TOTAL; n++) {
+            if (coop.integer && GetItemByIndex(n)->flags & IT_KEY)
                 self->client->resp.coop_respawn.inventory[n] = self->client->pers.inventory[n];
             self->client->pers.inventory[n] = 0;
         }
@@ -517,15 +517,13 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     // remove powerups
     self->client->quad_time = 0;
     self->client->invincible_time = 0;
-    self->client->breather_time = 0;
     self->client->enviro_time = 0;
-    self->flags &= ~FL_POWER_ARMOR;
 
     if (self->health < -40) {
         // gib
-        SV_StartSound(self, CHAN_BODY, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
         ThrowClientHead(self, damage);
 
         self->takedamage = DAMAGE_NO;
@@ -575,19 +573,16 @@ but is called after each death and level change in deathmatch
 */
 void InitClientPersistant(gclient_t *client)
 {
-	gitem_t     *item;
-
 	memset(&client->pers, 0, sizeof(client->pers));
 
-	item = FindItem("Axe");
-	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.selected_item = ITEM_AXE;
 	client->pers.inventory[client->pers.selected_item] = 1;
 
-	client->pers.weapon = item;
+	client->pers.weapon         = GetItemByIndex(client->pers.selected_item);
     client->pers.health         = 100;
     client->pers.max_health     = 100;
 
-    client->pers.max_nails    = 200;
+    client->pers.max_nails      = 200;
     client->pers.max_shells     = 100;
     client->pers.max_rockets    = 50;
     client->pers.max_cells      = 200;
@@ -624,7 +619,7 @@ void SaveClientData(void)
             continue;
         game.clients[i].pers.health = ent->health;
         game.clients[i].pers.max_health = ent->max_health;
-        game.clients[i].pers.savedFlags = (ent->flags & (FL_GODMODE | FL_NOTARGET | FL_POWER_ARMOR));
+        game.clients[i].pers.savedFlags = (ent->flags & (FL_GODMODE | FL_NOTARGET));
         if (coop.integer)
             game.clients[i].pers.score = ent->client->resp.score;
     }
@@ -882,9 +877,9 @@ void body_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
     int n;
 
     if (self->health < -40) {
-        SV_StartSound(self, CHAN_BODY, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
         self->s.origin[2] -= 48;
         ThrowClientHead(self, damage);
         self->takedamage = DAMAGE_NO;

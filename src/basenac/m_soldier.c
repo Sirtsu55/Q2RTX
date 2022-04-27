@@ -1100,11 +1100,11 @@ void soldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 // check for gib
     if (self->health <= self->gib_health) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 3; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowGib(self, "models/objects/gibs/chest/tris.md2", damage, GIB_ORGANIC);
-        ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
+        ThrowGib(self, ASSET_MODEL_GIB_CHEST, damage, GIB_ORGANIC);
+        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -1197,8 +1197,8 @@ void SP_monster_soldier_light(edict_t *self)
 
     sound_pain_light = SV_SoundIndex("soldier/solpain2.wav");
     sound_death_light = SV_SoundIndex("soldier/soldeth2.wav");
-    SV_ModelIndex("models/objects/laser/tris.md2");
-    SV_SoundIndex("misc/lasfly.wav");
+    SV_ModelIndex(ASSET_MODEL_LASER);
+    SV_SoundIndex(ASSET_SOUND_LASER_FLY);
     SV_SoundIndex("soldier/solatck2.wav");
 
     self->s.skinnum = 0;

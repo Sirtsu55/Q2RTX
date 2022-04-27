@@ -30,7 +30,6 @@ static int sound_die;
 static int sound_idle;
 static int sound_punch;
 static int sound_sight;
-static int sound_search;
 
 enum {
     ANIMATION(STAND, 18),
@@ -52,7 +51,7 @@ void knight_sight(edict_t *self, edict_t *other)
 void knight_search(edict_t *self)
 {
     if (frand() < 0.2)
-        SV_StartSound(self, CHAN_VOICE, sound_search, 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_NORM, 0);
 }
 
 mmove_t knight_move_stand = {
@@ -230,12 +229,12 @@ void knight_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     int     n;
 
     if (self->health <= self->gib_health) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
-            ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
+        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -262,7 +261,7 @@ void knight_load(edict_t *self)
     if (knight_inititalized)
         return;
 
-    m_iqm_t *iqm = M_InitializeIQM("models/monsters/knight/knight.iqm");
+    m_iqm_t *iqm = M_InitializeIQM(ASSET_MODEL_KNIGHT);
 
     M_SetupIQMDists(iqm, (mmove_t *[]) {
         &knight_move_stand, &knight_move_walk, &knight_move_run1, &knight_move_attack_spike,
@@ -285,14 +284,13 @@ void SP_monster_knight(edict_t *self)
     }
 
     // pre-caches
-    sound_pain  = SV_SoundIndex("nac_knight/khurt.wav");
-    sound_die   = SV_SoundIndex("nac_knight/kdeath.wav");
-    sound_idle  = SV_SoundIndex("nac_knight/idle.wav");
-    sound_punch = SV_SoundIndex("nac_knight/sword1.wav");
-    sound_search = SV_SoundIndex("nac_knight/idle.wav");
-    sound_sight = SV_SoundIndex("nac_knight/ksight.wav");
+    sound_pain  = SV_SoundIndex(ASSET_SOUND_KNIGHT_HURT);
+    sound_die   = SV_SoundIndex(ASSET_SOUND_KNIGHT_DEATH);
+    sound_idle  = SV_SoundIndex(ASSET_SOUND_KNIGHT_IDLE);
+    sound_punch = SV_SoundIndex(ASSET_SOUND_KNIGHT_SWORD);
+    sound_sight = SV_SoundIndex(ASSET_SOUND_KNIGHT_SIGHT);
 
-    self->s.modelindex = SV_ModelIndex("models/monsters/knight/knight.iqm");
+    self->s.modelindex = SV_ModelIndex(ASSET_MODEL_KNIGHT);
     VectorSet(self->mins, -16, -16, -0);
     VectorSet(self->maxs, 16, 16, 56);
     self->movetype = MOVETYPE_STEP;

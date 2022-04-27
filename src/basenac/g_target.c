@@ -166,7 +166,7 @@ void SP_target_secret(edict_t *ent)
 
     ent->use = use_target_secret;
     if (!st.noise)
-        st.noise = "misc/secret.wav";
+        st.noise = ASSET_SOUND_SECRET_FOUND;
     ent->noise_index = SV_SoundIndex(st.noise);
     ent->svflags = SVF_NOCLIENT;
     level.total_secrets++;
@@ -204,7 +204,7 @@ void SP_target_goal(edict_t *ent)
 
     ent->use = use_target_goal;
     if (!st.noise)
-        st.noise = "misc/secret.wav";
+        st.noise = ASSET_SOUND_SECRET_FOUND;
     ent->noise_index = SV_SoundIndex(st.noise);
     ent->svflags = SVF_NOCLIENT;
     level.total_goals++;

@@ -648,9 +648,9 @@ void makron_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     self->s.sound = 0;
     // check for gib
     if (self->health <= self->gib_health) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 1 /*4*/; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
             ThrowGib(self, "models/objects/gibs/sm_metal/tris.md2", damage, GIB_METALLIC);
         ThrowHead(self, "models/objects/gibs/gear/tris.md2", damage, GIB_METALLIC);

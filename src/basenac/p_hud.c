@@ -42,7 +42,6 @@ void MoveClientToIntermission(edict_t *ent)
     // clean up powerup info
     ent->client->quad_time = 0;
     ent->client->invincible_time = 0;
-    ent->client->breather_time = 0;
     ent->client->enviro_time = 0;
 
     ent->viewheight = 0;
@@ -92,8 +91,8 @@ void BeginIntermission(edict_t *targ)
                 if (!client->inuse)
                     continue;
                 // strip players of all keys between units
-                for (n = 0; n < MAX_ITEMS; n++) {
-                    if (itemlist[n].flags & IT_KEY)
+                for (n = 0; n < ITEM_TOTAL; n++) {
+                    if (GetItemByIndex(n)->flags & IT_KEY)
                         client->client->pers.inventory[n] = 0;
                 }
             }
@@ -349,8 +348,7 @@ G_SetStats
 void G_SetStats(edict_t *ent)
 {
     gitem_t     *item;
-    int         index, cells;
-    int         power_armor_type;
+    int         index;
 
     //
     // health
@@ -365,7 +363,7 @@ void G_SetStats(edict_t *ent)
         ent->client->ps.stats[STAT_AMMO_ICON] = 0;
         ent->client->ps.stats[STAT_AMMO] = 0;
     } else {
-        item = &itemlist[ent->client->ammo_index];
+        item = GetItemByIndex(ent->client->ammo_index);
         ent->client->ps.stats[STAT_AMMO_ICON] = SV_ImageIndex(item->icon);
         ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
     }
@@ -373,23 +371,8 @@ void G_SetStats(edict_t *ent)
     //
     // armor
     //
-    power_armor_type = PowerArmorType(ent);
-    if (power_armor_type) {
-        cells = ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))];
-        if (cells == 0) {
-            // ran out of cells for power armor
-            ent->flags &= ~FL_POWER_ARMOR;
-            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
-            power_armor_type = 0;;
-        }
-    }
-
     index = ArmorIndex(ent);
-    if (power_armor_type && (!index || (level.time % 1000) > 500)) {
-        // flash between power armor and other armor icon
-        ent->client->ps.stats[STAT_ARMOR_ICON] = SV_ImageIndex("i_powershield");
-        ent->client->ps.stats[STAT_ARMOR] = cells;
-    } else if (index) {
+    if (index) {
         item = GetItemByIndex(index);
         ent->client->ps.stats[STAT_ARMOR_ICON] = SV_ImageIndex(item->icon);
         ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
@@ -418,9 +401,6 @@ void G_SetStats(edict_t *ent)
     } else if (ent->client->enviro_time > level.time) {
         ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_envirosuit");
         ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->enviro_time - level.time);
-    } else if (ent->client->breather_time > level.time) {
-        ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_rebreather");
-        ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->breather_time - level.time);
     } else {
         ent->client->ps.stats[STAT_TIMER_ICON] = 0;
         ent->client->ps.stats[STAT_TIMER] = 0;
@@ -432,7 +412,7 @@ void G_SetStats(edict_t *ent)
     if (ent->client->pers.selected_item == -1)
         ent->client->ps.stats[STAT_SELECTED_ICON] = 0;
     else
-        ent->client->ps.stats[STAT_SELECTED_ICON] = SV_ImageIndex(itemlist[ent->client->pers.selected_item].icon);
+        ent->client->ps.stats[STAT_SELECTED_ICON] = SV_ImageIndex(GetItemByIndex(ent->client->pers.selected_item)->icon);
 
     ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
 

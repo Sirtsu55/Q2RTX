@@ -98,36 +98,12 @@ void gib_think(edict_t *self)
     }
 }
 
-void gib_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-    vec3_t  normal_angles, right;
-
-    if (!self->groundentity)
-        return;
-
-    self->touch = NULL;
-
-    if (plane) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/fhit3.wav"), 1, ATTN_NORM, 0);
-
-        vectoangles(plane->normal, normal_angles);
-        AngleVectors(normal_angles, NULL, right, NULL);
-        vectoangles(right, self->s.angles);
-
-        if (self->s.modelindex == sm_meat_index) {
-            self->s.frame++;
-            self->think = gib_think;
-            self->nextthink = level.time + 1;
-        }
-    }
-}
-
 void gib_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
     G_FreeEdict(self);
 }
 
-void ThrowGib(edict_t *self, char *gibname, int damage, int type)
+void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
 {
     edict_t *gib;
     vec3_t  vd;
@@ -152,7 +128,6 @@ void ThrowGib(edict_t *self, char *gibname, int damage, int type)
 
     if (type == GIB_ORGANIC) {
         gib->movetype = MOVETYPE_TOSS;
-        gib->touch = gib_touch;
         vscale = 0.5f;
     } else {
         gib->movetype = MOVETYPE_BOUNCE;
@@ -172,7 +147,7 @@ void ThrowGib(edict_t *self, char *gibname, int damage, int type)
     SV_LinkEntity(gib);
 }
 
-void ThrowHead(edict_t *self, char *gibname, int damage, int type)
+void ThrowHead(edict_t *self, const char *gibname, int damage, int type)
 {
     vec3_t  vd;
     float   vscale;
@@ -195,7 +170,6 @@ void ThrowHead(edict_t *self, char *gibname, int damage, int type)
 
     if (type == GIB_ORGANIC) {
         self->movetype = MOVETYPE_TOSS;
-        self->touch = gib_touch;
         vscale = 0.5f;
     } else {
         self->movetype = MOVETYPE_BOUNCE;
@@ -221,10 +195,10 @@ void ThrowClientHead(edict_t *self, int damage)
     char    *gibname;
 
     if (Q_rand() & 1) {
-        gibname = "models/objects/gibs/head2/tris.md2";
+        gibname = ASSET_MODEL_GIB_HEAD;
         self->s.skinnum = 1;        // second skin is player
     } else {
-        gibname = "models/objects/gibs/skull/tris.md2";
+        gibname = ASSET_MODEL_GIB_SKULL;
         self->s.skinnum = 0;
     }
 
@@ -266,7 +240,7 @@ void debris_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     G_FreeEdict(self);
 }
 
-void ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin)
+void ThrowDebris(edict_t *self, const char *modelname, float speed, vec3_t origin)
 {
     edict_t *chunk;
     vec3_t  v;
@@ -705,7 +679,7 @@ void func_explosive_explode(edict_t *self, edict_t *inflictor, edict_t *attacker
             chunkorigin[0] = origin[0] + crandom() * size[0];
             chunkorigin[1] = origin[1] + crandom() * size[1];
             chunkorigin[2] = origin[2] + crandom() * size[2];
-            ThrowDebris(self, "models/objects/debris1/tris.md2", 1, chunkorigin);
+            ThrowDebris(self, ASSET_MODEL_DEBRIS1, 1, chunkorigin);
         }
     }
 
@@ -717,7 +691,7 @@ void func_explosive_explode(edict_t *self, edict_t *inflictor, edict_t *attacker
         chunkorigin[0] = origin[0] + crandom() * size[0];
         chunkorigin[1] = origin[1] + crandom() * size[1];
         chunkorigin[2] = origin[2] + crandom() * size[2];
-        ThrowDebris(self, "models/objects/debris2/tris.md2", 2, chunkorigin);
+        ThrowDebris(self, ASSET_MODEL_DEBRIS2, 2, chunkorigin);
     }
 
     G_UseTargets(self, attacker);
@@ -752,8 +726,8 @@ void SP_func_explosive(edict_t *self)
 
     self->movetype = MOVETYPE_PUSH;
 
-    SV_ModelIndex("models/objects/debris1/tris.md2");
-    SV_ModelIndex("models/objects/debris2/tris.md2");
+    SV_ModelIndex(ASSET_MODEL_DEBRIS1);
+    SV_ModelIndex(ASSET_MODEL_DEBRIS2);
 
     if (self->spawnflags & 1) {
         self->svflags |= SVF_NOCLIENT;
@@ -817,61 +791,61 @@ void barrel_explode(edict_t *self)
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS1, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris1/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS1, spd, org);
 
     // bottom corners
     spd = 1.75f * (float)self->dmg / 200.0f;
     VectorCopy(self->absmin, org);
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS3, spd, org);
     VectorCopy(self->absmin, org);
     org[0] += self->size[0];
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS3, spd, org);
     VectorCopy(self->absmin, org);
     org[1] += self->size[1];
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS3, spd, org);
     VectorCopy(self->absmin, org);
     org[0] += self->size[0];
     org[1] += self->size[1];
-    ThrowDebris(self, "models/objects/debris3/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS3, spd, org);
 
     // a bunch of little chunks
     spd = 2 * self->dmg / 200;
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
     org[0] = self->s.origin[0] + crandom() * self->size[0];
     org[1] = self->s.origin[1] + crandom() * self->size[1];
     org[2] = self->s.origin[2] + crandom() * self->size[2];
-    ThrowDebris(self, "models/objects/debris2/tris.md2", spd, org);
+    ThrowDebris(self, ASSET_MODEL_DEBRIS2, spd, org);
 
     VectorCopy(save, self->s.origin);
     if (self->groundentity)
@@ -896,14 +870,14 @@ void SP_misc_explobox(edict_t *self)
         return;
     }
 
-    SV_ModelIndex("models/objects/debris1/tris.md2");
-    SV_ModelIndex("models/objects/debris2/tris.md2");
-    SV_ModelIndex("models/objects/debris3/tris.md2");
+    SV_ModelIndex(ASSET_MODEL_DEBRIS1);
+    SV_ModelIndex(ASSET_MODEL_DEBRIS2);
+    SV_ModelIndex(ASSET_MODEL_DEBRIS3);
 
     self->solid = SOLID_BBOX;
     self->movetype = MOVETYPE_STEP;
 
-    self->model = "models/objects/explobox/explobox.iqm";
+    self->model = ASSET_MODEL_EXPLOBOX;
     self->s.modelindex = SV_ModelIndex(self->model);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 64);
@@ -935,14 +909,14 @@ void SP_misc_explobox2(edict_t* self)
         return;
     }
 
-    SV_ModelIndex("models/objects/debris1/tris.md2");
-    SV_ModelIndex("models/objects/debris2/tris.md2");
-    SV_ModelIndex("models/objects/debris3/tris.md2");
+    SV_ModelIndex(ASSET_MODEL_DEBRIS1);
+    SV_ModelIndex(ASSET_MODEL_DEBRIS2);
+    SV_ModelIndex(ASSET_MODEL_DEBRIS3);
 
     self->solid = SOLID_BBOX;
     self->movetype = MOVETYPE_STEP;
 
-    self->model = "models/objects/explobox/explobox2.iqm";
+    self->model = ASSET_MODEL_EXPLOBOX_SMALL;
     self->s.modelindex = SV_ModelIndex(self->model);
     VectorSet(self->mins, -16, -16, 0);
     VectorSet(self->maxs, 16, 16, 32);
@@ -1172,10 +1146,10 @@ void misc_deadsoldier_die(edict_t *self, edict_t *inflictor, edict_t *attacker, 
     if (self->health > -80)
         return;
 
-    SV_StartSound(self, CHAN_BODY, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
     for (n = 0; n < 4; n++)
-        ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-    ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+        ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
+    ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
 }
 
 void SP_misc_deadsoldier(edict_t *ent)

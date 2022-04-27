@@ -2448,9 +2448,9 @@ static void cl_chat_sound_changed(cvar_t *self)
 {
     if (!*self->string)
         self->integer = 0;
-    else if (!Q_stricmp(self->string, "misc/talk.wav"))
+    else if (!Q_stricmp(self->string, ASSET_SOUND_CHAT))
         self->integer = 1;
-    else if (!Q_stricmp(self->string, "misc/talk1.wav"))
+    else if (!Q_stricmp(self->string, ASSET_SOUND_GAME_MESSAGE))
         self->integer = 2;
     else if (!self->integer && !COM_IsUint(self->string))
         self->integer = 1;

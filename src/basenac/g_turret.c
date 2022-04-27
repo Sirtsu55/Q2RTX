@@ -87,7 +87,7 @@ void turret_breach_fire(edict_t *self)
     damage = 100 + random() * 50;
     speed = 550 + 50 * skill.integer;
     fire_rocket(self->teammaster->owner, start, f, damage, speed, 150, damage);
-    SV_PositionedSound(start, self, CHAN_WEAPON, SV_SoundIndex("weapons/rocklf1a.wav"), 1, ATTN_NORM, 0);
+    SV_PositionedSound(start, self, CHAN_WEAPON, SV_SoundIndex(ASSET_SOUND_ROCKET_FIRE), 1, ATTN_NORM, 0);
 }
 
 void turret_breach_think(edict_t *self)

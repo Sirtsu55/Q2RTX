@@ -1406,7 +1406,7 @@ static void SCR_DrawInventory(void)
 
     num = 0;
     selected_num = 0;
-    for (i = 0; i < MAX_ITEMS; i++) {
+    for (i = 0; i < cl.num_items; i++) {
         if (i == selected) {
             selected_num = num;
         }

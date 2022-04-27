@@ -15,92 +15,21 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+
 #include "g_local.h"
-
-
-bool        Pickup_Weapon(edict_t *ent, edict_t *other);
-void        Use_Weapon(edict_t *ent, gitem_t *inv);
-void        Drop_Weapon(edict_t *ent, gitem_t *inv);
 
 extern const weapon_animation_t weap_axe_activate;
 extern const weapon_animation_t weap_perf_activate;
 extern const weapon_animation_t weap_shotgun_activate;
 
-gitem_armor_t greenarmor_info  = { 25,  50, .30, .00, ARMOR_GREEN};
-gitem_armor_t yellowarmor_info  = { 50, 100, .60, .30, ARMOR_YELLOW};
-gitem_armor_t redarmor_info    = {100, 200, .80, .60, ARMOR_RED};
+static gitem_armor_t greenarmor_info  = {100, 100, .30, .00};
+static gitem_armor_t yellowarmor_info = {150, 150, .60, .30};
+static gitem_armor_t redarmor_info    = {200, 200, .80, .60};
 
-static int  green_armor_index;
-static int  yellow_armor_index;
-static int  red_armor_index;
-static int  power_screen_index;
-static int  power_shield_index;
-
-#define HEALTH_IGNORE_MAX   1
-#define HEALTH_TIMED        2
-
-void Use_Quad(edict_t *ent, gitem_t *item);
-static gtime_t quad_drop_timeout_hack_ms;
-
-//======================================================================
-
-/*
-===============
-GetItemByIndex
-===============
-*/
-gitem_t *GetItemByIndex(int index)
-{
-    if (index == 0 || index >= game.num_items)
-        return NULL;
-
-    return &itemlist[index];
-}
-
-
-/*
-===============
-FindItemByClassname
-
-===============
-*/
-gitem_t *FindItemByClassname(char *classname)
-{
-    int     i;
-    gitem_t *it;
-
-    it = itemlist;
-    for (i = 0 ; i < game.num_items ; i++, it++) {
-        if (!it->classname)
-            continue;
-        if (!Q_stricmp(it->classname, classname))
-            return it;
-    }
-
-    return NULL;
-}
-
-/*
-===============
-FindItem
-
-===============
-*/
-gitem_t *FindItem(char *pickup_name)
-{
-    int     i;
-    gitem_t *it;
-
-    it = itemlist;
-    for (i = 0 ; i < game.num_items ; i++, it++) {
-        if (!it->pickup_name)
-            continue;
-        if (!Q_stricmp(it->pickup_name, pickup_name))
-            return it;
-    }
-
-    return NULL;
-}
+enum {
+    IT_HEALTH_IGNORE_MAX    = 1 << 15,
+    IT_HEALTH_TIMED         = 1 << 16
+};
 
 //======================================================================
 
@@ -140,253 +69,63 @@ void SetRespawn(edict_t *ent, float delay)
     SV_LinkEntity(ent);
 }
 
-
 //======================================================================
 
-bool Pickup_Powerup(edict_t *ent, edict_t *other)
+static bool Pickup_Powerup(edict_t *ent, edict_t *other)
 {
-    int     quantity;
+    ent->item->use(other, ent->item);
 
-    quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
-    if ((skill.integer == 1 && quantity >= 2) || (skill.integer >= 2 && quantity >= 1))
-        return false;
-
-    if (coop.integer && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
-        return false;
-
-    other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
-
-    if (deathmatch.integer) {
-        if (!(ent->spawnflags & DROPPED_ITEM))
-            SetRespawn(ent, ent->item->quantity);
-        if ((dmflags.integer & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))) {
-            if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
-                quad_drop_timeout_hack_ms = ent->nextthink - level.time;
-            ent->item->use(other, ent->item);
-        }
+    if (deathmatch.integer && !(ent->spawnflags & DROPPED_ITEM)) {
+        SetRespawn(ent, ent->item->quantity);
     }
 
     return true;
 }
 
-void Drop_General(edict_t *ent, gitem_t *item)
+static void Drop_General(edict_t *ent, gitem_t *item)
 {
     Drop_Item(ent, item);
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
+    ent->client->pers.inventory[item->id]--;
     ValidateSelectedItem(ent);
 }
 
-
 //======================================================================
 
-bool Pickup_Adrenaline(edict_t *ent, edict_t *other)
+static void Use_Quad(edict_t *ent, gitem_t *item)
 {
-    if (!deathmatch.integer)
-        other->max_health += 1;
-
-    if (other->health < other->max_health)
-        other->health = other->max_health;
-
-    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
-        SetRespawn(ent, ent->item->quantity);
-
-    return true;
-}
-
-bool Pickup_AncientHead(edict_t *ent, edict_t *other)
-{
-    other->max_health += 2;
-
-    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
-        SetRespawn(ent, ent->item->quantity);
-
-    return true;
-}
-
-bool Pickup_Bandolier(edict_t *ent, edict_t *other)
-{
-    gitem_t *item;
-    int     index;
-
-    if (other->client->pers.max_nails < 250)
-        other->client->pers.max_nails = 250;
-    if (other->client->pers.max_shells < 150)
-        other->client->pers.max_shells = 150;
-    if (other->client->pers.max_cells < 250)
-        other->client->pers.max_cells = 250;
-
-    item = FindItem("nails");
-    if (item) {
-        index = ITEM_INDEX(item);
-        other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_nails)
-            other->client->pers.inventory[index] = other->client->pers.max_nails;
-    }
-
-    item = FindItem("Shells");
-    if (item) {
-        index = ITEM_INDEX(item);
-        other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_shells)
-            other->client->pers.inventory[index] = other->client->pers.max_shells;
-    }
-
-    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
-        SetRespawn(ent, ent->item->quantity);
-
-    return true;
-}
-
-bool Pickup_Pack(edict_t *ent, edict_t *other)
-{
-    gitem_t *item;
-    int     index;
-
-    if (other->client->pers.max_nails < 300)
-        other->client->pers.max_nails = 300;
-    if (other->client->pers.max_shells < 200)
-        other->client->pers.max_shells = 200;
-    if (other->client->pers.max_rockets < 100)
-        other->client->pers.max_rockets = 100;
-    if (other->client->pers.max_cells < 300)
-        other->client->pers.max_cells = 300;
-
-    item = FindItem("nails");
-    if (item) {
-        index = ITEM_INDEX(item);
-        other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_nails)
-            other->client->pers.inventory[index] = other->client->pers.max_nails;
-    }
-
-    item = FindItem("Shells");
-    if (item) {
-        index = ITEM_INDEX(item);
-        other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_shells)
-            other->client->pers.inventory[index] = other->client->pers.max_shells;
-    }
-
-    item = FindItem("Cells");
-    if (item) {
-        index = ITEM_INDEX(item);
-        other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_cells)
-            other->client->pers.inventory[index] = other->client->pers.max_cells;
-    }
-
-    item = FindItem("Rockets");
-    if (item) {
-        index = ITEM_INDEX(item);
-        other->client->pers.inventory[index] += item->quantity;
-        if (other->client->pers.inventory[index] > other->client->pers.max_rockets)
-            other->client->pers.inventory[index] = other->client->pers.max_rockets;
-    }
-
-    if (!(ent->spawnflags & DROPPED_ITEM) && deathmatch.integer)
-        SetRespawn(ent, ent->item->quantity);
-
-    return true;
+    ent->client->quad_time = max(ent->client->quad_time, level.time) + 30000;
+    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_QUAD_ACTIVATE), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
 
-void Use_Quad(edict_t *ent, gitem_t *item)
+static void Use_Radsuit(edict_t *ent, gitem_t *item)
 {
-    gtime_t timeout;
-
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
-
-    if (quad_drop_timeout_hack_ms) {
-        timeout = quad_drop_timeout_hack_ms;
-        quad_drop_timeout_hack_ms = 0;
-    } else {
-        timeout = 30000;
-    }
-
-    if (ent->client->quad_time > level.time)
-        ent->client->quad_time += timeout;
-    else
-        ent->client->quad_time = level.time + timeout;
-
-    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM, 0);
+    ent->client->enviro_time = max(ent->client->enviro_time, level.time) + 30000;
+    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_BIOSUIT_ACTIVATE), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
 
-void Use_Breather(edict_t *ent, gitem_t *item)
+static void Use_Pentagram(edict_t *ent, gitem_t *item)
 {
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
-
-    if (ent->client->breather_time > level.time)
-        ent->client->breather_time += 30000;
-    else
-        ent->client->breather_time = level.time + 30000;
-
-//  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
+    ent->client->invincible_time = max(ent->client->invincible_time, level.time) + 30000;
+    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_PENT_ACTIVATE), 1, ATTN_NORM, 0);
 }
 
 //======================================================================
 
-void Use_Envirosuit(edict_t *ent, gitem_t *item)
-{
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
-
-    if (ent->client->enviro_time > level.time)
-        ent->client->enviro_time += 30000;
-    else
-        ent->client->enviro_time = level.time + 30000;
-
-//  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
-}
-
-//======================================================================
-
-void    Use_Invulnerability(edict_t *ent, gitem_t *item)
-{
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
-
-    if (ent->client->invincible_time > level.time)
-        ent->client->invincible_time += 30000;
-    else
-        ent->client->invincible_time = level.time + 30000;
-
-    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/protect.wav"), 1, ATTN_NORM, 0);
-}
-
-//======================================================================
-
-void    Use_Silencer(edict_t *ent, gitem_t *item)
-{
-    ent->client->pers.inventory[ITEM_INDEX(item)]--;
-    ValidateSelectedItem(ent);
-    ent->client->silencer_shots += 30;
-
-//  SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage.wav"), 1, ATTN_NORM);
-}
-
-//======================================================================
-
-bool Pickup_Key(edict_t *ent, edict_t *other)
+static bool Pickup_Key(edict_t *ent, edict_t *other)
 {
     if (coop.integer) {
-        if (strcmp(ent->classname, "key_power_cube") == 0) {
-            if (other->client->pers.power_cubes & ((ent->spawnflags & 0x0000ff00) >> 8))
-                return false;
-            other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
-            other->client->pers.power_cubes |= ((ent->spawnflags & 0x0000ff00) >> 8);
-        } else {
-            if (other->client->pers.inventory[ITEM_INDEX(ent->item)])
-                return false;
-            other->client->pers.inventory[ITEM_INDEX(ent->item)] = 1;
-        }
+        if (other->client->pers.inventory[ent->item->id])
+            return false;
+
+        other->client->pers.inventory[ent->item->id] = 1;
         return true;
     }
-    other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+
+    other->client->pers.inventory[ent->item->id]++;
     return true;
 }
 
@@ -394,24 +133,19 @@ bool Pickup_Key(edict_t *ent, edict_t *other)
 
 bool Add_Ammo(edict_t *ent, gitem_t *item, int count)
 {
-    int         index;
     int         max;
 
     if (!ent->client)
         return false;
 
-    if (item->tag == AMMO_NAILS)
-        max = ent->client->pers.max_nails;
-    else if (item->tag == AMMO_SHELLS)
+    gitem_id_t index = item->id;
+
+    if (index == ITEM_SHELLS)
         max = ent->client->pers.max_shells;
-    else if (item->tag == AMMO_ROCKETS)
-        max = ent->client->pers.max_rockets;
-    else if (item->tag == AMMO_CELLS)
-        max = ent->client->pers.max_cells;
+    else if (index == ITEM_NAILS)
+        max = ent->client->pers.max_nails;
     else
         return false;
-
-    index = ITEM_INDEX(item);
 
     if (ent->client->pers.inventory[index] == max)
         return false;
@@ -424,42 +158,33 @@ bool Add_Ammo(edict_t *ent, gitem_t *item, int count)
     return true;
 }
 
-bool Pickup_Ammo(edict_t *ent, edict_t *other)
+static bool Pickup_Ammo(edict_t *ent, edict_t *other)
 {
-    int         oldcount;
-    int         count;
-    bool        weapon;
+    int count;
 
-    weapon = (ent->item->flags & IT_WEAPON);
-    if (weapon && (dmflags.integer & DF_INFINITE_AMMO))
-        count = 1000;
-    else if (ent->count)
+    if (ent->count)
         count = ent->count;
     else
         count = ent->item->quantity;
 
-    oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+    int oldcount = other->client->pers.inventory[ent->item->id];
 
     if (!Add_Ammo(other, ent->item, count))
         return false;
 
-    if (weapon && !oldcount) {
-        if (other->client->pers.weapon != ent->item && (!deathmatch.integer || other->client->pers.weapon == FindItem("axe")))
-            other->client->newweapon = ent->item;
-    }
-
     if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && deathmatch.integer)
         SetRespawn(ent, 30);
+
     return true;
 }
 
-void Drop_Ammo(edict_t *ent, gitem_t *item)
+static void Drop_Ammo(edict_t *ent, gitem_t *item)
 {
     edict_t *dropped;
-    int     index;
+    gitem_id_t index = item->id;
 
-    index = ITEM_INDEX(item);
     dropped = Drop_Item(ent, item);
+
     if (ent->client->pers.inventory[index] >= item->quantity)
         dropped->count = item->quantity;
     else
@@ -486,20 +211,20 @@ void MegaHealth_think(edict_t *self)
         G_FreeEdict(self);
 }
 
-bool Pickup_Health(edict_t *ent, edict_t *other)
+static bool Pickup_Health(edict_t *ent, edict_t *other)
 {
-    if (!(ent->style & HEALTH_IGNORE_MAX))
+    if (!(ent->item->flags & IT_HEALTH_IGNORE_MAX))
         if (other->health >= other->max_health)
             return false;
 
-    other->health += ent->count;
+    int count = ent->count ? ent->count : ent->item->quantity;
 
-    if (!(ent->style & HEALTH_IGNORE_MAX)) {
+    if (!(ent->item->flags & IT_HEALTH_IGNORE_MAX)) {
         if (other->health > other->max_health)
             other->health = other->max_health;
     }
 
-    if (ent->style & HEALTH_TIMED) {
+    if (ent->item->flags & IT_HEALTH_TIMED) {
         ent->think = MegaHealth_think;
         ent->nextthink = level.time + 5000;
         ent->owner = other;
@@ -516,24 +241,22 @@ bool Pickup_Health(edict_t *ent, edict_t *other)
 
 //======================================================================
 
-int ArmorIndex(edict_t *ent)
+gitem_id_t ArmorIndex(edict_t *ent)
 {
     if (!ent->client)
-        return 0;
+        return ITEM_NULL;
 
-    if (ent->client->pers.inventory[green_armor_index] > 0)
-        return green_armor_index;
+    if (ent->client->pers.inventory[ITEM_ARMOR_GREEN] > 0)
+        return ITEM_ARMOR_GREEN;
+    else if (ent->client->pers.inventory[ITEM_ARMOR_YELLOW] > 0)
+        return ITEM_ARMOR_YELLOW;
+    else if (ent->client->pers.inventory[ITEM_ARMOR_RED] > 0)
+        return ITEM_ARMOR_RED;
 
-    if (ent->client->pers.inventory[yellow_armor_index] > 0)
-        return yellow_armor_index;
-
-    if (ent->client->pers.inventory[red_armor_index] > 0)
-        return red_armor_index;
-
-    return 0;
+    return ITEM_NULL;
 }
 
-bool Pickup_Armor(edict_t *ent, edict_t *other)
+static bool Pickup_Armor(edict_t *ent, edict_t *other)
 {
     int             old_armor_index;
     gitem_armor_t   *oldinfo;
@@ -543,31 +266,31 @@ bool Pickup_Armor(edict_t *ent, edict_t *other)
     int             salvagecount;
 
     // get info on new armor
-    newinfo = (gitem_armor_t *)ent->item->info;
+    newinfo = ent->item->armor;
 
     old_armor_index = ArmorIndex(other);
 
     // handle armor shards specially
-    if (ent->item->tag == ARMOR_SHARD) {
+    if (ent->item->id == ITEM_ARMOR_SHARD) {
         if (!old_armor_index)
-            other->client->pers.inventory[green_armor_index] = 2;
+            other->client->pers.inventory[ITEM_ARMOR_GREEN] = ent->item->quantity;
         else
-            other->client->pers.inventory[old_armor_index] += 2;
+            other->client->pers.inventory[old_armor_index] += ent->item->quantity;
     }
 
     // if player has no armor, just use it
     else if (!old_armor_index) {
-        other->client->pers.inventory[ITEM_INDEX(ent->item)] = newinfo->base_count;
+        other->client->pers.inventory[ent->item->id] = newinfo->base_count;
     }
 
     // use the better armor
     else {
         // get info on old armor
-        if (old_armor_index == green_armor_index)
+        if (old_armor_index == ITEM_ARMOR_GREEN)
             oldinfo = &greenarmor_info;
-        else if (old_armor_index == yellow_armor_index)
+        else if (old_armor_index == ITEM_ARMOR_YELLOW)
             oldinfo = &yellowarmor_info;
-        else // (old_armor_index == red_armor_index)
+        else
             oldinfo = &redarmor_info;
 
         if (newinfo->normal_protection > oldinfo->normal_protection) {
@@ -582,7 +305,7 @@ bool Pickup_Armor(edict_t *ent, edict_t *other)
             other->client->pers.inventory[old_armor_index] = 0;
 
             // change armor to new item with computed value
-            other->client->pers.inventory[ITEM_INDEX(ent->item)] = newcount;
+            other->client->pers.inventory[ent->item->id] = newcount;
         } else {
             // calc new armor values
             salvage = newinfo->normal_protection / oldinfo->normal_protection;
@@ -604,69 +327,6 @@ bool Pickup_Armor(edict_t *ent, edict_t *other)
         SetRespawn(ent, 20);
 
     return true;
-}
-
-//======================================================================
-
-int PowerArmorType(edict_t *ent)
-{
-    if (!ent->client)
-        return POWER_ARMOR_NONE;
-
-    if (!(ent->flags & FL_POWER_ARMOR))
-        return POWER_ARMOR_NONE;
-
-    if (ent->client->pers.inventory[power_shield_index] > 0)
-        return POWER_ARMOR_SHIELD;
-
-    if (ent->client->pers.inventory[power_screen_index] > 0)
-        return POWER_ARMOR_SCREEN;
-
-    return POWER_ARMOR_NONE;
-}
-
-void Use_PowerArmor(edict_t *ent, gitem_t *item)
-{
-    int     index;
-
-    if (ent->flags & FL_POWER_ARMOR) {
-        ent->flags &= ~FL_POWER_ARMOR;
-        SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("misc/power2.wav"), 1, ATTN_NORM, 0);
-    } else {
-        index = ITEM_INDEX(FindItem("cells"));
-        if (!ent->client->pers.inventory[index]) {
-            SV_ClientPrint(ent, PRINT_HIGH, "No cells for power armor.\n");
-            return;
-        }
-        ent->flags |= FL_POWER_ARMOR;
-        SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("misc/power1.wav"), 1, ATTN_NORM, 0);
-    }
-}
-
-bool Pickup_PowerArmor(edict_t *ent, edict_t *other)
-{
-    int     quantity;
-
-    quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
-
-    other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
-
-    if (deathmatch.integer) {
-        if (!(ent->spawnflags & DROPPED_ITEM))
-            SetRespawn(ent, ent->item->quantity);
-        // auto-use for DM only if we didn't already have one
-        if (!quantity)
-            ent->item->use(other, ent->item);
-    }
-
-    return true;
-}
-
-void Drop_PowerArmor(edict_t *ent, gitem_t *item)
-{
-    if ((ent->flags & FL_POWER_ARMOR) && (ent->client->pers.inventory[ITEM_INDEX(item)] == 1))
-        Use_PowerArmor(ent, item);
-    Drop_General(ent, item);
 }
 
 //======================================================================
@@ -695,23 +355,14 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
         // show icon and name on status bar
         other->client->ps.stats[STAT_PICKUP_ICON] = SV_ImageIndex(ent->item->icon);
-        other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ITEM_INDEX(ent->item);
+        other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS + ent->item->id;
         other->client->pickup_msg_time = level.time + 3000;
 
         // change selected item
-        if (ent->item->use)
-            other->client->pers.selected_item = other->client->ps.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
+        if (ent->item->use && other->client->pers.inventory[ent->item->id])
+            other->client->pers.selected_item = other->client->ps.stats[STAT_SELECTED_ITEM] = ent->item->id;
 
-        if (ent->item->pickup == Pickup_Health) {
-            if (ent->count == 2)
-                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/s_health.wav"), 1, ATTN_NORM, 0);
-            else if (ent->count == 10)
-                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/n_health.wav"), 1, ATTN_NORM, 0);
-            else if (ent->count == 25)
-                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/l_health.wav"), 1, ATTN_NORM, 0);
-            else // (ent->count == 100)
-                SV_StartSound(other, CHAN_ITEM, SV_SoundIndex("items/m_health.wav"), 1, ATTN_NORM, 0);
-        } else if (ent->item->pickup_sound) {
+        if (ent->item->pickup_sound) {
             SV_StartSound(other, CHAN_ITEM, SV_SoundIndex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
         }
     }
@@ -730,6 +381,109 @@ void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
         else
             G_FreeEdict(ent);
     }
+}
+
+//======================================================================
+
+static bool Pickup_Weapon(edict_t *ent, edict_t *other)
+{
+    gitem_t     *ammo;
+
+    gitem_id_t index = ent->item->id;
+
+    if (((dmflags.integer & DF_WEAPONS_STAY) || coop.integer)
+        && other->client->pers.inventory[index]) {
+        if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
+            return false;   // leave the weapon for others to pickup
+    }
+
+    if (!other->client->pers.inventory[index]) {
+        other->client->inspect = true;
+    }
+
+    other->client->pers.inventory[index]++;
+
+    if (!(ent->spawnflags & DROPPED_ITEM)) {
+        // give them some ammo with it
+        ammo = GetItemByIndex(ent->item->ammo);
+
+        if (dmflags.integer & DF_INFINITE_AMMO)
+            Add_Ammo(other, ammo, 1000);
+        else
+            Add_Ammo(other, ammo, ammo->quantity);
+
+        if (!(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
+            if (deathmatch.integer) {
+                if (dmflags.integer & DF_WEAPONS_STAY)
+                    ent->flags |= FL_RESPAWN;
+                else
+                    SetRespawn(ent, 30);
+            }
+            if (coop.integer)
+                ent->flags |= FL_RESPAWN;
+        }
+    }
+
+    if (other->client->pers.weapon != ent->item &&
+        (other->client->pers.inventory[index] == 1) &&
+        (!deathmatch.integer || (other->client->pers.weapon && other->client->pers.weapon->id == ITEM_AXE)))
+        other->client->newweapon = ent->item;
+
+    return true;
+}
+
+/*
+================
+Use_Weapon
+
+Make the weapon ready if there is ammo
+================
+*/
+static void Use_Weapon(edict_t *ent, gitem_t *item)
+{
+    // see if we're already using it
+    if (item == ent->client->pers.weapon)
+        return;
+
+    if (item->ammo && !g_select_empty.integer && !(item->flags & IT_AMMO)) {
+        gitem_id_t ammo_index = item->ammo;
+        gitem_t *ammo_item = GetItemByIndex(ammo_index);
+
+        if (!ent->client->pers.inventory[ammo_index]) {
+            SV_ClientPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+            return;
+        }
+
+        if (ent->client->pers.inventory[ammo_index] < item->quantity) {
+            SV_ClientPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
+            return;
+        }
+    }
+
+    // change to this weapon when down
+    ent->client->newweapon = item;
+}
+
+/*
+================
+Drop_Weapon
+================
+*/
+static void Drop_Weapon(edict_t *ent, gitem_t *item)
+{
+    if (dmflags.integer & DF_WEAPONS_STAY)
+        return;
+
+    gitem_id_t index = item->id;
+
+    // see if we're already using it
+    if (((item == ent->client->pers.weapon) || (item == ent->client->newweapon)) && (ent->client->pers.inventory[index] == 1)) {
+        SV_ClientPrint(ent, PRINT_HIGH, "Can't drop current weapon\n");
+        return;
+    }
+
+    Drop_Item(ent, item);
+    ent->client->pers.inventory[index]--;
 }
 
 //======================================================================
@@ -910,10 +664,11 @@ void PrecacheItem(gitem_t *it)
         SV_ImageIndex(it->icon);
 
     // parse everything for its ammo
-    if (it->ammo && it->ammo[0]) {
-        ammo = FindItem(it->ammo);
-        if (ammo != it)
+    if (it->ammo) {
+        ammo = GetItemByIndex(it->ammo);
+        if (ammo != it) {
             PrecacheItem(ammo);
+        }
     }
 
     // parse the space seperated precache string for other items
@@ -942,7 +697,9 @@ void PrecacheItem(gitem_t *it)
             SV_ModelIndex(data);
         else if (!strcmp(data + len - 3, "wav"))
             SV_SoundIndex(data);
-        else if (!strcmp(data + len - 3, "pcx"))
+        else if (!strcmp(data + len - 3, "pcx") ||
+                 !strcmp(data + len - 3, "tga") ||
+                 !strcmp(data + len - 3, "png"))
             SV_ImageIndex(data);
     }
 }
@@ -971,37 +728,33 @@ void SpawnItem(edict_t *ent, gitem_t *item)
     // some items will be prevented in deathmatch
     if (deathmatch.integer) {
         if (dmflags.integer & DF_NO_ARMOR) {
-            if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor) {
+            if (item->flags & IT_ARMOR) {
                 G_FreeEdict(ent);
                 return;
             }
         }
         if (dmflags.integer & DF_NO_ITEMS) {
-            if (item->pickup == Pickup_Powerup) {
+            if (item->flags & IT_POWERUP) {
                 G_FreeEdict(ent);
                 return;
             }
         }
         if (dmflags.integer & DF_NO_HEALTH) {
-            if (item->pickup == Pickup_Health || item->pickup == Pickup_Adrenaline || item->pickup == Pickup_AncientHead) {
+            if (item->flags & IT_HEALTH) {
                 G_FreeEdict(ent);
                 return;
             }
         }
         if (dmflags.integer & DF_INFINITE_AMMO) {
-            if ((item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_bfg") == 0)) {
+            if (item->flags & IT_AMMO) {
                 G_FreeEdict(ent);
                 return;
             }
         }
     }
 
-    if (coop.integer && (strcmp(ent->classname, "key_power_cube") == 0)) {
-        ent->spawnflags |= (1 << (8 + level.power_cubes));
-        level.power_cubes++;
-    }
-
     // don't let them drop items that stay in a coop game
+    // FIXME: move this so we don't modify itemlist
     if (coop.integer && (item->flags & IT_STAY_COOP)) {
         item->drop = NULL;
     }
@@ -1018,8 +771,8 @@ void SpawnItem(edict_t *ent, gitem_t *item)
 
 //======================================================================
 
-gitem_t itemlist[] = {
-    { 0 },  // leave index 0 alone
+static gitem_t itemlist[] = {
+    [ITEM_NULL] = { 0 },  // leave index 0 alone
 
     //
     // ARMOR
@@ -1027,166 +780,112 @@ gitem_t itemlist[] = {
 
     /*QUAKED item_armor_red (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_ARMOR_RED] = {
         .classname = "item_armor_red",
         .pickup = Pickup_Armor,
-        .pickup_sound = "misc/ar1_pkup.wav",
-        .world_model = "models/items/armor/armor.md3", .world_model_flags = EF_ROTATE,
+        .pickup_sound = ASSET_SOUND_ARMOR_PICKUP,
+        .world_model = ASSET_MODEL_ARMOR, .world_model_flags = EF_ROTATE,
         .skinnum = 2,
         .icon = "i_bodyarmor",
         .pickup_name = "Red Armor",
         .flags = IT_ARMOR,
-        .info = &redarmor_info,
-        .tag = ARMOR_RED
+        .armor = &redarmor_info
     },
 
     /*QUAKED item_armor_yellow (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_ARMOR_YELLOW] = {
         .classname = "item_armor_yellow",
         .pickup = Pickup_Armor,
-        .pickup_sound = "misc/ar1_pkup.wav",
-        .world_model = "models/items/armor/armor.md3", .world_model_flags = EF_ROTATE,
+        .pickup_sound = ASSET_SOUND_ARMOR_PICKUP,
+        .world_model = ASSET_MODEL_ARMOR, .world_model_flags = EF_ROTATE,
         .icon = "i_combatarmor",
         .pickup_name = "Yellow Armor",
         .flags = IT_ARMOR,
-        .info = &yellowarmor_info,
-        .tag = ARMOR_YELLOW
+        .armor = &yellowarmor_info
     },
 
     /*QUAKED item_armor_green (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_ARMOR_GREEN] = {
         .classname = "item_armor_green",
         .pickup = Pickup_Armor,
-        .pickup_sound = "misc/ar1_pkup.wav",
-        .world_model = "models/items/armor/armor.md3", .world_model_flags = EF_ROTATE,
+        .pickup_sound = ASSET_SOUND_ARMOR_PICKUP,
+        .world_model = ASSET_MODEL_ARMOR, .world_model_flags = EF_ROTATE,
         .skinnum = 1,
         .icon = "i_jacketarmor",
         .pickup_name = "Green Armor",
         .flags = IT_ARMOR,
-        .info = &greenarmor_info,
-        .tag = ARMOR_GREEN
+        .armor = &greenarmor_info
     },
 
     /*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_ARMOR_SHARD] = {
         .classname = "item_armor_shard",
         .pickup = Pickup_Armor,
-        .pickup_sound = "misc/ar2_pkup.wav",
-        .world_model = "models/items/armor/armor_shard.iqm", .world_model_flags = EF_ROTATE,
+        .pickup_sound = ASSET_SOUND_ARMOR_SHARD_PICKUP,
+        .world_model = ASSET_MODEL_ARMOR_SHARD, .world_model_flags = EF_ROTATE,
         .icon = "i_jacketarmor",
         .pickup_name = "Armor Shard",
         .flags = IT_ARMOR,
-        .tag = ARMOR_SHARD
+        .quantity = 2
     },
-
-#if 0
-    /*QUAKED item_power_screen (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_power_screen",
-        Pickup_PowerArmor,
-        Use_PowerArmor,
-        Drop_PowerArmor,
-        NULL,
-        "misc/ar3_pkup.wav",
-        "models/items/armor/screen/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_powerscreen",
-        /* pickup */    "Power Screen",
-        /* width */     0,
-        60,
-        NULL,
-        IT_ARMOR,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED item_power_shield (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_power_shield",
-        Pickup_PowerArmor,
-        Use_PowerArmor,
-        Drop_PowerArmor,
-        NULL,
-        "misc/ar3_pkup.wav",
-        "models/items/armor/shield/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_powershield",
-        /* pickup */    "Power Shield",
-        /* width */     0,
-        60,
-        NULL,
-        IT_ARMOR,
-        0,
-        NULL,
-        0,
-        /* precache */ "misc/power2.wav misc/power1.wav"
-    },
-#endif
 
     //
     // WEAPONS
     //
-
     /* weapon_axe (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_AXE] = {
         .classname = "weapon_axe",
         .use = Use_Weapon,
         .animation = &weap_axe_activate,
-        .pickup_sound = "misc/w_pkup.wav",
-        .view_model = "models/weapons/v_axe/axe.iqm",
-        .icon = "w_blaster",
+        .view_model = ASSET_MODEL_AXE_VIEW,
+        .icon = "w_axe",
         .pickup_name = "Axe",
         .flags = IT_WEAPON | IT_STAY_COOP,
-        .tag = WEAP_BLASTER,
+        .weapmodel = WEAP_BLASTER,
         .weapid = WEAPID_AXE
     },
 
     /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_SHOTGUN] = {
         .classname = "weapon_shotgun",
         .pickup = Pickup_Weapon,
         .use = Use_Weapon,
         .drop = Drop_Weapon,
         .animation = &weap_shotgun_activate,
-        .pickup_sound = "misc/w_pkup.wav",
-        .world_model = "models/weapons/g_shotg/g_shotg.iqm", .world_model_flags = EF_ROTATE,
-        .view_model = "models/weapons/v_shotg/v_shotg.iqm",
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_SHOTGUN_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_SHOTGUN_VIEW,
         .icon = "w_shotgun",
         .pickup_name = "Shotgun",
         .quantity = 1,
-        .ammo = "Shells",
+        .ammo = ITEM_SHELLS,
         .flags = IT_WEAPON | IT_STAY_COOP,
-        .tag = WEAP_SHOTGUN
+        .weapmodel = WEAP_SHOTGUN
     },
 
     /*QUAKED weapon_perforator (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_PERFORATOR] = {
         .classname = "weapon_perforator",
         .pickup = Pickup_Weapon,
         .use = Use_Weapon,
         .drop = Drop_Weapon,
         .animation = &weap_perf_activate,
-        .pickup_sound = "misc/w_pkup.wav",
-        .world_model = "models/weapons/g_perf/g_perf.iqm", .world_model_flags = EF_ROTATE,
-        .view_model = "models/weapons/v_perf/v_perf.iqm",
-        .icon = "w_chaingun",
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_PERFORATOR_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_PERFORATOR_VIEW,
+        .icon = "w_perf",
         .pickup_name = "Perforator",
         .quantity = 1,
-        .ammo = "nails",
+        .ammo = ITEM_NAILS,
         .flags = IT_WEAPON | IT_STAY_COOP,
-        .tag = WEAP_CHAINGUN,
-        .precaches = "weapons/perf/perf_spin.wav",
-        .precaches = "models/objects/nail/nail.iqm",
+        .weapmodel = WEAP_CHAINGUN,
+        .precaches = ASSET_SOUND_PERFORATOR_SPIN " " ASSET_MODEL_NAIL,
     },
 
     //
@@ -1195,585 +894,151 @@ gitem_t itemlist[] = {
 
     /*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_SHELLS] = {
         .classname = "ammo_shells",
         .pickup = Pickup_Ammo,
         .drop = Drop_Ammo,
-        .pickup_sound = "misc/am_pkup.wav",
-        .world_model = "models/items/ammo/shells/shellbox_small.iqm",
+        .pickup_sound = ASSET_SOUND_AMMO_PICKUP,
+        .world_model = ASSET_MODEL_SHELLS,
         .icon = "a_shells",
         .pickup_name = "Shells",
         .quantity = 10,
-        .flags = IT_AMMO,
-        .tag = AMMO_SHELLS
+        .flags = IT_AMMO
     },
 
     /*QUAKED ammo_nails (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
-    {
+    [ITEM_NAILS] = {
         .classname = "ammo_nails",
         .pickup = Pickup_Ammo,
         .drop = Drop_Ammo,
-        .pickup_sound = "misc/am_pkup.wav",
-        .world_model = "models/items/ammo/nails/nailbox.iqm",
+        .pickup_sound = ASSET_SOUND_AMMO_PICKUP,
+        .world_model = ASSET_MODEL_NAILS,
         .icon = "a_nails",
         .pickup_name = "Nails",
         .quantity = 50,
-        .flags = IT_AMMO,
-        .tag = AMMO_NAILS
+        .flags = IT_AMMO
     },
 
-#if 0
-    /*QUAKED ammo_cells (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "ammo_cells",
-        Pickup_Ammo,
-        NULL,
-        Drop_Ammo,
-        NULL,
-        "misc/am_pkup.wav",
-        "models/items/ammo/cells/medium/tris.md2", 0,
-        NULL,
-        /* icon */      "a_cells",
-        /* pickup */    "Cells",
-        /* width */     3,
-        50,
-        NULL,
-        IT_AMMO,
-        0,
-        NULL,
-        AMMO_CELLS,
-        /* precache */ ""
-    },
-
-    /*QUAKED ammo_rockets (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "ammo_rockets",
-        Pickup_Ammo,
-        NULL,
-        Drop_Ammo,
-        NULL,
-        "misc/am_pkup.wav",
-        "models/items/ammo/rockets/medium/tris.md2", 0,
-        NULL,
-        /* icon */      "a_rockets",
-        /* pickup */    "Rockets",
-        /* width */     3,
-        5,
-        NULL,
-        IT_AMMO,
-        0,
-        NULL,
-        AMMO_ROCKETS,
-        /* precache */ ""
-    },
-
-    //
-    // POWERUP ITEMS
-    //
-    /*QUAKED item_quad (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_quad",
-        Pickup_Powerup,
-        Use_Quad,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/quaddama/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_quad",
-        /* pickup */    "Quad Damage",
-        /* width */     2,
-        60,
-        NULL,
-        IT_POWERUP,
-        0,
-        NULL,
-        0,
-        /* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
-    },
-
-    /*QUAKED item_invulnerability (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_invulnerability",
-        Pickup_Powerup,
-        Use_Invulnerability,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/invulner/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_invulnerability",
-        /* pickup */    "Invulnerability",
-        /* width */     2,
-        300,
-        NULL,
-        IT_POWERUP,
-        0,
-        NULL,
-        0,
-        /* precache */ "items/protect.wav items/protect2.wav items/protect4.wav"
-    },
-
-    /*QUAKED item_silencer (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_silencer",
-        Pickup_Powerup,
-        Use_Silencer,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/silencer/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_silencer",
-        /* pickup */    "Silencer",
-        /* width */     2,
-        60,
-        NULL,
-        IT_POWERUP,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED item_breather (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_breather",
-        Pickup_Powerup,
-        Use_Breather,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/breather/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_rebreather",
-        /* pickup */    "Rebreather",
-        /* width */     2,
-        60,
-        NULL,
-        IT_STAY_COOP | IT_POWERUP,
-        0,
-        NULL,
-        0,
-        /* precache */ "items/airout.wav"
-    },
-
-    /*QUAKED item_enviro (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_enviro",
-        Pickup_Powerup,
-        Use_Envirosuit,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/enviro/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_envirosuit",
-        /* pickup */    "Environment Suit",
-        /* width */     2,
-        60,
-        NULL,
-        IT_STAY_COOP | IT_POWERUP,
-        0,
-        NULL,
-        0,
-        /* precache */ "items/airout.wav"
-    },
-
-    /*QUAKED item_ancient_head (.3 .3 1) (-16 -16 -16) (16 16 16)
-    Special item that gives +2 to maximum health
-    */
-    {
-        "item_ancient_head",
-        Pickup_AncientHead,
-        NULL,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        "models/items/c_head/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_fixme",
-        /* pickup */    "Ancient Head",
-        /* width */     2,
-        60,
-        NULL,
-        0,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED item_adrenaline (.3 .3 1) (-16 -16 -16) (16 16 16)
-    gives +1 to maximum health
-    */
-    {
-        "item_adrenaline",
-        Pickup_Adrenaline,
-        NULL,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        "models/items/adrenal/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_adrenaline",
-        /* pickup */    "Adrenaline",
-        /* width */     2,
-        60,
-        NULL,
-        0,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED item_bandolier (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_bandolier",
-        Pickup_Bandolier,
-        NULL,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        "models/items/band/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "p_bandolier",
-        /* pickup */    "Bandolier",
-        /* width */     2,
-        60,
-        NULL,
-        0,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED item_pack (.3 .3 1) (-16 -16 -16) (16 16 16)
-    */
-    {
-        "item_pack",
-        Pickup_Pack,
-        NULL,
-        NULL,
-        NULL,
-        "items/pkup.wav",
-        "models/items/pack/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_pack",
-        /* pickup */    "Ammo Pack",
-        /* width */     2,
-        180,
-        NULL,
-        0,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    //
-    // KEYS
-    //
-    /*QUAKED key_data_cd (0 .5 .8) (-16 -16 -16) (16 16 16)
-    key for computer centers
-    */
-    {
-        "key_data_cd",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/data_cd/tris.md2", EF_ROTATE,
-        NULL,
-        "k_datacd",
-        "Data CD",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED key_power_cube (0 .5 .8) (-16 -16 -16) (16 16 16) TRIGGER_SPAWN NO_TOUCH
-    warehouse circuits
-    */
-    {
-        "key_power_cube",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/power/tris.md2", EF_ROTATE,
-        NULL,
-        "k_powercube",
-        "Power Cube",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED key_pyramid (0 .5 .8) (-16 -16 -16) (16 16 16)
-    key for the entrance of jail3
-    */
-    {
-        "key_pyramid",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/pyramid/tris.md2", EF_ROTATE,
-        NULL,
-        "k_pyramid",
-        "Pyramid Key",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED key_data_spinner (0 .5 .8) (-16 -16 -16) (16 16 16)
-    key for the city computer
-    */
-    {
-        "key_data_spinner",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/spinner/tris.md2", EF_ROTATE,
-        NULL,
-        "k_dataspin",
-        "Data Spinner",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-
-    /*QUAKED key_pass (0 .5 .8) (-16 -16 -16) (16 16 16)
-    security pass for the security level
-    */
-    {
-        "key_pass",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/pass/tris.md2", EF_ROTATE,
-        NULL,
-        "k_security",
-        "Security Pass",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
-    },
-#endif
     /*QUAKED key_silver_key (0 .5 .8) (-16 -16 -16) (16 16 16)
     normal door key - silver
     */
-    {
+    [ITEM_KEY_SILVER] = {
         .classname = "key_silver_key",
         .pickup = Pickup_Key,
         .drop = Drop_General,
-        .pickup_sound = "items/pkup.wav",
-        .world_model = "models/items/keys/gold_key/gold_key.md3",
+        .pickup_sound = ASSET_SOUND_GENERIC_PICKUP,
+        .world_model = ASSET_MODEL_SILVER_KEY,
         .world_model_flags = EF_ROTATE,
         .icon = "k_silverkey",
         .pickup_name = "Silver Key",
         .flags = IT_STAY_COOP | IT_KEY,
     },
-#if 0
-    /*QUAKED key_red_key (0 .5 .8) (-16 -16 -16) (16 16 16)
-    normal door key - red
+
+    /*QUAKED item_quad (0 .5 .8) (-16 -16 -16) (16 16 16)
     */
-    {
-        "key_red_key",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/red_key/tris.md2", EF_ROTATE,
-        NULL,
-        "k_redkey",
-        "Red Key",
-        2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
+    [ITEM_QUAD_DAMAGE] = {
+        .classname = "item_quad",
+        .pickup = Pickup_Powerup,
+        .use = Use_Quad,
+        .world_model = ASSET_MODEL_QUAD_DAMAGE,
+        .world_model_flags = EF_ROTATE,
+        .icon = "p_quad",
+        .pickup_name = "Quad Damage",
+        .flags = IT_POWERUP,
+        .precaches = ASSET_SOUND_QUAD_ACTIVATE " " ASSET_SOUND_QUAD_FADE
     },
 
-    /*QUAKED key_commander_head (0 .5 .8) (-16 -16 -16) (16 16 16)
-    tank commander's head
+    /*QUAKED item_invulnerability (0 .5 .8) (-16 -16 -16) (16 16 16)
     */
-    {
-        "key_commander_head",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/monsters/commandr/head/tris.md2", EF_GIB,
-        NULL,
-        /* icon */      "k_comhead",
-        /* pickup */    "Commander's Head",
-        /* width */     2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
+    [ITEM_PENTAGRAM] = {
+        .classname = "item_invulnerability",
+        .pickup = Pickup_Powerup,
+        .use = Use_Pentagram,
+        .world_model = ASSET_MODEL_PENT,
+        .world_model_flags = EF_ROTATE,
+        .icon = "p_pent",
+        .pickup_name = "Pentagram of Protection",
+        .flags = IT_POWERUP,
+        .precaches = ASSET_SOUND_PENT_ACTIVATE " " ASSET_SOUND_PENT_HIT " " ASSET_SOUND_PENT_FADE
     },
 
-    /*QUAKED key_airstrike_target (0 .5 .8) (-16 -16 -16) (16 16 16)
-    tank commander's head
+    /*QUAKED item_biosuit (0 .5 .8) (-16 -16 -16) (16 16 16)
     */
-    {
-        "key_airstrike_target",
-        Pickup_Key,
-        NULL,
-        Drop_General,
-        NULL,
-        "items/pkup.wav",
-        "models/items/keys/target/tris.md2", EF_ROTATE,
-        NULL,
-        /* icon */      "i_airstrike",
-        /* pickup */    "Airstrike Marker",
-        /* width */     2,
-        0,
-        NULL,
-        IT_STAY_COOP | IT_KEY,
-        0,
-        NULL,
-        0,
-        /* precache */ ""
+    [ITEM_BIOSUIT] = {
+        .classname = "item_biosuit",
+        .pickup = Pickup_Powerup,
+        .use = Use_Radsuit,
+        .world_model = ASSET_MODEL_BIOSUIT,
+        .world_model_flags = EF_ROTATE,
+        .icon = "p_suit",
+        .pickup_name = "Biosuit",
+        .flags = IT_POWERUP,
+        .precaches = ASSET_SOUND_BIOSUIT_ACTIVATE " " ASSET_SOUND_BIOSUIT_FADE
     },
-#endif
 
-    {
+    /*QUAKED item_ring (0 .5 .8) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_RING_OF_SHADOWS] = {
+        .classname = "item_ring",
+        .pickup = Pickup_Powerup,
+        .use = Use_Radsuit,
+        .world_model = ASSET_MODEL_RING,
+        .world_model_flags = EF_ROTATE,
+        .icon = "p_ring",
+        .pickup_name = "Ring of Shadows",
+        .flags = IT_POWERUP
+    },
+
+    /*QUAKED item_health_rotten (0 .5 .8) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_HEALTH_ROTTEN] = {
+        .classname = "item_health_rotten",
         .pickup = Pickup_Health,
-        .pickup_sound = "items/pkup.wav",
+        .pickup_sound = ASSET_SOUND_HEALTH_ROTTEN_PICKUP,
+        .world_model = ASSET_MODEL_HEALTH_ROTTEN,
         .icon = "i_health",
-        .pickup_name = "Health"
+        .pickup_name = "Health",
+        .flags = IT_HEALTH,
+        .quantity = 15
+    },
+
+    /*QUAKED item_health (0 .5 .8) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_HEALTH] = {
+        .classname = "item_health",
+        .pickup = Pickup_Health,
+        .pickup_sound = ASSET_SOUND_HEALTH_PICKUP,
+        .world_model = ASSET_MODEL_HEALTH,
+        .icon = "i_health",
+        .pickup_name = "Health",
+        .flags = IT_HEALTH,
+        .quantity = 25
+    },
+
+    /*QUAKED item_health_mega (0 .5 .8) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_HEALTH_MEGA] = {
+        .classname = "item_health_mega",
+        .pickup = Pickup_Health,
+        .pickup_sound = ASSET_SOUND_HEALTH_MEGA_PICKUP,
+        .world_model = ASSET_MODEL_HEALTH_MEGA,
+        .icon = "i_health",
+        .pickup_name = "Mega Health",
+        .flags = IT_HEALTH | IT_HEALTH_IGNORE_MAX | IT_HEALTH_TIMED,
+        .quantity = 100
     },
 
     // end of list marker
-    {NULL}
+    { 0 }
 };
-
-
-/*QUAKED item_health (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health(edict_t *self)
-{
-    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
-        G_FreeEdict(self);
-        return;
-    }
-
-    self->model = "models/items/healing/medium/tris.md2";
-    self->count = 10;
-    SpawnItem(self, FindItem("Health"));
-    SV_SoundIndex("items/n_health.wav");
-}
-
-/*QUAKED item_health_small (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health_small(edict_t *self)
-{
-    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
-        G_FreeEdict(self);
-        return;
-    }
-
-    self->model = "models/items/healing/stimpack/tris.md2";
-    self->count = 2;
-    SpawnItem(self, FindItem("Health"));
-    self->style = HEALTH_IGNORE_MAX;
-    SV_SoundIndex("items/s_health.wav");
-}
-
-/*QUAKED item_health_large (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health_large(edict_t *self)
-{
-    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
-        G_FreeEdict(self);
-        return;
-    }
-
-    self->model = "models/items/healing/large/tris.md2";
-    self->count = 25;
-    SpawnItem(self, FindItem("Health"));
-    SV_SoundIndex("items/l_health.wav");
-}
-
-/*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-void SP_item_health_mega(edict_t *self)
-{
-    if (deathmatch.integer && (dmflags.integer & DF_NO_HEALTH)) {
-        G_FreeEdict(self);
-        return;
-    }
-
-    self->model = "models/items/mega_h/tris.md2";
-    self->count = 100;
-    SpawnItem(self, FindItem("Health"));
-    SV_SoundIndex("items/m_health.wav");
-    self->style = HEALTH_IGNORE_MAX | HEALTH_TIMED;
-}
-
 
 void InitItems(void)
 {
-    game.num_items = sizeof(itemlist) / sizeof(itemlist[0]) - 1;
+    for (size_t i = 0; i < q_countof(itemlist); i++) {
+        itemlist[i].id = i;
+    }
 }
-
-
 
 /*
 ===============
@@ -1784,17 +1049,64 @@ Called by worldspawn
 */
 void SetItemNames(void)
 {
-    int     i;
-    gitem_t *it;
+    for (gitem_id_t i = 0 ; i < ITEM_TOTAL ; i++) {
+        SV_SetConfigString(CS_ITEMS + i, itemlist[i].pickup_name);
+    }
+}
 
-    for (i = 0 ; i < game.num_items ; i++) {
-        it = &itemlist[i];
-        SV_SetConfigString(CS_ITEMS + i, it->pickup_name);
+
+//======================================================================
+
+/*
+===============
+GetItemByIndex
+===============
+*/
+gitem_t *GetItemByIndex(gitem_id_t index)
+{
+    if (index <= ITEM_NULL || index >= ITEM_TOTAL)
+        return NULL;
+
+    return &itemlist[index];
+}
+
+
+/*
+===============
+FindItemByClassname
+
+===============
+*/
+gitem_t *FindItemByClassname(char *classname)
+{
+    gitem_t *it = itemlist;
+
+    for (gitem_id_t i = 0; i < ITEM_TOTAL; i++, it++) {
+        if (!it->classname)
+            continue;
+        if (!Q_stricmp(it->classname, classname))
+            return it;
     }
 
-    green_armor_index = ITEM_INDEX(FindItem("Green Armor"));
-    yellow_armor_index = ITEM_INDEX(FindItem("Yellow Armor"));
-    red_armor_index   = ITEM_INDEX(FindItem("Red Armor"));
-    power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
-    power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
+    return NULL;
+}
+
+/*
+===============
+FindItem
+
+===============
+*/
+gitem_t *FindItem(char *pickup_name)
+{
+    gitem_t *it = itemlist;
+
+    for (gitem_id_t i = 0 ; i < ITEM_TOTAL; i++, it++) {
+        if (!it->pickup_name)
+            continue;
+        if (!Q_stricmp(it->pickup_name, pickup_name))
+            return it;
+    }
+
+    return NULL;
 }

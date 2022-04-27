@@ -891,9 +891,9 @@ static void CL_ParsePrint(void)
 
     // play sound
     if (cl_chat_sound->integer > 1)
-        S_StartLocalSound_("misc/talk1.wav");
+        S_StartLocalSound_(ASSET_SOUND_GAME_MESSAGE);
     else if (cl_chat_sound->integer > 0)
-        S_StartLocalSound_("misc/talk.wav");
+        S_StartLocalSound_(ASSET_SOUND_CHAT);
 }
 
 static void CL_ParseCenterPrint(void)
@@ -927,9 +927,7 @@ static void CL_ParseLayout(void)
 
 static void CL_ParseInventory(void)
 {
-    int        i;
-
-    for (i = 0; i < MAX_ITEMS; i++) {
+    for (int i = 0; i < cl.num_items; i++) {
         cl.inventory[i] = MSG_ReadShort();
     }
 }

@@ -340,8 +340,8 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     bolt->s.effects |= effect;
     VectorClear(bolt->mins);
     VectorClear(bolt->maxs);
-    bolt->s.modelindex = SV_ModelIndex("models/objects/laser/tris.md2");
-    bolt->s.sound = SV_SoundIndex("misc/lasfly.wav");
+    bolt->s.modelindex = SV_ModelIndex(ASSET_MODEL_LASER);
+    bolt->s.sound = SV_SoundIndex(ASSET_SOUND_LASER_FLY);
     bolt->owner = self;
     bolt->touch = blaster_touch;
     bolt->nextthink = level.time + 2000;
@@ -438,7 +438,7 @@ void Grenade_Touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
             else
                 SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/hgrenb2a.wav"), 1, ATTN_NORM, 0);
         } else {
-            SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/grenlb1b.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GRENADE_BOUNCE), 1, ATTN_NORM, 0);
         }
         return;
     }
@@ -471,7 +471,7 @@ void fire_grenade(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int sp
     grenade->s.effects |= EF_GRENADE;
     VectorClear(grenade->mins);
     VectorClear(grenade->maxs);
-    grenade->s.modelindex = SV_ModelIndex("models/objects/grenade/tris.md2");
+    grenade->s.modelindex = SV_ModelIndex(ASSET_MODEL_GRENADE);
     grenade->owner = self;
     grenade->touch = Grenade_Touch;
     grenade->nextthink = level.time + G_SecToMs(timer);
@@ -562,7 +562,7 @@ void rocket_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *sur
             if ((surf) && !(surf->flags & (SURF_WARP | SURF_TRANS33 | SURF_TRANS66 | SURF_FLOWING))) {
                 n = Q_rand() % 5;
                 while (n--)
-                    ThrowDebris(ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
+                    ThrowDebris(ent, ASSET_MODEL_DEBRIS2, 2, ent->s.origin);
             }
         }
     }
@@ -595,7 +595,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
     rocket->s.effects |= EF_ROCKET;
     VectorClear(rocket->mins);
     VectorClear(rocket->maxs);
-    rocket->s.modelindex = SV_ModelIndex("models/objects/rocket/tris.md2");
+    rocket->s.modelindex = SV_ModelIndex(ASSET_MODEL_ROCKET);
     rocket->owner = self;
     rocket->touch = rocket_touch;
     rocket->nextthink = level.time + 4000;
@@ -603,7 +603,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
     rocket->dmg = damage;
     rocket->radius_dmg = radius_damage;
     rocket->dmg_radius = damage_radius;
-    rocket->s.sound = SV_SoundIndex("weapons/rockfly.wav");
+    rocket->s.sound = SV_SoundIndex(ASSET_SOUND_ROCKET_FLY);
     rocket->classname = "rocket";
 
     if (self->client)
@@ -653,7 +653,7 @@ void fire_nail(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed)
     nail->movetype = MOVETYPE_FLYMISSILE;
     nail->clipmask = MASK_SHOT;
     nail->solid = SOLID_BBOX;
-    nail->s.modelindex = SV_ModelIndex("models/objects/nail/nail.iqm");
+    nail->s.modelindex = SV_ModelIndex(ASSET_MODEL_NAIL);
     nail->owner = self;
     nail->touch = nail_touch;
     nail->nextthink = level.time + 2000;

@@ -415,6 +415,11 @@ void CL_UpdateConfigstring(int index)
         return;
     }
 
+    if (index == CS_NUMITEMS) {
+        cl.num_items = atoi(s);
+        return;
+    }
+
     if (index == CS_MODELS + 1) {
         size_t len = strlen(s);
 

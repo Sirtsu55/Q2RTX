@@ -313,7 +313,7 @@ void CL_MuzzleFlash(void)
         break;
     case MZ_HYPERBLASTER:
         DL_COLOR(1, 1, 0);
-        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/perf/perf_fire.wav"), volume, ATTN_NORM, 0, crand() * 14);
+        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound(ASSET_SOUND_PERFORATOR_FIRE), volume, ATTN_NORM, 0, crand() * 14);
         break;
     case MZ_MACHINEGUN:
         DL_COLOR(1, 1, 0);
@@ -357,7 +357,7 @@ void CL_MuzzleFlash(void)
         break;
     case MZ_ROCKET:
         DL_COLOR(1, 0.5f, 0.2f);
-        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/rocklf1a.wav"), volume, ATTN_NORM, 0, 0);
+        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound(ASSET_SOUND_ROCKET_FIRE), volume, ATTN_NORM, 0, 0);
         S_StartSound(NULL, mz.entity, CHAN_AUTO,   S_RegisterSound("weapons/rocklr1b.wav"), volume, ATTN_NORM, 0.1f, 0);
         break;
     case MZ_GRENADE:
@@ -2094,5 +2094,7 @@ void CL_InitEffects(void)
         for (j = 0; j < 3; j++)
             avelocities[i][j] = (Q_rand() & 255) * 0.01f;
 
+    S_RegisterSound(ASSET_SOUND_SHOTGUN_FIRE);
+    S_RegisterSound(ASSET_SOUND_PERFORATOR_FIRE);
 }
 

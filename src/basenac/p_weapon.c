@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "m_player.h"
 
 bool     is_quad;
-byte     is_silenced;
 
 void G_ProjectSource2(const vec3_t point, const vec3_t distance, const vec3_t forward, const vec3_t right, const vec3_t up, vec3_t result)
 {
@@ -71,13 +70,6 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
 {
     edict_t     *noise;
 
-    if (type == PNOISE_WEAPON) {
-        if (who->client->silencer_shots) {
-            who->client->silencer_shots--;
-            return;
-        }
-    }
-
     if (deathmatch.integer)
         return;
 
@@ -120,50 +112,15 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
     SV_LinkEntity(noise);
 }
 
-
-bool Pickup_Weapon(edict_t *ent, edict_t *other)
+static bool G_HasWeaponAndAmmo(edict_t *ent, gitem_id_t weapon)
 {
-    int         index;
-    gitem_t     *ammo;
+    if (!ent->client->pers.inventory[weapon])
+        return false;
 
-    index = ITEM_INDEX(ent->item);
+    const gitem_t *it = GetItemByIndex(weapon);
 
-    if (((dmflags.integer & DF_WEAPONS_STAY) || coop.integer)
-        && other->client->pers.inventory[index]) {
-        if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
-            return false;   // leave the weapon for others to pickup
-    }
-
-    if (!other->client->pers.inventory[index]) {
-        other->client->inspect = true;
-    }
-
-    other->client->pers.inventory[index]++;
-
-    if (!(ent->spawnflags & DROPPED_ITEM)) {
-        // give them some ammo with it
-        ammo = FindItem(ent->item->ammo);
-        if (dmflags.integer & DF_INFINITE_AMMO)
-            Add_Ammo(other, ammo, 1000);
-        else
-            Add_Ammo(other, ammo, ammo->quantity);
-
-        if (!(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
-            if (deathmatch.integer) {
-                if (dmflags.integer & DF_WEAPONS_STAY)
-                    ent->flags |= FL_RESPAWN;
-                else
-                    SetRespawn(ent, 30);
-            }
-            if (coop.integer)
-                ent->flags |= FL_RESPAWN;
-        }
-    }
-
-    if (other->client->pers.weapon != ent->item &&
-        (other->client->pers.inventory[index] == 1) &&
-        (!deathmatch.integer || other->client->pers.weapon == FindItem("Axe")))
-        other->client->newweapon = ent->item;
+    if (it->ammo && ent->client->pers.inventory[it->ammo] < it->quantity)
+        return false;
 
     return true;
 }
@@ -175,17 +132,13 @@ NoAmmoWeaponChange
 */
 static void NoAmmoWeaponChange(edict_t *ent)
 {
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("nails"))]
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("perforator"))]) {
-        ent->client->newweapon = FindItem("perforator");
-        return;
+    if (G_HasWeaponAndAmmo(ent, ITEM_PERFORATOR)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_PERFORATOR);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_SHOTGUN)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_SHOTGUN);
+    } else {
+        ent->client->newweapon = GetItemByIndex(ITEM_AXE);
     }
-    if (ent->client->pers.inventory[ITEM_INDEX(FindItem("shells"))]
-        &&  ent->client->pers.inventory[ITEM_INDEX(FindItem("shotgun"))]) {
-        ent->client->newweapon = FindItem("shotgun");
-        return;
-    }
-    ent->client->newweapon = FindItem("axe");
 }
 
 // not animation function; returns true if
@@ -199,7 +152,7 @@ bool Weapon_AmmoCheck(edict_t *ent)
         return true;
     }
 
-    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
 
     NoAmmoWeaponChange(ent);
 
@@ -236,7 +189,7 @@ void Weapon_Activate(edict_t *ent, bool switched)
 
     // set ammo index
     if (ent->client->pers.weapon && ent->client->pers.weapon->ammo)
-        ent->client->ammo_index = ITEM_INDEX(FindItem(ent->client->pers.weapon->ammo));
+        ent->client->ammo_index = ent->client->pers.weapon->ammo;
     else
         ent->client->ammo_index = 0;
 
@@ -380,72 +333,9 @@ void Think_Weapon(edict_t *ent)
     // call active weapon think routine
     if (ent->client->pers.weapon) {
         is_quad = (ent->client->quad_time > level.time);
-        if (ent->client->silencer_shots)
-            is_silenced = MZ_SILENCED;
-        else
-            is_silenced = 0;
 
         for (currentWeaponId = 0; currentWeaponId < WEAPID_TOTAL; currentWeaponId++) {
             Weapon_RunAnimation(ent);
         }
     }
-}
-
-
-/*
-================
-Use_Weapon
-
-Make the weapon ready if there is ammo
-================
-*/
-void Use_Weapon(edict_t *ent, gitem_t *item)
-{
-    int         ammo_index;
-    gitem_t     *ammo_item;
-
-    // see if we're already using it
-    if (item == ent->client->pers.weapon)
-        return;
-
-    if (item->ammo && !g_select_empty.integer && !(item->flags & IT_AMMO)) {
-        ammo_item = FindItem(item->ammo);
-        ammo_index = ITEM_INDEX(ammo_item);
-
-        if (!ent->client->pers.inventory[ammo_index]) {
-            SV_ClientPrintf(ent, PRINT_HIGH, "No %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
-            return;
-        }
-
-        if (ent->client->pers.inventory[ammo_index] < item->quantity) {
-            SV_ClientPrintf(ent, PRINT_HIGH, "Not enough %s for %s.\n", ammo_item->pickup_name, item->pickup_name);
-            return;
-        }
-    }
-
-    // change to this weapon when down
-    ent->client->newweapon = item;
-}
-
-/*
-================
-Drop_Weapon
-================
-*/
-void Drop_Weapon(edict_t *ent, gitem_t *item)
-{
-    int     index;
-
-    if (dmflags.integer & DF_WEAPONS_STAY)
-        return;
-
-    index = ITEM_INDEX(item);
-    // see if we're already using it
-    if (((item == ent->client->pers.weapon) || (item == ent->client->newweapon)) && (ent->client->pers.inventory[index] == 1)) {
-        SV_ClientPrint(ent, PRINT_HIGH, "Can't drop current weapon\n");
-        return;
-    }
-
-    Drop_Item(ent, item);
-    ent->client->pers.inventory[index]--;
 }

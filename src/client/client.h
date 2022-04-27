@@ -247,6 +247,7 @@ typedef struct client_state_s {
     char        gamedir[MAX_QPATH];
     int         clientNum;            // never changed during gameplay, set by serverdata packet
     int         maxclients;
+    int         num_items;
     pmoveParams_t pmp;
 
     char        baseconfigstrings[MAX_CONFIGSTRINGS][MAX_QPATH];

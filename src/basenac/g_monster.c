@@ -113,7 +113,7 @@ void M_FliesOn(edict_t *self)
     if (self->waterlevel)
         return;
     self->s.effects |= EF_FLIES;
-    self->s.sound = SV_SoundIndex("infantry/inflies1.wav");
+    self->s.sound = SV_SoundIndex(ASSET_SOUND_FLIES);
     self->think = M_FliesOff;
     self->nextthink = level.time + G_MinToMs(1);
 }
@@ -245,7 +245,7 @@ void M_WorldEffects(edict_t *ent)
 
     if (ent->waterlevel == 0) {
         if (ent->flags & FL_INWATER) {
-            SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_EXIT), 1, ATTN_NORM, 0);
             ent->flags &= ~FL_INWATER;
         }
         return;
@@ -268,13 +268,13 @@ void M_WorldEffects(edict_t *ent)
         if (!(ent->svflags & SVF_DEADMONSTER)) {
             if (ent->watertype & CONTENTS_LAVA)
                 if (random() <= 0.5f)
-                    SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/lava1.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_MONSTER_FRY1), 1, ATTN_NORM, 0);
                 else
-                    SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/lava2.wav"), 1, ATTN_NORM, 0);
+                    SV_StartSound(ent, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_MONSTER_FRY2), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_SLIME)
-                SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(ent, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_ENTER), 1, ATTN_NORM, 0);
             else if (ent->watertype & CONTENTS_WATER)
-                SV_StartSound(ent, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+                SV_StartSound(ent, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_ENTER), 1, ATTN_NORM, 0);
         }
 
         ent->flags |= FL_INWATER;
@@ -307,24 +307,12 @@ void M_droptofloor(edict_t *ent)
 
 void M_SetEffects(edict_t *ent)
 {
-    ent->s.effects &= ~(EF_COLOR_SHELL | EF_POWERSCREEN);
+    ent->s.effects &= ~(EF_COLOR_SHELL);
     ent->s.renderfx &= ~(RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE);
 
     if (ent->monsterinfo.aiflags & AI_RESURRECTING) {
         ent->s.effects |= EF_COLOR_SHELL;
         ent->s.renderfx |= RF_SHELL_RED;
-    }
-
-    if (ent->health <= 0)
-        return;
-
-    if (ent->powerarmor_time > level.time) {
-        if (ent->monsterinfo.power_armor_type == POWER_ARMOR_SCREEN) {
-            ent->s.effects |= EF_POWERSCREEN;
-        } else if (ent->monsterinfo.power_armor_type == POWER_ARMOR_SHIELD) {
-            ent->s.effects |= EF_COLOR_SHELL;
-            ent->s.renderfx |= RF_SHELL_GREEN;
-        }
     }
 }
 

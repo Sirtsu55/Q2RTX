@@ -488,7 +488,7 @@ void UI_StartSound(menuSound_t sound)
         S_StartLocalSound("misc/menu3.wav");
         break;
     case QMS_BEEP:
-        S_StartLocalSound("misc/talk1.wav");
+        S_StartLocalSound(ASSET_SOUND_GAME_MESSAGE);
         break;
     default:
         break;

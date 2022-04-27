@@ -100,8 +100,7 @@ static inline float G_MsToFrames(gtime_t ms)
 #define FL_WATERJUMP            0x00000200  // player jumping out of water
 #define FL_TEAMSLAVE            0x00000400  // not the first on the team
 #define FL_NO_KNOCKBACK         0x00000800
-#define FL_POWER_ARMOR          0x00001000  // power armor (if any) is active
-#define FL_ACCELERATE           0x00002000  // accelerative movement (plats, etc)
+#define FL_ACCELERATE           0x00001000  // accelerative movement (plats, etc)
 #define FL_RESPAWN              0x80000000  // used for item respawning
 
 #define MELEE_DISTANCE  80
@@ -113,14 +112,6 @@ typedef enum {
     DAMAGE_YES,         // will take damage if hit
     DAMAGE_AIM          // auto targeting recognizes this
 } damage_t;
-
-typedef enum {
-    AMMO_NAILS,
-    AMMO_SHELLS,
-    AMMO_ROCKETS,
-    AMMO_CELLS
-} ammo_t;
-
 
 //deadflag
 #define DEAD_NO                 0
@@ -162,18 +153,6 @@ typedef enum {
 #define AS_SLIDING              2
 #define AS_MELEE                3
 #define AS_MISSILE              4
-
-// armor types
-#define ARMOR_NONE              0
-#define ARMOR_GREEN             1
-#define ARMOR_YELLOW            2
-#define ARMOR_RED               3
-#define ARMOR_SHARD             4
-
-// power armor types
-#define POWER_ARMOR_NONE        0
-#define POWER_ARMOR_SCREEN      1
-#define POWER_ARMOR_SHIELD      2
 
 // handedness values
 #define RIGHT_HANDED            0
@@ -247,31 +226,69 @@ typedef struct {
     int     max_count;
     float   normal_protection;
     float   energy_protection;
-    int     armor;
 } gitem_armor_t;
 
-
 // gitem_t->flags
-#define IT_WEAPON       1       // use makes active weapon
-#define IT_AMMO         2
-#define IT_ARMOR        4
-#define IT_STAY_COOP    8
-#define IT_KEY          16
-#define IT_POWERUP      32
+typedef enum {
+    IT_WEAPON       = 1 << 0, // use makes active weapon
+    IT_AMMO         = 1 << 1,
+    IT_ARMOR        = 1 << 2,
+    IT_STAY_COOP    = 1 << 3,
+    IT_KEY          = 1 << 4,
+    IT_POWERUP      = 1 << 5,
+    IT_HEALTH       = 1 << 6,
+} gitem_flags_t;
 
 // gitem_t->weapmodel for weapons indicates model index
-#define WEAP_BLASTER            1
-#define WEAP_SHOTGUN            2
-#define WEAP_SUPERSHOTGUN       3
-#define WEAP_MACHINEGUN         4
-#define WEAP_CHAINGUN           5
-#define WEAP_GRENADES           6
-#define WEAP_GRENADELAUNCHER    7
-#define WEAP_ROCKETLAUNCHER     8
-#define WEAP_HYPERBLASTER       9
-#define WEAP_RAILGUN            10
-#define WEAP_BFG                11
-#define WEAP_FLAREGUN           12
+typedef enum {
+    WEAP_BLASTER            = 1,
+    WEAP_SHOTGUN            = 2,
+    WEAP_SUPERSHOTGUN       = 3,
+    WEAP_MACHINEGUN         = 4,
+    WEAP_CHAINGUN           = 5,
+    WEAP_GRENADES           = 6,
+    WEAP_GRENADELAUNCHER    = 7,
+    WEAP_ROCKETLAUNCHER     = 8,
+    WEAP_HYPERBLASTER       = 9,
+    WEAP_RAILGUN            = 10,
+    WEAP_BFG                = 11,
+    WEAP_FLAREGUN           = 12,
+} gitem_vwep_t;
+
+// Item ID list. Item list fills out the
+// details of every item. 0 must always be NULL,
+// and the weapons should be grouped together for
+// vwep purposes.
+typedef enum {
+    // MUST ALWAYS BE AT THE BEGINNING
+    ITEM_NULL,
+
+    ITEM_AXE,
+    ITEM_SHOTGUN,
+    ITEM_PERFORATOR,
+
+    ITEM_HEALTH_ROTTEN,
+    ITEM_HEALTH,
+    ITEM_HEALTH_MEGA,
+
+    ITEM_ARMOR_SHARD,
+    ITEM_ARMOR_GREEN,
+    ITEM_ARMOR_YELLOW,
+    ITEM_ARMOR_RED,
+
+    ITEM_SHELLS,
+    ITEM_NAILS,
+
+    ITEM_QUAD_DAMAGE,
+    ITEM_PENTAGRAM,
+    ITEM_RING_OF_SHADOWS,
+    ITEM_BIOSUIT,
+
+    ITEM_KEY_SILVER,
+
+    // MUST ALWAYS BE AT THE END
+    ITEM_TOTAL
+} gitem_id_t;
 
 typedef struct gitem_s {
     char        *classname; // spawning name
@@ -289,18 +306,17 @@ typedef struct gitem_s {
     char        *icon;
     char        *pickup_name;   // for printing on pickup
 
-    int         quantity;       // for ammo how much, for weapons how much is used per shot
-    char        *ammo;          // for weapons
-    int         flags;          // IT_* flags
+    int             quantity;      // for ammo how much, for weapons how much is used per shot
+    gitem_id_t      ammo;          // for weapons
+    gitem_flags_t   flags;         // IT_* flags
 
-    int         weapmodel;      // weapon model index (for weapons)
-
-    void        *info;
-    int         tag;
+    gitem_vwep_t    weapmodel;      // weapon model index (for weapons)
+    gitem_armor_t   *armor;
 
     char        *precaches;     // string of all models, sounds, and images this item will use
 
     weapon_id_t weapid;
+    gitem_id_t  id; // set by InitItems
 } gitem_t;
 
 //
@@ -325,9 +341,6 @@ typedef struct {
 
     // cross level triggers
     int         serverflags;
-
-    // items
-    int         num_items;
 
     bool        autosaved;
 
@@ -376,8 +389,6 @@ typedef struct {
 
     edict_t     *current_entity;    // entity running from G_RunFrame
     int         body_que;           // dead bodies
-
-    int         power_cubes;        // ugly necessity for coop
 
     // Paril: level gravity change support.
     // we have to do this here for save/load support.
@@ -489,9 +500,6 @@ typedef struct {
     gtime_t     idle_time;
     int         linkcount;
 
-    int         power_armor_type;
-    int         power_armor_power;
-
     void        (*load)(edict_t *self);
 
     float       melee_distance;
@@ -602,7 +610,6 @@ extern  cvarRef_t  sv_features;
 #define ITEM_TRIGGER_SPAWN      0x00000001
 #define ITEM_NO_TOUCH           0x00000002
 // 6 bits reserved for editor flags
-// 8 bits used as power cube id bits for coop games
 #define DROPPED_ITEM            0x00010000
 #define DROPPED_PLAYER_ITEM     0x00020000
 #define ITEM_TARGETS_USED       0x00040000
@@ -624,15 +631,14 @@ typedef enum {
     F_VECTOR,
     F_ANGLEHACK,
     F_EDICT,            // index on disk, pointer in memory
-    F_ITEM,             // index on disk, pointer in memory
+    F_ITEM,             // string on disk, pointer in memory
+    F_ITEM_ID,          // string on disk, gitem_id_t in memory
     F_CLIENT,           // index on disk, pointer in memory
     F_FUNCTION,
     F_POINTER,
     F_IGNORE,
     F_INT64
 } fieldtype_t;
-
-extern  gitem_t itemlist[];
 
 //
 // g_cmds.c
@@ -648,7 +654,6 @@ void InitItems(void);
 void SetItemNames(void);
 gitem_t *FindItem(char *pickup_name);
 gitem_t *FindItemByClassname(char *classname);
-#define ITEM_INDEX(x) ((x)-itemlist)
 edict_t *Drop_Item(edict_t *ent, gitem_t *item);
 void SetRespawn(edict_t *ent, float delay);
 bool ChangeWeapon(edict_t *ent);
@@ -656,8 +661,7 @@ void Weapon_Activate(edict_t *ent, bool switched);
 void SpawnItem(edict_t *ent, gitem_t *item);
 void Think_Weapon(edict_t *ent);
 int ArmorIndex(edict_t *ent);
-int PowerArmorType(edict_t *ent);
-gitem_t *GetItemByIndex(int index);
+gitem_t *GetItemByIndex(gitem_id_t index);
 bool Add_Ammo(edict_t *ent, gitem_t *item, int count);
 void Touch_Item(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
 
@@ -735,9 +739,9 @@ void M_CheckGround(edict_t *ent);
 //
 // g_misc.c
 //
-void ThrowHead(edict_t *self, char *gibname, int damage, int type);
+void ThrowHead(edict_t *self, const char *gibname, int damage, int type);
 void ThrowClientHead(edict_t *self, int damage);
-void ThrowGib(edict_t *self, char *gibname, int damage, int type);
+void ThrowGib(edict_t *self, const char *gibname, int damage, int type);
 void BecomeExplosion1(edict_t *self);
 
 #define CLOCK_MESSAGE_SIZE  16
@@ -765,7 +769,7 @@ bool FacingIdeal(edict_t *self);
 //
 // g_weapon.c
 //
-void ThrowDebris(edict_t *self, char *modelname, float speed, vec3_t origin);
+void ThrowDebris(edict_t *self, const char *modelname, float speed, vec3_t origin);
 bool fire_hit(edict_t *self, vec3_t aim, int damage, int kick);
 void fire_bullet(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int mod);
 void fire_shotgun(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int hspread, int vspread, int count, int mod);
@@ -896,8 +900,8 @@ typedef struct {
     int         max_health;
     int         savedFlags;
 
-    int         selected_item;
-    int         inventory[MAX_ITEMS];
+    gitem_id_t  selected_item;
+    int         inventory[ITEM_TOTAL];
 
     // ammo capacities
     int         max_nails;
@@ -908,7 +912,6 @@ typedef struct {
     gitem_t     *weapon;
     gitem_t     *lastweapon;
 
-    int         power_cubes;    // used for tracking the cubes in coop games
     int         score;          // for calculating total unit score in coop games
 
     int         game_helpchanged;
@@ -944,7 +947,7 @@ struct gclient_s {
     bool        showhelp;
     bool        showhelpicon;
 
-    int         ammo_index;
+    gitem_id_t  ammo_index;
 
     int         buttons;
     int         oldbuttons;
@@ -957,7 +960,6 @@ struct gclient_s {
     // sum up damage over an entire frame, so
     // shotgun blasts give a single big kick
     int         damage_armor;       // damage absorbed by armor
-    int         damage_parmor;      // damage absorbed by power armor
     int         damage_blood;       // damage taken out of health
     int         damage_knockback;   // impact damage
     vec3_t      damage_from;        // origin for vector calculation
@@ -992,10 +994,8 @@ struct gclient_s {
     // powerup timers
     gtime_t     quad_time;
     gtime_t     invincible_time;
-    gtime_t     breather_time;
     gtime_t     enviro_time;
 
-    int         silencer_shots;
     int         weapon_sound;
 
     gtime_t     pickup_msg_time;
@@ -1103,8 +1103,6 @@ struct edict_s {
     int         gib_health;
     int         deadflag;
     gtime_t     show_hostile_time;
-
-    gtime_t     powerarmor_time;
 
     char        *map;           // target_changelevel
 

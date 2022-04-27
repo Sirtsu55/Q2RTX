@@ -545,9 +545,9 @@ void SP_func_plat(edict_t *ent)
     VectorCopy(ent->pos2, ent->moveinfo.end_origin);
     VectorCopy(ent->s.angles, ent->moveinfo.end_angles);
 
-    ent->moveinfo.sound_start = SV_SoundIndex("plats/pt1_strt.wav");
-    ent->moveinfo.sound_middle = SV_SoundIndex("plats/pt1_mid.wav");
-    ent->moveinfo.sound_end = SV_SoundIndex("plats/pt1_end.wav");
+    ent->moveinfo.sound_start = SV_SoundIndex(ASSET_SOUND_PLATFORM_START);
+    ent->moveinfo.sound_middle = SV_SoundIndex(ASSET_SOUND_PLATFORM_LOOP);
+    ent->moveinfo.sound_end = SV_SoundIndex(ASSET_SOUND_PLATFORM_END);
 
     SV_LinkEntity(ent);
 }
@@ -616,8 +616,6 @@ void SP_func_rotating(edict_t *ent)
         ent->speed = 100;
     if (!ent->dmg)
         ent->dmg = 2;
-
-//  ent->moveinfo.sound_middle = "doors/hydro1.wav";
 
     ent->use = rotating_use;
     if (ent->dmg)
@@ -741,7 +739,7 @@ void SP_func_button(edict_t *ent)
     SV_SetBrushModel(ent, ent->model);
 
     if (ent->sounds != 1)
-        ent->moveinfo.sound_start = SV_SoundIndex("switches/butn2.wav");
+        ent->moveinfo.sound_start = SV_SoundIndex(ASSET_SOUND_BUTTON_PRESS);
 
     if (!ent->speed)
         ent->speed = 40;
@@ -1079,7 +1077,7 @@ void door_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
     self->touch_debounce_time = level.time + 5000;
 
     SV_CenterPrint(other, "%s");
-    SV_StartSound(other, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(other, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE), 1, ATTN_NORM, 0);
 }
 
 void SP_func_door(edict_t *ent)
@@ -1087,9 +1085,9 @@ void SP_func_door(edict_t *ent)
     vec3_t  abs_movedir;
 
     if (ent->sounds != 1) {
-        ent->moveinfo.sound_start = SV_SoundIndex("doors/dr1_strt.wav");
-        ent->moveinfo.sound_middle = SV_SoundIndex("doors/dr1_mid.wav");
-        ent->moveinfo.sound_end = SV_SoundIndex("doors/dr1_end.wav");
+        ent->moveinfo.sound_start = SV_SoundIndex(ASSET_SOUND_DOOR_START);
+        ent->moveinfo.sound_middle = SV_SoundIndex(ASSET_SOUND_DOOR_LOOP);
+        ent->moveinfo.sound_end = SV_SoundIndex(ASSET_SOUND_DOOR_END);
     }
 
     G_SetMovedir(ent->s.angles, ent->movedir);
@@ -1143,7 +1141,7 @@ void SP_func_door(edict_t *ent)
         ent->die = door_killed;
         ent->max_health = ent->health;
     } else if (ent->targetname && ent->message) {
-        SV_SoundIndex("misc/talk.wav");
+        SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE);
         ent->touch = door_touch;
     }
 
@@ -1250,9 +1248,9 @@ void SP_func_door_rotating(edict_t *ent)
         ent->dmg = 2;
 
     if (ent->sounds != 1) {
-        ent->moveinfo.sound_start = SV_SoundIndex("doors/dr1_strt.wav");
-        ent->moveinfo.sound_middle = SV_SoundIndex("doors/dr1_mid.wav");
-        ent->moveinfo.sound_end = SV_SoundIndex("doors/dr1_end.wav");
+        ent->moveinfo.sound_start = SV_SoundIndex(ASSET_SOUND_DOOR_START);
+        ent->moveinfo.sound_middle = SV_SoundIndex(ASSET_SOUND_DOOR_LOOP);
+        ent->moveinfo.sound_end = SV_SoundIndex(ASSET_SOUND_DOOR_END);
     }
 
     // if it starts open, switch the positions
@@ -1270,7 +1268,7 @@ void SP_func_door_rotating(edict_t *ent)
     }
 
     if (ent->targetname && ent->message) {
-        SV_SoundIndex("misc/talk.wav");
+        SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE);
         ent->touch = door_touch;
     }
 
@@ -1330,13 +1328,9 @@ void SP_func_water(edict_t *self)
         break;
 
     case 1: // water
-        self->moveinfo.sound_start = SV_SoundIndex("world/mov_watr.wav");
-        self->moveinfo.sound_end = SV_SoundIndex("world/stp_watr.wav");
-        break;
-
     case 2: // lava
-        self->moveinfo.sound_start = SV_SoundIndex("world/mov_watr.wav");
-        self->moveinfo.sound_end = SV_SoundIndex("world/stp_watr.wav");
+        self->moveinfo.sound_start = SV_SoundIndex(ASSET_SOUND_WATER_START);
+        self->moveinfo.sound_end = SV_SoundIndex(ASSET_SOUND_WATER_STOP);
         break;
     }
 
@@ -1874,9 +1868,9 @@ void SP_func_door_secret(edict_t *ent)
     float   width;
     float   length;
 
-    ent->moveinfo.sound_start = SV_SoundIndex("doors/dr1_strt.wav");
-    ent->moveinfo.sound_middle = SV_SoundIndex("doors/dr1_mid.wav");
-    ent->moveinfo.sound_end = SV_SoundIndex("doors/dr1_end.wav");
+    ent->moveinfo.sound_start = SV_SoundIndex(ASSET_SOUND_DOOR_START);
+    ent->moveinfo.sound_middle = SV_SoundIndex(ASSET_SOUND_DOOR_LOOP);
+    ent->moveinfo.sound_end = SV_SoundIndex(ASSET_SOUND_DOOR_END);
 
     ent->movetype = MOVETYPE_PUSH;
     ent->solid = SOLID_BSP;
@@ -1921,7 +1915,7 @@ void SP_func_door_secret(edict_t *ent)
         ent->die = door_killed;
         ent->max_health = ent->health;
     } else if (ent->targetname && ent->message) {
-        SV_SoundIndex("misc/talk.wav");
+        SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE);
         ent->touch = door_touch;
     }
 

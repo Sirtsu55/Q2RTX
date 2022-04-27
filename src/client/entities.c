@@ -289,18 +289,18 @@ static void parse_entity_event(int number)
 
     switch (cent->current.event) {
     case EV_ITEM_RESPAWN:
-        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("items/respawn1.wav"), 1, ATTN_IDLE, 0, 0);
+        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound(ASSET_SOUND_ITEM_RESPAWN), 1, ATTN_IDLE, 0, 0);
         CL_ItemRespawnParticles(cent->current.origin);
         break;
     case EV_PLAYER_TELEPORT:
-        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound("misc/tele1.wav"), 1, ATTN_IDLE, 0, 0);
+        S_StartSound(NULL, number, CHAN_WEAPON, S_RegisterSound(ASSET_SOUND_TELEPORT), 1, ATTN_IDLE, 0, 0);
         CL_TeleportParticles(cent->current.origin);
         break;
     case EV_FOOTSTEP:
         S_StartSound(NULL, number, CHAN_BODY, cl_sfx_footsteps[Q_rand() & 3], 1, ATTN_NORM, 0, 0);
         break;
     case EV_FALLSHORT:
-        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("player/land1.wav"), 1, ATTN_NORM, 0, 0);
+        S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound(ASSET_SOUND_PLAYER_LAND), 1, ATTN_NORM, 0, 0);
         break;
     case EV_FALL:
         S_StartSound(NULL, number, CHAN_AUTO, S_RegisterSound("*fall2.wav"), 1, ATTN_NORM, 0, 0);

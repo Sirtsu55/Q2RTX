@@ -74,11 +74,11 @@ void SelectNextItem(edict_t *ent, int itflags)
     }
 
     // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (cl->pers.selected_item + i) % MAX_ITEMS;
+    for (i = 1 ; i <= ITEM_TOTAL ; i++) {
+        index = (cl->pers.selected_item + i) % ITEM_TOTAL;
         if (!cl->pers.inventory[index])
             continue;
-        it = &itemlist[index];
+        it = GetItemByIndex(index);
         if (!it->use)
             continue;
         if (!(it->flags & itflags))
@@ -105,11 +105,11 @@ void SelectPrevItem(edict_t *ent, int itflags)
     }
 
     // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (cl->pers.selected_item + MAX_ITEMS - i) % MAX_ITEMS;
+    for (i = 1 ; i <= ITEM_TOTAL ; i++) {
+        index = (cl->pers.selected_item + ITEM_TOTAL - i) % ITEM_TOTAL;
         if (!cl->pers.inventory[index])
             continue;
-        it = &itemlist[index];
+        it = GetItemByIndex(index);
         if (!it->use)
             continue;
         if (!(it->flags & itflags))
@@ -148,8 +148,7 @@ void Cmd_Give_f(edict_t *ent)
 {
     char        *name;
     gitem_t     *it;
-    int         index;
-    int         i;
+    gitem_id_t  i;
     bool        give_all;
     edict_t     *it_ent;
 
@@ -175,8 +174,8 @@ void Cmd_Give_f(edict_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "weapons") == 0) {
-        for (i = 0 ; i < game.num_items ; i++) {
-            it = itemlist + i;
+        for (i = 0 ; i < ITEM_TOTAL ; i++) {
+            it = GetItemByIndex(i);
             if (!it->pickup)
                 continue;
             if (!(it->flags & IT_WEAPON))
@@ -188,8 +187,8 @@ void Cmd_Give_f(edict_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "ammo") == 0) {
-        for (i = 0 ; i < game.num_items ; i++) {
-            it = itemlist + i;
+        for (i = 0 ; i < ITEM_TOTAL ; i++) {
+            it = GetItemByIndex(i);
             if (!it->pickup)
                 continue;
             if (!(it->flags & IT_AMMO))
@@ -201,40 +200,19 @@ void Cmd_Give_f(edict_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "armor") == 0) {
-        gitem_armor_t   *info;
+        ent->client->pers.inventory[ITEM_ARMOR_GREEN] = 0;
+        ent->client->pers.inventory[ITEM_ARMOR_YELLOW] = 0;
 
-        it = FindItem("Green Armor");
-        ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+        it = GetItemByIndex(ITEM_ARMOR_RED);
+        ent->client->pers.inventory[it->id] = it->armor->max_count;
 
-        it = FindItem("Yellow Armor");
-        ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
-
-        it = FindItem("Red Armor");
-        info = (gitem_armor_t *)it->info;
-        ent->client->pers.inventory[ITEM_INDEX(it)] = info->max_count;
-
-        if (!give_all)
-            return;
-    }
-
-    if (give_all || Q_stricmp(name, "Power Shield") == 0) {
-        it = FindItem("Power Shield");
-        if (it)
-        {
-            it_ent = G_Spawn();
-            it_ent->classname = it->classname;
-            SpawnItem(it_ent, it);
-            Touch_Item(it_ent, ent, NULL, NULL);
-            if (it_ent->inuse)
-                G_FreeEdict(it_ent);
-        }
         if (!give_all)
             return;
     }
 
     if (give_all) {
-        for (i = 0 ; i < game.num_items ; i++) {
-            it = itemlist + i;
+        for (i = 0 ; i < ITEM_TOTAL; i++) {
+            it = GetItemByIndex(i);
             if (!it->pickup)
                 continue;
             if (it->flags & (IT_ARMOR | IT_WEAPON | IT_AMMO))
@@ -259,13 +237,11 @@ void Cmd_Give_f(edict_t *ent)
         return;
     }
 
-    index = ITEM_INDEX(it);
-
     if (it->flags & IT_AMMO) {
         if (Cmd_Argc() == 3)
-            ent->client->pers.inventory[index] = atoi(Cmd_Argv(2));
+            ent->client->pers.inventory[it->id] = atoi(Cmd_Argv(2));
         else
-            ent->client->pers.inventory[index] += it->quantity;
+            ent->client->pers.inventory[it->id] += it->quantity;
     } else {
         it_ent = G_Spawn();
         it_ent->classname = it->classname;
@@ -399,7 +375,7 @@ void Cmd_Use_f(edict_t *ent)
         SV_ClientPrint(ent, PRINT_HIGH, "Item is not usable.\n");
         return;
     }
-    index = ITEM_INDEX(it);
+    index = it->id;
     if (!ent->client->pers.inventory[index]) {
         SV_ClientPrintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
         return;
@@ -432,7 +408,7 @@ void Cmd_Drop_f(edict_t *ent)
         SV_ClientPrint(ent, PRINT_HIGH, "Item is not droppable.\n");
         return;
     }
-    index = ITEM_INDEX(it);
+    index = it->id;
     if (!ent->client->pers.inventory[index]) {
         SV_ClientPrintf(ent, PRINT_HIGH, "Out of item: %s\n", s);
         return;
@@ -465,7 +441,7 @@ void Cmd_Inven_f(edict_t *ent)
     cl->showinventory = true;
 
     SV_WriteByte(svc_inventory);
-    for (i = 0 ; i < MAX_ITEMS ; i++) {
+    for (i = 0 ; i < ITEM_TOTAL ; i++) {
         SV_WriteShort(cl->pers.inventory[i]);
     }
     SV_Unicast(ent, true);
@@ -487,7 +463,7 @@ void Cmd_InvUse_f(edict_t *ent)
         return;
     }
 
-    it = &itemlist[ent->client->pers.selected_item];
+    it = GetItemByIndex(ent->client->pers.selected_item);
     if (!it->use) {
         SV_ClientPrint(ent, PRINT_HIGH, "Item is not usable.\n");
         return;
@@ -512,14 +488,14 @@ void Cmd_WeapPrev_f(edict_t *ent)
     if (!cl->pers.weapon)
         return;
 
-    selected_weapon = ITEM_INDEX(cl->pers.weapon);
+    selected_weapon = cl->pers.weapon->id;
 
     // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (selected_weapon + i) % MAX_ITEMS;
+    for (i = 1 ; i <= ITEM_TOTAL ; i++) {
+        index = (selected_weapon + i) % ITEM_TOTAL;
         if (!cl->pers.inventory[index])
             continue;
-        it = &itemlist[index];
+        it = GetItemByIndex(index);
         if (!it->use)
             continue;
         if (!(it->flags & IT_WEAPON))
@@ -547,14 +523,14 @@ void Cmd_WeapNext_f(edict_t *ent)
     if (!cl->pers.weapon)
         return;
 
-    selected_weapon = ITEM_INDEX(cl->pers.weapon);
+    selected_weapon = cl->pers.weapon->id;
 
     // scan  for the next valid one
-    for (i = 1 ; i <= MAX_ITEMS ; i++) {
-        index = (selected_weapon + MAX_ITEMS - i) % MAX_ITEMS;
+    for (i = 1 ; i <= ITEM_TOTAL ; i++) {
+        index = (selected_weapon + ITEM_TOTAL - i) % ITEM_TOTAL;
         if (!cl->pers.inventory[index])
             continue;
-        it = &itemlist[index];
+        it = GetItemByIndex(index);
         if (!it->use)
             continue;
         if (!(it->flags & IT_WEAPON))
@@ -581,10 +557,10 @@ void Cmd_WeapLast_f(edict_t *ent)
     if (!cl->pers.weapon || !cl->pers.lastweapon)
         return;
 
-    index = ITEM_INDEX(cl->pers.lastweapon);
+    index = cl->pers.lastweapon->id;
     if (!cl->pers.inventory[index])
         return;
-    it = &itemlist[index];
+    it = GetItemByIndex(index);
     if (!it->use)
         return;
     if (!(it->flags & IT_WEAPON))
@@ -608,7 +584,7 @@ void Cmd_InvDrop_f(edict_t *ent)
         return;
     }
 
-    it = &itemlist[ent->client->pers.selected_item];
+    it = GetItemByIndex(ent->client->pers.selected_item);
     if (!it->drop) {
         SV_ClientPrint(ent, PRINT_HIGH, "Item is not dropable.\n");
         return;

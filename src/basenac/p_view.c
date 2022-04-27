@@ -73,7 +73,6 @@ void P_DamageFeedback(edict_t *player)
     float   realcount, count, kick;
     vec3_t  v;
     int     r, l;
-    static  vec3_t  power_color = {0.0, 1.0, 0.0};
     static  vec3_t  acolor = {1.0, 1.0, 1.0};
     static  vec3_t  bcolor = {1.0, 0.0, 0.0};
 
@@ -87,7 +86,7 @@ void P_DamageFeedback(edict_t *player)
         client->ps.stats[STAT_FLASHES] |= 2;
 
     // total points of damage shot at the player this frame
-    count = (client->damage_blood + client->damage_armor + client->damage_parmor);
+    count = (client->damage_blood + client->damage_armor);
     if (count == 0)
         return;     // didn't take any damage
 
@@ -149,8 +148,6 @@ void P_DamageFeedback(edict_t *player)
     // the color of the blend will vary based on how much was absorbed
     // by different armors
     VectorClear(v);
-    if (client->damage_parmor)
-        VectorMA(v, (float)client->damage_parmor / realcount, power_color, v);
     if (client->damage_armor)
         VectorMA(v, (float)client->damage_armor / realcount,  acolor, v);
     if (client->damage_blood)
@@ -187,7 +184,6 @@ void P_DamageFeedback(edict_t *player)
     //
     client->damage_blood = 0;
     client->damage_armor = 0;
-    client->damage_parmor = 0;
     client->damage_knockback = 0;
 }
 
@@ -359,27 +355,21 @@ void SV_CalcBlend(edict_t *ent)
     if (ent->client->quad_time > level.time) {
         remaining = ent->client->quad_time - level.time;
         if (remaining == 3000)    // beginning to fade
-            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/damage2.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_QUAD_FADE), 1, ATTN_NORM, 0);
         if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(0, 0, 1, 0.08f, ent->client->ps.blend);
     } else if (ent->client->invincible_time > level.time) {
         remaining = ent->client->invincible_time - level.time;
         if (remaining == 3000)    // beginning to fade
-            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/protect2.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_PENT_FADE), 1, ATTN_NORM, 0);
         if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(1, 1, 0, 0.08f, ent->client->ps.blend);
     } else if (ent->client->enviro_time > level.time) {
         remaining = ent->client->enviro_time - level.time;
         if (remaining == 3000)    // beginning to fade
-            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/airout.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_BIOSUIT_FADE), 1, ATTN_NORM, 0);
         if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(0, 1, 0, 0.08f, ent->client->ps.blend);
-    } else if (ent->client->breather_time > level.time) {
-        remaining = ent->client->breather_time - level.time;
-        if (remaining == 3000)    // beginning to fade
-            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex("items/airout.wav"), 1, ATTN_NORM, 0);
-        if (remaining > 3000 || (remaining % 500) == 0)
-            SV_AddBlend(0.4f, 1, 0.4f, 0.04f, ent->client->ps.blend);
     }
 
     // add for damage
@@ -479,7 +469,6 @@ P_WorldEffects
 */
 void P_WorldEffects(void)
 {
-    bool        breather;
     bool        envirosuit;
     int         waterlevel, old_waterlevel;
 
@@ -492,7 +481,6 @@ void P_WorldEffects(void)
     old_waterlevel = current_client->old_waterlevel;
     current_client->old_waterlevel = waterlevel;
 
-    breather = current_client->breather_time > level.time;
     envirosuit = current_client->enviro_time > level.time;
 
     //
@@ -501,11 +489,11 @@ void P_WorldEffects(void)
     if (!old_waterlevel && waterlevel) {
         PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
         if (current_player->watertype & CONTENTS_LAVA)
-            SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex("player/lava_in.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_LAVA_ENTER), 1, ATTN_NORM, 0);
         else if (current_player->watertype & CONTENTS_SLIME)
-            SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_ENTER), 1, ATTN_NORM, 0);
         else if (current_player->watertype & CONTENTS_WATER)
-            SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex("player/watr_in.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_ENTER), 1, ATTN_NORM, 0);
         current_player->flags |= FL_INWATER;
 
         // clear damage_debounce, so the pain sound will play immediately
@@ -517,7 +505,7 @@ void P_WorldEffects(void)
     //
     if (old_waterlevel && ! waterlevel) {
         PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-        SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex("player/watr_out.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_EXIT), 1, ATTN_NORM, 0);
         current_player->flags &= ~FL_INWATER;
     }
 
@@ -525,7 +513,7 @@ void P_WorldEffects(void)
     // check for head just going under water
     //
     if (old_waterlevel != 3 && waterlevel == 3) {
-        SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex("player/watr_un.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(current_player, CHAN_BODY, SV_SoundIndex(ASSET_SOUND_WATER_UNDER), 1, ATTN_NORM, 0);
     }
 
     //
@@ -547,18 +535,8 @@ void P_WorldEffects(void)
     //
     if (waterlevel == 3) {
         // breather or envirosuit give air
-        if (breather || envirosuit) {
+        if (envirosuit) {
             current_player->air_finished_time = level.time + 10000;
-
-            if (((current_client->breather_time - level.time) % 2500) == 0) {
-                if (!current_client->breather_sound)
-                    SV_StartSound(current_player, CHAN_AUTO, SV_SoundIndex("player/u_breath1.wav"), 1, ATTN_NORM, 0);
-                else
-                    SV_StartSound(current_player, CHAN_AUTO, SV_SoundIndex("player/u_breath2.wav"), 1, ATTN_NORM, 0);
-                current_client->breather_sound ^= 1;
-                PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-                //FIXME: release a bubble?
-            }
         }
 
         // if out of air, start drowning
@@ -637,16 +615,6 @@ void G_SetClientEffects(edict_t *ent)
 
     if (ent->health <= 0 || level.intermission_time)
         return;
-
-    if (ent->powerarmor_time > level.time) {
-        pa_type = PowerArmorType(ent);
-        if (pa_type == POWER_ARMOR_SCREEN) {
-            ent->s.effects |= EF_POWERSCREEN;
-        } else if (pa_type == POWER_ARMOR_SHIELD) {
-            ent->s.effects |= EF_COLOR_SHELL;
-            ent->s.renderfx |= RF_SHELL_GREEN;
-        }
-    }
 
     if (ent->client->quad_time > level.time) {
         remaining = ent->client->quad_time - level.time;

@@ -75,13 +75,15 @@ void CL_RegisterTEntSounds(void)
     cl_sfx_spark6 = S_RegisterSound("world/spark6.wav");
     cl_sfx_spark7 = S_RegisterSound("world/spark7.wav");
     cl_sfx_railg = S_RegisterSound("weapons/railgf1a.wav");
-    cl_sfx_rockexp = S_RegisterSound("weapons/rocklx1a.wav");
-    cl_sfx_grenexp = S_RegisterSound("weapons/grenlx1a.wav");
-    cl_sfx_watrexp = S_RegisterSound("weapons/xpld_wat.wav");
+    cl_sfx_rockexp = S_RegisterSound(ASSET_SOUND_ROCKET_EXPLODE);
+    cl_sfx_grenexp = S_RegisterSound(ASSET_SOUND_GRENADE_EXPLODE);
+    cl_sfx_watrexp = S_RegisterSound(ASSET_SOUND_UNDERWATER_EXPLODE);
 
-    S_RegisterSound("player/land1.wav");
+    S_RegisterSound(ASSET_SOUND_PLAYER_LAND);
     S_RegisterSound("player/fall2.wav");
     S_RegisterSound("player/fall1.wav");
+    S_RegisterSound(ASSET_SOUND_ITEM_RESPAWN);
+    S_RegisterSound(ASSET_SOUND_TELEPORT);
 
     for (i = 0; i < 4; i++) {
         Q_snprintf(name, sizeof(name), "player/step%i.wav", i + 1);
@@ -111,7 +113,7 @@ void CL_RegisterTEntModels(void)
 	cl_mod_explosions[3] = R_RegisterModel("sprites/rocket_6.sp2");
     cl_mod_bfg_explo = R_RegisterModel("sprites/s_bfg2.sp2");
     cl_mod_powerscreen = R_RegisterModel("models/items/armor/effect/tris.md2");
-    cl_mod_laser = R_RegisterModel("models/objects/laser/tris.md2");
+    cl_mod_laser = R_RegisterModel(ASSET_MODEL_LASER);
     cl_mod_dmspot = R_RegisterModel("models/objects/dmspot/tris.md2");
 
     cl_mod_lightning = R_RegisterModel("models/proj/lightning/tris.md2");

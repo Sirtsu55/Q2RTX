@@ -31,11 +31,6 @@ typedef struct {
     fieldtype_t type;
 } spawn_field_t;
 
-void SP_item_health(edict_t *self);
-void SP_item_health_small(edict_t *self);
-void SP_item_health_large(edict_t *self);
-void SP_item_health_mega(edict_t *self);
-
 void SP_info_player_start(edict_t *ent);
 void SP_info_player_deathmatch(edict_t *ent);
 void SP_info_player_coop(edict_t *ent);
@@ -157,11 +152,6 @@ void SP_monster_fiend(edict_t *self);
 void SP_env_reverb(edict_t *ent);
 
 static const spawn_func_t spawn_funcs[] = {
-    {"item_health", SP_item_health},
-    {"item_health_small", SP_item_health_small},
-    {"item_health_large", SP_item_health_large},
-    {"item_health_mega", SP_item_health_mega},
-
     {"info_player_start", SP_info_player_start, ENT_PRIVATE},
     {"info_player_deathmatch", SP_info_player_deathmatch},
     {"info_player_coop", SP_info_player_coop, ENT_PRIVATE},
@@ -410,7 +400,8 @@ edict_t *ED_CallSpawn(edict_t *ent)
     }
 
     // check item spawn functions
-    for (i = 0, item = itemlist ; i < game.num_items ; i++, item++) {
+    for (i = ITEM_NULL + 1; i < ITEM_TOTAL; i++, item++) {
+        item = GetItemByIndex(i);
         if (!item->classname)
             continue;
         if (!strcmp(item->classname, ent->classname)) {
@@ -929,6 +920,8 @@ void SP_worldspawn(edict_t *ent)
     else
         SV_SetConfigString(CS_SKY, "unit1_");
 
+    SV_SetConfigString(CS_NUMITEMS, va("%i", ITEM_TOTAL));
+
     SV_SetConfigString(CS_SKYROTATE, va("%f", st.skyrotate));
 
     SV_SetConfigString(CS_SKYAXIS, va("%f %f %f",
@@ -963,20 +956,17 @@ void SP_worldspawn(edict_t *ent)
     // Level gravity change support
     level.gravity = sv_gravity.value;
 
-    snd_fry = SV_SoundIndex("player/fry.wav");  // standing in lava / slime
+    snd_fry = SV_SoundIndex(ASSET_SOUND_LAVA_FRYING);  // standing in lava / slime
 
-    PrecacheItem(FindItem("Axe"));
+    PrecacheItem(GetItemByIndex(ITEM_AXE));
 
-    SV_SoundIndex("player/lava1.wav");
-    SV_SoundIndex("player/lava2.wav");
+    SV_SoundIndex(ASSET_SOUND_MONSTER_FRY1);
+    SV_SoundIndex(ASSET_SOUND_MONSTER_FRY2);
 
     SV_SoundIndex("misc/pc_up.wav");
-    SV_SoundIndex("misc/talk1.wav");
+    SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE);
 
-    SV_SoundIndex("misc/udeath.wav");
-
-    // gibs
-    SV_SoundIndex("items/respawn1.wav");
+    SV_SoundIndex(ASSET_SOUND_GIB);
 
     // sexed sounds
     SV_SoundIndex("*death1.wav");
@@ -1017,32 +1007,24 @@ void SP_worldspawn(edict_t *ent)
     SV_SoundIndex("player/gasp1.wav");      // gasping for air
     SV_SoundIndex("player/gasp2.wav");      // head breaking surface, not gasping
 
-    SV_SoundIndex("player/watr_in.wav");    // feet hitting water
-    SV_SoundIndex("player/watr_out.wav");   // feet leaving water
+    SV_SoundIndex(ASSET_SOUND_WATER_ENTER);    // feet hitting water
+    SV_SoundIndex(ASSET_SOUND_WATER_EXIT);   // feet leaving water
 
-    SV_SoundIndex("player/watr_un.wav");    // head going underwater
+    SV_SoundIndex(ASSET_SOUND_WATER_UNDER);    // head going underwater
 
-    SV_SoundIndex("player/u_breath1.wav");
-    SV_SoundIndex("player/u_breath2.wav");
+    SV_SoundIndex(ASSET_SOUND_MONSTER_LAND);        // landing thud
+    SV_SoundIndex(ASSET_SOUND_WATER_IMPACT);      // landing splash
 
-    SV_SoundIndex("items/pkup.wav");        // bonus item pickup
-    SV_SoundIndex("world/land.wav");        // landing thud
-    SV_SoundIndex("misc/h2ohit1.wav");      // landing splash
+    SV_SoundIndex(ASSET_SOUND_QUAD_ACTIVATE);
+    SV_SoundIndex(ASSET_SOUND_PENT_ACTIVATE);
+    SV_SoundIndex(ASSET_SOUND_PENT_HIT);
+    SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO);
 
-    SV_SoundIndex("items/damage.wav");
-    SV_SoundIndex("items/protect.wav");
-    SV_SoundIndex("items/protect4.wav");
-    SV_SoundIndex("weapons/noammo.wav");
-
-    SV_SoundIndex("infantry/inflies1.wav");
-
-    sm_meat_index = SV_ModelIndex("models/objects/gibs/sm_meat/tris.md2");
-    SV_ModelIndex("models/objects/gibs/arm/tris.md2");
-    SV_ModelIndex("models/objects/gibs/bone/tris.md2");
-    SV_ModelIndex("models/objects/gibs/bone2/tris.md2");
-    SV_ModelIndex("models/objects/gibs/chest/tris.md2");
-    SV_ModelIndex("models/objects/gibs/skull/tris.md2");
-    SV_ModelIndex("models/objects/gibs/head2/tris.md2");
+    sm_meat_index = SV_ModelIndex(ASSET_MODEL_GIB_MEAT);
+    SV_ModelIndex(ASSET_MODEL_GIB_BONE);
+    SV_ModelIndex(ASSET_MODEL_GIB_CHEST);
+    SV_ModelIndex(ASSET_MODEL_GIB_SKULL);
+    SV_ModelIndex(ASSET_MODEL_GIB_HEAD);
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.

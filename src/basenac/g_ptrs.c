@@ -397,8 +397,6 @@ extern void func_train_find(void);
 extern void func_wall_use(void);
 extern void G_FreeEdict(void);
 extern void gib_die(void);
-extern void gib_think(void);
-extern void gib_touch(void);
 extern void gladiator_attack(void);
 extern void gladiator_die(void);
 extern void gladiator_idle(void);
@@ -659,7 +657,6 @@ const save_ptr_t save_ptrs[] = {
 { P_think, func_timer_think },
 { P_think, func_train_find },
 { P_think, G_FreeEdict },
-{ P_think, gib_think },
 { P_think, Grenade_Explode },
 { P_think, hover_deadthink },
 { P_think, M_droptofloor },
@@ -718,7 +715,6 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, fiend_touch },
 { P_touch, flare_touch },
 { P_touch, func_object_touch },
-{ P_touch, gib_touch },
 { P_touch, Grenade_Touch },
 { P_touch, hurt_touch },
 { P_touch, misc_viper_bomb_touch },

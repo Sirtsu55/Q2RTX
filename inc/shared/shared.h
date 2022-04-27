@@ -1511,24 +1511,27 @@ typedef enum {
 // the server to all connected clients.
 // Each config string can be at most MAX_QPATH characters.
 //
-#define CS_NAME             0
-#define CS_CDTRACK          1
-#define CS_SKY              2
-#define CS_SKYAXIS          3       // %f %f %f format
-#define CS_SKYROTATE        4
-#define CS_STATUSBAR        5       // display program string
-
-#define CS_MAXCLIENTS       30
-#define CS_MAPCHECKSUM      31      // for catching cheater maps
-
-#define CS_MODELS           32
-#define CS_SOUNDS           (CS_MODELS+MAX_MODELS)
-#define CS_IMAGES           (CS_SOUNDS+MAX_SOUNDS)
-#define CS_LIGHTS           (CS_IMAGES+MAX_IMAGES)
-#define CS_ITEMS            (CS_LIGHTS+MAX_LIGHTSTYLES)
-#define CS_PLAYERSKINS      (CS_ITEMS+MAX_ITEMS)
-#define CS_GENERAL          (CS_PLAYERSKINS+MAX_CLIENTS)
-#define MAX_CONFIGSTRINGS   (CS_GENERAL+MAX_GENERAL)
+enum {
+    CS_NAME,
+    CS_CDTRACK,
+    CS_SKY,
+    CS_SKYAXIS,       // %f %f %f format
+    CS_SKYROTATE,
+    CS_NUMITEMS,
+    CS_STATUSBAR,       // display program string
+    
+    CS_MAXCLIENTS       = 32,
+    CS_MAPCHECKSUM,      // for catching out of date maps
+    
+    CS_MODELS,
+    CS_SOUNDS           = (CS_MODELS+MAX_MODELS),
+    CS_IMAGES           = (CS_SOUNDS+MAX_SOUNDS),
+    CS_LIGHTS           = (CS_IMAGES+MAX_IMAGES),
+    CS_ITEMS            = (CS_LIGHTS+MAX_LIGHTSTYLES),
+    CS_PLAYERSKINS      = (CS_ITEMS+MAX_ITEMS),
+    CS_GENERAL          = (CS_PLAYERSKINS+MAX_CLIENTS),
+    MAX_CONFIGSTRINGS   = (CS_GENERAL+MAX_GENERAL)
+};
 
 // CS_STATUSBAR and CS_GENERAL are allowed to overflow
 static inline size_t CS_SIZE(uint32_t cs)
@@ -1748,5 +1751,7 @@ static void StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t veloci
     if (copy_primal)
         VectorCopy(primal_velocity, velocity);
 }
+
+#include "assets.h"
 
 #endif // SHARED_H

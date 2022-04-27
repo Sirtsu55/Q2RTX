@@ -370,12 +370,12 @@ void berserk_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
     int     n;
 
     if (self->health <= self->gib_health) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
-            ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
+        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
         self->deadflag = DEAD_DEAD;
         return;
     }

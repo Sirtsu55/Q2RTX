@@ -49,6 +49,7 @@ typedef struct {
 #define L(name) _F(F_LSTRING, name)
 #define V(name) _F(F_VECTOR, name)
 #define T(name) _F(F_ITEM, name)
+#define TI(name) _F(F_ITEM_ID, name)
 #define E(name) _F(F_EDICT, name)
 #define P(name, type) _FA(F_POINTER, name, type)
 #define I64A(name, size) _FA(F_INT64, name, size)
@@ -146,8 +147,6 @@ static const save_field_t entityfields[] = {
     I(gib_health),
     I(deadflag),
     I64(show_hostile_time),
-
-    I64(powerarmor_time),
 
     L(map),
 
@@ -248,9 +247,6 @@ static const save_field_t entityfields[] = {
     I64(monsterinfo.idle_time),
     I(monsterinfo.linkcount),
 
-    I(monsterinfo.power_armor_type),
-    I(monsterinfo.power_armor_power),
-
     // Paril - entity animation stuff
     S(anim.target),
     I(anim.start),
@@ -306,8 +302,6 @@ static const save_field_t levelfields[] = {
 
     I(body_que),
 
-    I(power_cubes),
-
     F(gravity),
     I(default_reverb),
     E(reverb_entities),
@@ -358,7 +352,7 @@ static const save_field_t clientfields[] = {
     I(pers.max_health),
     I(pers.savedFlags),
 
-    I(pers.selected_item),
+    TI(pers.selected_item),
     IA(pers.inventory, MAX_ITEMS),
 
     I(pers.max_nails),
@@ -369,7 +363,6 @@ static const save_field_t clientfields[] = {
     T(pers.weapon),
     T(pers.lastweapon),
 
-    I(pers.power_cubes),
     I(pers.score),
 
     I(pers.game_helpchanged),
@@ -382,12 +375,11 @@ static const save_field_t clientfields[] = {
     O(showhelp),
     O(showhelpicon),
 
-    I(ammo_index),
+    TI(ammo_index),
 
     T(newweapon),
 
     I(damage_armor),
-    I(damage_parmor),
     I(damage_blood),
     I(damage_knockback),
     V(damage_from),
@@ -420,10 +412,8 @@ static const save_field_t clientfields[] = {
     // powerup timers
     I64(quad_time),
     I64(invincible_time),
-    I64(breather_time),
     I64(enviro_time),
 
-    I(silencer_shots),
     I(weapon_sound),
 
     I64(pickup_msg_time),
@@ -440,8 +430,6 @@ static const save_field_t gamefields[] = {
     I(maxclients),
 
     I(serverflags),
-
-    I(num_items),
 
     O(autosaved),
 
@@ -547,6 +535,16 @@ static void write_pointer(FILE *f, void *p, ptr_type_t type)
     Com_Errorf(ERR_DROP, "%s: unknown pointer: %p", __func__, p);
 }
 
+static void write_item(FILE *fp, const gitem_t *item)
+{
+    if (!item || item->id == ITEM_NULL || !item->classname) {
+        write_int(fp, -1);
+        return;
+    }
+
+    write_string(fp, item->classname);
+}
+
 static void write_field(FILE *f, const save_field_t *field, void *base)
 {
     void *p = (byte *)base + field->ofs;
@@ -594,7 +592,10 @@ static void write_field(FILE *f, const save_field_t *field, void *base)
         write_index(f, *(void **)p, sizeof(gclient_t), game.clients, game.maxclients - 1);
         break;
     case F_ITEM:
-        write_index(f, *(void **)p, sizeof(gitem_t), itemlist, game.num_items - 1);
+        write_item(f, *(gitem_t **)p);
+        break;
+    case F_ITEM_ID:
+        write_item(f, GetItemByIndex(*(gitem_id_t *)p));
         break;
 
     case F_POINTER:
@@ -669,7 +670,6 @@ static float read_float(FILE *f)
     return v;
 }
 
-
 static char *read_string(FILE *f)
 {
     int len;
@@ -704,6 +704,26 @@ static void read_zstring(FILE *f, char *s, size_t size)
 
     read_data(s, len, f);
     s[len] = 0;
+}
+
+static gitem_t *read_item(FILE *f)
+{
+    int len = read_int(f);
+
+    if (len == -1) {
+        return NULL;
+    }
+
+    static char item_name[256];
+
+    if (len >= q_countof(item_name) - 1) {
+        Com_Errorf(ERR_DROP, "%s: bad length", __func__);
+    }
+
+    read_data(&item_name, len, f);
+    item_name[len] = 0;
+
+    return FindItemByClassname(item_name);
 }
 
 static void read_vector(FILE *f, vec_t *v)
@@ -803,8 +823,13 @@ static void read_field(FILE *f, const save_field_t *field, void *base)
         *(gclient_t **)p = read_index(f, sizeof(gclient_t), game.clients, game.maxclients - 1);
         break;
     case F_ITEM:
-        *(gitem_t **)p = read_index(f, sizeof(gitem_t), itemlist, game.num_items - 1);
+        *(gitem_t **)p = read_item(f);
         break;
+    case F_ITEM_ID: {
+        gitem_t *item = read_item(f);
+        *(gitem_id_t *)p = item ? item->id : 0;
+        break;
+    }
 
     case F_POINTER:
         *(void **)p = read_pointer(f, field->size);

@@ -105,7 +105,8 @@ void fiend_run(edict_t *self)
 void fiend_attack_claw(edict_t *self)
 {
     vec3_t  aim = {self->monsterinfo.melee_distance, 0, 0};
-    fire_hit(self, aim, 25, 5);
+    if (fire_hit(self, aim, 25, 5))
+        SV_StartSound(self, CHAN_VOICE, sound_hit, 1, ATTN_NORM, 0);
 }
 
 mmove_t fiend_move_attack_claw = {
@@ -423,12 +424,12 @@ void fiend_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     int     n;
 
     if (self->health <= self->gib_health) {
-        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex("misc/udeath.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
         for (n = 0; n < 2; n++)
-            ThrowGib(self, "models/objects/gibs/bone/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
         for (n = 0; n < 4; n++)
-            ThrowGib(self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
-        ThrowHead(self, "models/objects/gibs/head2/tris.md2", damage, GIB_ORGANIC);
+            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
+        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -453,7 +454,7 @@ void fiend_load(edict_t *self)
     if (fiend_inititalized)
         return;
 
-    m_iqm_t *iqm = M_InitializeIQM("models/monsters/fiend/fiend.iqm");
+    m_iqm_t *iqm = M_InitializeIQM(ASSET_MODEL_FIEND);
 
     M_SetupIQMDists(iqm, (mmove_t *[]) {
         &fiend_move_stand, &fiend_move_walk, &fiend_move_run1, /*&fiend_move_leap,*/ &fiend_move_pain,
@@ -475,15 +476,15 @@ void SP_monster_fiend(edict_t *self)
     }
 
     // pre-caches
-    sound_pain  = SV_SoundIndex("nac_fiend/dpain1.wav");
-    sound_die   = SV_SoundIndex("nac_fiend/ddeath.wav");
-    sound_idle  = SV_SoundIndex("nac_fiend/idle1.wav");
-    sound_hit   = SV_SoundIndex("nac_fiend/dhit2.wav");
-    sound_jump  = SV_SoundIndex("nac_fiend/djump.wav");
-    sound_land  = SV_SoundIndex("nac_fiend/dland2.wav");
-    sound_sight = SV_SoundIndex("nac_fiend/dsight.wav");
+    sound_pain  = SV_SoundIndex(ASSET_SOUND_FIEND_PAIN);
+    sound_die   = SV_SoundIndex(ASSET_SOUND_FIEND_DIE);
+    sound_idle  = SV_SoundIndex(ASSET_SOUND_FIEND_IDLE);
+    sound_hit   = SV_SoundIndex(ASSET_SOUND_FIEND_HIT);
+    sound_jump  = SV_SoundIndex(ASSET_SOUND_FIEND_JUMP);
+    sound_land  = SV_SoundIndex(ASSET_SOUND_FIEND_LAND);
+    sound_sight = SV_SoundIndex(ASSET_SOUND_FIEND_SIGHT);
 
-    self->s.modelindex = SV_ModelIndex("models/monsters/fiend/fiend.iqm");
+    self->s.modelindex = SV_ModelIndex(ASSET_MODEL_FIEND);
     VectorSet(self->mins, -16, -16, -0);
     VectorSet(self->maxs, 16, 16, 56);
     self->movetype = MOVETYPE_STEP;

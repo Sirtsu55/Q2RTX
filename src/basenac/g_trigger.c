@@ -110,11 +110,9 @@ void trigger_enable(edict_t *self, edict_t *other, edict_t *activator)
 void SP_trigger_multiple(edict_t *ent)
 {
     if (ent->sounds == 1)
-        ent->noise_index = SV_SoundIndex("misc/secret.wav");
+        ent->noise_index = SV_SoundIndex(ASSET_SOUND_SECRET_FOUND);
     else if (ent->sounds == 2)
-        ent->noise_index = SV_SoundIndex("misc/talk.wav");
-    else if (ent->sounds == 3)
-        ent->noise_index = SV_SoundIndex("misc/trigger1.wav");
+        ent->noise_index = SV_SoundIndex(ASSET_SOUND_CHAT);
 
     if (!ent->wait)
         ent->wait = 0.2f;
@@ -211,53 +209,35 @@ Use "item" to specify the required key, for example "key_data_cd"
 */
 void trigger_key_use(edict_t *self, edict_t *other, edict_t *activator)
 {
-    int         index;
-
     if (!self->item)
         return;
     if (!activator->client)
         return;
 
-    index = ITEM_INDEX(self->item);
+    gitem_id_t index = self->item->id;
+
     if (!activator->client->pers.inventory[index]) {
         if (level.time < self->touch_debounce_time)
             return;
         self->touch_debounce_time = level.time + 5000;
         SV_CenterPrintf(activator, "You need the %s", self->item->pickup_name);
-        SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/keytry.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_KEY_TRY), 1, ATTN_NORM, 0);
         return;
     }
 
-    SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/keyuse.wav"), 1, ATTN_NORM, 0);
+    SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_KEY_USE), 1, ATTN_NORM, 0);
     if (coop.integer) {
         int     player;
         edict_t *ent;
 
-        if (strcmp(self->item->classname, "key_power_cube") == 0) {
-            int cube;
-
-            for (cube = 0; cube < 8; cube++)
-                if (activator->client->pers.power_cubes & (1 << cube))
-                    break;
-            for (player = 1; player <= game.maxclients; player++) {
-                ent = &globals.entities[player];
-                if (!ent->inuse)
-                    continue;
-                if (!ent->client)
-                    continue;
-                if (ent->client->pers.power_cubes & (1 << cube)) {
-                    ent->client->pers.inventory[index]--;
-                    ent->client->pers.power_cubes &= ~(1 << cube);
-                }
-            }
-        } else {
-            for (player = 1; player <= game.maxclients; player++) {
-                ent = &globals.entities[player];
-                if (!ent->inuse)
-                    continue;
-                if (!ent->client)
-                    continue;
-                ent->client->pers.inventory[index] = 0;
+        for (player = 1; player <= game.maxclients; player++) {
+            ent = &globals.entities[player];
+            if (!ent->inuse)
+                continue;
+            if (!ent->client)
+                continue;
+            if (ent->client->pers.inventory[index]) {
+                ent->client->pers.inventory[index]--;
             }
         }
     } else {
@@ -287,8 +267,8 @@ void SP_trigger_key(edict_t *self)
         return;
     }
 
-    SV_SoundIndex("misc/keytry.wav");
-    SV_SoundIndex("misc/keyuse.wav");
+    SV_SoundIndex(ASSET_SOUND_KEY_TRY);
+    SV_SoundIndex(ASSET_SOUND_KEY_USE);
 
     self->use = trigger_key_use;
 }
@@ -320,14 +300,14 @@ void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
     if (self->count) {
         if (!(self->spawnflags & 1)) {
             SV_CenterPrintf(activator, "%i more to go...", self->count);
-            SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+            SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE), 1, ATTN_NORM, 0);
         }
         return;
     }
 
     if (!(self->spawnflags & 1)) {
         SV_CenterPrint(activator, "Sequence completed!");
-        SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex("misc/talk1.wav"), 1, ATTN_NORM, 0);
+        SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE), 1, ATTN_NORM, 0);
     }
     self->activator = activator;
     multi_trigger(self);
@@ -421,7 +401,7 @@ void SP_trigger_push(edict_t *self)
 {
     InitTrigger(self);
     if (!(self->spawnflags & PUSH_SILENT))
-        windsound = SV_SoundIndex("misc/windfly.wav");
+        windsound = SV_SoundIndex(ASSET_SOUND_PUSH_WIND);
 
     self->touch = trigger_push_touch;
     if (!self->speed)
@@ -503,7 +483,9 @@ void SP_trigger_hurt(edict_t *self)
 {
     InitTrigger(self);
 
-    self->noise_index = SV_SoundIndex("world/electro.wav");
+    if (!(self->spawnflags & 4)) {
+        self->noise_index = SV_SoundIndex(ASSET_SOUND_HURT_BURN);
+    }
     self->touch = hurt_touch;
 
     if (!self->dmg)

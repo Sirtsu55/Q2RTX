@@ -86,7 +86,7 @@ static void Axe_Attack(edict_t *ent, int damage)
         if (tr.ent && tr.ent->takedamage)
         {
             T_Damage(tr.ent, ent, ent, forward, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
-            SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex("makron/brain1.wav"), 1.f, ATTN_NORM, 0);
+            SV_StartSound(ent, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_AXE_HIT), 1.f, ATTN_NORM, 0);
         }
         else if (!(tr.surface->flags & SURF_SKY))
         {
