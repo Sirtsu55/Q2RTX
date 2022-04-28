@@ -1049,7 +1049,7 @@ Called by worldspawn
 */
 void SetItemNames(void)
 {
-    for (gitem_id_t i = 0 ; i < ITEM_TOTAL ; i++) {
+    for (gitem_id_t i = 1 ; i < ITEM_TOTAL ; i++) {
         SV_SetConfigString(CS_ITEMS + i, itemlist[i].pickup_name);
     }
 }
@@ -1081,7 +1081,7 @@ gitem_t *FindItemByClassname(char *classname)
 {
     gitem_t *it = itemlist;
 
-    for (gitem_id_t i = 0; i < ITEM_TOTAL; i++, it++) {
+    for (gitem_id_t i = 1; i < ITEM_TOTAL; i++, it++) {
         if (!it->classname)
             continue;
         if (!Q_stricmp(it->classname, classname))
@@ -1101,7 +1101,7 @@ gitem_t *FindItem(char *pickup_name)
 {
     gitem_t *it = itemlist;
 
-    for (gitem_id_t i = 0 ; i < ITEM_TOTAL; i++, it++) {
+    for (gitem_id_t i = 1 ; i < ITEM_TOTAL; i++, it++) {
         if (!it->pickup_name)
             continue;
         if (!Q_stricmp(it->pickup_name, pickup_name))

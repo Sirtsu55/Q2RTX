@@ -464,6 +464,7 @@ typedef struct {
     void    (*aifunc)(edict_t *self, float dist);
     float   dist;
     void    (*thinkfunc)(edict_t *self);
+    vec3_t  translate;
 } mframe_t;
 
 typedef struct {

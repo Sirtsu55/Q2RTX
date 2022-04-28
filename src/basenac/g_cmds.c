@@ -174,7 +174,7 @@ void Cmd_Give_f(edict_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "weapons") == 0) {
-        for (i = 0 ; i < ITEM_TOTAL ; i++) {
+        for (i = 1 ; i < ITEM_TOTAL ; i++) {
             it = GetItemByIndex(i);
             if (!it->pickup)
                 continue;
@@ -187,7 +187,7 @@ void Cmd_Give_f(edict_t *ent)
     }
 
     if (give_all || Q_stricmp(name, "ammo") == 0) {
-        for (i = 0 ; i < ITEM_TOTAL ; i++) {
+        for (i = 1 ; i < ITEM_TOTAL ; i++) {
             it = GetItemByIndex(i);
             if (!it->pickup)
                 continue;
@@ -211,7 +211,7 @@ void Cmd_Give_f(edict_t *ent)
     }
 
     if (give_all) {
-        for (i = 0 ; i < ITEM_TOTAL; i++) {
+        for (i = 1 ; i < ITEM_TOTAL; i++) {
             it = GetItemByIndex(i);
             if (!it->pickup)
                 continue;

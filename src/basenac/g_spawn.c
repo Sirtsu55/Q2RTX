@@ -149,6 +149,7 @@ void SP_model_spawn(edict_t *ent);
 void SP_misc_property_swap(edict_t *ent);
 void SP_monster_knight(edict_t *self);
 void SP_monster_fiend(edict_t *self);
+void SP_monster_vore(edict_t *self);
 void SP_env_reverb(edict_t *ent);
 void SP_target_spotlight(edict_t *self);
 
@@ -276,6 +277,7 @@ static const spawn_func_t spawn_funcs[] = {
     // NAC
     { "monster_knight", SP_monster_knight },
     { "monster_fiend", SP_monster_fiend },
+    { "monster_vore", SP_monster_vore },
     { "env_reverb", SP_env_reverb, ENT_PRIVATE },
 
     {NULL, NULL}
@@ -407,7 +409,7 @@ edict_t *ED_CallSpawn(edict_t *ent)
     }
 
     // check item spawn functions
-    for (i = ITEM_NULL + 1; i < ITEM_TOTAL; i++, item++) {
+    for (i = 1; i < ITEM_TOTAL; i++, item++) {
         item = GetItemByIndex(i);
         if (!item->classname)
             continue;

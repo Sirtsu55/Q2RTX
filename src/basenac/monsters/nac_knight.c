@@ -295,6 +295,7 @@ void SP_monster_knight(edict_t *self)
     VectorSet(self->maxs, 16, 16, 56);
     self->movetype = MOVETYPE_STEP;
     self->solid = SOLID_BBOX;
+    self->viewheight = 48;
 
     self->health = 90;
     self->gib_health = -60;

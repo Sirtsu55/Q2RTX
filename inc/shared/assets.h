@@ -176,3 +176,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_FIEND_JUMP "nac_fiend/djump.wav"
 #define ASSET_SOUND_FIEND_LAND "nac_fiend/dland2.wav"
 #define ASSET_SOUND_FIEND_SIGHT "nac_fiend/dsight.wav"
+
+
+// Vore
+#define ASSET_MODEL_VORE "models/monsters/vore/vore.iqm"
+#define ASSET_MODEL_VORE_BALL "models/monsters/vore/vore_ball.iqm"
+#define ASSET_SOUND_VORE_BALL_CHASE "world/amb10.wav"
+#define ASSET_SOUND_VORE_HURT "world/amb1.wav"
+#define ASSET_SOUND_VORE_DEATH "world/amb1.wav"
+#define ASSET_SOUND_VORE_IDLE "world/amb1.wav"
+#define ASSET_SOUND_VORE_ATTACK "world/amb1.wav"
+#define ASSET_SOUND_VORE_ATTACK2 "world/amb1.wav"
+#define ASSET_SOUND_VORE_SIGHT "world/amb1.wav"

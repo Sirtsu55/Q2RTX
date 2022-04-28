@@ -262,6 +262,12 @@ extern int tank_move_run;
 extern int tank_move_stand;
 extern int tank_move_start_run;
 extern int tank_move_walk;
+extern int vore_move_attack;
+extern int vore_move_death;
+extern int vore_move_pain;
+extern int vore_move_run;
+extern int vore_move_stand;
+extern int vore_move_walk;
 extern void AngleMove_Begin(void);
 extern void AngleMove_Done(void);
 extern void AngleMove_Final(void);
@@ -630,6 +636,19 @@ extern void use_target_spawner(void);
 extern void Use_Target_Speaker(void);
 extern void use_target_splash(void);
 extern void Use_Target_Tent(void);
+extern void vore_attack(void);
+extern void vore_ball_chase(void);
+extern void vore_ball_think(void);
+extern void vore_ball_touch(void);
+extern void vore_die(void);
+extern void vore_load(void);
+extern void vore_pain(void);
+extern void vore_run(void);
+extern void vore_search(void);
+extern void vore_search(void);
+extern void vore_sight(void);
+extern void vore_stand(void);
+extern void vore_walk(void);
 extern void walkmonster_start_go(void);
 const save_ptr_t save_ptrs[] = {
 { P_prethink, misc_viper_bomb_prethink },
@@ -698,6 +717,8 @@ const save_ptr_t save_ptrs[] = {
 { P_think, turret_breach_think },
 { P_think, turret_driver_link },
 { P_think, turret_driver_think },
+{ P_think, vore_ball_chase },
+{ P_think, vore_ball_think },
 { P_think, walkmonster_start_go },
 { P_blocked, door_blocked },
 { P_blocked, door_secret_blocked },
@@ -732,6 +753,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, trigger_gravity_touch },
 { P_touch, trigger_monsterjump_touch },
 { P_touch, trigger_push_touch },
+{ P_touch, vore_ball_touch },
 { P_use, button_use },
 { P_use, commander_body_use },
 { P_use, door_secret_use },
@@ -808,6 +830,7 @@ const save_ptr_t save_ptrs[] = {
 { P_pain, soldier_pain },
 { P_pain, supertank_pain },
 { P_pain, tank_pain },
+{ P_pain, vore_pain },
 { P_die, barrel_delay },
 { P_die, berserk_die },
 { P_die, body_die },
@@ -841,6 +864,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, supertank_die },
 { P_die, tank_die },
 { P_die, turret_driver_die },
+{ P_die, vore_die },
 { P_moveinfo_endfunc, button_done },
 { P_moveinfo_endfunc, button_wait },
 { P_moveinfo_endfunc, door_hit_bottom },
@@ -1114,6 +1138,12 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &tank_move_stand },
 { P_monsterinfo_currentmove, &tank_move_start_run },
 { P_monsterinfo_currentmove, &tank_move_walk },
+{ P_monsterinfo_currentmove, &vore_move_attack },
+{ P_monsterinfo_currentmove, &vore_move_death },
+{ P_monsterinfo_currentmove, &vore_move_pain },
+{ P_monsterinfo_currentmove, &vore_move_run },
+{ P_monsterinfo_currentmove, &vore_move_stand },
+{ P_monsterinfo_currentmove, &vore_move_walk },
 { P_monsterinfo_stand, berserk_stand },
 { P_monsterinfo_stand, boss2_stand },
 { P_monsterinfo_stand, brain_stand },
@@ -1136,6 +1166,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, soldier_stand },
 { P_monsterinfo_stand, supertank_stand },
 { P_monsterinfo_stand, tank_stand },
+{ P_monsterinfo_stand, vore_stand },
 { P_monsterinfo_idle, brain_idle },
 { P_monsterinfo_idle, fiend_search },
 { P_monsterinfo_idle, floater_idle },
@@ -1147,6 +1178,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_idle, mutant_idle },
 { P_monsterinfo_idle, parasite_idle },
 { P_monsterinfo_idle, tank_idle },
+{ P_monsterinfo_idle, vore_search },
 { P_monsterinfo_search, berserk_search },
 { P_monsterinfo_search, boss2_search },
 { P_monsterinfo_search, brain_search },
@@ -1159,6 +1191,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_search, medic_search },
 { P_monsterinfo_search, mutant_search },
 { P_monsterinfo_search, supertank_search },
+{ P_monsterinfo_search, vore_search },
 { P_monsterinfo_walk, berserk_walk },
 { P_monsterinfo_walk, boss2_walk },
 { P_monsterinfo_walk, brain_walk },
@@ -1181,6 +1214,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_walk, soldier_walk },
 { P_monsterinfo_walk, supertank_walk },
 { P_monsterinfo_walk, tank_walk },
+{ P_monsterinfo_walk, vore_walk },
 { P_monsterinfo_run, berserk_run },
 { P_monsterinfo_run, boss2_run },
 { P_monsterinfo_run, brain_run },
@@ -1203,6 +1237,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_run, soldier_run },
 { P_monsterinfo_run, supertank_run },
 { P_monsterinfo_run, tank_run },
+{ P_monsterinfo_run, vore_run },
 { P_monsterinfo_dodge, brain_dodge },
 { P_monsterinfo_dodge, chick_dodge },
 { P_monsterinfo_dodge, gunner_dodge },
@@ -1227,6 +1262,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_attack, soldier_attack },
 { P_monsterinfo_attack, supertank_attack },
 { P_monsterinfo_attack, tank_attack },
+{ P_monsterinfo_attack, vore_attack },
 { P_monsterinfo_melee, berserk_melee },
 { P_monsterinfo_melee, brain_melee },
 { P_monsterinfo_melee, chick_melee },
@@ -1255,6 +1291,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_sight, parasite_sight },
 { P_monsterinfo_sight, soldier_sight },
 { P_monsterinfo_sight, tank_sight },
+{ P_monsterinfo_sight, vore_sight },
 { P_monsterinfo_checkattack, Boss2_CheckAttack },
 { P_monsterinfo_checkattack, Jorg_CheckAttack },
 { P_monsterinfo_checkattack, M_CheckAttack },
@@ -1263,5 +1300,6 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, mutant_checkattack },
 { P_monsterinfo_load, fiend_load },
 { P_monsterinfo_load, knight_load },
+{ P_monsterinfo_load, vore_load },
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);

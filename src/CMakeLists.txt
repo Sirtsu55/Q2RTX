@@ -61,6 +61,7 @@ SET(SRC_BASENAC
 	basenac/monsters/nac_monster.c
 	basenac/monsters/nac_knight.c
 	basenac/monsters/nac_fiend.c
+	basenac/monsters/nac_vore.c
 	basenac/entities/nac_env_reverb.c
 )
 

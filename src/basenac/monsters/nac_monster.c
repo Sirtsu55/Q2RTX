@@ -50,7 +50,7 @@ m_iqm_t *M_InitializeIQM(const char *name)
 
     for (uint32_t i = 0; i < iqm.model.num_joints; i++)
     {
-        if (Q_strcasecmp(iqm.model.jointNames[i], "root") == 0)
+        if (strlen(iqm.model.jointNames[i]) >= 4 && Q_strcasecmp(iqm.model.jointNames[i] + strlen(iqm.model.jointNames[i]) - 4, "root") == 0)
         {
             iqm.root_id = i;
             break;
@@ -77,11 +77,10 @@ void M_SetupIQMDists(const m_iqm_t *iqm, mmove_t *animations[])
 
         for (int32_t i = (*anim)->firstframe; i < (*anim)->lastframe; i++, frame++)
         {
-            vec3_t d;
             const iqm_transform_t *pose = &iqm->model.poses[iqm->root_id + (i * iqm->model.num_poses)];
-            VectorSubtract(offsetFrom, pose->translate, d);
+            VectorSubtract(offsetFrom, pose->translate, frame->translate);
             VectorCopy(pose->translate, offsetFrom);
-            frame->dist = VectorLength(d);
+            frame->dist = VectorLength(frame->translate);
         }
     }
 }

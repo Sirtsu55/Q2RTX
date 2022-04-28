@@ -507,7 +507,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
         // clear inventory
         // this is kind of ugly, but it's how we want to handle keys in coop
-        for (n = 0; n < ITEM_TOTAL; n++) {
+        for (n = 1; n < ITEM_TOTAL; n++) {
             if (coop.integer && GetItemByIndex(n)->flags & IT_KEY)
                 self->client->resp.coop_respawn.inventory[n] = self->client->pers.inventory[n];
             self->client->pers.inventory[n] = 0;

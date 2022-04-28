@@ -114,7 +114,7 @@ extern int active_buffers;
 
 extern bool s_active;
 
-#define MAX_CHANNELS            32
+#define MAX_CHANNELS            128
 extern  channel_t   channels[MAX_CHANNELS];
 extern  int         s_numchannels;
 

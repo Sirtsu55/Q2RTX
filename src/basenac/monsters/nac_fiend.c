@@ -466,7 +466,7 @@ void fiend_load(edict_t *self)
     fiend_inititalized = true;
 }
 
-/*QUAKED monster_knight (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
+/*QUAKED monster_vore (1 .5 0) (-16 -16 -24) (16 16 32) Ambush Trigger_Spawn Sight
 */
 void SP_monster_fiend(edict_t *self)
 {
@@ -495,6 +495,7 @@ void SP_monster_fiend(edict_t *self)
     self->mass = 145;
     self->monsterinfo.aiflags |= AI_HIGH_TICK_RATE;
     self->yaw_speed = 40;
+    self->viewheight = 48;
 
     self->pain = fiend_pain;
     self->die = fiend_die;
