@@ -68,20 +68,28 @@ void M_FreeIQM(m_iqm_t *iqm)
     Z_FreeTags(TAG_MODEL);
 }
 
-void M_SetupIQMDists(const m_iqm_t *iqm, mmove_t *animations[])
+void M_SetupIQMAnimation(const m_iqm_t *iqm, mmove_t *anim, bool absolute)
 {
-    for (mmove_t **anim = animations; *anim; anim++)
-    {
-        vec3_t offsetFrom = { 0, 0, 0 };
-        mframe_t *frame = (*anim)->frame;
+    vec3_t offsetFrom = { 0, 0, 0 };
+    mframe_t *frame = anim->frame;
 
-        for (int32_t i = (*anim)->firstframe; i < (*anim)->lastframe; i++, frame++)
-        {
-            const iqm_transform_t *pose = &iqm->model.poses[iqm->root_id + (i * iqm->model.num_poses)];
+    for (int32_t i = anim->firstframe; i < anim->lastframe; i++, frame++)
+    {
+        const iqm_transform_t *pose = &iqm->model.poses[iqm->root_id + (i * iqm->model.num_poses)];
+        if (absolute) {
+            VectorCopy(pose->translate, frame->translate);
+        } else {
             VectorSubtract(offsetFrom, pose->translate, frame->translate);
             VectorCopy(pose->translate, offsetFrom);
             frame->dist = VectorLength(frame->translate);
         }
+    }
+}
+
+void M_SetupIQMAnimations(const m_iqm_t *iqm, mmove_t *animations[])
+{
+    for (mmove_t **anim = animations; *anim; anim++) {
+        M_SetupIQMAnimation(iqm, *anim, false);
     }
 }
 

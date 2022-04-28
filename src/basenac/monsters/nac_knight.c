@@ -263,7 +263,7 @@ void knight_load(edict_t *self)
 
     m_iqm_t *iqm = M_InitializeIQM(ASSET_MODEL_KNIGHT);
 
-    M_SetupIQMDists(iqm, (mmove_t *[]) {
+    M_SetupIQMAnimations(iqm, (mmove_t *[]) {
         &knight_move_stand, &knight_move_walk, &knight_move_run1, &knight_move_attack_spike,
         &knight_move_attack, &knight_move_pain1, &knight_move_pain2, &knight_move_death1,
         &knight_move_death2, NULL

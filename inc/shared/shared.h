@@ -353,7 +353,7 @@ static inline void Matrix34Multiply(const float *a, const float *b, float *out)
     out[11] = a[8] * b[3] + a[9] * b[7] + a[10] * b[11] + a[11];
 }
 
-void AngleVectors(vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 vec_t VectorNormalize(vec3_t v);        // returns vector length
 vec_t VectorNormalize2(vec3_t v, vec3_t out);
 void ClearBounds(vec3_t mins, vec3_t maxs);
@@ -376,7 +376,7 @@ static inline void ClipVelocity(const vec3_t in, const vec3_t normal, vec3_t out
     VectorScale(out, overbounce, out);
 }
 
-static inline void AnglesToAxis(vec3_t angles, vec3_t axis[3])
+static inline void AnglesToAxis(const vec3_t angles, vec3_t axis[3])
 {
     AngleVectors(angles, axis[0], axis[1], axis[2]);
     VectorInverse(axis[1]);

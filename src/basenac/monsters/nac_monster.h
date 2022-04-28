@@ -27,7 +27,8 @@ typedef struct m_iqm_s m_iqm_t;
 
 m_iqm_t *M_InitializeIQM(const char *name);
 void M_FreeIQM(m_iqm_t *iqm);
-void M_SetupIQMDists(const m_iqm_t *iqm, mmove_t *animations[]);
+void M_SetupIQMAnimation(const m_iqm_t *iqm, mmove_t *animations, bool absolute);
+void M_SetupIQMAnimations(const m_iqm_t *iqm, mmove_t *animations[]);
 
 #define ANIMATION(name, length) \
     FRAME_##name##_FIRST, \

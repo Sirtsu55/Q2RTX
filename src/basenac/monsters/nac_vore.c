@@ -119,7 +119,7 @@ void vore_ball_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t 
 }
 
 #define VORE_BALL_CHASE_SPEED 300
-#define VORE_BALL_CORRECTION 0.25
+#define VORE_BALL_CORRECTION 0.35
 
 void vore_ball_chase(edict_t *self)
 {
@@ -132,6 +132,7 @@ void vore_ball_chase(edict_t *self)
 
     vec3_t chase_origin;
     VectorMA(self->enemy->absmin, 0.5, self->enemy->size, chase_origin);
+    chase_origin[2] += self->enemy->viewheight;
     trace_t tr = SV_Trace(self->s.origin, vec3_origin, vec3_origin, self->enemy->s.origin, self, MASK_OPAQUE);
 
     // target not in view, so just drift
@@ -139,9 +140,23 @@ void vore_ball_chase(edict_t *self)
         return;
     }
 
-    // target in view, apply correction
+    // don't allow us to get too close to another vore ball; push the other balls away
+    edict_t *other = NULL;
     vec3_t dir;
+    
+    while ((other = findradius(other, self->s.origin, 24.f))) {
+        if (other != self && strcmp(other->classname, self->classname) == 0) {
+            VectorSubtract(other->s.origin, self->s.origin, dir);
+            VectorNormalize(dir);
 
+            VectorScale(dir, VORE_BALL_CHASE_SPEED, other->movedir);
+            VectorAdd(other->velocity, other->movedir, other->movedir);
+            VectorNormalize(other->movedir);
+            VectorScale(other->movedir, VORE_BALL_CHASE_SPEED, other->movedir);
+        }
+    }
+
+    // target in view, apply correction
     VectorSubtract(chase_origin, self->s.origin, dir);
     VectorNormalize(dir);
 
@@ -158,10 +173,7 @@ void vore_ball_chase(edict_t *self)
 void vore_ball_think(edict_t *self)
 {
     self->s.frame++;
-    VectorAdd(self->movedir, vore_ball_anim.frame[self->s.frame - VORE_BALL_ANIM_START].translate, self->movedir);
-    VectorAdd(self->owner->s.origin, self->movedir, self->s.origin);
-    VectorCopy(self->owner->s.angles, self->s.angles);
-    SV_LinkEntity(self);
+    self->nextthink = level.time + 1;
 
     if (self->s.frame == VORE_BALL_ANIM_END)
     {
@@ -171,6 +183,7 @@ void vore_ball_think(edict_t *self)
         self->touch = vore_ball_touch;
         self->s.sound = SV_SoundIndex(ASSET_SOUND_VORE_BALL_CHASE);
         self->s.sound_pitch = 83;
+        self->owner->mynoise = NULL;
         VectorSet(self->avelocity, crandom() * 300, crandom() * 300, crandom() * 300);
 
         vec3_t d;
@@ -178,9 +191,18 @@ void vore_ball_think(edict_t *self)
         VectorNormalize(d);
         VectorCopy(d, self->movedir);
         VectorScale(d, VORE_BALL_CHASE_SPEED, self->velocity);
+        return;
     }
 
-    self->nextthink = level.time + 1;
+    vec3_t axis[3];
+    vec3_t pt;
+    VectorCopy(vore_ball_anim.frame[self->s.frame - VORE_BALL_ANIM_START].translate, pt);
+
+    AnglesToAxis((const vec3_t) { 0, -self->owner->s.angles[1], 0 }, axis);
+    RotatePoint(pt, axis);
+
+    VectorAdd(self->owner->s.origin, pt, self->s.origin);
+    SV_LinkEntity(self);
 }
 
 static void vore_spawn_ball(edict_t *self)
@@ -194,9 +216,11 @@ static void vore_spawn_ball(edict_t *self)
     ball->s.effects = EF_PLASMA;
     ball->owner = self;
     ball->enemy = self->enemy;
-    ball->s.frame = 7;
+    ball->s.frame = 6;
+    vore_ball_think(ball);
     ball->think = vore_ball_think;
     ball->nextthink = level.time + 1;
+    ball->classname = "vore_ball";
     self->mynoise = ball;
     SV_LinkEntity(ball);
 }
@@ -305,7 +329,7 @@ void vore_load(edict_t *self)
 
     m_iqm_t *iqm = M_InitializeIQM(ASSET_MODEL_VORE);
 
-    M_SetupIQMDists(iqm, (mmove_t *[]) {
+    M_SetupIQMAnimations(iqm, (mmove_t *[]) {
         &vore_move_stand, &vore_move_walk, &vore_move_run, &vore_move_attack,
         &vore_move_pain, &vore_move_death, NULL
     });
@@ -314,9 +338,7 @@ void vore_load(edict_t *self)
 
     iqm = M_InitializeIQM(ASSET_MODEL_VORE_BALL);
 
-    M_SetupIQMDists(iqm, (mmove_t *[]) {
-        &vore_ball_anim, NULL
-    });
+    M_SetupIQMAnimation(iqm, &vore_ball_anim, true);
 
     M_FreeIQM(iqm);
 

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 vec3_t vec3_origin = { 0, 0, 0 };
 
-void AngleVectors(vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
     float        angle;
     float        sr, sp, sy, cr, cp, cy;

@@ -162,7 +162,7 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 		if (Q_strcasecmp(model->jointNames[i], "spin") == 0)
 			spin_id = i;
 		// SKIP
-		else if (Q_strcasecmp(model->jointNames[i], "root") == 0)
+		else if (strlen(model->jointNames[i]) >= 4 && Q_strcasecmp(model->jointNames[i] + strlen(model->jointNames[i]) - 4, "root") == 0)
 			skip_id = i;
 	}
 

@@ -456,7 +456,7 @@ void fiend_load(edict_t *self)
 
     m_iqm_t *iqm = M_InitializeIQM(ASSET_MODEL_FIEND);
 
-    M_SetupIQMDists(iqm, (mmove_t *[]) {
+    M_SetupIQMAnimations(iqm, (mmove_t *[]) {
         &fiend_move_stand, &fiend_move_walk, &fiend_move_run1, /*&fiend_move_leap,*/ &fiend_move_pain,
         &fiend_move_death, &fiend_move_attack_claw, NULL
     });
