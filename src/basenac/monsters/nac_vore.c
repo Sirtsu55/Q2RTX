@@ -314,7 +314,8 @@ void vore_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
     SV_LinkEntity(self);
 
     if (self->mynoise) {
-        G_FreeEdict(self);
+        G_FreeEdict(self->mynoise);
+        self->mynoise = NULL;
     }
 
     self->monsterinfo.currentmove = &vore_move_death;
