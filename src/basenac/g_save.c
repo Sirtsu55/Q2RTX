@@ -1061,7 +1061,7 @@ void ReadLevel(const char *filename)
             Com_Errorf(ERR_DROP, "Entity number out of range (%i)\n", entnum);
         }
 
-        *num = max(*num, entnum - start);
+        *num = max(*num, (entnum - start) + 1);
 
         ent = &globals.entities[entnum];
         read_fields(f, entityfields, ent);
