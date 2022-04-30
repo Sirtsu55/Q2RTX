@@ -1,0 +1,28 @@
+textures/q2nac/wgrate1_8:
+	texture_base textures/q2nac/wgrate1_8.tga
+	texture_normals textures/q2nac/wgrate1_8_n.tga
+	roughness_override 0.300000
+	bump_scale 2.0
+	
+textures/q2nac/wgrate1_5:
+	texture_base textures/q2nac/wgrate1_5.tga
+	texture_normals textures/q2nac/wgrate1_5_n.tga
+	roughness_override 0.300000
+	base_factor 2.0
+	bump_scale 2.0
+	
+textures/q2nac/floor3_1:
+	texture_base textures/q2nac/floor3_1.tga
+	texture_normals textures/q2nac/floor3_1_n.tga
+	roughness_override 0.300000
+	bump_scale 2.0
+	
+textures/q2nac/c_met5_2:
+	texture_base textures/q2nac/c_met5_2.tga
+	texture_normals textures/q2nac/c_met5_2_n.tga
+	base_factor 2.5
+	
+textures/q2nac/c_met11_2:
+	texture_base textures/q2nac/c_met11_2.tga
+	texture_normals textures/q2nac/c_met11_2_n.tga
+	base_factor 2.5

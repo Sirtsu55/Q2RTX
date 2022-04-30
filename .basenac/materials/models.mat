@@ -2,25 +2,357 @@ models/weapons/v_shotg/v_shotg:
 	texture_base models/weapons/v_shotg/v_shotg.tga
 	texture_normals models/weapons/v_shotg/v_shotg_n.tga
 	kind CHROME
+	
+models/weapons/g_shotg/v_shotg:
+	texture_base models/weapons/v_shotg/v_shotg.tga
+	texture_normals models/weapons/v_shotg/v_shotg_n.tga
+	mat base_factor 2.0
+	mat metalness_factor 2.0
+	bump_scale 2.0
 
 models/weapons/v_perf/v_perf:
 	texture_base models/weapons/v_perf/v_perf.tga
 	texture_normals models/weapons/v_perf/v_perf_n.tga
 	kind CHROME
 	
+models/weapons/g_perf/v_perf:
+	texture_base models/weapons/v_perf/v_perf.tga
+	texture_normals models/weapons/v_perf/v_perf_n.tga
+	mat base_factor 2.0
+	mat metalness_factor 2.0
+	bump_scale 2.0
+		
 models/weapons/v_axe/arm:
 	texture_base models/weapons/v_axe/arm.tga
 	texture_normals models/weapons/v_axe/arm_n.png
 	metalness_factor 0
+	roughness_override 0.3
 
 models/weapons/v_axe/axe:
 	texture_base models/weapons/v_axe/axe.tga
 	texture_normals models/weapons/v_axe/axe_n.tga
 	kind CHROME
+	roughness_override 0.21
+	metalness_factor 2.0	
+	bump_scale 2.0
 
-models/proj/lightning/skin:
-	texture_base models/proj/lightning/skin.pcx
-	texture_emissive models/proj/lightning/skin.pcx
-	emissive_factor 4.0
-	base_factor 2.5
-	specular_factor 0
+models/items/ammo/nails/nailbox:
+	texture_base models/items/ammo/nails/nailbox.tga
+	texture_normals models/items/ammo/nails/nailbox_n.tga
+	kind CHROME
+
+models/items/ammo/shells/shellbox_small:
+	texture_base models/items/ammo/shells/shellbox_small.tga
+	texture_normals models/items/ammo/shells/shellbox_small_n.tga
+
+models/env/gravestones/grave_04:
+	texture_base models/env/gravestones/grave_04.tga
+	texture_normals models/env/gravestones/grave_04_n.png
+	bump_scale 2.000000
+	roughness_override 0.400000
+	metalness_factor 0.000000
+
+models/env/gravestones/grave_cluster:
+	texture_base models/env/gravestones/grave_cluster.tga
+	texture_normals models/env/gravestones/grave_cluster_n.png
+	bump_scale 2.000000
+	roughness_override 0.400000
+	metalness_factor 0.000000
+
+models/env/gravestones/grave_01:
+	texture_base models/env/gravestones/grave_01.tga
+	texture_normals models/env/gravestones/grave_01_n.tga
+	bump_scale 2.000000
+	roughness_override 0.400000
+	metalness_factor 0.000000
+
+models/env/gravestones/grave_02:
+	texture_base models/env/gravestones/grave_02.tga
+	texture_normals models/env/gravestones/grave_02_n.tga
+	bump_scale 2.000000
+	roughness_override 0.400000
+	metalness_factor 0.000000
+
+models/env/gravestones/grave_03:
+	texture_base models/env/gravestones/grave_03.tga
+	texture_normals models/env/gravestones/grave_03_n.png
+	bump_scale 2.000000
+	roughness_override 0.500000
+	metalness_factor 0.000000
+
+models/env/window_03/window_03_goat:
+	texture_base models/env/window_03/window_03_goat.tga
+	texture_normals models/env/window_03/window_03_goat_n.png
+	metalness_factor 0.500000
+	base_factor 2.000000
+
+models/env/window_03/windows03_frame:
+	texture_base models/env/window_03/windows03_frame.tga
+	texture_normals models/env/window_03/windows03_frame_n.png
+	bump_scale 2.000000
+	metalness_factor 0.500000
+	emissive_factor 0.000000
+	base_factor 2.000000
+
+models/env/window_03/window03_glass:
+	texture_base models/env/window_03/window03_glass.tga
+	texture_normals models/env/window_03/window03_glass_n.tga
+	bump_scale 0.000000
+	base_factor 20.000000
+	kind GLASS
+	is_light 1
+
+models/env/bones/arch/bonetile:
+	texture_base models/env/bones/arch/bonetile.tga
+	texture_normals models/env/bones/arch/bonetile_n.png
+	bump_scale 2.000000
+	metalness_factor 0.000000
+	base_factor 2.000000
+
+models/env/bones/arch/bones:
+	texture_base models/env/bones/arch/bones.tga
+	texture_normals models/env/bones/arch/bones_n.png
+	bump_scale 2.000000
+	metalness_factor 0.000000
+	base_factor 2.000000
+
+models/env/bones/arch/faces:
+	texture_base models/env/bones/arch/faces.tga
+	texture_normals models/env/bones/arch/faces_n.png
+	bump_scale 2.000000
+	metalness_factor 0.000000
+	base_factor 2.000000
+
+models/env/bones/arch/head:
+	texture_base models/env/bones/arch/head.tga
+	texture_normals models/env/bones/arch/head_n.png
+	bump_scale 2.000000
+	metalness_factor 0.000000
+	base_factor 2.000000
+
+models/props/torch2/torch2:
+	texture_base models/props/torch2/torch2.tga
+	texture_normals models/props/torch2/torch2_n.tga
+	base_factor 2.000000
+
+models/props/torch2/torch2_2:
+	texture_base models/props/torch2/torch2_2.tga
+	texture_normals models/props/torch2/torch2_2_n.tga
+	base_factor 2.000000
+
+models/props/slipgate/slipgate_body:
+	texture_base models/props/slipgate/slipgate_body.tga
+	texture_normals models/props/slipgate/slipgate_body_n.tga
+
+models/props/slipgate/slipgate_rear:
+	texture_base models/props/slipgate/slipgate_rear.tga
+	texture_normals models/props/slipgate/slipgate_rear_n.tga
+
+models/props/slipgate/slipgate_side:
+	texture_base models/props/slipgate/slipgateside_3.tga
+	texture_normals models/props/slipgate/slipgateside_3_n.tga
+	texture_emissive models/props/slipgate/slipgateside_3_light.png
+	emissive_factor 0.080000
+	
+models/props/slipgate/slipgateside_3:
+	texture_base models/props/slipgate/slipgateside_3.tga
+	texture_normals models/props/slipgate/slipgateside_3_n.tga
+	texture_emissive models/props/slipgate/slipgateside_3_light.png
+	is_light 1
+		
+models/props/slipgate/tubeglow:
+	texture_base models/props/slipgate/tubeglow.tga
+	texture_normals models/props/slipgate/tubeglow_n.tga
+	texture_emissive models/props/slipgate/tubeglow_light.png
+	emissive_factor 0.100000
+
+models/props/slipgate/slipgate_frontpanel:
+	texture_base models/props/slipgate/slipgate_frontpanel.tga
+	texture_normals models/props/slipgate/slipgate_frontpanel_n.tga
+
+models/props/slipgate/glass:
+	texture_base models/props/slipgate/glass.tga
+	texture_normals models/props/slipgate/glass_n.tga
+	kind GLASS
+
+models/props/slipgate/monitor:
+	texture_base models/props/slipgate/monitorglow_03.png
+	texture_emissive models/props/slipgate/monitorglow_03_light.png
+	metalness_factor 0.000000
+	emissive_factor 0.100000
+	specular_factor 0.000000
+
+models/props/candles/candle_merge_1_5:
+	texture_base models/props/candles/candle_merge_1_5.tga
+	texture_normals models/props/candles/candle_merge_1_5_n.jpg
+	texture_emissive models/props/candles/candle_merge_1_5_light.jpg
+	metalness_factor 0.000000
+	emissive_factor 0.020000
+
+models/props/candles/xcandle_merge_1_5:
+	texture_base models/props/candles/candle_merge_1_5.tga
+	texture_normals models/props/candles/candle_merge_1_5_n.jpg
+	emissive_factor 0.000000
+	metalness_factor 0.000000
+
+models/props/candles/candle_7_12:
+	texture_base models/props/candles/candle_7_12.tga
+	texture_normals models/props/candles/candle_7_12_n.jpg
+	texture_emissive models/props/candles/candle_7_12_light.jpg
+	metalness_factor 0.000000
+	emissive_factor 0.020000
+
+models/props/candles/xcandle_7_12:
+	texture_base models/props/candles/candle_7_12.tga
+	texture_normals models/props/candles/candle_7_12_n.jpg
+	emissive_factor 0.000000
+	metalness_factor 0.000000
+
+models/props/candles/candle_1_6:
+	texture_base models/props/candles/candle_1_6.tga
+	texture_normals models/props/candles/candle_1_6_n.jpg
+	texture_emissive models/props/candles/candle_1_6_light.jpg
+	metalness_factor 0.000000
+	emissive_factor 0.020000
+
+models/props/candles/xcandle_1_6:
+	texture_base models/props/candles/candle_1_6.tga
+	texture_normals models/props/candles/candle_1_6_n.jpg
+	emissive_factor 0.000000
+	metalness_factor 0.000000
+	
+models/env/pyramid_light/pyramid_light_skin:
+	texture_base models/env/pyramid_light/pyramid_light_skin.tga
+	texture_normals models/env/pyramid_light/pyramid_light_skin_n.png
+	metalness_factor 0.000000
+
+models/env/pyramid_light/pyramid_emissive_skin:
+	texture_emissive models/env/pyramid_light/pyramid_emissive_skin_light.jpg
+	metalness_factor 0.000000
+	specular_factor 0.000000
+	is_light 1
+
+models/env/tlight_07/tlight_07_skin:
+	texture_base models/env/tlight_07/tlight_07_skin.tga
+	texture_normals models/env/tlight_07/tlight_07_skin_n.tga
+
+models/env/tlight_07/tlight_07_emissive_skin:
+	texture_base models/env/tlight_07/tlight_07_emissive_skin.jpg
+	texture_emissive models/env/tlight_07/tlight_07_emissive_skin_light.jpg
+	metalness_factor 0.000000
+	specular_factor 0.000000
+	is_light 1
+	
+models/env/tlight_07/tlight_07_emissive_skin:
+	texture_base models/env/tlight_07/tlight_07_emissive_skin.jpg
+	texture_emissive models/env/tlight_07/tlight_07_emissive_skin_light.jpg
+	metalness_factor 0.000000
+	emissive_factor 3.000000
+	specular_factor 0.000000
+	is_light 1
+	
+models/monsters/fiend/fiend:
+	texture_base models/monsters/fiend/fiend.tga
+	texture_normals models/monsters/fiend/fiend_n.png
+	metalness_factor 0.000000
+
+models/monsters/knight/knight:
+	texture_base models/monsters/knight/knight.tga
+	texture_normals models/monsters/knight/knight_n.tga
+	bump_scale 1.500000
+	base_factor 1.2
+	roughness_override 0.3
+
+models/monsters/knight/knight_sword:
+	texture_base models/monsters/knight/knight_sword.tga
+	texture_normals models/monsters/knight/knight_sword_n.tga
+	bump_scale 1.500000
+	base_factor 10.000000
+	metalness_factor 10.000000
+	
+models/items/keys/gold_key/silver_key:
+	texture_base models/items/keys/gold_key/silver_key.tga
+	texture_normals models/items/keys/gold_key/gold_key_n.tga
+	base_factor 1.5
+	kind CHROME
+
+models/items/keys/gold_key/gold_key:
+	texture_base models/items/keys/gold_key/gold_key.tga
+	texture_normals models/items/keys/gold_key/gold_key_n.tga
+	base_factor 1.5
+	kind CHROME
+	
+models/objects/explobox/explobox:
+	texture_base models/objects/explobox/explobox.tga
+	texture_normals models/objects/explobox/explobox_n.tga
+	texture_emissive models/objects/explobox/explobox_light.jpg
+	bump_scale 2.000000
+	base_factor 2.000000
+	emissive_factor 0.45
+	
+models/objects/explobox/explobox2:
+	texture_base models/objects/explobox/explobox2.tga
+	texture_normals models/objects/explobox/explobox2_n.tga
+	texture_emissive models/objects/explobox/explobox2_light.jpg
+	bump_scale 2.000000
+	base_factor 2.000000
+	emissive_factor 0.45
+	
+models/ranger/ranger_top:
+	texture_base models/ranger/ranger_top.tga
+	texture_normals models/ranger/ranger_top_n.tga
+	bump_scale 2.000000
+	base_factor 1.500000
+
+models/ranger/ranger_top_green:
+	texture_base models/ranger/ranger_top_green.tga
+	texture_normals models/ranger/ranger_top_n.tga
+	bump_scale 2.000000
+
+models/ranger/ranger_top_red:
+	texture_base models/ranger/ranger_top_red.tga
+	texture_normals models/ranger/ranger_top_n.tga
+	bump_scale 2.000000
+
+models/ranger/ranger_accessories:
+	texture_base models/ranger/ranger_accessories.tga
+	texture_normals models/ranger/ranger_accessories_n.tga
+	bump_scale 2.000000
+	
+models/objects/nail/nail:
+	texture_base models/ranger/ranger_accessories.tga
+	texture_normals models/ranger/ranger_accessories_n.tga
+	bump_scale 2.0
+	base_factor 5.0
+	specular_factor 5.0	
+	metalness_factor 5.0
+	
+models/items/armor/armorshard:
+	texture_base models/items/armor/armorshard.tga
+	texture_normals models/items/armor/armorshard_n.tga
+	
+models/env/demon_head/demon_head:
+	texture_base models/env/demon_head/demon_head.tga
+	texture_normals models/env/demon_head/demon_head_n.tga
+	
+models/props/torch1/torch1:
+	texture_base models/props/torch1/torch1.tga
+	texture_normals models/props/torch1/torch1_n.tga
+	bump_scale 3.000000
+	specular_factor 2.000000
+	
+models/monsters/vore/vore_ball:
+	texture_base models/monsters/vore/vore_ball.tga
+	texture_normals models/monsters/vore/vore_ball_n.tga
+	texture_emissive models/monsters/vore/vore_ball_light.tga
+	metalness_factor 0.000000
+	bump_scale 3.000000
+	specular_factor 3.000000
+	
+models/monsters/vore/vore:
+	texture_base models/monsters/vore/vore.tga
+	texture_normals models/monsters/vore/vore_n.tga
+	bump_scale 1.500000
+	roughness_override 0.300000
+	metalness_factor 0.000000
+

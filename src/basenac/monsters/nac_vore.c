@@ -266,7 +266,8 @@ void vore_pain(edict_t *self, edict_t *other, float kick, int damage)
         return;     // no pain anims in nightmare
 
     if (self->mynoise) {
-        G_FreeEdict(self);
+        G_FreeEdict(self->mynoise);
+        self->mynoise = NULL;
     }
 
     self->monsterinfo.currentmove = &vore_move_pain;

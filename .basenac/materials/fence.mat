@@ -1,0 +1,44 @@
+textures/fence/grate07:
+	texture_base textures/fence/grate07.tga
+	texture_normals textures/fence/grate07_n.jpg
+	texture_mask textures/fence/grate07_mask.jpg
+	roughness_override 0.300000
+
+textures/fence/grate06:
+	texture_base textures/fence/grate06.tga
+	texture_normals textures/fence/grate06_n.tga
+	texture_mask textures/fence/grate06_mask.jpg
+	roughness_override 0.300000
+
+textures/fence/grate05:
+	texture_base textures/fence/grate05.tga
+	texture_normals textures/fence/grate05_n.tga
+	texture_mask textures/fence/grate05_mask.jpg
+	roughness_override 0.300000
+
+textures/fence/grate04:
+	texture_base textures/fence/grate04.tga
+	texture_normals textures/fence/grate04_n.jpg
+	texture_mask textures/fence/grate04_mask.jpg
+	roughness_override 0.300000
+
+textures/fence/grate03:
+	texture_base textures/fence/grate03.tga
+	texture_normals textures/fence/grate03_n.tga
+	texture_mask textures/fence/grate03_mask.jpg
+	roughness_override 0.300000
+
+textures/fence/grate02:
+	texture_base textures/fence/grate02.tga
+	texture_normals textures/fence/grate02_n.tga
+	texture_mask textures/fence/grate02_mask.jpg
+	roughness_override 0.300000
+	metalness_factor 2.000000
+
+textures/fence/grate01:
+	texture_base textures/fence/grate01.tga
+	texture_normals textures/fence/grate01_n.tga
+	texture_mask textures/fence/grate01_mask.jpg
+	roughness_override 0.300000
+	metalness_factor 2.000000
+
