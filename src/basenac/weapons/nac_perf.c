@@ -202,19 +202,20 @@ static bool Perf_Idle(edict_t *ent)
     }
 
     if (!Perf_Firing(ent)) {
-        return false;
-    }
-    
-    // check explicit inspect last
-    if (ent->client->inspect)
-    {
-        if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_idle)
-        {
-            Perf_PickIdle(ent);
-            return false;
+
+        if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_inspect) {
+            return true;
+        } else if (ent->client->inspect) {
+            if (ent->client->weapanim[WEAPID_GUN] == &weap_perf_idle)
+            {
+                Perf_PickIdle(ent);
+                return false;
+            }
+
+            ent->client->inspect = false;
         }
 
-        ent->client->inspect = false;
+        return false;
     }
 
     return true;

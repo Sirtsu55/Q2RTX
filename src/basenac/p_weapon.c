@@ -258,6 +258,8 @@ void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation,
     }
     else
         ent->client->ps.gun[currentWeaponId].frame = frame;
+
+    //Com_Printf("(%f) change to frame %i\n", G_MsToSec(level.time), frame);
 }
 
 void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation)
@@ -281,6 +283,8 @@ void Weapon_RunAnimation(edict_t *ent)
         currentFrame = animation->start;
         Com_Print("animation out of range; restarting\n");
     }
+
+    //Com_Printf("(%f) running frame %i\n", G_MsToSec(level.time), currentFrame);
    
     // run frame func first
     if (animation->frame && !animation->frame(ent))
