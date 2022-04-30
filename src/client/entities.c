@@ -1079,7 +1079,7 @@ void CL_AdjustGunPosition(vec3_t viewangles, vec3_t *gun_origin, float *alpha)
     vec3_t view_dir, right_dir, up_dir;
     vec3_t gun_real_pos, gun_tip;
     const float gun_length = 28.f;
-    const float gun_right = 10.f;
+    const float gun_right = 0.f;
     const float gun_up = -5.f;
     trace_t trace;
     static vec3_t mins = { -4, -4, -4 }, maxs = { 4, 4, 4 };
