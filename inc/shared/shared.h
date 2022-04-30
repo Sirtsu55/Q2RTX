@@ -309,6 +309,13 @@ typedef struct vrect_s {
 
 #define QuatCopy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
 
+static inline void VectorClosestPointToBox(const vec3_t in, vec3_t absmin, vec3_t absmax, vec3_t out)
+{
+    for (int i = 0; i < 3; i++) {
+        out[i] = (in[i] < absmin[i]) ? absmin[i] : (in[i] > absmax[i]) ? absmax[i] : in[i];
+    }
+}
+
 static inline void JointToMatrix(const quat_t rot, const vec3_t scale, const vec3_t trans, float *mat)
 {
     float xx = 2.0f * rot[0] * rot[0];

@@ -450,8 +450,7 @@ void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t
         if (!ent->takedamage)
             continue;
 
-        VectorAdd(ent->mins, ent->maxs, v);
-        VectorMA(ent->s.origin, 0.5f, v, v);
+        VectorClosestPointToBox(inflictor->s.origin, ent->absmin, ent->absmax, v);
         VectorSubtract(inflictor->s.origin, v, v);
         points = damage - 0.5f * VectorLength(v);
         if (ent == attacker)

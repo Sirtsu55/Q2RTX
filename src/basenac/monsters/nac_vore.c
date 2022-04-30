@@ -115,6 +115,8 @@ void vore_ball_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t 
     SV_WritePos(d);
     SV_Multicast(d, MULTICAST_PVS, false);
 
+    T_RadiusDamage(self, self->owner, 35, self->owner, 125, MOD_ROCKET);
+
     G_FreeEdict(self);
 }
 

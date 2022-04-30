@@ -1593,9 +1593,7 @@ void CL_GetEntitySoundOrigin(int entnum, vec3_t org)
                 VectorAdd(org, cm->mins, absmin);
                 VectorAdd(org, cm->maxs, absmax);
 
-                for (int i = 0; i < 3; i++) {
-                    org[i] = (cl.playerEntityOrigin[i] < absmin[i]) ? absmin[i] : (cl.playerEntityOrigin[i] > absmax[i]) ? absmax[i] : cl.playerEntityOrigin[i];
-                }
+                VectorClosestPointToBox(cl.playerEntityOrigin, absmin, absmax, org);
             }
         }
     }
