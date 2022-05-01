@@ -147,6 +147,8 @@ typedef enum {
 #define AI_RESURRECTING         0x00004000
 #define AI_HIGH_TICK_RATE       0x00008000
 #define AI_JUMP_IMMEDIATELY     0x00010000
+#define AI_ALLOW_BLIND_FIRE     0x00020000
+#define AI_DO_BLIND_FIRE        0x00040000
 
 //monster attack state
 #define AS_STRAIGHT             1

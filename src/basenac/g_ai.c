@@ -552,7 +552,7 @@ bool M_CheckAttack(edict_t *self)
 
     self->monsterinfo.aiflags &= ~AI_JUMP_IMMEDIATELY;
 
-    if (self->enemy->health > 0) {
+    if (self->enemy->health > 0 && !(self->monsterinfo.aiflags & AI_DO_BLIND_FIRE)) {
         // see if any entities are in the way of the shot
         VectorCopy(self->s.origin, spot1);
         spot1[2] += self->viewheight;
@@ -567,7 +567,8 @@ bool M_CheckAttack(edict_t *self)
     }
 
     // melee attack
-    if (enemy_range == RANGE_MELEE) {
+    // don't melee if we're trying to jump or if we can't see the enemy
+    if (enemy_range == RANGE_MELEE && !jump_now && !(self->monsterinfo.aiflags & AI_LOST_SIGHT)) {
         // don't always melee in easy mode
         if (skill.integer == 0 && (Q_rand() & 3))
             return false;
@@ -582,7 +583,10 @@ bool M_CheckAttack(edict_t *self)
     if (!self->monsterinfo.attack)
         return false;
 
-    if (jump_now && (self->enemy->s.origin[2] - self->s.origin[2]) < -24.f) {
+    if (self->monsterinfo.aiflags & AI_DO_BLIND_FIRE) {
+        self->monsterinfo.aiflags &= ~AI_DO_BLIND_FIRE;
+        chance = 1.f;
+    } else if (jump_now && (self->enemy->s.origin[2] - self->s.origin[2]) < -24.f) {
         chance = 1.0f;
     } else {
         if (level.time < self->monsterinfo.attack_finished_time)
@@ -775,9 +779,12 @@ bool ai_checkattack(edict_t *self, float dist)
 
 // check knowledge of enemy
     enemy_vis = visible(self, self->enemy);
+
     if (enemy_vis) {
         self->monsterinfo.search_time = level.time + 5000;
         VectorCopy(self->enemy->s.origin, self->monsterinfo.last_sighting);
+    } else if (self->monsterinfo.aiflags & AI_DO_BLIND_FIRE) {
+        enemy_vis = true; // fake visibility for blindfire
     }
 
 // look for other coop players here
@@ -788,7 +795,7 @@ bool ai_checkattack(edict_t *self, float dist)
 //  }
 
     enemy_range = range(self, self->enemy);
-    VectorSubtract(self->enemy->s.origin, self->s.origin, temp);
+    VectorSubtract(self->monsterinfo.last_sighting, self->s.origin, temp);
     enemy_yaw = vectoyaw(temp);
 
 
@@ -863,7 +870,7 @@ void ai_run(edict_t *self, float dist)
 //      if (self.aiflags & AI_LOST_SIGHT)
 //          dprint("regained sight\n");
         M_MoveToGoal(self, dist);
-        self->monsterinfo.aiflags &= ~AI_LOST_SIGHT;
+        self->monsterinfo.aiflags &= ~(AI_LOST_SIGHT | AI_DO_BLIND_FIRE);
         VectorCopy(self->enemy->s.origin, self->monsterinfo.last_sighting);
         self->monsterinfo.trail_time = level.time;
         return;
@@ -894,6 +901,11 @@ void ai_run(edict_t *self, float dist)
 //      dprint("lost sight of player, last seen at "); dprint(vtos(self.last_sighting)); dprint("\n");
         self->monsterinfo.aiflags |= (AI_LOST_SIGHT | AI_PURSUIT_LAST_SEEN);
         self->monsterinfo.aiflags &= ~(AI_PURSUE_NEXT | AI_PURSUE_TEMP);
+
+        if (self->monsterinfo.aiflags & AI_ALLOW_BLIND_FIRE) {
+            self->monsterinfo.aiflags |= AI_DO_BLIND_FIRE;
+        }
+
         new = true;
     }
 
