@@ -44,7 +44,7 @@ SV_TestEntityPosition
 
 ============
 */
-edict_t *SV_TestEntityPosition(edict_t *ent)
+static edict_t *SV_TestEntityPosition(edict_t *ent)
 {
     trace_t trace;
     int     mask;
@@ -67,7 +67,7 @@ edict_t *SV_TestEntityPosition(edict_t *ent)
 SV_CheckVelocity
 ================
 */
-void SV_CheckVelocity(edict_t *ent)
+static void SV_CheckVelocity(edict_t *ent)
 {
 //
 // bound velocity
@@ -86,7 +86,7 @@ SV_RunThink
 Runs thinking code for this frame if necessary
 =============
 */
-bool SV_RunThink(edict_t *ent)
+static bool SV_RunThink(edict_t *ent)
 {
     gtime_t thinktime = ent->nextthink;
     if (thinktime <= 0)
@@ -137,27 +137,25 @@ Returns the clipflags if the velocity was modified (hit something solid)
 typedef struct {
     int mask;
     edict_t *self;
-    trace_t *tr;
 } fly_move_args;
 
 void SV_FlyMove_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, void *arg)
 {
     fly_move_args *args = arg;
-    args->tr = tr;
     *tr = SV_Trace(start, mins, maxs, end, args->self, args->mask);
 }
 
-bool SV_FlyMove_Impact(edict_t *ent, void *arg)
+bool SV_FlyMove_Impact(trace_t *tr, void *arg)
 {
     fly_move_args *args = arg;
-    SV_Impact(args->self, args->tr);
+    SV_Impact(args->self, tr);
     return !args->self->inuse; // removed by the impact function?
 }
 
 static inline void SV_FlyMove(edict_t *ent, float time, int mask)
 {
-    fly_move_args args = { mask, ent, NULL };
-    StepSlideMove(ent->s.origin, ent->mins, ent->maxs, ent->velocity, time, false, SV_FlyMove_Trace, SV_FlyMove_Impact, &args);
+    fly_move_args args = { mask, ent };
+    SlideMove(ent->s.origin, ent->mins, ent->maxs, ent->velocity, time, false, SV_FlyMove_Trace, SV_FlyMove_Impact, &args);
 }
 
 
@@ -167,7 +165,7 @@ SV_AddGravity
 
 ============
 */
-void SV_AddGravity(edict_t *ent)
+static void SV_AddGravity(edict_t *ent)
 {
     ent->velocity[2] -= ent->gravity * level.gravity * BASE_FRAMETIME_S;
 }
@@ -187,7 +185,7 @@ SV_PushEntity
 Does not change the entities velocity at all
 ============
 */
-trace_t SV_PushEntity(edict_t *ent, vec3_t push)
+static trace_t SV_PushEntity(edict_t *ent, vec3_t push)
 {
     trace_t trace;
     vec3_t  start;
@@ -247,7 +245,7 @@ Objects need to be moved back on a failed push,
 otherwise riders would continue to slide.
 ============
 */
-bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
+static bool SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 {
     int         i;
     edict_t     *check, *block;
@@ -405,7 +403,7 @@ Bmodel objects don't interact with each other, but
 push all box objects
 ================
 */
-void SV_Physics_Pusher(edict_t *ent)
+static void SV_Physics_Pusher(edict_t *ent)
 {
     vec3_t      move, amove;
     edict_t     *part, *mv;
@@ -465,7 +463,7 @@ SV_Physics_None
 Non moving objects can only think
 =============
 */
-void SV_Physics_None(edict_t *ent)
+static void SV_Physics_None(edict_t *ent)
 {
 // regular thinking
     SV_RunThink(ent);
@@ -478,7 +476,7 @@ SV_Physics_Noclip
 A moving object that doesn't obey physics
 =============
 */
-void SV_Physics_Noclip(edict_t *ent)
+static void SV_Physics_Noclip(edict_t *ent)
 {
 // regular thinking
     SV_RunThink(ent);
@@ -507,7 +505,7 @@ SV_Physics_Toss
 Toss, bounce, and fly movement.  When onground, do nothing.
 =============
 */
-void SV_Physics_Toss(edict_t *ent)
+static void SV_Physics_Toss(edict_t *ent)
 {
     trace_t     trace;
     vec3_t      move;
@@ -626,7 +624,7 @@ FIXME: is this true?
 #define sv_friction         6
 #define sv_waterfriction    1
 
-void SV_AddRotationalFriction(edict_t *ent)
+static void SV_AddRotationalFriction(edict_t *ent)
 {
     int     n;
     float   adjustment;
@@ -646,7 +644,7 @@ void SV_AddRotationalFriction(edict_t *ent)
     }
 }
 
-void SV_Physics_Step(edict_t *ent)
+static void SV_Physics_Step(edict_t *ent)
 {
     bool        wasonground;
     bool        hitsound = false;

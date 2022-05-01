@@ -863,6 +863,8 @@ void M_ChangeYaw(edict_t *ent);
 // g_phys.c
 //
 void G_RunEntity(edict_t *ent);
+void G_InitAnimation(edict_t *ent);
+void SV_Impact(edict_t *e1, trace_t *trace);
 
 //
 // g_main.c
@@ -1187,9 +1189,6 @@ struct edict_s {
 };
 
 // API wrappers
-
-// Paril - animated entity stuff
-void G_InitAnimation(edict_t *ent);
 
 void SV_CenterPrint(edict_t *ent, const char *message);
 void SV_CenterPrintf(edict_t *ent, const char *fmt, ...);

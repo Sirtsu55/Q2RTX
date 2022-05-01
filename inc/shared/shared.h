@@ -309,6 +309,13 @@ typedef struct vrect_s {
 
 #define QuatCopy(a,b)			((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2],(b)[3]=(a)[3])
 
+static inline float VectorDistance(const vec3_t a, const vec3_t b)
+{
+    vec3_t t;
+    VectorSubtract(a, b, t);
+    return VectorLength(t);
+}
+
 static inline void VectorClosestPointToBox(const vec3_t in, vec3_t absmin, vec3_t absmax, vec3_t out)
 {
     for (int i = 0; i < 3; i++) {
@@ -1663,9 +1670,9 @@ static inline void ClipVelocitySlide(const vec3_t in, const vec3_t normal, vec3_
 #define MAX_CLIP_PLANES 5
 
 typedef void (*StepSlideMoveTrace) (trace_t *tr, vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t end, void *arg);
-typedef bool (*StepSlideMoveImpact) (struct edict_s *ent, void *arg);
+typedef bool (*StepSlideMoveImpact) (trace_t *ent, void *arg);
 
-static void StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t velocity, float time_left, bool copy_primal, StepSlideMoveTrace trace_func, StepSlideMoveImpact impact_func, void *callback_arg)
+static inline bool SlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t velocity, float time_left, bool copy_primal, StepSlideMoveTrace trace_func, StepSlideMoveImpact impact_func, void *callback_arg)
 {
     int         bumpcount, numbumps;
     vec3_t      dir;
@@ -1692,7 +1699,7 @@ static void StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t veloci
         if (trace.allsolid) {
             // entity is trapped in another solid
             velocity[2] = 0;    // don't build up falling damage
-            return;
+            return false;
         }
 
         if (trace.fraction > 0) {
@@ -1705,7 +1712,7 @@ static void StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t veloci
             break;     // moved the entire distance
 
         // save entity for contact
-        if (impact_func(trace.ent, callback_arg)) {
+        if (impact_func(&trace, callback_arg)) {
             break;
         }
 
@@ -1760,6 +1767,76 @@ static void StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t veloci
 
     if (copy_primal)
         VectorCopy(primal_velocity, velocity);
+
+    return true;
+}
+
+#define STEPSIZE 18
+#define MIN_STEP_NORMAL 0.7f    // can't step up onto very steep slopes
+
+static inline bool StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t velocity, float time_left, bool copy_primal, StepSlideMoveTrace trace_func, StepSlideMoveImpact impact_func, void *callback_arg, trace_t *tr)
+{
+    vec3_t      start_o, start_v;
+    vec3_t      down_o, down_v;
+    float       down_dist, up_dist;
+    vec3_t      up, down;
+
+    VectorCopy(origin, start_o);
+    VectorCopy(velocity, start_v);
+
+    if (!SlideMove(origin, mins, maxs, velocity, time_left, false, trace_func, impact_func, callback_arg)) {
+        return false;
+    }
+
+    VectorCopy(origin, down_o);
+    VectorCopy(velocity, down_v);
+
+    VectorCopy(start_o, up);
+    up[2] += STEPSIZE;
+
+    trace_func(tr, up, mins, maxs, up, callback_arg);
+
+    if (tr->allsolid) {
+        return false;     // can't step up
+    }
+
+    // try sliding above
+    VectorCopy(up, origin);
+    VectorCopy(start_v, velocity);
+
+    if (!SlideMove(origin, mins, maxs, velocity, time_left, false, trace_func, impact_func, callback_arg)) {
+        return false;
+    }
+
+    // push down the final amount
+    VectorCopy(origin, down);
+    down[2] -= (STEPSIZE + STEPSIZE);
+
+    trace_func(tr, origin, mins, maxs, down, callback_arg);
+
+    if (!tr->allsolid) {
+        VectorCopy(tr->endpos, origin);
+    }
+
+    VectorCopy(origin, up);
+
+    // decide which one went farther
+    down_dist = (down_o[0] - start_o[0]) * (down_o[0] - start_o[0])
+        + (down_o[1] - start_o[1]) * (down_o[1] - start_o[1]);
+    up_dist = (up[0] - start_o[0]) * (up[0] - start_o[0])
+        + (up[1] - start_o[1]) * (up[1] - start_o[1]);
+
+    if (down_dist > up_dist || tr->plane.normal[2] < MIN_STEP_NORMAL) {
+        VectorCopy(down_o, origin);
+        VectorCopy(down_v, velocity);
+        return true;
+    }
+
+    //!! Special case
+    // if we were walking along a plane, then we need to copy the Z over
+    velocity[2] = down_v[2];
+
+    return true;
 }
 
 #include "assets.h"

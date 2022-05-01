@@ -151,7 +151,7 @@ void vore_ball_chase(edict_t *self)
             VectorSubtract(other->s.origin, self->s.origin, dir);
             VectorNormalize(dir);
 
-            VectorScale(dir, VORE_BALL_CHASE_SPEED, other->movedir);
+            VectorScale(dir, VORE_BALL_CHASE_SPEED * VORE_BALL_CORRECTION, other->movedir);
             VectorAdd(other->velocity, other->movedir, other->movedir);
             VectorNormalize(other->movedir);
             VectorScale(other->movedir, VORE_BALL_CHASE_SPEED, other->movedir);

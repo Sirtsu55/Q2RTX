@@ -19,8 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared/shared.h"
 #include "common/pmove.h"
 
-#define STEPSIZE    18
-
 // all of the locals will be zeroed before each
 // pmove, just to make damn sure we don't have
 // any differences when running on client or server
@@ -67,94 +65,31 @@ Returns a new origin, velocity, and contact entity
 Does not modify any world state?
 ==================
 */
-#define MIN_STEP_NORMAL 0.7f    // can't step up onto very steep slopes
-#define MAX_CLIP_PLANES 5
-
 static void Pm_StepSlideMove_Trace(trace_t *tr, vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t end, void *arg)
 {
     pm->trace(tr, origin, mins, maxs, end);
 }
 
-static bool Pm_StepSlideMove_Impact(struct edict_s *ent, void *arg)
+static bool Pm_StepSlideMove_Impact(trace_t *tr, void *arg)
 {
     // save entity for contact
-    if (pm->numtouch < MAXTOUCH && ent) {
-        pm->touchents[pm->numtouch] = ent;
+    if (pm->numtouch < MAXTOUCH && tr->ent) {
+        pm->touchents[pm->numtouch] = tr->ent;
         pm->numtouch++;
     }
-    return false;
-}
 
-static inline void PM_StepSlideMove_(void)
-{
-    StepSlideMove(pml.origin, pm->mins, pm->maxs, pml.velocity, pml.frametime, !!pm->s.pm_time, Pm_StepSlideMove_Trace, Pm_StepSlideMove_Impact, NULL);
+    return false;
 }
 
 /*
 ==================
 PM_StepSlideMove
-
 ==================
 */
 static void PM_StepSlideMove(void)
 {
-    vec3_t      start_o, start_v;
-    vec3_t      down_o, down_v;
-    trace_t     trace;
-    float       down_dist, up_dist;
-    vec3_t      up, down;
-
-    VectorCopy(pml.origin, start_o);
-    VectorCopy(pml.velocity, start_v);
-
-    PM_StepSlideMove_();
-
-    VectorCopy(pml.origin, down_o);
-    VectorCopy(pml.velocity, down_v);
-
-    VectorCopy(start_o, up);
-    up[2] += STEPSIZE;
-
-    pm->trace(&trace, up, pm->mins, pm->maxs, up);
-    if (trace.allsolid)
-        return;     // can't step up
-
-    // try sliding above
-    VectorCopy(up, pml.origin);
-    VectorCopy(start_v, pml.velocity);
-
-    PM_StepSlideMove_();
-
-    // push down the final amount
-    VectorCopy(pml.origin, down);
-    down[2] -= STEPSIZE;
-
-    // if we're already on ground, go down twice
-    // so we go down stairs/slopes
-    if (pm->s.pm_flags & PMF_ON_GROUND) {
-        down[2] -= STEPSIZE;
-    }
-
-    pm->trace(&trace, pml.origin, pm->mins, pm->maxs, down);
-    if (!trace.allsolid)
-        VectorCopy(trace.endpos, pml.origin);
-
-    VectorCopy(pml.origin, up);
-
-    // decide which one went farther
-    down_dist = (down_o[0] - start_o[0]) * (down_o[0] - start_o[0])
-                + (down_o[1] - start_o[1]) * (down_o[1] - start_o[1]);
-    up_dist = (up[0] - start_o[0]) * (up[0] - start_o[0])
-              + (up[1] - start_o[1]) * (up[1] - start_o[1]);
-
-    if (down_dist > up_dist || trace.plane.normal[2] < MIN_STEP_NORMAL) {
-        VectorCopy(down_o, pml.origin);
-        VectorCopy(down_v, pml.velocity);
-        return;
-    }
-    //!! Special case
-    // if we were walking along a plane, then we need to copy the Z over
-    pml.velocity[2] = down_v[2];
+    trace_t tr;
+    StepSlideMove(pml.origin, pm->mins, pm->maxs, pml.velocity, pml.frametime, !!pm->s.pm_time, Pm_StepSlideMove_Trace, Pm_StepSlideMove_Impact, NULL, &tr);
 }
 
 /*

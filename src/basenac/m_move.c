@@ -19,8 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
-#define STEPSIZE    18
-
 /*
 =============
 M_CheckBottom
@@ -92,6 +90,18 @@ realcheck:
     return true;
 }
 
+static void SV_movestep_StepSlideMoveTrace (trace_t *tr, vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t end, void *arg)
+{
+    edict_t *ent = arg;
+    *tr = SV_Trace(origin, mins, maxs, end, ent, MASK_MONSTERSOLID);
+}
+
+static bool SV_movestep_StepSlideMoveImpact (trace_t *ent, void *arg)
+{
+    edict_t *self = arg;
+    SV_Impact(self, ent);
+    return false;
+}
 
 /*
 =============
@@ -99,35 +109,28 @@ SV_movestep
 
 Called by monster program code.
 The move will be adjusted for slopes and stairs, but if the move isn't
-possible, no move is done, false is returned, and
-pr_global_struct->trace_normal is set to the normal of the blocking wall
+possible, no move is done, false is returned
 =============
 */
-//FIXME since we need to test end position contents here, can we avoid doing
-//it again later in catagorize position?
 bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
 {
-    float       dz;
-    vec3_t      oldorg, neworg, end;
-    trace_t     trace;
-    int         i;
-    float       stepsize;
-    vec3_t      test;
-    int         contents;
-
-// try the move
+    vec3_t oldorg;
     VectorCopy(ent->s.origin, oldorg);
-    VectorAdd(ent->s.origin, move, neworg);
 
-// flying monsters don't step up
+    // flying monsters don't step up
     if (ent->flags & (FL_SWIM | FL_FLY)) {
+        vec3_t neworg;
+
+        // try the move
+        VectorAdd(ent->s.origin, move, neworg);
+
         // try one move with vertical motion, then one without
-        for (i = 0 ; i < 2 ; i++) {
+        for (int i = 0 ; i < 2 ; i++) {
             VectorAdd(ent->s.origin, move, neworg);
             if (i == 0 && ent->enemy) {
                 if (!ent->goalentity)
                     ent->goalentity = ent->enemy;
-                dz = ent->s.origin[2] - ent->goalentity->s.origin[2];
+                float dz = ent->s.origin[2] - ent->goalentity->s.origin[2];
                 if (ent->goalentity->client) {
                     if (dz > 40)
                         neworg[2] -= 8;
@@ -145,15 +148,16 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
                         neworg[2] += dz;
                 }
             }
-            trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, neworg, ent, MASK_MONSTERSOLID);
+            trace_t trace = SV_Trace(ent->s.origin, ent->mins, ent->maxs, neworg, ent, MASK_MONSTERSOLID);
 
             // fly monsters don't enter water voluntarily
             if (ent->flags & FL_FLY) {
                 if (!ent->waterlevel) {
+                    vec3_t test;
                     test[0] = trace.endpos[0];
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
-                    contents = SV_PointContents(test);
+                    int contents = SV_PointContents(test);
                     if (contents & MASK_WATER)
                         return false;
                 }
@@ -162,10 +166,11 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
             // swim monsters don't exit water voluntarily
             if (ent->flags & FL_SWIM) {
                 if (ent->waterlevel < 2) {
+                    vec3_t test;
                     test[0] = trace.endpos[0];
                     test[1] = trace.endpos[1];
                     test[2] = trace.endpos[2] + ent->mins[2] + 1;
-                    contents = SV_PointContents(test);
+                    int contents = SV_PointContents(test);
                     if (!(contents & MASK_WATER))
                         return false;
                 }
@@ -187,41 +192,26 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
         return false;
     }
 
-// push down from a step height above the wished position
-    if (!(ent->monsterinfo.aiflags & AI_NOSTEP))
-        stepsize = STEPSIZE;
-    else
-        stepsize = 1;
+    vec3_t neworg;
+    VectorCopy(ent->s.origin, neworg);
 
-    neworg[2] += stepsize;
-    VectorCopy(neworg, end);
-    end[2] -= stepsize * 2;
-
-    trace = SV_Trace(neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
-
-    if (trace.allsolid)
+    trace_t tr;
+    if (!StepSlideMove(neworg, ent->mins, ent->maxs, move, 1.0f, false, SV_movestep_StepSlideMoveTrace, SV_movestep_StepSlideMoveImpact, ent, &tr)) {
         return false;
-
-    if (trace.startsolid) {
-        neworg[2] -= stepsize;
-        trace = SV_Trace(neworg, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
-        if (trace.allsolid || trace.startsolid)
-            return false;
     }
 
+    VectorCopy(neworg, ent->s.origin);
+    
+    M_CatagorizePosition(ent);
 
-    // don't go in to water
-    if (ent->waterlevel == 0) {
-        test[0] = trace.endpos[0];
-        test[1] = trace.endpos[1];
-        test[2] = trace.endpos[2] + ent->mins[2] + 1;
-        contents = SV_PointContents(test);
+    VectorCopy(oldorg, ent->s.origin);
 
-        if (contents & MASK_WATER)
-            return false;
+    // don't go under water
+    if (ent->waterlevel == 3) {
+        return false;
     }
 
-    if (trace.fraction == 1) {
+    if (tr.fraction == 1) {
         // if monster had the ground pulled out, go ahead and fall
         if (ent->flags & FL_PARTIALGROUND) {
             VectorAdd(ent->s.origin, move, ent->s.origin);
@@ -237,7 +227,7 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
     }
 
 // check point traces down for dangling corners
-    VectorCopy(trace.endpos, ent->s.origin);
+    VectorCopy(neworg, ent->s.origin);
 
     if (!M_CheckBottom(ent)) {
         if (ent->flags & FL_PARTIALGROUND) {
@@ -257,8 +247,8 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
     if (ent->flags & FL_PARTIALGROUND) {
         ent->flags &= ~FL_PARTIALGROUND;
     }
-    ent->groundentity = trace.ent;
-    ent->groundentity_linkcount = trace.ent->linkcount;
+    ent->groundentity = tr.ent;
+    ent->groundentity_linkcount = tr.ent->linkcount;
 
 // the move is ok
     if (relink) {
@@ -335,14 +325,19 @@ bool SV_StepDirection(edict_t *ent, float yaw, float dist)
 
     VectorCopy(ent->s.origin, oldorigin);
     if (SV_movestep(ent, move, false)) {
-        delta = ent->s.angles[YAW] - ent->ideal_yaw;
-        if (delta > 45 && delta < 315) {
-            // not turned far enough, so don't take the step
-            VectorCopy(oldorigin, ent->s.origin);
+
+        // if we didn't move at least an 8th of the distance,
+        // we're probably stuck
+        if (VectorDistance(ent->s.origin, oldorigin) > dist * (1.f / 8.f)) {
+            delta = ent->s.angles[YAW] - ent->ideal_yaw;
+            if (delta > 45 && delta < 315) {
+                // not turned far enough, so don't take the step
+                VectorCopy(oldorigin, ent->s.origin);
+            }
+            SV_LinkEntity(ent);
+            G_TouchTriggers(ent);
+            return true;
         }
-        SV_LinkEntity(ent);
-        G_TouchTriggers(ent);
-        return true;
     }
     SV_LinkEntity(ent);
     G_TouchTriggers(ent);

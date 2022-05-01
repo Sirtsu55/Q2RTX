@@ -513,7 +513,6 @@ bool monster_start(edict_t *self)
 
     self->nextthink = level.time + 1;
     self->svflags |= SVF_MONSTER;
-    self->s.renderfx |= RF_FRAMELERP;
     self->takedamage = DAMAGE_AIM;
     self->air_finished_time = level.time + 12000;
     self->use = monster_use;

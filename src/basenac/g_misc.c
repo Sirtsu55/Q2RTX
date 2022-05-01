@@ -891,7 +891,6 @@ void SP_misc_explobox(edict_t *self)
 
     self->die = barrel_delay;
     self->takedamage = DAMAGE_YES;
-    self->monsterinfo.aiflags = AI_NOSTEP;
 
     self->touch = barrel_touch;
 
@@ -903,24 +902,6 @@ void SP_misc_explobox(edict_t *self)
 
 void SP_misc_explobox2(edict_t* self)
 {
-    if (deathmatch.integer) {
-        // auto-remove for deathmatch
-        G_FreeEdict(self);
-        return;
-    }
-
-    SV_ModelIndex(ASSET_MODEL_DEBRIS1);
-    SV_ModelIndex(ASSET_MODEL_DEBRIS2);
-    SV_ModelIndex(ASSET_MODEL_DEBRIS3);
-
-    self->solid = SOLID_BBOX;
-    self->movetype = MOVETYPE_STEP;
-
-    self->model = ASSET_MODEL_EXPLOBOX_SMALL;
-    self->s.modelindex = SV_ModelIndex(self->model);
-    VectorSet(self->mins, -16, -16, 0);
-    VectorSet(self->maxs, 16, 16, 32);
-
     if (!self->mass)
         self->mass = 185;
     if (!self->health)
@@ -928,14 +909,15 @@ void SP_misc_explobox2(edict_t* self)
     if (!self->dmg)
         self->dmg = 125;
 
-    self->die = barrel_delay;
-    self->takedamage = DAMAGE_YES;
-    self->monsterinfo.aiflags = AI_NOSTEP;
+    SP_misc_explobox(self);
 
-    self->touch = barrel_touch;
+    if (!self->inuse) {
+        return;
+    }
 
-    self->think = M_droptofloor;
-    self->nextthink = level.time + 200;
+    self->s.modelindex = SV_ModelIndex(ASSET_MODEL_EXPLOBOX_SMALL);
+    VectorSet(self->mins, -16, -16, 0);
+    VectorSet(self->maxs, 16, 16, 32);
 
     SV_LinkEntity(self);
 }
