@@ -34,11 +34,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // upper design bounds
 // leaffaces, leafbrushes, planes, and verts are still bounded by
 // 16 bit short limits
-#define     MAX_MAP_MODELS      1024
-#define     MAX_MAP_BRUSHES     8192
-#define     MAX_MAP_ENTITIES    2048
+#define     MAX_MAP_MODELS      UINT_MAX
+#define     MAX_MAP_BRUSHES     USHRT_MAX
 #define     MAX_MAP_ENTSTRING   0x40000
-#define     MAX_MAP_TEXINFO     8192
+#define     MAX_MAP_TEXINFO     USHRT_MAX
 
 #define     MAX_MAP_AREAS       256
 #define     MAX_MAP_AREAPORTALS 1024
