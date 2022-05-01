@@ -196,7 +196,7 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
     VectorCopy(ent->s.origin, neworg);
 
     trace_t tr;
-    if (!StepSlideMove(neworg, ent->mins, ent->maxs, move, 1.0f, false, SV_movestep_StepSlideMoveTrace, SV_movestep_StepSlideMoveImpact, ent, &tr)) {
+    if (!StepSlideMove(neworg, ent->mins, ent->maxs, move, 1.0f, false, !!ent->groundentity, SV_movestep_StepSlideMoveTrace, SV_movestep_StepSlideMoveImpact, ent, &tr)) {
         return false;
     }
 

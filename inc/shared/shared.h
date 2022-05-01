@@ -1774,7 +1774,7 @@ static inline bool SlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t vel
 #define STEPSIZE 18
 #define MIN_STEP_NORMAL 0.7f    // can't step up onto very steep slopes
 
-static inline bool StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t velocity, float time_left, bool copy_primal, StepSlideMoveTrace trace_func, StepSlideMoveImpact impact_func, void *callback_arg, trace_t *tr)
+static inline bool StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t velocity, float time_left, bool copy_primal, bool on_ground, StepSlideMoveTrace trace_func, StepSlideMoveImpact impact_func, void *callback_arg, trace_t *tr)
 {
     vec3_t      start_o, start_v;
     vec3_t      down_o, down_v;
@@ -1810,7 +1810,12 @@ static inline bool StepSlideMove(vec3_t origin, vec3_t mins, vec3_t maxs, vec3_t
 
     // push down the final amount
     VectorCopy(origin, down);
-    down[2] -= (STEPSIZE + STEPSIZE);
+    down[2] -= STEPSIZE;
+
+    // if we're already on ground, do the second step down
+    if (on_ground) {
+        down[2] -= STEPSIZE;
+    }
 
     trace_func(tr, origin, mins, maxs, down, callback_arg);
 

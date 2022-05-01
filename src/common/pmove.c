@@ -89,7 +89,7 @@ PM_StepSlideMove
 static void PM_StepSlideMove(void)
 {
     trace_t tr;
-    StepSlideMove(pml.origin, pm->mins, pm->maxs, pml.velocity, pml.frametime, !!pm->s.pm_time, Pm_StepSlideMove_Trace, Pm_StepSlideMove_Impact, NULL, &tr);
+    StepSlideMove(pml.origin, pm->mins, pm->maxs, pml.velocity, pml.frametime, !!pm->s.pm_time, pm->s.pm_flags & PMF_ON_GROUND, Pm_StepSlideMove_Trace, Pm_StepSlideMove_Impact, NULL, &tr);
 }
 
 /*
