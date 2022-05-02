@@ -328,7 +328,7 @@ bool SV_StepDirection(edict_t *ent, float yaw, float dist)
 
         // if we didn't move at least a 16th of the distance,
         // we're probably stuck
-        if (VectorDistance(ent->s.origin, oldorigin) > dist * (1.f / 16.f)) {
+        if (!dist || VectorDistance(ent->s.origin, oldorigin) >= dist * (1.f / 16.f)) {
             delta = ent->s.angles[YAW] - ent->ideal_yaw;
             if (delta > 45 && delta < 315) {
                 // not turned far enough, so don't take the step

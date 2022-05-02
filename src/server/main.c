@@ -1680,7 +1680,13 @@ static void SV_CheckAmbientEntities(void)
     // received ambients to the current ambients
     for (int32_t i = 0; i < ge->num_entities[ENT_AMBIENT]; i++) {
         entity_state_t *from = &sv.ambient_states[i];
-        const entity_state_t *to = &EDICT_NUM(OFFSET_AMBIENT_ENTITIES + i)->s;
+        const edict_t *ent = EDICT_NUM(OFFSET_AMBIENT_ENTITIES + i);
+        const entity_state_t *to = &ent->s;
+
+        if (ent->svflags & SVF_NOCLIENT) {
+            to = &nullEntityState;
+        }
+
         uint32_t bits = MSG_EntityWillWrite(from, to, 0);
 
         // something changed!
@@ -1688,6 +1694,7 @@ static void SV_CheckAmbientEntities(void)
         if (bits) {
             changes = true;
             *from = *to;
+            from->number = OFFSET_AMBIENT_ENTITIES + i;
         }
     }
 
