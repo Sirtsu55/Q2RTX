@@ -500,7 +500,7 @@ void SP_monster_fiend(edict_t *self)
     self->gib_health = -60;
     self->mass = 145;
     self->monsterinfo.aiflags |= AI_HIGH_TICK_RATE | AI_ALLOW_BLIND_FIRE;
-    self->yaw_speed = 40;
+    self->yaw_speed = 25;
     self->viewheight = 48;
 
     self->pain = fiend_pain;
