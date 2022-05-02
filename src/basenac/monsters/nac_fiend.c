@@ -261,6 +261,7 @@ void fiend_leap_wait(edict_t *self)
     if (self->groundentity) {
         self->monsterinfo.nextframe = FRAME_LEAP_FIRST + 20;
         self->monsterinfo.currentmove = &fiend_move_leap;
+        Com_Printf("touched ground while waiting, stopping leap\n");
     } else {
         vec3_t wall_normal;
 
@@ -275,6 +276,7 @@ void fiend_leap_wait(edict_t *self)
             VectorSet(self->velocity, 0, 0, 300.f);
 
             self->monsterinfo.currentmove = &fiend_move_leap_climb;
+            Com_Printf("climb\n");
         } else {
             self->monsterinfo.currentmove = &fiend_move_leap_loop;
         }
@@ -299,6 +301,8 @@ void fiend_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
         damage = 40 + 10 * random();
         T_Damage(other, self, self, self->velocity, point, normal, damage, damage, 0, MOD_UNKNOWN);
         self->touch = NULL;
+
+        Com_Printf("hit enemy, touch cancel\n");
     }
 
     M_CheckBottom(self);
@@ -306,12 +310,14 @@ void fiend_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
     if (self->groundentity) {
         self->touch = NULL;
         VectorClear(self->velocity);
+        Com_Printf("touched ground\n");
     }
 }
 
 void fiend_leap(edict_t *self)
 {
     VectorCopy(self->pos1, self->velocity);
+    Com_Printf("leaping @ %f %f %f\n", self->velocity[0], self->velocity[1], self->velocity[2]);
     vec3_t dir;
     VectorNormalize2(self->velocity, dir);
     self->velocity[2] += 24.f;
