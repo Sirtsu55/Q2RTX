@@ -261,7 +261,6 @@ void fiend_leap_wait(edict_t *self)
     if (self->groundentity) {
         self->monsterinfo.nextframe = FRAME_LEAP_FIRST + 20;
         self->monsterinfo.currentmove = &fiend_move_leap;
-        Com_Printf("touched ground while waiting, stopping leap\n");
     } else {
         vec3_t wall_normal;
 
@@ -276,7 +275,6 @@ void fiend_leap_wait(edict_t *self)
             VectorSet(self->velocity, 0, 0, 300.f);
 
             self->monsterinfo.currentmove = &fiend_move_leap_climb;
-            Com_Printf("climb\n");
         } else {
             self->monsterinfo.currentmove = &fiend_move_leap_loop;
         }
@@ -301,8 +299,6 @@ void fiend_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
         damage = 40 + 10 * random();
         T_Damage(other, self, self, self->velocity, point, normal, damage, damage, 0, MOD_UNKNOWN);
         self->touch = NULL;
-
-        Com_Printf("hit enemy, touch cancel\n");
     }
 
     M_CheckBottom(self);
@@ -310,14 +306,13 @@ void fiend_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
     if (self->groundentity) {
         self->touch = NULL;
         VectorClear(self->velocity);
-        Com_Printf("touched ground\n");
     }
 }
 
 void fiend_leap(edict_t *self)
 {
     VectorCopy(self->pos1, self->velocity);
-    Com_Printf("leaping @ %f %f %f\n", self->velocity[0], self->velocity[1], self->velocity[2]);
+
     vec3_t dir;
     VectorNormalize2(self->velocity, dir);
     self->velocity[2] += 24.f;
@@ -347,16 +342,12 @@ void fiend_attack(edict_t *self)
     vec3_t low, high;
     int solutions = solve_ballistic_arc1(self->s.origin, 600.f, self->enemy->s.origin, 800.f, low, high);
 
-    Com_WPrintf("%i solutions (%f %f %f, %f %f %f)\n", solutions, low[0], low[1], low[2], high[0], high[1], high[2]);
-
     if (!solutions) {
         float diff = self->enemy->s.origin[2] - self->s.origin[2];
 
         // if we're above them and we have no solution, give them an extra boost
         if (diff > 24.f) {
             int solutions = solve_ballistic_arc1(self->s.origin, 750.f, self->enemy->s.origin, 800.f, low, high);
-
-            Com_WPrintf("attempt 2 (higher): %i solutions (%f %f %f, %f %f %f)\n", solutions, low[0], low[1], low[2], high[0], high[1], high[2]);
 
             if (!solutions)
                 return;
@@ -365,8 +356,8 @@ void fiend_attack(edict_t *self)
             solutions = 1;
             AngleVectors(self->s.angles, low, NULL, NULL);
             VectorScale(low, 600.f, low);
-
-            Com_WPrintf("below them, so don't care\n");
+        } else {
+            return; // no solution
         }
     }
 
@@ -376,16 +367,13 @@ void fiend_attack(edict_t *self)
     if (SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
     {
         if (solutions != 2) {
-            Com_WPrintf("leap blocked\n");
             return;
         }
 
         VectorCopy(high, self->pos1);
-        Com_WPrintf("picking high\n");
     }
     else {
         VectorCopy(low, self->pos1);
-        Com_WPrintf("picking low\n");
     }
 
     self->monsterinfo.currentmove = &fiend_move_leap;
