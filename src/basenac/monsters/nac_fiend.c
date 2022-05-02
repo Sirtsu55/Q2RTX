@@ -347,12 +347,16 @@ void fiend_attack(edict_t *self)
     vec3_t low, high;
     int solutions = solve_ballistic_arc1(self->s.origin, 600.f, self->enemy->s.origin, 800.f, low, high);
 
+    Com_WPrintf("%i solutions (%f %f %f, %f %f %f)\n", solutions, low[0], low[1], low[2], high[0], high[1], high[2]);
+
     if (!solutions) {
         float diff = self->enemy->s.origin[2] - self->s.origin[2];
 
         // if we're above them and we have no solution, give them an extra boost
         if (diff > 24.f) {
             int solutions = solve_ballistic_arc1(self->s.origin, 750.f, self->enemy->s.origin, 800.f, low, high);
+
+            Com_WPrintf("attempt 2 (higher): %i solutions (%f %f %f, %f %f %f)\n", solutions, low[0], low[1], low[2], high[0], high[1], high[2]);
 
             if (!solutions)
                 return;
@@ -361,6 +365,8 @@ void fiend_attack(edict_t *self)
             solutions = 1;
             AngleVectors(self->s.angles, low, NULL, NULL);
             VectorScale(low, 600.f, low);
+
+            Com_WPrintf("below them, so don't care\n");
         }
     }
 
@@ -369,13 +375,18 @@ void fiend_attack(edict_t *self)
 
     if (SV_Trace(self->s.origin, self->mins, self->maxs, o, self, MASK_SHOT).fraction != 1.0f)
     {
-        if (solutions != 2)
+        if (solutions != 2) {
+            Com_WPrintf("leap blocked\n");
             return;
+        }
 
         VectorCopy(high, self->pos1);
+        Com_WPrintf("picking high\n");
     }
-    else
+    else {
         VectorCopy(low, self->pos1);
+        Com_WPrintf("picking low\n");
+    }
 
     self->monsterinfo.currentmove = &fiend_move_leap;
     SV_StartSound(self, CHAN_VOICE, sound_jump, 1, ATTN_NORM, 0);
