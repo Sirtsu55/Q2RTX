@@ -551,7 +551,7 @@ void monster_start_go(edict_t *self)
         return;
 
     // plop
-    if (!(self->flags & FL_FLY | FL_SWIM)) {
+    if (!(self->flags & (FL_FLY | FL_SWIM))) {
         M_droptofloor(self);
 
         if (self->groundentity)

@@ -17,6 +17,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "g_local.h"
 
+enum TriggerSpawnflags
+{
+    SPAWNFLAG_MONSTER = 1 << 0,
+    SPAWNFLAG_NOT_PLAYER = 1 << 1,
+    SPAWNFLAG_START_OFF = 1 << 2,
+    SPAWNFLAG_SHOOTABLE = 1 << 3,
+    SPAWNFLAG_TOGGLE = 1 << 4
+};
 
 void InitTrigger(edict_t *self)
 {
@@ -26,7 +34,11 @@ void InitTrigger(edict_t *self)
     self->solid = SOLID_TRIGGER;
     self->movetype = MOVETYPE_NONE;
     self->svflags = SVF_NOCLIENT;
-    SV_SetBrushModel(self, self->model);
+
+    if (self->model && *self->model) {
+        SV_SetBrushModel(self, self->model);
+    }
+
     SV_LinkEntity(self);
 }
 
@@ -69,13 +81,14 @@ void Use_Multi(edict_t *ent, edict_t *other, edict_t *activator)
 void Touch_Multi(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
     if (other->client) {
-        if (self->spawnflags & 2)
+        if (self->spawnflags & SPAWNFLAG_NOT_PLAYER)
             return;
     } else if (other->svflags & SVF_MONSTER) {
-        if (!(self->spawnflags & 1))
+        if (!(self->spawnflags & SPAWNFLAG_MONSTER))
             return;
-    } else
+    } else {
         return;
+    }
 
     if (!VectorEmpty(self->movedir)) {
         vec3_t  forward;
@@ -89,7 +102,7 @@ void Touch_Multi(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *sur
     multi_trigger(self);
 }
 
-/*QUAKED trigger_multiple (.5 .5 .5) ? MONSTER NOT_PLAYER TRIGGERED
+/*QUAKED trigger_multiple (.5 .5 .5) ? MONSTER NOT_PLAYER START_OFF SHOOTABLE TOGGLE
 Variable sized repeatable trigger.  Must be targeted at one or more entities.
 If "delay" is set, the trigger waits some time after activating before firing.
 "wait" : Seconds between triggerings. (.2 default)
@@ -100,11 +113,25 @@ sounds
 4)
 set "message" to text string
 */
-void trigger_enable(edict_t *self, edict_t *other, edict_t *activator)
+void trigger_toggle(edict_t *self, edict_t *other, edict_t *activator)
 {
-    self->solid = SOLID_TRIGGER;
-    self->use = Use_Multi;
+    if (self->solid == SOLID_NOT) {
+        self->solid = (self->spawnflags & SPAWNFLAG_SHOOTABLE) ? SOLID_BBOX : SOLID_TRIGGER;
+    } else {
+        self->solid = SOLID_NOT;
+    }
+
+    if (!(self->spawnflags & SPAWNFLAG_TOGGLE)) {
+        self->use = Use_Multi;
+    }
+
     SV_LinkEntity(self);
+}
+
+void trigger_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+    self->activator = attacker;
+    multi_trigger(self);
 }
 
 void SP_trigger_multiple(edict_t *ent)
@@ -116,22 +143,40 @@ void SP_trigger_multiple(edict_t *ent)
 
     if (!ent->wait)
         ent->wait = 0.2f;
-    ent->touch = Touch_Multi;
+
     ent->movetype = MOVETYPE_NONE;
     ent->svflags |= SVF_NOCLIENT;
 
-    if (ent->spawnflags & 4) {
+    if (ent->model && *ent->model) {
+        SV_SetBrushModel(ent, ent->model);
+    }
+
+    if (ent->spawnflags & SPAWNFLAG_SHOOTABLE) {
+        if (!ent->health) {
+            ent->health = 1;
+            ent->die = trigger_die;
+        }
+    } else {
+        ent->touch = Touch_Multi;
+    }
+
+    if (ent->spawnflags & SPAWNFLAG_START_OFF) {
         ent->solid = SOLID_NOT;
-        ent->use = trigger_enable;
+    } else if (ent->spawnflags & SPAWNFLAG_SHOOTABLE) {
+        ent->solid = SOLID_BBOX;
     } else {
         ent->solid = SOLID_TRIGGER;
+    }
+
+    if (ent->spawnflags & SPAWNFLAG_TOGGLE) {
+        ent->use = trigger_toggle;
+    } else {
         ent->use = Use_Multi;
     }
 
     if (!VectorEmpty(ent->s.angles))
         G_SetMovedir(ent->s.angles, ent->movedir);
 
-    SV_SetBrushModel(ent, ent->model);
     SV_LinkEntity(ent);
 }
 

@@ -604,9 +604,9 @@ extern void train_use(void);
 extern void train_wait(void);
 extern void trigger_counter_use(void);
 extern void trigger_crosslevel_trigger_use(void);
+extern void trigger_die(void);
 extern void trigger_elevator_init(void);
 extern void trigger_elevator_use(void);
-extern void trigger_enable(void);
 extern void trigger_gravity_touch(void);
 extern void trigger_key_use(void);
 extern void trigger_monsterjump_toggle(void);
@@ -614,6 +614,7 @@ extern void trigger_monsterjump_touch(void);
 extern void trigger_push_touch(void);
 extern void trigger_push_use(void);
 extern void trigger_relay_use(void);
+extern void trigger_toggle(void);
 extern void turret_blocked(void);
 extern void turret_breach_finish_init(void);
 extern void turret_breach_think(void);
@@ -786,11 +787,11 @@ const save_ptr_t save_ptrs[] = {
 { P_use, trigger_counter_use },
 { P_use, trigger_crosslevel_trigger_use },
 { P_use, trigger_elevator_use },
-{ P_use, trigger_enable },
 { P_use, trigger_key_use },
 { P_use, trigger_monsterjump_toggle },
 { P_use, trigger_push_use },
 { P_use, trigger_relay_use },
+{ P_use, trigger_toggle },
 { P_use, Use_Areaportal },
 { P_use, Use_Boss3 },
 { P_use, Use_Item },
@@ -863,6 +864,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, soldier_die },
 { P_die, supertank_die },
 { P_die, tank_die },
+{ P_die, trigger_die },
 { P_die, turret_driver_die },
 { P_die, vore_die },
 { P_moveinfo_endfunc, button_done },
