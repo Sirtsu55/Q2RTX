@@ -550,6 +550,15 @@ void monster_start_go(edict_t *self)
     if (self->health <= 0)
         return;
 
+    // plop
+    if (!(self->flags & FL_FLY | FL_SWIM)) {
+        M_droptofloor(self);
+
+        if (self->groundentity)
+            if (!M_walkmove(self, 0, 0))
+                Com_WPrintf("%s in solid at %s\n", self->classname, vtos(self->s.origin));
+    }
+
     if (self->monsterinfo.aiflags & AI_HIGH_TICK_RATE)
         self->yaw_speed /= 2;
 
@@ -620,14 +629,6 @@ void monster_start_go(edict_t *self)
 
 void walkmonster_start_go(edict_t *self)
 {
-    if (!(self->spawnflags & 2) && level.time < 1000) {
-        M_droptofloor(self);
-
-        if (self->groundentity)
-            if (!M_walkmove(self, 0, 0))
-                Com_WPrintf("%s in solid at %s\n", self->classname, vtos(self->s.origin));
-    }
-
     if (!self->yaw_speed)
         self->yaw_speed = 20;
     self->viewheight = 25;

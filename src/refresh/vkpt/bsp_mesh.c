@@ -1237,8 +1237,6 @@ collect_sky_and_lava_light_polys(bsp_mesh_t *wm, bsp_t* bsp)
 
 		if (belongs_to_model(bsp, surf))
 			continue;
-		if (!surf->texinfo)
-			continue;
 
 		if (!surf->texinfo)
 			continue;
