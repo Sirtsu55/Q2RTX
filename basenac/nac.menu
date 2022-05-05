@@ -527,11 +527,11 @@ begin weapons
     style --compact
     title "Weapon and Item Bindings"
     blank
-    bind "blaster" "use Axe"
+    bind "axe" "use Axe"
     bind "shotgun" "use Shotgun"
     bind "super shotgun" "use Super Shotgun"
     bind "machinegun" "use Machinegun"
-    bind "chaingun" "use Perforator"
+    bind "perforator" "use Perforator"
     bind "grenade launcher" "use Grenade Launcher"
     bind "rocket launcher" "use Rocket Launcher"
     bind "hyperblaster" "use HyperBlaster"
