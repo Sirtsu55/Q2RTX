@@ -47,6 +47,11 @@ void InitTrigger(edict_t *self)
 void multi_wait(edict_t *ent)
 {
     ent->nextthink = 0;
+
+    if (ent->spawnflags & SPAWNFLAG_SHOOTABLE) {
+        ent->solid = SOLID_BBOX;
+        ent->takedamage = DAMAGE_YES;
+    }
 }
 
 
@@ -132,6 +137,9 @@ void trigger_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
     self->activator = attacker;
     multi_trigger(self);
+    self->solid = SOLID_NOT;
+    self->health = self->max_health;
+    self->takedamage = DAMAGE_NO;
 }
 
 void SP_trigger_multiple(edict_t *ent)
@@ -154,8 +162,11 @@ void SP_trigger_multiple(edict_t *ent)
     if (ent->spawnflags & SPAWNFLAG_SHOOTABLE) {
         if (!ent->health) {
             ent->health = 1;
-            ent->die = trigger_die;
         }
+        ent->max_health = ent->health;
+        ent->die = trigger_die;
+        ent->takedamage = DAMAGE_YES;
+        ent->svflags |= SVF_DEADMONSTER;
     } else {
         ent->touch = Touch_Multi;
     }
