@@ -194,29 +194,6 @@ SET(SRC_REFRESH
 	refresh/stb/stb.c
 )
 
-
-SET(SRC_GL
-	refresh/gl/draw.c
-	refresh/gl/hq2x.c
-	refresh/gl/texture.c
-	refresh/gl/main.c
-	refresh/gl/mesh.c
-	refresh/gl/models.c
-	refresh/gl/sky.c
-	refresh/gl/state.c
-	refresh/gl/surf.c
-	refresh/gl/tess.c
-	refresh/gl/world.c
-	refresh/gl/qgl.c
-	refresh/gl/legacy.c
-	refresh/gl/shader.c
-)
-
-SET(HEADERS_GL
-	refresh/gl/arbfp.h
-	refresh/gl/gl.h
-)
-
 SET(SRC_SHARED
 	shared/m_flash.c
 	shared/shared.c
@@ -433,11 +410,6 @@ IF (TARGET client)
     ENDIF()
 
     add_dependencies(client shaders)
-
-    IF (CONFIG_GL_RENDERER)
-        TARGET_SOURCES(client PRIVATE ${SRC_GL} ${HEADERS_GL})
-        TARGET_COMPILE_DEFINITIONS(client PRIVATE REF_GL=1 USE_REF=1)
-    ENDIF()
 
     IF (CONFIG_VKPT_RENDERER)
         TARGET_SOURCES(client PRIVATE ${SRC_VKPT} ${HEADERS_VKPT})

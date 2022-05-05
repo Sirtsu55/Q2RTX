@@ -748,7 +748,7 @@ vkpt_final_blit_filtered(VkCommandBuffer cmd_buf)
 	return VK_SUCCESS;
 }
 
-void R_SetClipRect_RTX(const clipRect_t *clip) 
+void R_SetClipRect(const clipRect_t *clip) 
 { 
 	if (clip)
 	{
@@ -762,46 +762,46 @@ void R_SetClipRect_RTX(const clipRect_t *clip)
 }
 
 void
-R_ClearColor_RTX(void)
+R_ClearColor(void)
 {
 	draw.colors[0].u32 = U32_WHITE;
 	draw.colors[1].u32 = U32_WHITE;
 }
 
 void
-R_SetAlpha_RTX(float alpha)
+R_SetAlpha(float alpha)
 {
     alpha = powf(fabsf(alpha), 0.4545f); // un-sRGB the alpha
 	draw.colors[0].u8[3] = draw.colors[1].u8[3] = alpha * 255;
 }
 
 void
-R_SetAlphaScale_RTX(float alpha)
+R_SetAlphaScale(float alpha)
 {
 	draw.alpha_scale = alpha;
 }
 
 void
-R_SetColor_RTX(uint32_t color)
+R_SetColor(uint32_t color)
 {
 	draw.colors[0].u32   = color;
 	draw.colors[1].u8[3] = draw.colors[0].u8[3];
 }
 
 void
-R_LightPoint_RTX(vec3_t origin, vec3_t light)
+R_LightPoint(vec3_t origin, vec3_t light)
 {
 	VectorSet(light, 1, 1, 1);
 }
 
 void
-R_SetScale_RTX(float scale)
+R_SetScale(float scale)
 {
 	draw.scale = scale;
 }
 
 void
-R_DrawStretchPic_RTX(int x, int y, int w, int h, qhandle_t pic)
+R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic)
 {
 	enqueue_stretch_pic(
 		x,    y,    w,    h,
@@ -810,7 +810,7 @@ R_DrawStretchPic_RTX(int x, int y, int w, int h, qhandle_t pic)
 }
 
 void
-R_DrawPic_RTX(int x, int y, qhandle_t pic)
+R_DrawPic(int x, int y, qhandle_t pic)
 {
 	image_t *image = IMG_ForHandle(pic);
 	R_DrawStretchPic(x, y, image->width, image->height, pic);
@@ -819,7 +819,7 @@ R_DrawPic_RTX(int x, int y, qhandle_t pic)
 #define DIV64 (1.0f / 64.0f)
 
 void
-R_TileClear_RTX(int x, int y, int w, int h, qhandle_t pic)
+R_TileClear(int x, int y, int w, int h, qhandle_t pic)
 {
 	enqueue_stretch_pic(x, y, w, h,
 		x * DIV64, y * DIV64, (x + w) * DIV64, (y + h) * DIV64,
@@ -827,7 +827,7 @@ R_TileClear_RTX(int x, int y, int w, int h, qhandle_t pic)
 }
 
 void
-R_DrawFill8_RTX(int x, int y, int w, int h, int c)
+R_DrawFill8(int x, int y, int w, int h, int c)
 {
 	if(!w || !h)
 		return;
@@ -836,7 +836,7 @@ R_DrawFill8_RTX(int x, int y, int w, int h, int c)
 }
 
 void
-R_DrawFill32_RTX(int x, int y, int w, int h, uint32_t color)
+R_DrawFill32(int x, int y, int w, int h, uint32_t color)
 {
 	if(!w || !h)
 		return;
@@ -869,13 +869,13 @@ draw_char(int x, int y, int flags, int c, qhandle_t font)
 }
 
 void
-R_DrawChar_RTX(int x, int y, int flags, int c, qhandle_t font)
+R_DrawChar(int x, int y, int flags, int c, qhandle_t font)
 {
 	draw_char(x, y, flags, c & 255, font);
 }
 
 int
-R_DrawString_RTX(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font)
+R_DrawString(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font)
 {
 	while(maxlen-- && *s) {
 		byte c = *s++;

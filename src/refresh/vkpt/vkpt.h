@@ -792,8 +792,6 @@ typedef struct maliasmesh_s {
 #define TESS_MAX_VERTICES   16384
 #define TESS_MAX_INDICES    (3 * TESS_MAX_VERTICES)
 
-#define QGL_INDEX_TYPE  GLuint
-
 typedef struct {
     color_t     colors[2]; // 0 - actual color, 1 - transparency (for text drawing)
     float scale;
@@ -824,31 +822,31 @@ static inline void end_perf_marker(VkCommandBuffer command_buffer, int index)
 #define BEGIN_PERF_MARKER(command_buffer, name)  begin_perf_marker(command_buffer, name, #name)
 #define END_PERF_MARKER(command_buffer, name)    end_perf_marker(command_buffer, name)
 
-void R_SetClipRect_RTX(const clipRect_t *clip);
-void R_ClearColor_RTX(void);
-void R_SetAlpha_RTX(float alpha);
-void R_SetAlphaScale_RTX(float alpha);
-void R_SetColor_RTX(uint32_t color);
-void R_LightPoint_RTX(vec3_t origin, vec3_t light);
-void R_SetScale_RTX(float scale);
-void R_DrawStretchPic_RTX(int x, int y, int w, int h, qhandle_t pic);
-void R_DrawPic_RTX(int x, int y, qhandle_t pic);
-void R_TileClear_RTX(int x, int y, int w, int h, qhandle_t pic);
-void R_DrawFill8_RTX(int x, int y, int w, int h, int c);
-void R_DrawFill32_RTX(int x, int y, int w, int h, uint32_t color);
-void R_DrawChar_RTX(int x, int y, int flags, int c, qhandle_t font);
-int R_DrawString_RTX(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
-bool R_InterceptKey_RTX(unsigned key, bool down);
+void R_SetClipRect(const clipRect_t *clip);
+void R_ClearColor(void);
+void R_SetAlpha(float alpha);
+void R_SetAlphaScale(float alpha);
+void R_SetColor(uint32_t color);
+void R_LightPoint(vec3_t origin, vec3_t light);
+void R_SetScale(float scale);
+void R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic);
+void R_DrawPic(int x, int y, qhandle_t pic);
+void R_TileClear(int x, int y, int w, int h, qhandle_t pic);
+void R_DrawFill8(int x, int y, int w, int h, int c);
+void R_DrawFill32(int x, int y, int w, int h, uint32_t color);
+void R_DrawChar(int x, int y, int flags, int c, qhandle_t font);
+int R_DrawString(int x, int y, int flags, size_t maxlen, const char *s, qhandle_t font);
+bool R_InterceptKey(unsigned key, bool down);
 
-void IMG_Load_RTX(image_t *image, byte *pic);
-void IMG_Unload_RTX(image_t *image);
-byte *IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes);
-float *IMG_ReadPixelsHDR_RTX(int *width, int *height);
+void IMG_Load(image_t *image, byte *pic);
+void IMG_Unload(image_t *image);
+byte *IMG_ReadPixels(int *width, int *height, int *rowbytes);
+float *IMG_ReadPixelsHDR(int *width, int *height);
 
-int MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name);
-int MOD_LoadMD3_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-int MOD_LoadIQM_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name);
-void MOD_Reference_RTX(model_t *model);
+int MOD_LoadMD2(model_t *model, const void *rawdata, size_t length, const char* mod_name);
+int MOD_LoadMD3(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+int MOD_LoadIQM(model_t *model, const void *rawdata, size_t length, const char* mod_name);
+void MOD_Reference(model_t *model);
 
 #endif  /*__VKPT_H__*/
 

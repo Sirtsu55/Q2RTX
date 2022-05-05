@@ -177,7 +177,7 @@ void vkpt_freecam_update(float frame_time)
 	}
 }
 
-bool R_InterceptKey_RTX(unsigned key, bool down)
+bool R_InterceptKey(unsigned key, bool down)
 {
 	if (cl_paused->integer != 2 || !sv_paused->integer)
 		return false;

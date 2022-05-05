@@ -50,8 +50,6 @@ typedef struct m_player_s {
 
 static m_player_t    m_player;
 
-extern cvar_t       *vid_rtx;
-
 static const char *handedness[] = {
     "right",
     "left",
@@ -334,16 +332,9 @@ void M_Menu_PlayerConfig(void)
     m_player.menu.free = Free;
 	m_player.menu.image = uis.backgroundHandle;
 
-	if (cls.ref_type == REF_TYPE_VKPT)
-	{
-		// Q2RTX: make the player menu transparent so that we can see 
-		// the model below: all 2D stuff is rendered after 3D, in stretch_pics.
-		m_player.menu.color.u32 = 0;
-	}
-	else
-	{
-		m_player.menu.color.u32 = MakeColor(0, 0, 0, 255);
-	}
+	// Q2RTX: make the player menu transparent so that we can see 
+	// the model below: all 2D stuff is rendered after 3D, in stretch_pics.
+	m_player.menu.color.u32 = 0;
 
 	m_player.menu.transparent = uis.transparent;
 
@@ -363,15 +354,8 @@ void M_Menu_PlayerConfig(void)
     m_player.refdef.entities = m_player.entities;
     m_player.refdef.rdflags = RDF_NOWORLDMODEL;
 
-	if (cls.ref_type == REF_TYPE_VKPT)
-	{
-		m_player.refdef.num_dlights = sizeof(dlights) / sizeof(*dlights);
-		m_player.refdef.dlights = dlights;
-	}
-	else
-	{
-		m_player.refdef.num_dlights = 0;
-	}
+	m_player.refdef.num_dlights = sizeof(dlights) / sizeof(*dlights);
+	m_player.refdef.dlights = dlights;
 
     m_player.name.generic.type = MTYPE_FIELD;
     m_player.name.generic.flags = QMF_HASFOCUS;

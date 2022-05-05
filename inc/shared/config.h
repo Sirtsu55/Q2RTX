@@ -35,18 +35,14 @@
 #define USE_MAPCHECKSUM 1
 
 #if USE_CLIENT
-//#define VID_REF "gl"
 #define VID_MODELIST "640x480 800x600 1024x768 1280x720"
 #define VID_GEOMETRY "1280x720"
-//#define REF_GL 1
-//#define USE_REF REF_GL
 #define USE_UI 1
 #define USE_PNG 1
 #define USE_JPG 1
 #define USE_TGA 1
 #define USE_MD3 1
 #define USE_DLIGHTS 1
-//#define USE_CURL 0
 #define USE_AUTOREPLY 1
 #endif
 

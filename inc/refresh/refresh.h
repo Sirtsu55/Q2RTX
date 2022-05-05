@@ -102,9 +102,6 @@ typedef enum dlight_type_e
 
 typedef struct dlight_s {
     vec3_t  origin;
-#if USE_REF == REF_GL
-    vec3_t  transformed;
-#endif
     vec3_t  color;
     float   intensity;
 	float   radius;
@@ -244,18 +241,11 @@ typedef enum {
     IT_MAX
 } imagetype_t;
 
-typedef enum ref_type_e
-{
-    REF_TYPE_NONE = 0,
-    REF_TYPE_GL,
-    REF_TYPE_VKPT
-} ref_type_t;
-
 // called when the library is loaded
-extern ref_type_t  (*R_Init)(bool total);
+bool        R_Init(bool total);
 
 // called before the library is unloaded
-extern void        (*R_Shutdown)(bool total);
+void        R_Shutdown(bool total);
 
 // All data that will be used in a level should be
 // registered before rendering any frames to prevent disk hits,
@@ -270,7 +260,7 @@ extern void        (*R_Shutdown)(bool total);
 // are flood filled to eliminate mip map edge errors, and pics have
 // an implicit "pics/" prepended to the name. (a pic name that starts with a
 // slash will not use the "pics/" prefix or the ".pcx" postfix)
-extern void    (*R_BeginRegistration)(const char *map);
+void    R_BeginRegistration(const char *map);
 qhandle_t R_RegisterModel(const char *name);
 qhandle_t R_RegisterImage(const char *name, imagetype_t type,
                           imageflags_t flags, int *err_p);
@@ -278,50 +268,43 @@ qhandle_t R_RegisterRawImage(const char *name, int width, int height, byte* pic,
                           imageflags_t flags);
 void R_UnregisterImage(qhandle_t handle);
 
-extern void    (*R_SetSky)(const char *name, float rotate, vec3_t axis);
-extern void    (*R_EndRegistration)(void);
+void    R_SetSky(const char *name, float rotate, vec3_t axis);
+void    R_EndRegistration(void);
 
 #define R_RegisterPic(name)     R_RegisterImage(name, IT_PIC, IF_PERMANENT | IF_SRGB, NULL)
 #define R_RegisterPic2(name)    R_RegisterImage(name, IT_PIC, IF_SRGB, NULL)
 #define R_RegisterFont(name)    R_RegisterImage(name, IT_FONT, IF_PERMANENT | IF_SRGB, NULL)
 #define R_RegisterSkin(name)    R_RegisterImage(name, IT_SKIN, IF_SRGB, NULL)
 
-extern void    (*R_RenderFrame)(refdef_t *fd);
-extern void    (*R_LightPoint)(vec3_t origin, vec3_t light);
+void    R_RenderFrame(refdef_t *fd);
+void    R_LightPoint(vec3_t origin, vec3_t light);
 
-extern void    (*R_ClearColor)(void);
-extern void    (*R_SetAlpha)(float clpha);
-extern void    (*R_SetAlphaScale)(float alpha);
-extern void    (*R_SetColor)(uint32_t color);
-extern void    (*R_SetClipRect)(const clipRect_t *clip);
+void    R_ClearColor(void);
+void    R_SetAlpha(float clpha);
+void    R_SetAlphaScale(float alpha);
+void    R_SetColor(uint32_t color);
+void    R_SetClipRect(const clipRect_t *clip);
 float   R_ClampScale(cvar_t *var);
-extern void    (*R_SetScale)(float scale);
-extern void    (*R_DrawChar)(int x, int y, int flags, int ch, qhandle_t font);
-extern int     (*R_DrawString)(int x, int y, int flags, size_t maxChars,
+void    R_SetScale(float scale);
+void    R_DrawChar(int x, int y, int flags, int ch, qhandle_t font);
+int     R_DrawString(int x, int y, int flags, size_t maxChars,
                      const char *string, qhandle_t font);  // returns advanced x coord
 bool R_GetPicSize(int *w, int *h, qhandle_t pic);   // returns transparency bit
-extern void    (*R_DrawPic)(int x, int y, qhandle_t pic);
-extern void    (*R_DrawStretchPic)(int x, int y, int w, int h, qhandle_t pic);
-extern void    (*R_TileClear)(int x, int y, int w, int h, qhandle_t pic);
-extern void    (*R_DrawFill8)(int x, int y, int w, int h, int c);
-extern void    (*R_DrawFill32)(int x, int y, int w, int h, uint32_t color);
+void    R_DrawPic(int x, int y, qhandle_t pic);
+void    R_DrawStretchPic(int x, int y, int w, int h, qhandle_t pic);
+void    R_TileClear(int x, int y, int w, int h, qhandle_t pic);
+void    R_DrawFill8(int x, int y, int w, int h, int c);
+void    R_DrawFill32(int x, int y, int w, int h, uint32_t color);
 
 // video mode and refresh state management entry points
-extern void    (*R_BeginFrame)(void);
-extern void    (*R_EndFrame)(void);
-extern void    (*R_ModeChanged)(int width, int height, int flags, int rowbytes, void *pixels);
+void    R_BeginFrame(void);
+void    R_EndFrame(void);
+void    R_ModeChanged(int width, int height, int flags, int rowbytes, void *pixels);
 
 // add decal to ring buffer
-extern void    (*R_AddDecal)(decal_t *d);
+void    R_AddDecal(decal_t *d);
 
-extern bool    (*R_InterceptKey)(unsigned key, bool down);
-extern bool    (*R_IsHDR)();
-
-#if REF_GL
-void R_RegisterFunctionsGL();
-#endif
-#if REF_VKPT
-void R_RegisterFunctionsRTX();
-#endif
+bool    R_InterceptKey(unsigned key, bool down);
+bool    R_IsHDR();
 
 #endif // REFRESH_H

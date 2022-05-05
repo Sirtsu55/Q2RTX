@@ -83,12 +83,6 @@ cvar_t  *info_hand;
 cvar_t  *info_gender;
 cvar_t  *info_uf;
 
-#if USE_REF == REF_GL
-extern cvar_t *gl_modulate_world;
-extern cvar_t *gl_modulate_entities;
-extern cvar_t *gl_brightness;
-#endif
-
 client_static_t cls;
 client_state_t  cl;
 
@@ -618,13 +612,6 @@ void CL_ClearState(void)
 
     // unprotect game cvar
     fs_game->flags &= ~CVAR_ROM;
-
-#if USE_REF == REF_GL
-    // unprotect our custom modulate cvars
-    if(gl_modulate_world) gl_modulate_world->flags &= ~CVAR_CHEAT;
-    if(gl_modulate_entities) gl_modulate_entities->flags &= ~CVAR_CHEAT;
-    if(gl_brightness) gl_brightness->flags &= ~CVAR_CHEAT;
-#endif
 }
 
 /*
@@ -1557,15 +1544,6 @@ Called after all downloads are done. Not used for demos.
 */
 void CL_Begin(void)
 {
-#if USE_REF == REF_GL
-    if (!Q_stricmp(cl.gamedir, "gloom")) {
-        // cheat protect our custom modulate cvars
-        gl_modulate_world->flags |= CVAR_CHEAT;
-        gl_modulate_entities->flags |= CVAR_CHEAT;
-        gl_brightness->flags |= CVAR_CHEAT;
-    }
-#endif
-
     Cvar_FixCheats();
 
     CL_PrepRefresh();

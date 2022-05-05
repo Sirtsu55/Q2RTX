@@ -352,7 +352,7 @@ typedef struct client_static_s {
     active_t    active;
 
     bool        ref_initialized;
-    ref_type_t  ref_type;
+    bool        ref_type;
     unsigned    disable_screen;
 
     int         userinfo_modified;

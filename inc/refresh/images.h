@@ -34,13 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define R_Malloc(size)      Z_TagMalloc(size, TAG_RENDERER)
 #define R_Mallocz(size)     Z_TagMallocz(size, TAG_RENDERER)
 
-#if USE_REF == REF_GL
-#define IMG_AllocPixels(x)  FS_AllocTempMem(x)
-#define IMG_FreePixels(x)   FS_FreeTempMem(x)
-#else
 #define IMG_AllocPixels(x)  R_Malloc(x)
 #define IMG_FreePixels(x)   Z_Free(x)
-#endif
 
 #define LUMINANCE(r, g, b) ((r) * 0.2126f + (g) * 0.7152f + (b) * 0.0722f)
 
@@ -71,10 +66,6 @@ typedef struct image_s {
 	char            filepath[MAX_QPATH]; // actual path loaded, with correct format extension
 	int             is_srgb;
 	uint64_t        last_modified;
-#if REF_GL
-    unsigned        texnum; // gl texture binding
-    float           sl, sh, tl, th;
-#endif
 #if REF_VKPT
     byte            *pix_data; // todo: add miplevels
     vec3_t          light_color; // use this color if this is a light source
@@ -82,8 +73,6 @@ typedef struct image_s {
 	vec2_t          max_light_texcoord;
 	bool            entire_texture_emissive;
 	bool            processing_complete;
-#else
-    byte            *pixels[4]; // mip levels
 #endif
 } image_t;
 
@@ -118,10 +107,10 @@ void IMG_ResampleTexture(const byte *in, int inwidth, int inheight,
 void IMG_MipMap(byte *out, byte *in, int width, int height);
 
 // these are implemented in src/refresh/[gl,sw]/images.c
-extern void (*IMG_Unload)(image_t *image);
-extern void (*IMG_Load)(image_t *image, byte *pic);
-extern byte* (*IMG_ReadPixels)(int *width, int *height, int *rowbytes);
-extern float* (*IMG_ReadPixelsHDR)(int *width, int *height);
+void IMG_Unload(image_t *image);
+void IMG_Load(image_t *image, byte *pic);
+byte* IMG_ReadPixels(int *width, int *height, int *rowbytes);
+float* IMG_ReadPixelsHDR(int *width, int *height);
 
 #endif // IMAGES_H
 

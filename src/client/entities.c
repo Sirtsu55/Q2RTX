@@ -746,12 +746,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             V_AddLight(ent.origin, 225, -1.0f, -1.0f, -1.0f);
 
         if (!cl.thirdPersonView)
-        {
-			if(cls.ref_type == REF_TYPE_VKPT)
-                base_entity_flags |= RF_VIEWERMODEL;    // only draw from mirrors
-            else
-                goto skip;
-        }
+            base_entity_flags |= RF_VIEWERMODEL;    // only draw from mirrors
 
         // don't tilt the model - looks weird
         ent.angles[0] = 0.f;
@@ -792,7 +787,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
     ent.flags |= base_entity_flags;
 
     // in rtx mode, the base entity has the renderfx for shells
-	if ((effects & EF_COLOR_SHELL) && cls.ref_type == REF_TYPE_VKPT) {
+	if (effects & EF_COLOR_SHELL) {
         renderfx = adjust_shell_fx(renderfx);
         ent.flags |= renderfx;
     }
@@ -819,14 +814,6 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
 
 			V_AddSphereLight(origin, 500.f, 1.6f * brightness, 1.0f * brightness, 0.2f * brightness, 5.f);
         }
-    }
-
-    // color shells generate a separate entity for the main model
-    if ((effects & EF_COLOR_SHELL) && cls.ref_type != REF_TYPE_VKPT) {
-        renderfx = adjust_shell_fx(renderfx);
-        ent.flags = renderfx | RF_TRANSLUCENT | base_entity_flags;
-        ent.alpha = 0.30f;
-        V_AddEntity(&ent);
     }
 
     ent.skin = 0;       // never use a custom skin on others
@@ -858,7 +845,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             ent.flags = RF_TRANSLUCENT;
         }
 
-		if ((effects & EF_COLOR_SHELL) && cls.ref_type == REF_TYPE_VKPT) {
+		if (effects & EF_COLOR_SHELL) {
             ent.flags |= renderfx;
         }
 
@@ -1160,9 +1147,7 @@ static void CL_AddViewWeapon(void)
 	shell_flags = shell_effect_hack();
 
 	// same entity in rtx mode
-	if (cls.ref_type == REF_TYPE_VKPT) {
-		gun.flags |= shell_flags;
-    }
+    gun.flags |= shell_flags;
 
     for (int32_t i = 0; i < q_countof(ps->gun); i++) {
         if (i == 0 && gun_model) {

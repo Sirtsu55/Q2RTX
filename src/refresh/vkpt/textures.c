@@ -927,14 +927,14 @@ vkpt_extract_emissive_texture_info(image_t *image)
 }
 
 void
-IMG_Load_RTX(image_t *image, byte *pic)
+IMG_Load(image_t *image, byte *pic)
 {
 	image->pix_data = pic;
 	image_loading_dirty_flag = 1;
 }
 
 void
-IMG_Unload_RTX(image_t *image)
+IMG_Unload(image_t *image)
 {
 	if(image->pix_data)
 		Z_Free(image->pix_data);

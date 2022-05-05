@@ -2748,7 +2748,7 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 
 /* renders the map ingame */
 void
-R_RenderFrame_RTX(refdef_t *fd)
+R_RenderFrame(refdef_t *fd)
 {
 	if (!qvk.swap_chain)
 		return;
@@ -3234,7 +3234,7 @@ static void drs_process()
 }
 
 void
-R_BeginFrame_RTX(void)
+R_BeginFrame(void)
 {
 	LOG_FUNC();
 
@@ -3336,7 +3336,7 @@ retry:;
 }
 
 void
-R_EndFrame_RTX(void)
+R_EndFrame(void)
 {
 	LOG_FUNC();
 
@@ -3456,7 +3456,7 @@ R_EndFrame_RTX(void)
 }
 
 void
-R_ModeChanged_RTX(int width, int height, int flags, int rowbytes, void *pixels)
+R_ModeChanged(int width, int height, int flags, int rowbytes, void *pixels)
 {
 	Com_DPrintf("mode changed %d %d\n", width, height);
 
@@ -3507,14 +3507,14 @@ static void ray_tracing_api_g(genctx_t *ctx)
 }
 
 /* called when the library is loaded */
-ref_type_t
-R_Init_RTX(bool total)
+bool
+R_Init(bool total)
 {
 	registration_sequence = 1;
 
 	if (!VID_Init(GAPI_VULKAN)) {
 		Com_Error(ERR_FATAL, "VID_Init failed\n");
-		return REF_TYPE_NONE;
+		return false;
 	}
 
 	extern SDL_Window *sdl_window;
@@ -3655,7 +3655,7 @@ R_Init_RTX(bool total)
 	
 	if(!init_vulkan()) {
 		Com_Error(ERR_FATAL, "Couldn't initialize Vulkan.\n");
-		return REF_TYPE_NONE;
+		return false;
 	}
 
 	_VK(create_command_pool_and_fences());
@@ -3685,12 +3685,12 @@ R_Init_RTX(bool total)
 		taa_samples[i][1] = halton(3, i + 1) - 0.5f;
 	}
 
-	return REF_TYPE_VKPT;
+	return true;
 }
 
 /* called before the library is unloaded */
 void
-R_Shutdown_RTX(bool total)
+R_Shutdown(bool total)
 {
 	vkpt_freecam_reset();
 
@@ -3731,7 +3731,7 @@ R_Shutdown_RTX(bool total)
 
 // for screenshots
 byte *
-IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
+IMG_ReadPixels(int *width, int *height, int *rowbytes)
 {
 	if (qvk.surf_format.format != VK_FORMAT_B8G8R8A8_SRGB &&
 		qvk.surf_format.format != VK_FORMAT_R8G8B8A8_SRGB)
@@ -3857,7 +3857,7 @@ IMG_ReadPixels_RTX(int *width, int *height, int *rowbytes)
 }
 
 float *
-IMG_ReadPixelsHDR_RTX(int *width, int *height)
+IMG_ReadPixelsHDR(int *width, int *height)
 {
 	if (qvk.surf_format.format != VK_FORMAT_R16G16B16A16_SFLOAT)
 	{
@@ -3966,7 +3966,7 @@ IMG_ReadPixelsHDR_RTX(int *width, int *height)
 }
 
 void
-R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
+R_SetSky(const char *name, float rotate, vec3_t axis)
 {
 	int     i;
 	char    pathname[MAX_QPATH];
@@ -4035,11 +4035,11 @@ R_SetSky_RTX(const char *name, float rotate, vec3_t axis)
 	Z_Free(data);
 }
 
-void R_AddDecal_RTX(decal_t *d)
+void R_AddDecal(decal_t *d)
 { }
 
 void
-R_BeginRegistration_RTX(const char *name)
+R_BeginRegistration(const char *name)
 {
 	registration_sequence++;
 	LOG_FUNC();
@@ -4096,7 +4096,7 @@ R_BeginRegistration_RTX(const char *name)
 }
 
 void
-R_EndRegistration_RTX(void)
+R_EndRegistration(void)
 {
 	LOG_FUNC();
 	
@@ -4310,47 +4310,9 @@ void debug_output(const char* format, ...)
 #endif
 }
 
-static bool R_IsHDR_RTX()
+bool R_IsHDR()
 {
 	return qvk.surf_is_hdr;
-}
-
-void R_RegisterFunctionsRTX()
-{
-	R_Init = R_Init_RTX;
-	R_Shutdown = R_Shutdown_RTX;
-	R_BeginRegistration = R_BeginRegistration_RTX;
-	R_EndRegistration = R_EndRegistration_RTX;
-	R_SetSky = R_SetSky_RTX;
-	R_RenderFrame = R_RenderFrame_RTX;
-	R_LightPoint = R_LightPoint_RTX;
-	R_ClearColor = R_ClearColor_RTX;
-	R_SetAlpha = R_SetAlpha_RTX;
-	R_SetAlphaScale = R_SetAlphaScale_RTX;
-	R_SetColor = R_SetColor_RTX;
-	R_SetClipRect = R_SetClipRect_RTX;
-	R_SetScale = R_SetScale_RTX;
-	R_DrawChar = R_DrawChar_RTX;
-	R_DrawString = R_DrawString_RTX;
-	R_DrawPic = R_DrawPic_RTX;
-	R_DrawStretchPic = R_DrawStretchPic_RTX;
-	R_TileClear = R_TileClear_RTX;
-	R_DrawFill8 = R_DrawFill8_RTX;
-	R_DrawFill32 = R_DrawFill32_RTX;
-	R_BeginFrame = R_BeginFrame_RTX;
-	R_EndFrame = R_EndFrame_RTX;
-	R_ModeChanged = R_ModeChanged_RTX;
-	R_AddDecal = R_AddDecal_RTX;
-	R_InterceptKey = R_InterceptKey_RTX;
-	R_IsHDR = R_IsHDR_RTX;
-	IMG_Load = IMG_Load_RTX;
-	IMG_Unload = IMG_Unload_RTX;
-	IMG_ReadPixels = IMG_ReadPixels_RTX;
-	IMG_ReadPixelsHDR = IMG_ReadPixelsHDR_RTX;
-	MOD_LoadMD2 = MOD_LoadMD2_RTX;
-	MOD_LoadMD3 = MOD_LoadMD3_RTX;
-	MOD_LoadIQM = MOD_LoadIQM_RTX;
-	MOD_Reference = MOD_Reference_RTX;
 }
 
 // vim: shiftwidth=4 noexpandtab tabstop=4 cindent

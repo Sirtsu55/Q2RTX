@@ -184,70 +184,6 @@ OPENGL STUFF
 
 #if USE_CLIENT
 
-#if REF_GL
-
-static SDL_GLContext    *sdl_context;
-
-static void vsync_changed(cvar_t *self)
-{
-    if (SDL_GL_SetSwapInterval(!!self->integer) < 0) {
-        Com_EPrintf("Couldn't set swap interval %d: %s\n", self->integer, SDL_GetError());
-    }
-}
-
-static void VID_SDL_GL_SetAttributes(void)
-{
-    int colorbits = Cvar_ClampInteger(
-        Cvar_Get("gl_colorbits", "0", CVAR_REFRESH), 0, 32);
-    int depthbits = Cvar_ClampInteger(
-        Cvar_Get("gl_depthbits", "0", CVAR_REFRESH), 0, 32);
-    int stencilbits = Cvar_ClampInteger(
-        Cvar_Get("gl_stencilbits", "8", CVAR_REFRESH), 0, 8);
-    int multisamples = Cvar_ClampInteger(
-        Cvar_Get("gl_multisamples", "0", CVAR_REFRESH), 0, 32);
-
-    if (colorbits == 0)
-        colorbits = 24;
-
-    if (depthbits == 0)
-        depthbits = colorbits > 16 ? 24 : 16;
-
-    if (depthbits < 24)
-        stencilbits = 0;
-
-    if (colorbits > 16) {
-        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    } else {
-        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthbits);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, stencilbits);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    if (multisamples > 1) {
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
-    }
-
-#if USE_GLES
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-#endif
-}
-
-void *VID_GetProcAddr(const char *sym)
-{
-    return SDL_GL_GetProcAddress(sym);
-}
-
-#endif
-
 /*
 ===============================================================================
 
@@ -325,9 +261,7 @@ void VID_BeginFrame(void)
 
 void VID_EndFrame(void)
 {
-#if USE_REF == REF_GL
-    SDL_GL_SwapWindow(sdl_window);
-#elif USE_REF == REF_VKPT
+#if USE_REF == REF_VKPT
 	/* subsystem does it itself */
 #else
     SDL_UpdateWindowSurface(sdl_window);
@@ -500,17 +434,6 @@ bool VID_Init(graphics_api_t api)
 	if (VID_SDL_InitSubSystem()) {
 		return false;
 	}
-	
-#if REF_GL
-	if (api == GAPI_OPENGL)
-	{
-		VID_SDL_GL_SetAttributes();
-
-        Cvar_Get("gl_driver", LIBGL, CVAR_ROM);
-
-		flags |= SDL_WINDOW_OPENGL;
-	}
-#endif
 
 	SDL_SetEventFilter(VID_SDL_EventFilter, NULL);
 
@@ -554,22 +477,6 @@ bool VID_Init(graphics_api_t api)
 
     VID_SDL_SetMode();
 
-#if REF_GL
-	if (api == GAPI_OPENGL)
-	{
-		sdl_context = SDL_GL_CreateContext(sdl_window);
-		if (!sdl_context) {
-			Com_EPrintf("Couldn't create OpenGL context: %s\n", SDL_GetError());
-			goto fail;
-		}
-
-		cvar_t *cvar_vsync = Cvar_Get("vid_vsync", "0", CVAR_ARCHIVE);
-		cvar_vsync->changed = vsync_changed;
-		cvar_vsync->flags &= ~CVAR_REFRESH; // in case the RTX renderer has marked it as REFRESH
-		vsync_changed(cvar_vsync);
-	}
-#endif
-
     cvar_t *vid_hwgamma = Cvar_Get("vid_hwgamma", "0", CVAR_REFRESH);
     if (vid_hwgamma->integer) {
         Uint16  gamma[3][256];
@@ -586,20 +493,10 @@ bool VID_Init(graphics_api_t api)
 
     VID_SetMode();
     return true;
-
-fail:
-	VID_Shutdown();
-	return false;
 }
 
 void VID_Shutdown(void)
 {
-#if REF_GL
-    if (sdl_context) {
-        SDL_GL_DeleteContext(sdl_context);
-        sdl_context = NULL;
-    }
-#endif
     if (sdl_window) {
         SDL_DestroyWindow(sdl_window);
         sdl_window = NULL;

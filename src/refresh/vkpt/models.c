@@ -308,7 +308,7 @@ static void compute_missing_model_tangents(model_t* model)
 	}
 }
 
-int MOD_LoadMD2_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name)
+int MOD_LoadMD2(model_t *model, const void *rawdata, size_t length, const char* mod_name)
 {
 	dmd2header_t    header;
 	dmd2frame_t     *src_frame;
@@ -710,7 +710,7 @@ fail:
 	return ret;
 }
 
-int MOD_LoadMD3_RTX(model_t *model, const void *rawdata, size_t length, const char* mod_name)
+int MOD_LoadMD3(model_t *model, const void *rawdata, size_t length, const char* mod_name)
 {
 	dmd3header_t    header;
 	size_t          end, offset, remaining;
@@ -806,7 +806,7 @@ static void *MOD_LoadIQM_Malloc(model_t* model, size_t size)
 	return MOD_Malloc(size);
 }
 
-int MOD_LoadIQM_RTX(model_t* model, const void* rawdata, size_t length, const char* mod_name)
+int MOD_LoadIQM(model_t* model, const void* rawdata, size_t length, const char* mod_name)
 {
 	int ret;
 
@@ -897,7 +897,7 @@ fail:
 
 extern model_vbo_t model_vertex_data[];
 
-void MOD_Reference_RTX(model_t *model)
+void MOD_Reference(model_t *model)
 {
 	int mesh_idx, skin_idx, frame_idx;
 

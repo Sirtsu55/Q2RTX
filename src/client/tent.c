@@ -385,14 +385,14 @@ static void CL_AddExplosions(void)
         if (ex->type == ex_free)
             continue;
 
-		if (cls.ref_type == REF_TYPE_VKPT)
-			CL_AddExplosionLight(ex, frac / (ex->frames - 1));
-		else
-		{
+		//if (cls.ref_type == REF_TYPE_VKPT)
+		//	CL_AddExplosionLight(ex, frac / (ex->frames - 1));
+		//else
+		//{
         if (ex->light)
             V_AddLight(ent->origin, ex->light * ent->alpha,
                        ex->lightcolor[0], ex->lightcolor[1], ex->lightcolor[2]);
-		}
+		//}
 
         if (ex->type != ex_light) {
             VectorCopy(ent->origin, ent->oldorigin);

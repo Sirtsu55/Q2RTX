@@ -78,21 +78,10 @@ typedef struct model_s {
     // alias models
     int numframes;
     struct maliasframe_s *frames;
-#if USE_REF == REF_GL || USE_REF == REF_VKPT
+
     int nummeshes;
     struct maliasmesh_s *meshes;
 	model_class_t model_class;
-#else
-    int numskins;
-    struct image_s *skins[MAX_ALIAS_SKINS];
-    int numtris;
-    struct maliastri_s *tris;
-    int numsts;
-    struct maliasst_s *sts;
-    int numverts;
-    int skinwidth;
-    int skinheight;
-#endif
 
     // sprite models
     struct mspriteframe_s *spriteframes;
@@ -127,11 +116,11 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 
 // these are implemented in [gl,sw]_models.c
 typedef int (*mod_load_t)(model_t *, const void *, size_t, const char*);
-extern int (*MOD_LoadMD2)(model_t *model, const void *rawdata, size_t length, const char* mod_name);
+int MOD_LoadMD2(model_t *model, const void *rawdata, size_t length, const char* mod_name);
 #if USE_MD3
-extern int (*MOD_LoadMD3)(model_t *model, const void *rawdata, size_t length, const char* mod_name);
+int MOD_LoadMD3(model_t *model, const void *rawdata, size_t length, const char* mod_name);
 #endif
-extern int(*MOD_LoadIQM)(model_t* model, const void* rawdata, size_t length, const char* mod_name);
-extern void (*MOD_Reference)(model_t *model);
+int MOD_LoadIQM(model_t* model, const void* rawdata, size_t length, const char* mod_name);
+void MOD_Reference(model_t *model);
 
 #endif // MODELS_H

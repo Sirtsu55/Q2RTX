@@ -121,7 +121,6 @@ begin video
     background #212F3CD0
     style --compact
     banner m_banner_video
-	pairs "renderer" vid_rtx opengl 0 rtx 1
     values -s "use LEFT and RIGHT keys to select" "video mode" vid_fullscreen windowed $$vid_modelist
     pairs "full screen display" vid_display $vid_displaylist
     toggle "vertical sync" vid_vsync
@@ -129,53 +128,33 @@ begin video
     range -f "%.0f deg" "field of view" fov 60 120 5
     blank
 
-    ifeq vid_rtx 1
-        action "resolution scaling options..." pushmenu resolution
-        action "HDR options..." pushmenu hdr
-        blank
-        range -f "%+.1f EV" "exposure bias (brightness)" tm_exposure_bias -5 0 0.1
-        range -p -f "%.0f%%" "contrast" tm_reinhard 0 1 0.1
-		range "texture LOD bias" pt_texture_lod_bias -2 2 0.5
-        pairs "anti-aliasing" flt_taa "none" 0 "temporal AA" 1 "temporal upscaling" 2
-        toggle "AMD FSR 1.0" flt_fsr_enable
-        range --status "lower is sharper" "AMD FSR 1.0 sharpness" flt_fsr_sharpness 0 2 0.01
-        pairs "global illumination" pt_num_bounce_rays low 0.5 medium 1 high 2
-        pairs "reflection/refraction depth" pt_reflect_refract off 0 1 1 2 2 4 4 8 8
-		toggle --status "turn some monitors in the game into security camera views" \
-            "security cameras" pt_cameras
-        toggle "caustics" pt_caustics
-        toggle "god rays" gr_enable
-        toggle "bloom" bloom_enable
-        blank
-        toggle "denoiser" flt_enable
-        toggle "textures" flt_fixed_albedo ~1
-        pairs "texture filtering" pt_nearest "anisotropic" 0 "mixed" 1 "nearest (noisy)" 2
-        pairs --status "experimental feature - simulates reflection and refraction effects in thick glass" \
-            "thick glass refraction" pt_thick_glass "disabled" 0 "photo mode only" 1 "enabled" 2
-        pairs projection pt_projection perspective 0 cylindrical 1
-        blank
-		pairs "multi-gpu support" sli "disabled" 0 "when available" 1
-        pairs "ray tracing API" ray_tracing_api "automatic selection" "auto" "prefer KHR_ray_query" "query"  "prefer KHR_ray_tracing_pipeline" "pipeline"
-        toggle "GPU profiler" profiler
-    endif
-
-    ifneq vid_rtx 1
-        range "texture gamma" vid_gamma 1.3 0.3
-        toggle "hardware gamma" vid_hwgamma
-        range "texture quality" gl_picmip 3 0 -1
-        pairs "texture filter" gl_texturemode \
-            nearest GL_NEAREST \
-            linear GL_LINEAR \
-            bilinear GL_LINEAR_MIPMAP_NEAREST \
-            trilinear GL_LINEAR_MIPMAP_LINEAR
-        pairs "anisotropic filter" gl_anisotropy no 1 2x 2 4x 4 8x 8 16x 16
-        range "texture saturation" gl_saturation 0 1
-        pairs "texture intensity" intensity 1x 1 2x 2 3x 3
-        range "lightmap saturation" gl_coloredlightmaps 0 1
-        range "lightmap brightness" gl_brightness 0 0.3
-        blank
-        toggle "use new textures and models" gl_use_hd_assets
-    endif
+    action "resolution scaling options..." pushmenu resolution
+    action "HDR options..." pushmenu hdr
+    blank
+    range -f "%+.1f EV" "exposure bias (brightness)" tm_exposure_bias -5 0 0.1
+    range -p -f "%.0f%%" "contrast" tm_reinhard 0 1 0.1
+	range "texture LOD bias" pt_texture_lod_bias -2 2 0.5
+    pairs "anti-aliasing" flt_taa "none" 0 "temporal AA" 1 "temporal upscaling" 2
+    toggle "AMD FSR 1.0" flt_fsr_enable
+    range --status "lower is sharper" "AMD FSR 1.0 sharpness" flt_fsr_sharpness 0 2 0.01
+    pairs "global illumination" pt_num_bounce_rays low 0.5 medium 1 high 2
+    pairs "reflection/refraction depth" pt_reflect_refract off 0 1 1 2 2 4 4 8 8
+	toggle --status "turn some monitors in the game into security camera views" \
+        "security cameras" pt_cameras
+    toggle "caustics" pt_caustics
+    toggle "god rays" gr_enable
+    toggle "bloom" bloom_enable
+    blank
+    toggle "denoiser" flt_enable
+    toggle "textures" flt_fixed_albedo ~1
+    pairs "texture filtering" pt_nearest "anisotropic" 0 "mixed" 1 "nearest (noisy)" 2
+    pairs --status "experimental feature - simulates reflection and refraction effects in thick glass" \
+        "thick glass refraction" pt_thick_glass "disabled" 0 "photo mode only" 1 "enabled" 2
+    pairs projection pt_projection perspective 0 cylindrical 1
+    blank
+	pairs "multi-gpu support" sli "disabled" 0 "when available" 1
+    pairs "ray tracing API" ray_tracing_api "automatic selection" "auto" "prefer KHR_ray_query" "query"  "prefer KHR_ray_tracing_pipeline" "pipeline"
+    toggle "GPU profiler" profiler
 end
 
 begin options
@@ -183,9 +162,7 @@ begin options
     background #212F3CD0
     style --compact
     banner m_banner_options
-    ifeq vid_rtx 1
-        action "environment setup" pushmenu environment
-    endif
+    action "environment setup" pushmenu environment
     action "graphics settings" pushmenu video
     action "photo mode settings" pushmenu photomode
     action "sound settings" pushmenu sound
@@ -243,13 +220,6 @@ begin effects
     style --compact
     title "Effects Setup"
     blank
-    ifneq vid_rtx 1
-        values "dynamic lighting" gl_dynamic "no" "yes" "only switchable"
-        values "entity cel-shading" gl_celshading no 1x 2x 3x
-        toggle "entity glowing" cl_noglow ~
-        toggle "ground shadows" gl_shadows
-        toggle "screen blending" gl_polyblend
-    endif
     toggle "grenade explosions" cl_disable_explosions ~0
     toggle "rocket explosions" cl_disable_explosions ~1
     toggle "explosion sprites" cl_explosion_sprites

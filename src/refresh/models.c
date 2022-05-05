@@ -32,7 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "refresh/images.h"
 #include "refresh/models.h"
 #include "../client/client.h"
-#include "gl/gl.h"
 
 // during registration it is possible to have more models than could actually
 // be referenced during gameplay, because we don't want to free anything until
@@ -349,8 +348,8 @@ qhandle_t R_RegisterModel(const char *name)
             fs_flags = try_location == TRY_MODEL_SRC_GAME ? FS_PATH_GAME : FS_PATH_BASE;
 
         char* extension = normalized + namelen - 4;
-        bool try_md3 = cls.ref_type == REF_TYPE_VKPT || (cls.ref_type == REF_TYPE_GL && gl_use_hd_assets->integer);
-        if (namelen > 4 && (strcmp(extension, ".md2") == 0) && try_md3)
+
+        if (namelen > 4 && (strcmp(extension, ".md2") == 0))
         {
             memcpy(extension, ".md3", 4);
 

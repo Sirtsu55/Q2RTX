@@ -262,7 +262,7 @@ CL_MuzzleFlash
 void CL_MuzzleFlash(void)
 {
 #if USE_DLIGHTS
-    vec3_t      fv, rv;
+    vec3_t      fv, rv, dv;
     cdlight_t   *dl;
 #endif
     centity_t   *pl;
@@ -278,14 +278,20 @@ void CL_MuzzleFlash(void)
 
 #if USE_DLIGHTS
     dl = CL_AllocDlight(mz.entity);
-    VectorCopy(pl->current.origin,  dl->origin);
-    AngleVectors(pl->current.angles, fv, rv, NULL);
-    VectorMA(dl->origin, 18, fv, dl->origin);
-    VectorMA(dl->origin, 16, rv, dl->origin);
+    AngleVectors(pl->current.angles, fv, rv, dv);
+    if (mz.entity == cl.clientNum + 1) {
+        VectorCopy(cl.refdef.vieworg, dl->origin);
+        VectorMA(dl->origin, 6, fv, dl->origin);
+        VectorMA(dl->origin, 6, dv, dl->origin);
+    } else {
+        VectorCopy(pl->current.origin,  dl->origin);
+        VectorMA(dl->origin, 18, fv, dl->origin);
+        VectorMA(dl->origin, 16, rv, dl->origin);
+    }
     if (mz.silenced)
-        dl->radius = 100 + (Q_rand() & 31);
+        dl->radius = 0.3;
     else
-        dl->radius = 200 + (Q_rand() & 31);
+        dl->radius = 0.5;
     //dl->minlight = 32;
     dl->die = cl.time + 16;
 #define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
@@ -441,11 +447,11 @@ void CL_MuzzleFlash(void)
 	// Q2RTX
     }
 
-	if (cls.ref_type == REF_TYPE_VKPT)
-	{
+	//if (cls.ref_type == REF_TYPE_VKPT)
+	//{
 		// don't add muzzle flashes in RTX mode
-		DL_RADIUS(0.f);
-    }
+		//DL_RADIUS(0.f);
+    //}
 }
 
 
