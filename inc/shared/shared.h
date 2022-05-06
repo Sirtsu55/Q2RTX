@@ -1535,9 +1535,7 @@ enum {
     CS_SKYAXIS,       // %f %f %f format
     CS_SKYROTATE,
     CS_NUMITEMS,
-    CS_STATUSBAR,       // display program string
-    
-    CS_MAXCLIENTS       = 32,
+    CS_MAXCLIENTS,
     CS_MAPCHECKSUM,      // for catching out of date maps
     
     CS_MODELS,
@@ -1550,12 +1548,10 @@ enum {
     MAX_CONFIGSTRINGS   = (CS_GENERAL+MAX_GENERAL)
 };
 
-// CS_STATUSBAR and CS_GENERAL are allowed to overflow
+// CS_GENERAL is allowed to overflow
 static inline size_t CS_SIZE(uint32_t cs)
 {
-    if (cs >= CS_STATUSBAR && cs < CS_MAXCLIENTS) {
-        return MAX_QPATH * (CS_MAXCLIENTS - cs);
-    } else if (cs >= CS_GENERAL && cs < MAX_CONFIGSTRINGS) {
+    if (cs >= CS_GENERAL && cs < MAX_CONFIGSTRINGS) {
         return MAX_QPATH * (MAX_CONFIGSTRINGS - cs);
     }
     

@@ -49,6 +49,8 @@ static struct {
     int         hud_width, hud_height;
     float       hud_scale;
     float       hud_alpha;
+
+    char        *hud_string;
 } scr;
 
 cvar_t   *scr_viewsize;
@@ -72,6 +74,7 @@ static cvar_t   *scr_fps;
 
 static cvar_t   *scr_demobar;
 static cvar_t   *scr_font;
+static cvar_t   *scr_hud;
 static cvar_t   *scr_scale;
 
 static cvar_t   *scr_crosshair;
@@ -226,6 +229,12 @@ bool SCR_ParseColor(const char *s, color_t *color)
             color->u8[1] = c[1] | (c[1] << 4);
             color->u8[2] = c[2] | (c[2] << 4);
             color->u8[3] = 255;
+            break;
+        case 4:
+            color->u8[0] = c[0] | (c[0] << 4);
+            color->u8[1] = c[1] | (c[1] << 4);
+            color->u8[2] = c[2] | (c[2] << 4);
+            color->u8[3] = c[3] | (c[3] << 4);
             break;
         case 6:
             color->u8[0] = c[1] | (c[0] << 4);
@@ -1195,6 +1204,20 @@ static void scr_scale_changed(cvar_t *self)
     scr.hud_scale = R_ClampScale(self);
 }
 
+static void SCR_LoadHud(void);
+static void SCR_DestroyHud(void);
+
+static void scr_hud_changed(cvar_t *self)
+{
+    SCR_DestroyHud();
+    SCR_LoadHud();
+}
+
+static void SCR_HudReload_f(void)
+{
+    scr_hud_changed(NULL);
+}
+
 static const cmdreg_t scr_cmds[] = {
     { "timerefresh", SCR_TimeRefresh_f },
     { "sizeup", SCR_SizeUp_f },
@@ -1203,6 +1226,7 @@ static const cmdreg_t scr_cmds[] = {
     { "draw", SCR_Draw_f, SCR_Draw_c },
     { "undraw", SCR_UnDraw_f, SCR_UnDraw_c },
     { "clearchathud", SCR_ClearChatHUD_f },
+    { "hud_reload", SCR_HudReload_f },
     { NULL }
 };
 
@@ -1219,6 +1243,8 @@ void SCR_Init(void)
     scr_demobar = Cvar_Get("scr_demobar", "1", 0);
     scr_font = Cvar_Get("scr_font", "conchars", 0);
     scr_font->changed = scr_font_changed;
+    scr_hud = Cvar_Get("scr_hud", "default", 0);
+    scr_hud->changed = scr_hud_changed;
     scr_scale = Cvar_Get("scr_scale", "0", 0);
     scr_scale->changed = scr_scale_changed;
     scr_crosshair = Cvar_Get("crosshair", "0", CVAR_ARCHIVE);
@@ -1267,12 +1293,15 @@ void SCR_Init(void)
 
     scr_scale_changed(scr_scale);
 
+    SCR_LoadHud();
+
     scr.initialized = true;
 }
 
 void SCR_Shutdown(void)
 {
     Cmd_Deregister(scr_cmds);
+    SCR_DestroyHud();
     scr.initialized = false;
 }
 
@@ -1801,6 +1830,147 @@ static void SCR_ExecuteLayoutString(const char *s)
     R_SetAlpha(scr_alpha->value);
 }
 
+static struct {
+    const char *key;
+    const char *value;
+} scr_hud_macros[] = {
+    { "STAT_HEALTH_ICON", STRINGIFY(STAT_HEALTH_ICON) },
+    { "STAT_HEALTH", STRINGIFY(STAT_HEALTH) },
+    { "STAT_AMMO_ICON", STRINGIFY(STAT_AMMO_ICON) },
+    { "STAT_AMMO", STRINGIFY(STAT_AMMO) },
+    { "STAT_ARMOR_ICON", STRINGIFY(STAT_ARMOR_ICON) },
+    { "STAT_ARMOR", STRINGIFY(STAT_ARMOR) },
+    { "STAT_SELECTED_ICON", STRINGIFY(STAT_SELECTED_ICON) },
+    { "STAT_PICKUP_ICON", STRINGIFY(STAT_PICKUP_ICON) },
+    { "STAT_PICKUP_STRING", STRINGIFY(STAT_PICKUP_STRING) },
+    { "STAT_TIMER_ICON", STRINGIFY(STAT_TIMER_ICON) },
+    { "STAT_TIMER", STRINGIFY(STAT_TIMER) },
+    { "STAT_HELPICON", STRINGIFY(STAT_HELPICON) },
+    { "STAT_SELECTED_ITEM", STRINGIFY(STAT_SELECTED_ITEM) },
+    { "STAT_LAYOUTS", STRINGIFY(STAT_LAYOUTS) },
+    { "STAT_FRAGS", STRINGIFY(STAT_FRAGS) },
+    { "STAT_FLASHES", STRINGIFY(STAT_FLASHES) },
+    { "STAT_CHASE", STRINGIFY(STAT_CHASE) },
+    { "STAT_SPECTATOR", STRINGIFY(STAT_SPECTATOR) }
+};
+
+static bool SCR_NeedsQuotes(const char *t)
+{
+    char c;
+
+    while ((c = *t)) {
+        if (c == ' ' || c == '\n' || c == '\t') {
+            return true;
+        }
+
+        t++;
+    }
+
+    return false;
+}
+
+static void SCR_LoadHud(void)
+{
+    char path[MAX_OSPATH];
+
+    Q_snprintf(path, sizeof(path), "huds/%s.hud", scr_hud->string);
+
+    char *buffer;
+
+    int ret = FS_LoadFile(path, &buffer);
+
+    if (!buffer) {
+        Com_WPrintf("Couldn't find HUD \"%s\"\n", path);
+
+        Q_snprintf(path, sizeof(path), "huds/default.hud");
+
+        ret = FS_LoadFile(path, &buffer);
+
+        if (!buffer) {
+            Com_EPrintf("Couldn't find default HUD \"%s\"\n", path);
+            return;
+        }
+    }
+
+    // in theory the final HUD should never be larger than the file...
+    size_t hud_string_length = ret + 1;
+    scr.hud_string = Z_TagMallocz(hud_string_length, TAG_UI);
+
+    char *hud_end = scr.hud_string;
+
+    char *token_buf = buffer;
+
+#define APPEND(x) \
+    if (Q_snprintf(hud_end, hud_string_length - (hud_end - scr.hud_string), "%s", x) != strlen(x)) { \
+        Com_Errorf(ERR_DROP, "HUD file overflow"); \
+        goto fail; \
+    } \
+    hud_end += strlen(x)
+
+    while (true)
+    {
+        char *token = COM_Parse(&token_buf);
+
+        if (!token || !*token) {
+            break;
+        }
+
+        // add in space
+        if (*scr.hud_string) {
+            APPEND(" ");
+        }
+
+        // macros
+        if (token[0] == '$') {
+            token++;
+
+            size_t i;
+
+            for (i = 0; i < q_countof(scr_hud_macros); i++) {
+                if (Q_strcasecmp(scr_hud_macros[i].key, token) == 0) {
+                    APPEND(scr_hud_macros[i].value);
+                    break;
+                }
+            }
+
+            if (i == q_countof(scr_hud_macros)) {
+                Com_Errorf(ERR_DROP, "Invalid HUD macro \"%s\"", token);
+                goto fail;
+            }
+
+            continue;
+        }
+
+        // see if we need quotes
+        if (SCR_NeedsQuotes(token)) {
+            APPEND("\"");
+            APPEND(token);
+            APPEND("\"");
+        } else {
+            APPEND(token);
+        }
+    }
+
+    goto finish;
+
+fail:
+    if (scr.hud_string) {
+        Z_Free(scr.hud_string);
+        scr.hud_string = NULL;
+    }
+
+finish:
+    FS_FreeFile(buffer);
+}
+
+static void SCR_DestroyHud(void)
+{
+    if (scr.hud_string) {
+        Z_Free(scr.hud_string);
+        scr.hud_string = NULL;
+    }
+}
+
 //=============================================================================
 
 static void SCR_DrawPause(void)
@@ -1864,7 +2034,7 @@ static void SCR_DrawStats(void)
     if (scr_draw2d->integer <= 1)
         return;
 
-    SCR_ExecuteLayoutString(cl.configstrings[CS_STATUSBAR]);
+    SCR_ExecuteLayoutString(scr.hud_string);
 }
 
 static void SCR_DrawLayout(void)

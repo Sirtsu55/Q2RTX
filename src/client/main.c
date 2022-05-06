@@ -1864,11 +1864,6 @@ static void dump_program(const char *text, const char *name)
     }
 }
 
-static void CL_DumpStatusbar_f(void)
-{
-    dump_program(cl.configstrings[CS_STATUSBAR], "status bar");
-}
-
 static void CL_DumpLayout_f(void)
 {
     dump_program(cl.layout, "layout");
@@ -2461,7 +2456,6 @@ static const cmdreg_t c_client[] = {
     { "ignorenick", CL_IgnoreNick_f, CL_IgnoreNick_c },
     { "unignorenick", CL_UnIgnoreNick_f, CL_UnIgnoreNick_c },
     { "dumpclients", CL_DumpClients_f },
-    { "dumpstatusbar", CL_DumpStatusbar_f },
     { "dumplayout", CL_DumpLayout_f },
     { "writeconfig", CL_WriteConfig_f, CL_WriteConfig_c },
 //    { "msgtab", CL_Msgtab_f, CL_Msgtab_g },
