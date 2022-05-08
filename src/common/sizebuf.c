@@ -37,6 +37,13 @@ void SZ_Init(sizebuf_t *buf, void *data, size_t size)
     buf->allowunderflow = true;
 }
 
+void SZ_InitRead(sizebuf_t *buf, void *data, size_t size)
+{
+    memset(buf, 0, sizeof(*buf));
+    buf->data = data;
+    buf->maxsize = buf->cursize = size;
+}
+
 void SZ_Clear(sizebuf_t *buf)
 {
     buf->cursize = 0;
@@ -105,4 +112,69 @@ void SZ_WriteLong(sizebuf_t *sb, int c)
     buf[1] = (c >> 8) & 0xff;
     buf[2] = (c >> 16) & 0xff;
     buf[3] = c >> 24;
+}
+
+void SZ_BeginReading(sizebuf_t *sb)
+{
+    sb->readcount = 0;
+    sb->bitpos = 0;
+}
+
+byte *SZ_ReadData(sizebuf_t *sb, size_t len)
+{
+    byte *buf = sb->data + sb->readcount;
+
+    sb->readcount += len;
+    sb->bitpos = sb->readcount << 3;
+
+    if (sb->readcount > sb->cursize) {
+        if (!sb->allowunderflow) {
+            Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
+        }
+        return NULL;
+    }
+
+    return buf;
+}
+
+int SZ_ReadByte(sizebuf_t *sb)
+{
+    byte *buf = SZ_ReadData(sb, 1);
+    int c;
+
+    if (!buf) {
+        c = -1;
+    } else {
+        c = (unsigned char)buf[0];
+    }
+
+    return c;
+}
+
+int SZ_ReadShort(sizebuf_t *sb)
+{
+    byte *buf = SZ_ReadData(sb, 2);
+    int c;
+
+    if (!buf) {
+        c = -1;
+    } else {
+        c = (signed short)LittleShortMem(buf);
+    }
+
+    return c;
+}
+
+int SZ_ReadLong(sizebuf_t *sb)
+{
+    byte *buf = SZ_ReadData(sb, 4);
+    int c;
+
+    if (!buf) {
+        c = -1;
+    } else {
+        c = LittleLongMem(buf);
+    }
+
+    return c;
 }

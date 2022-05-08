@@ -168,6 +168,7 @@ const weapon_animation_t weap_axe_attack_charged = {
     .start = ANIM_ATTACK_CHARGED_FIRST, .end = ANIM_ATTACK_CHARGED_LAST, .next = &weap_axe_idle,
     .events = (const weapon_event_t []) {
         { Axe_ChargedAttack, 190, 196 },
+        { Axe_NextAttack, 205, WEAPON_EVENT_MINMAX },
         { NULL }
     }
 };

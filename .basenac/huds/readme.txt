@@ -1,6 +1,19 @@
 HUDs are a string of opcodes that describe how the HUD is laid out. Spaces are collapsed,
 so feel free to use any spacing you want to use.
 
+First, you can import other hud files with the following opcode:
+
+import <file>
+ * Import the specified file (relative to huds/)
+
+You can also define macros, which can be used as replacements for parameters in
+any opcode.
+
+define <name> <value>
+ * Define the specified macro
+
+Macros must have a value.
+
 The cursor is where all HUD elements will be drawn. The following opcodes move the cursor:
 
 xl <int>
@@ -54,25 +67,8 @@ color <color>
 We've drawn static data, but we can also draw dynamic data derived from stats data given to the client!
 The client has an array of stat data as integers, and we can pull them out to render dependent data.
 
-For stat indices, you can use the following macros to refer to the stats the game stores:
- $STAT_HEALTH_ICON
- $STAT_HEALTH
- $STAT_AMMO_ICON
- $STAT_AMMO
- $STAT_ARMOR_ICON
- $STAT_ARMOR
- $STAT_SELECTED_ICON
- $STAT_PICKUP_ICON
- $STAT_PICKUP_STRING
- $STAT_TIMER_ICON
- $STAT_TIMER
- $STAT_HELPICON
- $STAT_SELECTED_ITEM
- $STAT_LAYOUTS
- $STAT_FRAGS
- $STAT_FLASHES
- $STAT_CHASE
- $STAT_SPECTATOR
+For stat indices, you can use macros, which are prefixed with a $. See constants.inc for pre-defined
+constants for stats and stuff.
 
 pic <stat>
  * Draw the specified image at the specified stat index

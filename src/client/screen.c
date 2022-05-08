@@ -23,6 +23,62 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define STAT_PICS       11
 #define STAT_MINUS      (STAT_PICS - 1)  // num frame for '-' stats digit
 
+typedef enum {
+    // just so zero is never a valid opcode
+    HUD_OP_NOP,
+
+    // positioning
+    HUD_OP_XL, // <x: int>
+    HUD_OP_XR, // <x: int>
+    HUD_OP_YT, // <y: int>
+    HUD_OP_YB, // <y: int>
+    HUD_OP_XV, // <x: int>,
+    HUD_OP_YV, // <y: int>,
+
+    HUD_OP_PICN, // <s: string_int>
+    HUD_OP_HNUM,
+    HUD_OP_ANUM,
+    HUD_OP_RNUM,
+    HUD_OP_CSTRING, // <s: string_int>
+    HUD_OP_CSTRING2, // <s: string_int>
+
+    HUD_OP_STRING, // <s: string_int>
+    HUD_OP_STRING2, // <s: string_int>
+
+    HUD_OP_COLOR, // <r: byte> <g: byte> <b: byte> <a: byte>
+
+    HUD_OP_PIC, // <stat: byte>
+    HUD_OP_NUM, // <width: byte> <stat: byte>
+    HUD_OP_STAT_STRING, // <stat: byte>
+    HUD_OP_STAT_STRING2, // <stat: byte>
+
+    HUD_OP_IF, // <stat: byte> <loc_false: int>
+} hud_opcode_t;
+
+typedef struct {
+    char key[MAX_OSPATH];
+    char value[MAX_OSPATH];
+} hud_macro_t;
+
+typedef struct hud_control_s {
+    size_t p;
+    struct hud_control_s *next;
+} hud_control_t;
+
+typedef struct {
+    byte *bytecode; // bytecode
+    size_t bytecode_length;
+    size_t bytecode_pos;
+    char *string_data; // constant string data
+    size_t string_data_length, string_count, string_len;
+
+    // during compilation only
+    hud_macro_t *constants;
+    size_t allocated_constants;
+    size_t num_constants;
+    hud_control_t *control_head;
+} hud_script_t;
+
 static struct {
     bool        initialized;        // ready to draw
 
@@ -50,7 +106,7 @@ static struct {
     float       hud_scale;
     float       hud_alpha;
 
-    char        *hud_string;
+    hud_script_t *hud_script;
 } scr;
 
 cvar_t   *scr_viewsize;
@@ -1521,6 +1577,183 @@ static void SCR_DrawSelectedItemName(int x, int y, int item)
     }
 }
 
+static void SCR_ExecuteLayoutBytecode(const hud_script_t *script)
+{
+    sizebuf_t buf;
+    SZ_InitRead(&buf, script->bytecode, script->bytecode_pos);
+
+    int x = 0, y = 0;
+
+    while (buf.readcount < buf.cursize)
+    {
+        hud_opcode_t opcode = SZ_ReadByte(&buf);
+
+        switch (opcode)
+        {
+            case HUD_OP_NOP:
+                break;
+            case HUD_OP_XL:
+                x = SZ_ReadLong(&buf);
+                break;
+            case HUD_OP_XR:
+                x = scr.hud_width + SZ_ReadLong(&buf);
+                break;
+            case HUD_OP_YT:
+                y = SZ_ReadLong(&buf);
+                break;
+            case HUD_OP_YB:
+                y = scr.hud_height + SZ_ReadLong(&buf);
+                break;
+            case HUD_OP_XV:
+                x = scr.hud_width / 2 - 160 + SZ_ReadLong(&buf);
+                break;
+            case HUD_OP_YV:
+                y = scr.hud_height / 2 - 120 + SZ_ReadLong(&buf);
+                break;
+            case HUD_OP_PICN:
+                R_DrawPic(x, y, R_RegisterPic2(script->string_data + SZ_ReadLong(&buf)));
+                break;
+            case HUD_OP_HNUM: {
+                // health number
+                int width = 3;
+                int value = cl.frame.ps.stats[STAT_HEALTH];
+                int color;
+                if (value > 25)
+                    color = 0;  // green
+                else if (value > 0)
+                    color = ((cl.frame.number / BASE_FRAMEDIV) >> 2) & 1;     // flash
+                else
+                    color = 1;
+
+                if (cl.frame.ps.stats[STAT_FLASHES] & 1)
+                    R_DrawPic(x, y, scr.field_pic);
+
+                HUD_DrawNumber(x, y, color, width, value);
+                break;
+            }
+            case HUD_OP_ANUM: {
+                // ammo number
+                int width = 3;
+                int value = cl.frame.ps.stats[STAT_AMMO];
+                int color;
+                if (value > 5)
+                    color = 0;  // green
+                else if (value >= 0)
+                    color = ((cl.frame.number / BASE_FRAMEDIV) >> 2) & 1;     // flash
+                else
+                    break;   // negative number = don't show
+
+                if (cl.frame.ps.stats[STAT_FLASHES] & 4)
+                    R_DrawPic(x, y, scr.field_pic);
+
+                HUD_DrawNumber(x, y, color, width, value);
+                break;
+            }
+            case HUD_OP_RNUM: {
+                // armor number
+                int width = 3;
+                int value = cl.frame.ps.stats[STAT_ARMOR];
+                if (value < 1)
+                    break;
+
+                int color = 0;  // green
+
+                if (cl.frame.ps.stats[STAT_FLASHES] & 2)
+                    R_DrawPic(x, y, scr.field_pic);
+
+                HUD_DrawNumber(x, y, color, width, value);
+                break;
+            }
+            case HUD_OP_CSTRING:
+                HUD_DrawCenterString(x + 320 / 2, y, script->string_data + SZ_ReadLong(&buf));
+                break;
+            case HUD_OP_CSTRING2:
+                HUD_DrawAltCenterString(x + 320 / 2, y, script->string_data + SZ_ReadLong(&buf));
+                break;
+            case HUD_OP_STRING:
+                HUD_DrawString(x, y, script->string_data + SZ_ReadLong(&buf));
+                break;
+            case HUD_OP_STRING2:
+                HUD_DrawAltString(x, y, script->string_data + SZ_ReadLong(&buf));
+                break;
+            case HUD_OP_COLOR: {
+                color_t c;
+                c.u32 = SZ_ReadLong(&buf);
+                c.u8[3] *= scr_alpha->value;
+                R_SetColor(c.u32);
+                break;
+            }
+            case HUD_OP_PIC: {
+                // draw a pic from a stat number
+                int value = SZ_ReadByte(&buf);
+                if (value < 0 || value >= MAX_STATS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
+                }
+                int index = cl.frame.ps.stats[value];
+                if (index < 0 || index >= MAX_IMAGES) {
+                    Com_Errorf(ERR_DROP, "%s: invalid pic index", __func__);
+                }
+                const char *token = cl.configstrings[CS_IMAGES + index];
+                if (token[0] && cl.image_precache[index]) {
+                    R_DrawPic(x, y, cl.image_precache[index]);
+                }
+
+                if (value == STAT_SELECTED_ICON && scr_showitemname->integer) {
+                    SCR_DrawSelectedItemName(x + 32, y + 8, cl.frame.ps.stats[STAT_SELECTED_ITEM]);
+                }
+                break;
+            }
+            case HUD_OP_NUM: {
+                // draw a number
+                int width = SZ_ReadByte(&buf);
+                int value = SZ_ReadByte(&buf);
+                if (value < 0 || value >= MAX_STATS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
+                }
+                value = cl.frame.ps.stats[value];
+                HUD_DrawNumber(x, y, 0, width, value);
+                break;
+            }
+            case HUD_OP_STAT_STRING: {
+                int index = SZ_ReadByte(&buf);
+                if (index < 0 || index >= MAX_STATS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
+                }
+                index = cl.frame.ps.stats[index];
+                if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid string index", __func__);
+                }
+                HUD_DrawString(x, y, cl.configstrings[index]);
+                break;
+            }
+            case HUD_OP_STAT_STRING2: {
+                int index = SZ_ReadByte(&buf);
+                if (index < 0 || index >= MAX_STATS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
+                }
+                index = cl.frame.ps.stats[index];
+                if (index < 0 || index >= MAX_CONFIGSTRINGS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid string index", __func__);
+                }
+                HUD_DrawAltString(x, y, cl.configstrings[index]);
+                break;
+            }
+            case HUD_OP_IF: {
+                int value = SZ_ReadByte(&buf);
+                if (value < 0 || value >= MAX_STATS) {
+                    Com_Errorf(ERR_DROP, "%s: invalid stat index", __func__);
+                }
+                int skip = SZ_ReadLong(&buf);
+                value = cl.frame.ps.stats[value];
+                if (!value) {   // skip to endif
+                    buf.readcount = skip;
+                }
+                break;
+            }
+        }
+    }
+}
+
 static void SCR_ExecuteLayoutString(const char *s)
 {
     char    buffer[MAX_QPATH];
@@ -1830,43 +2063,378 @@ static void SCR_ExecuteLayoutString(const char *s)
     R_SetAlpha(scr_alpha->value);
 }
 
-static struct {
-    const char *key;
-    const char *value;
-} scr_hud_macros[] = {
-    { "STAT_HEALTH_ICON", STRINGIFY(STAT_HEALTH_ICON) },
-    { "STAT_HEALTH", STRINGIFY(STAT_HEALTH) },
-    { "STAT_AMMO_ICON", STRINGIFY(STAT_AMMO_ICON) },
-    { "STAT_AMMO", STRINGIFY(STAT_AMMO) },
-    { "STAT_ARMOR_ICON", STRINGIFY(STAT_ARMOR_ICON) },
-    { "STAT_ARMOR", STRINGIFY(STAT_ARMOR) },
-    { "STAT_SELECTED_ICON", STRINGIFY(STAT_SELECTED_ICON) },
-    { "STAT_PICKUP_ICON", STRINGIFY(STAT_PICKUP_ICON) },
-    { "STAT_PICKUP_STRING", STRINGIFY(STAT_PICKUP_STRING) },
-    { "STAT_TIMER_ICON", STRINGIFY(STAT_TIMER_ICON) },
-    { "STAT_TIMER", STRINGIFY(STAT_TIMER) },
-    { "STAT_HELPICON", STRINGIFY(STAT_HELPICON) },
-    { "STAT_SELECTED_ITEM", STRINGIFY(STAT_SELECTED_ITEM) },
-    { "STAT_LAYOUTS", STRINGIFY(STAT_LAYOUTS) },
-    { "STAT_FRAGS", STRINGIFY(STAT_FRAGS) },
-    { "STAT_FLASHES", STRINGIFY(STAT_FLASHES) },
-    { "STAT_CHASE", STRINGIFY(STAT_CHASE) },
-    { "STAT_SPECTATOR", STRINGIFY(STAT_SPECTATOR) }
-};
-
-static bool SCR_NeedsQuotes(const char *t)
+static hud_script_t *SCR_AllocateHudScript(void)
 {
-    char c;
+    hud_script_t *script = Z_TagMallocz(sizeof(hud_script_t), TAG_HUD);
+    script->bytecode = Z_TagMalloc(script->bytecode_length = 2048, TAG_HUD);
+    script->string_data = Z_TagMallocz(script->string_data_length = 2048, TAG_HUD);
+    script->constants = Z_TagMalloc(sizeof(hud_macro_t) * (script->allocated_constants = 64), TAG_HUD);
+    return script;
+}
 
-    while ((c = *t)) {
-        if (c == ' ' || c == '\n' || c == '\t') {
-            return true;
-        }
+static void SCR_ShrinkHudScript(void)
+{
+    scr.hud_script->bytecode = Z_Realloc(scr.hud_script->bytecode, scr.hud_script->bytecode_pos);
+    scr.hud_script->bytecode_length = scr.hud_script->bytecode_pos;
 
-        t++;
+    scr.hud_script->string_data = Z_Realloc(scr.hud_script->string_data, scr.hud_script->string_len);
+    scr.hud_script->string_data_length = scr.hud_script->string_len;
+}
+
+static void SCR_DestroyHudScriptTemp(void)
+{
+    if (scr.hud_script->constants) {
+        Z_Free(scr.hud_script->constants);
+        scr.hud_script->constants = NULL;
     }
 
-    return false;
+    while (scr.hud_script->control_head) {
+        hud_control_t *n = scr.hud_script->control_head->next;
+        Z_Free(scr.hud_script->control_head);
+        scr.hud_script->control_head = n;
+    }
+
+    scr.hud_script->control_head = NULL;
+}
+
+static void SCR_DestroyHudScript(void)
+{
+    if (scr.hud_script->bytecode) {
+        Z_Free(scr.hud_script->bytecode);
+        scr.hud_script->bytecode = NULL;
+    }
+
+    if (scr.hud_script->string_data) {
+        Z_Free(scr.hud_script->string_data);
+        scr.hud_script->string_data = NULL;
+    }
+
+    SCR_DestroyHudScriptTemp();
+
+    Z_Free(scr.hud_script);
+    scr.hud_script = NULL;
+}
+
+static void SCR_PushHudBytecode(hud_script_t *script, sizebuf_t *buf)
+{
+    if (script->bytecode_pos + buf->cursize > script->bytecode_length) {
+        script->bytecode_length += 2048;
+        script->bytecode = Z_Realloc(script->bytecode, script->bytecode_length);
+    }
+
+    memcpy(script->bytecode + script->bytecode_pos, buf->data, buf->cursize);
+    script->bytecode_pos += buf->cursize;
+    SZ_Clear(buf);
+}
+
+static void SCR_PushHudConstant(hud_script_t *script, const char *key, const char *value)
+{
+    for (size_t i = 0; i < script->num_constants; i++) {
+        if (Q_strcasecmp(script->constants[i].key, key) == 0) {
+            Q_strlcpy(script->constants[i].value, value, sizeof(script->constants[i].value));
+            return;
+        }
+    }
+
+    if (script->num_constants == script->allocated_constants) {
+        script->allocated_constants += 64;
+        script->constants = Z_Realloc(script->constants, sizeof(hud_macro_t) * (script->allocated_constants));
+    }
+
+    Q_strlcpy(script->constants[script->num_constants].key, key, sizeof(script->constants[script->num_constants].key));
+    Q_strlcpy(script->constants[script->num_constants].value, value, sizeof(script->constants[script->num_constants].value));
+    script->num_constants++;
+}
+
+static uint32_t SCR_FindHudString(hud_script_t *script, const char *str)
+{
+    char *s = script->string_data;
+
+    for (size_t i = 0; i < script->string_count; i++) {
+        if (strcmp(s, str) == 0) {
+            return s - script->string_data;
+        }
+
+        s += strlen(s) + 1;
+    }
+
+    // not found, we can write one here
+    size_t pos = s - script->string_data;
+    size_t reserve_len = strlen(str) + 1;
+
+    if (pos + reserve_len > script->string_data_length) {
+        script->string_data_length += 2048;
+        script->string_data = Z_Realloc(script->string_data, script->string_data_length);
+        s = script->string_data + pos;
+        memset(s, 0, script->string_data_length - pos);
+    }
+
+    Q_strlcpy(s, str, script->string_data_length - pos);
+    script->string_count++;
+    script->string_len += reserve_len;
+
+    return pos;
+}
+
+static void SCR_PrintError(const char *script_path, const char *script_data, const char *token_location, const char *token, const char *message)
+{
+    char loc_buffer[128];
+    Q_snprintf(loc_buffer, sizeof(loc_buffer), "<unknown>");
+
+    if (script_data) {
+        if (!token_location) {
+            Q_snprintf(loc_buffer, sizeof(loc_buffer), "<eof>");
+        } else if (token_location >= script_data && token_location <= script_data + strlen(script_data)) {
+            size_t last_newline = 0, newline_count = 0;
+            const char *p = script_data;
+
+            while (p != token_location && *p++) {
+                if (*p == '\n') {
+                    last_newline = p - script_data;
+                    newline_count++;
+                }
+            }
+
+            Q_snprintf(loc_buffer, sizeof(loc_buffer), "%i:%i", newline_count + 1, (token_location - script_data) - last_newline - strlen(token));
+        }
+    }
+
+    Com_EPrintf("Script error in %s[%s]: %s\n", script_path, loc_buffer, message);
+}
+
+#define SCR_HudError(msg, token) \
+    SCR_PrintError(path, script_data, buffer, token, msg); FS_FreeFile(script_data); return false
+
+#define SCR_ExpectInt(name) \
+    int name; { char *end = NULL; const char *s = SCR_ResolveConstant(script, token); name = strtol(s, &end, 10); if (end == s) { SCR_HudError("expected integer", token); } }
+
+static const char *SCR_ResolveConstant(hud_script_t *script, const char *key)
+{
+    if (key[0] != '$') {
+        return key;
+    }
+
+    for (size_t i = 0; i < script->num_constants; i++) {
+        if (Q_strcasecmp(script->constants[i].key, key + 1) == 0) {
+            return script->constants[i].value;
+        }
+    }
+
+    return key;
+}
+
+static bool SCR_CompileHudFile(hud_script_t *script, const char *path)
+{
+    char *buffer;
+
+    int ret = FS_LoadFile(path, &buffer);
+
+    if (!buffer) {
+        Com_WPrintf("Couldn't find HUD file \"%s\"\n", path);
+        return false;
+    }
+
+    char *script_data = buffer;
+
+    // parse all the opcodes of this file
+    char *token;
+
+    byte opcode_buffer[32];
+    sizebuf_t opcodes = { 0 };
+    SZ_TagInit(&opcodes, &opcode_buffer, sizeof(opcode_buffer), TAG_HUD);
+
+    while (*(token = COM_Parse(&buffer)))
+    {
+        // import another file
+        if (Q_strcasecmp(token, "include") == 0) {
+            char include_path[MAX_OSPATH];
+
+            token = COM_Parse(&buffer);
+            Q_snprintf(include_path, sizeof(include_path), "huds/%s", SCR_ResolveConstant(script, token));
+
+            if (!SCR_CompileHudFile(script, include_path)) {
+                SCR_HudError("couldn't find HUD import", token);
+                return false;
+            }
+        // define constant
+        } else if (Q_strcasecmp(token, "define") == 0) {
+            const char *key = COM_Parse(&buffer);
+            
+            if (!*key) {
+                SCR_HudError("invalid macro name", key);
+            }
+
+            token = COM_Parse(&buffer);
+
+            if (!*token) {
+                SCR_HudError("invalid macro value", token);
+            }
+
+            SCR_PushHudConstant(script, key, token);
+        } else if (Q_strcasecmp(token, "xl") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_XL);
+            SZ_WriteLong(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "xr") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_XR);
+            SZ_WriteLong(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "yt") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_YT);
+            SZ_WriteLong(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "yb") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_YB);
+            SZ_WriteLong(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "xv") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_XV);
+            SZ_WriteLong(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "yv") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_YV);
+            SZ_WriteLong(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "picn") == 0) {
+            token = COM_Parse(&buffer);
+
+            if (!*token) {
+                SCR_HudError("invalid image", token);
+            }
+
+            uint32_t id = SCR_FindHudString(script, SCR_ResolveConstant(script, token));
+
+            SZ_WriteByte(&opcodes, HUD_OP_PICN);
+            SZ_WriteLong(&opcodes, id);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "hnum") == 0) {
+            SZ_WriteByte(&opcodes, HUD_OP_HNUM);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "anum") == 0) {
+            SZ_WriteByte(&opcodes, HUD_OP_ANUM);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "rnum") == 0) {
+            SZ_WriteByte(&opcodes, HUD_OP_RNUM);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "cstring") == 0) {
+            token = COM_Parse(&buffer);
+            uint32_t id = SCR_FindHudString(script, SCR_ResolveConstant(script, token));
+
+            SZ_WriteByte(&opcodes, HUD_OP_CSTRING);
+            SZ_WriteLong(&opcodes, id);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "cstring2") == 0) {
+            token = COM_Parse(&buffer);
+            uint32_t id = SCR_FindHudString(script, SCR_ResolveConstant(script, token));
+
+            SZ_WriteByte(&opcodes, HUD_OP_CSTRING2);
+            SZ_WriteLong(&opcodes, id);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "string") == 0) {
+            token = COM_Parse(&buffer);
+            uint32_t id = SCR_FindHudString(script, SCR_ResolveConstant(script, token));
+
+            SZ_WriteByte(&opcodes, HUD_OP_STRING);
+            SZ_WriteLong(&opcodes, id);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "string2") == 0) {
+            token = COM_Parse(&buffer);
+            uint32_t id = SCR_FindHudString(script, SCR_ResolveConstant(script, token));
+
+            SZ_WriteByte(&opcodes, HUD_OP_STRING2);
+            SZ_WriteLong(&opcodes, id);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "color") == 0) {
+            token = COM_Parse(&buffer);
+            color_t c;
+            if (!SCR_ParseColor(SCR_ResolveConstant(script, token), &c)) {
+                SCR_HudError("invalid color", token);
+            }
+
+            SZ_WriteByte(&opcodes, HUD_OP_COLOR);
+            SZ_WriteLong(&opcodes, c.u32);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "pic") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_PIC);
+            SZ_WriteByte(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "num") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(width);
+
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_NUM);
+            SZ_WriteByte(&opcodes, width);
+            SZ_WriteByte(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "stat_string") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_STAT_STRING);
+            SZ_WriteByte(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "stat_string2") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_STAT_STRING2);
+            SZ_WriteByte(&opcodes, v);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "if") == 0) {
+            token = COM_Parse(&buffer);
+            SCR_ExpectInt(v);
+
+            SZ_WriteByte(&opcodes, HUD_OP_IF);
+            SZ_WriteByte(&opcodes, v);
+
+            hud_control_t *ctrl = Z_TagMallocz(sizeof(hud_control_t), TAG_HUD);
+            ctrl->p = script->bytecode_pos + opcodes.cursize;
+            ctrl->next = script->control_head;
+            script->control_head = ctrl;
+
+            SZ_WriteLong(&opcodes, 12345678);
+            SCR_PushHudBytecode(script, &opcodes);
+        } else if (Q_strcasecmp(token, "endif") == 0) {
+            if (!script->control_head) {
+                SCR_HudError("endif without matching if", token);
+            }
+
+            *((int32_t *) (script->bytecode + script->control_head->p)) = script->bytecode_pos;
+
+            hud_control_t *n = script->control_head->next;
+            Z_Free(script->control_head);
+            script->control_head = n;
+        } else {
+            SCR_HudError("invalid opcode", token);
+        }
+    }
+
+    FS_FreeFile(script_data);
+    return true;
 }
 
 static void SCR_LoadHud(void)
@@ -1875,100 +2443,26 @@ static void SCR_LoadHud(void)
 
     Q_snprintf(path, sizeof(path), "huds/%s.hud", scr_hud->string);
 
-    char *buffer;
+    scr.hud_script = SCR_AllocateHudScript();
 
-    int ret = FS_LoadFile(path, &buffer);
-
-    if (!buffer) {
-        Com_WPrintf("Couldn't find HUD \"%s\"\n", path);
-
-        Q_snprintf(path, sizeof(path), "huds/default.hud");
-
-        ret = FS_LoadFile(path, &buffer);
-
-        if (!buffer) {
-            Com_EPrintf("Couldn't find default HUD \"%s\"\n", path);
-            return;
-        }
+    if (!SCR_CompileHudFile(scr.hud_script, path)) {
+        SCR_DestroyHudScript();
+        return;
     }
 
-    // in theory the final HUD should never be larger than the file...
-    size_t hud_string_length = ret + 1;
-    scr.hud_string = Z_TagMallocz(hud_string_length, TAG_UI);
-
-    char *hud_end = scr.hud_string;
-
-    char *token_buf = buffer;
-
-#define APPEND(x) \
-    if (Q_snprintf(hud_end, hud_string_length - (hud_end - scr.hud_string), "%s", x) != strlen(x)) { \
-        Com_Errorf(ERR_DROP, "HUD file overflow"); \
-        goto fail; \
-    } \
-    hud_end += strlen(x)
-
-    while (true)
-    {
-        char *token = COM_Parse(&token_buf);
-
-        if (!token || !*token) {
-            break;
-        }
-
-        // add in space
-        if (*scr.hud_string) {
-            APPEND(" ");
-        }
-
-        // macros
-        if (token[0] == '$') {
-            token++;
-
-            size_t i;
-
-            for (i = 0; i < q_countof(scr_hud_macros); i++) {
-                if (Q_strcasecmp(scr_hud_macros[i].key, token) == 0) {
-                    APPEND(scr_hud_macros[i].value);
-                    break;
-                }
-            }
-
-            if (i == q_countof(scr_hud_macros)) {
-                Com_Errorf(ERR_DROP, "Invalid HUD macro \"%s\"", token);
-                goto fail;
-            }
-
-            continue;
-        }
-
-        // see if we need quotes
-        if (SCR_NeedsQuotes(token)) {
-            APPEND("\"");
-            APPEND(token);
-            APPEND("\"");
-        } else {
-            APPEND(token);
-        }
+    if (scr.hud_script->control_head) {
+        SCR_PrintError(path, NULL, NULL, NULL, "unexpected end of script; no endif found for if");
+        SCR_DestroyHudScript();
+        return;
     }
 
-    goto finish;
-
-fail:
-    if (scr.hud_string) {
-        Z_Free(scr.hud_string);
-        scr.hud_string = NULL;
-    }
-
-finish:
-    FS_FreeFile(buffer);
+    SCR_DestroyHudScriptTemp();
+    SCR_ShrinkHudScript();
 }
 
 static void SCR_DestroyHud(void)
 {
-    if (scr.hud_string) {
-        Z_Free(scr.hud_string);
-        scr.hud_string = NULL;
-    }
+    SCR_DestroyHudScript();
 }
 
 //=============================================================================
@@ -2034,7 +2528,7 @@ static void SCR_DrawStats(void)
     if (scr_draw2d->integer <= 1)
         return;
 
-    SCR_ExecuteLayoutString(scr.hud_string);
+    SCR_ExecuteLayoutBytecode(scr.hud_script);
 }
 
 static void SCR_DrawLayout(void)

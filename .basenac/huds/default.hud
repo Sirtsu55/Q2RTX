@@ -1,76 +1,79 @@
+include constants.inc
+
 yb -24
 
 // health
 xv 0
 hnum
+
 xv 50
 pic 0
 
 // ammo
-if 2
+if $STAT_AMMO_ICON
    xv  100
    anum
    xv  150
-   pic 2
+   pic $STAT_AMMO_ICON
 endif
 
 // armor
-if 4
+if $STAT_ARMOR_ICON
    xv  200
    rnum
    xv  250
-   pic 4
+   pic $STAT_ARMOR_ICON
 endif
 
 // selected item
-if 6
+if $STAT_SELECTED_ICON
    xv  296
-   pic 6
+   pic $STAT_SELECTED_ICON
 endif
 
 yb -50
 
 // picked up item
-if 7
+if $STAT_PICKUP_ICON
    xv  0
-   pic 7
+   pic $STAT_PICKUP_ICON
    xv  26
    yb  -42
-   stat_string 8
+   stat_string $STAT_PICKUP_STRING
    yb  -50
 endif
 
 // timer
-if 9
+if $STAT_TIMER_ICON
    xv  246
-   num 2   10
+   num 2   $STAT_TIMER
    xv  296
-   pic 9
+   pic $STAT_TIMER_ICON
 endif
 
 //  help / weapon icon
-if 11
+if $STAT_HELPICON
    xv  148
-   pic 11
+   pic $STAT_HELPICON
 endif
 
 //  frags
 xr -50
 yt 2
-num 3 14
+num 3 $STAT_FRAGS
 
 // spectator
-if 17
-xv 0
-yb -58
-string2 "SPECTATOR MODE"
+if $STAT_SPECTATOR
+	xv 0
+	yb -58
+	string2 "SPECTATOR MODE"
 endif
 
 // chase camera
-if 16
-xv 0
-yb -68
-string "Chasing"
-xv 64
-stat_string 16
+if $STAT_CHASE
+	xv 0
+	yb -68
+	string "Chasing"
+	xv 64
+	stat_string $STAT_CHASE
 endif

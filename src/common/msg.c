@@ -1000,25 +1000,12 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
 
 void MSG_BeginReading(void)
 {
-    msg_read.readcount = 0;
-    msg_read.bitpos = 0;
+    SZ_BeginReading(&msg_read);
 }
 
 byte *MSG_ReadData(size_t len)
 {
-    byte *buf = msg_read.data + msg_read.readcount;
-
-    msg_read.readcount += len;
-    msg_read.bitpos = msg_read.readcount << 3;
-
-    if (msg_read.readcount > msg_read.cursize) {
-        if (!msg_read.allowunderflow) {
-            Com_Errorf(ERR_DROP, "%s: read past end of message", __func__);
-        }
-        return NULL;
-    }
-
-    return buf;
+    return SZ_ReadData(&msg_read, len);
 }
 
 // returns -1 if no more characters are available

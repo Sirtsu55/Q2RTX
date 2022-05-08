@@ -62,7 +62,8 @@ static const char   z_tagnames[TAG_MAX][8] = {
     "ui",
     "server",
     "sound",
-    "cmodel"
+    "cmodel",
+    "hud"
 };
 
 static inline void Z_CountFree(zhead_t *z)
