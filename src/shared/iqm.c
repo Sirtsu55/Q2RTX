@@ -358,6 +358,8 @@ int MOD_LoadIQM_Base(iqm_model_t *iqmData, const void *rawdata, size_t length, c
 	}
 
 	// fill header
+	iqmData->root_id = -1;
+
 	iqmData->num_vertexes = (header->num_meshes > 0) ? header->num_vertexes : 0;
 	iqmData->num_triangles = (header->num_meshes > 0) ? header->num_triangles : 0;
 	iqmData->num_frames = header->num_frames;
@@ -549,6 +551,10 @@ int MOD_LoadIQM_Base(iqm_model_t *iqmData, const void *rawdata, size_t length, c
 			const char *name = (const char *) header + header->ofs_text + joint->name;
 			Q_strlcpy((char *) str, name, sizeof(*str));
 			str++;
+
+			if (strlen(name) >= 4 && Q_strcasecmp(name + strlen(name) - 4, "root") == 0) {
+				iqmData->root_id = joint_idx;
+			}
 		}
 
 		// copy joint parents

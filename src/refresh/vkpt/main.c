@@ -40,6 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../../client/ui/ui.h"
 
 #include "shader/vertex_buffer.h"
+#include "format/iqm.h"
 
 #include <vulkan/vulkan.h>
 #include <SDL.h>
@@ -1823,6 +1824,32 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 #define MESH_FILTER_MASKED 4
 #define MESH_FILTER_ALL 7
 
+void MatrixTranspose(mat4_t m)
+{
+	mat4_t c;
+	memcpy(&c, m, sizeof(c));
+
+	m[0] = c[0];
+	m[4] = c[1];
+	m[8] = c[2];
+	m[12] = c[3];
+
+	m[1] = c[4];
+	m[5] = c[5];
+	m[9] = c[6];
+	m[13] = c[7];
+
+	m[2] = c[8];
+	m[6] = c[9];
+	m[10] = c[10];
+	m[14] = c[11];
+
+	m[3] = c[12];
+	m[7] = c[13];
+	m[11] = c[14];
+	m[15] = c[15];
+}
+
 static void process_regular_entity(
 	const entity_t* entity, 
 	const model_t* model, 
@@ -1841,7 +1868,7 @@ static void process_regular_entity(
 	InstanceBuffer* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
 
 	float transform[16];
-	create_entity_matrix(transform, (entity_t*)entity, is_viewer_weapon);
+	create_entity_matrix(transform, entity, is_viewer_weapon);
 	
 	int current_instance_index = *instance_count;
 	int current_animated_index = *animated_count;
@@ -1851,8 +1878,7 @@ static void process_regular_entity(
 		*contains_transparent = false;
 
 	int iqm_matrix_index = -1;
-	if (model->iqmData && model->iqmData->num_poses)
-	{
+	if (model->iqmData && model->iqmData->num_poses) {
 		iqm_matrix_index = *iqm_matrix_offset;
 		
 		if (iqm_matrix_index + model->iqmData->num_poses > MAX_IQM_MATRICES)
@@ -1860,9 +1886,96 @@ static void process_regular_entity(
 			assert(!"IQM matrix buffer overflow");
 			return;
 		}
-		
-		R_ComputeIQMTransforms(model->iqmData, entity, iqm_matrix_data + (iqm_matrix_index * 12), fd);
-		
+
+		float *pose_mat = iqm_matrix_data + (iqm_matrix_index * 12);
+
+		iqm_transform_t relativeJoints[IQM_MAX_JOINTS];
+
+		R_ComputeIQMRelativeJoints(model->iqmData, entity->frame, entity->oldframe, 1.0f - entity->backlerp, entity->backlerp, relativeJoints);
+
+		if (model->spin_id != -1 && entity->spin_angle) {
+			quat_t spin_quat = { 0, 0, 0, 1 };
+			QuatRotateY(spin_quat, spin_quat, entity->spin_angle);
+			QuatMultiply(relativeJoints[model->spin_id].rotate, relativeJoints[model->spin_id].rotate, spin_quat);
+		}
+
+		R_ComputeIQMWorldSpaceMatricesFromRelative(model->iqmData, relativeJoints, pose_mat);
+
+		/*if (!(entity->flags & RF_WEAPONMODEL)) {
+			for (size_t i = 1; i < model->iqmData->num_joints; i++) {
+				float *renderPoseMat = pose_mat + (i * 12);
+				mat4 mat1_ = {
+					{ renderPoseMat[0], renderPoseMat[4], renderPoseMat[8], 0 },
+					{ renderPoseMat[1], renderPoseMat[5], renderPoseMat[9], 0 },
+					{ renderPoseMat[2], renderPoseMat[6], renderPoseMat[10], 0 },
+					{ renderPoseMat[3], renderPoseMat[7], renderPoseMat[11], 1 },
+				};
+				vec3_t p;
+				transform_point(vec3_origin, (const float *) (&mat1_[0][0]), p);
+				transform_point(p, transform, p);
+
+				if (fabsf(entity->origin[2] - p[2]) < 1.f) {
+					particle_t *pr = &fd->particles[fd->num_particles++];
+					memset(pr, 0, sizeof(*pr));
+					pr->color = -1;
+					pr->brightness = 1;
+					pr->radius = 1.0f;
+					pr->rgba = (color_t) { .u8 = { 255, 0, 0, 255 } };
+					pr->alpha = 1.f;
+					VectorCopy(p, pr->origin);
+
+					if (CM_PointContents(pr->origin, cl.bsp->nodes) & CONTENTS_SOLID) {
+						relativeJoints[i].translate[0] -= 16.f;
+					} else {
+						trace_t tr;
+						CM_BoxTrace(&tr, pr->origin, (vec3_t) { pr->origin[0], pr->origin[1], pr->origin[2] - STEPSIZE }, vec3_origin, vec3_origin, cl.bsp->nodes, MASK_SOLID);
+						relativeJoints[i].translate[0] -= (pr->origin[2] - tr.endpos[2]);
+					}
+				}
+			}
+		}*/
+
+		// debug bones
+		/*if (!(entity->flags & RF_WEAPONMODEL)) {
+			float *renderPoseMat = pose_mat;
+			int base = fd->num_particles;
+
+			for (size_t i = 0; i < model->iqmData->num_poses; i++) {
+
+				particle_t *pr = &fd->particles[fd->num_particles++];
+				memset(pr, 0, sizeof(*pr));
+				pr->color = -1;
+				pr->brightness = 1;
+				pr->radius = 1.0f;
+				pr->rgba = (color_t) { .u8 = { 255, 0, 0, 255 } };
+				pr->alpha = 1.f;
+				mat4 mat1_ = {
+					{ renderPoseMat[0], renderPoseMat[4], renderPoseMat[8], 0 },
+					{ renderPoseMat[1], renderPoseMat[5], renderPoseMat[9], 0 },
+					{ renderPoseMat[2], renderPoseMat[6], renderPoseMat[10], 0 },
+					{ renderPoseMat[3], renderPoseMat[7], renderPoseMat[11], 1 },
+				};
+				transform_point(vec3_origin, (const float *) (&mat1_[0][0]), pr->origin);
+				transform_point(pr->origin, transform, pr->origin);
+
+				if (*(model->iqmData->jointParents + i) >= 0) {
+					entity_t *b = &fd->entities[fd->num_entities++];
+					memset(b, 0, sizeof(*b));
+					b->skinnum = -1;
+					b->rgba = (color_t) { .u8 = { 0, 0, 255, 255 } };
+					b->alpha = 1.f;
+					b->flags = RF_BEAM;
+					b->frame = 1;
+					VectorCopy(pr->origin, b->origin);
+					VectorCopy(fd->particles[base + *(model->iqmData->jointParents + i)].origin, b->oldorigin);
+				}
+
+				renderPoseMat += 12;
+			}
+		}*/
+
+		R_ComputeIQMLocalSpaceMatricesFromRelative(model->iqmData, relativeJoints, pose_mat);
+
 		*iqm_matrix_offset += (int)model->iqmData->num_poses;
 	}
 

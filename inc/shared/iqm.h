@@ -68,6 +68,10 @@ typedef struct
 	float *bounds;
 
 	iqm_anim_t *animations;
+
+	// NAC stuff
+	// Root bone ID
+	int32_t root_id;
 } iqm_model_t;
 
 // inter-quake-model mesh

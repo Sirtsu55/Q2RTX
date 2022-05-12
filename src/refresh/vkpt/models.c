@@ -883,6 +883,13 @@ int MOD_LoadIQM(model_t* model, const void* rawdata, size_t length, const char* 
 		mesh->numskins = skin_idx;
 	}
 
+	model->spin_id = -1;
+
+	for (uint32_t i = 0; i < model->iqmData->num_joints; i++)
+		if (Q_strcasecmp(model->iqmData->jointNames[i], "spin") == 0) {
+			model->spin_id = i;
+		}
+
 	compute_missing_model_tangents(model);
 
 	extract_model_lights(model);

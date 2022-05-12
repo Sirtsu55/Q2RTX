@@ -87,7 +87,9 @@ typedef struct model_s {
     struct mspriteframe_s *spriteframes;
 	bool sprite_vertical;
 
+    // IQM models
 	iqm_model_t* iqmData;
+    int spin_id;
 
 	int num_light_polys;
 	light_poly_t* light_polys;
@@ -112,7 +114,16 @@ qhandle_t R_RegisterModel(const char *name);
 struct dmd2header_s;
 int MOD_ValidateMD2(struct dmd2header_s *header, size_t length);
 
-bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, float* pose_matrices, struct refdef_s *fd);
+// compute pose transformations for the given model + data
+// `relativeJoints` must have enough room for model->num_poses
+void R_ComputeIQMRelativeJoints(const iqm_model_t* model, int32_t frame, int32_t oldframe, float lerp, float backlerp, iqm_transform_t *relativeJoints);
+
+// compute local space matrices for the given pose transformations.
+// this is the "fast path" for when world space is not necessary.
+void R_ComputeIQMLocalSpaceMatricesFromRelative(const iqm_model_t *model, const iqm_transform_t *relativeJoints, float *pose_matrices);
+
+// compute world space matrices for the given pose transformations.
+void R_ComputeIQMWorldSpaceMatricesFromRelative(const iqm_model_t *model, const iqm_transform_t *relativeJoints, float *pose_matrices);
 
 // these are implemented in [gl,sw]_models.c
 typedef int (*mod_load_t)(model_t *, const void *, size_t, const char*);

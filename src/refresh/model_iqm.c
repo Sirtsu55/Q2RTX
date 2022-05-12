@@ -28,149 +28,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <refresh/models.h>
 #include <refresh/refresh.h>
 
-static void QuatSlerp(const quat_t from, const quat_t _to, float fraction, quat_t out)
+void R_ComputeIQMRelativeJoints(const iqm_model_t* model, int32_t frame, int32_t oldframe, float lerp, float backlerp, iqm_transform_t *relativeJoints)
 {
-	// cos() of angle
-	float cosAngle = from[0] * _to[0] + from[1] * _to[1] + from[2] * _to[2] + from[3] * _to[3];
-
-	// negative handling is needed for taking shortest path (required for model joints)
-	quat_t to;
-	if (cosAngle < 0.0f)
-	{
-		cosAngle = -cosAngle;
-		to[0] = -_to[0];
-		to[1] = -_to[1];
-		to[2] = -_to[2];
-		to[3] = -_to[3];
-	}
-	else
-	{
-		QuatCopy(_to, to);
-	}
-
-	float backlerp, lerp;
-	if (cosAngle < 0.999999f)
-	{
-		// spherical lerp (slerp)
-		const float angle = acosf(cosAngle);
-		const float sinAngle = sinf(angle);
-		backlerp = sinf((1.0f - fraction) * angle) / sinAngle;
-		lerp = sinf(fraction * angle) / sinAngle;
-	}
-	else
-	{
-		// linear lerp
-		backlerp = 1.0f - fraction;
-		lerp = fraction;
-	}
-
-	out[0] = from[0] * backlerp + to[0] * lerp;
-	out[1] = from[1] * backlerp + to[1] * lerp;
-	out[2] = from[2] * backlerp + to[2] * lerp;
-	out[3] = from[3] * backlerp + to[3] * lerp;
-}
-
-static inline void QuatRotateX(quat_t out, quat_t a, float rad)
-{
-	rad *= 0.5;
-
-	float ax = a[0],
-		ay = a[1],
-		az = a[2],
-		aw = a[3];
-	float bx = sinf(rad),
-		bw = cosf(rad);
-
-	out[0] = ax * bw + aw * bx;
-	out[1] = ay * bw + az * bx;
-	out[2] = az * bw - ay * bx;
-	out[3] = aw * bw - ax * bx;
-}
-
-static inline void QuatRotateY(quat_t out, quat_t a, float rad) {
-	rad *= 0.5;
-
-	float ax = a[0],
-		ay = a[1],
-		az = a[2],
-		aw = a[3];
-	float by = sinf(rad),
-		bw = cosf(rad);
-
-	out[0] = ax * bw - az * by;
-	out[1] = ay * bw + aw * by;
-	out[2] = az * bw + ax * by;
-	out[3] = aw * bw - ay * by;
-}
-
-static inline void QuatRotateZ(quat_t out, quat_t a, float rad) {
-	rad *= 0.5;
-
-	float ax = a[0],
-		ay = a[1],
-		az = a[2],
-		aw = a[3];
-	float bz = sinf(rad),
-		bw = cosf(rad);
-
-	out[0] = ax * bw + ay * bz;
-	out[1] = ay * bw - ax * bz;
-	out[2] = az * bw + aw * bz;
-	out[3] = aw * bw - az * bz;
-}
-
-static inline void QuatMultiply(quat_t out, quat_t a, quat_t b)
-{
-	float ax = a[0],
-		ay = a[1],
-		az = a[2],
-		aw = a[3];
-	float bx = b[0],
-		by = b[1],
-		bz = b[2],
-		bw = b[3];
-
-	out[0] = ax * bw + aw * bx + ay * bz - az * by;
-	out[1] = ay * bw + aw * by + az * bx - ax * bz;
-	out[2] = az * bw + aw * bz + ax * by - ay * bx;
-	out[3] = aw * bw - ax * bx - ay * by - az * bz;
-}
-
-/*
-=================
-R_ComputeIQMTransforms
-
-Compute matrices for this model, returns [model->num_poses] 3x4 matrices in the (pose_matrices) array
-=================
-*/
-bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, float* pose_matrices, refdef_t *fd)
-{
-	iqm_transform_t relativeJoints[IQM_MAX_JOINTS];
-
 	iqm_transform_t* relativeJoint = relativeJoints;
 
-	const int frame = model->num_frames ? entity->frame % (int)model->num_frames : 0;
-	const int oldframe = model->num_frames ? entity->oldframe % (int)model->num_frames : 0;
-	const float backlerp = entity->backlerp;
-
-	// SPIN
-	int32_t spin_id = -1, skip_id = -1;
-	static float spin_angle = 0;
-	
-	for (uint32_t i = 0; i < model->num_joints; i++)
-	{
-		if (Q_strcasecmp(model->jointNames[i], "spin") == 0)
-			spin_id = i;
-		// SKIP
-		else if (strlen(model->jointNames[i]) >= 4 && Q_strcasecmp(model->jointNames[i] + strlen(model->jointNames[i]) - 4, "root") == 0)
-			skip_id = i;
-	}
-
-	quat_t spin_quat = { 0, 0, 0, 1 };
-
-	if (spin_id != -1 && entity->spin_angle)
-		QuatRotateY(spin_quat, spin_quat, entity->spin_angle);
-	// SPIN
+	frame = model->num_frames ? (frame % (int) model->num_frames) : 0;
+	oldframe = model->num_frames ? (oldframe % (int) model->num_frames) : 0;
 
 	// copy or lerp animation frame pose
 	if (oldframe == frame)
@@ -178,7 +41,7 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 		const iqm_transform_t* pose = &model->poses[frame * model->num_poses];
 		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, pose++, relativeJoint++)
 		{
-			if (pose_idx == skip_id)
+			if (pose_idx == model->root_id)
 			{
 				VectorClear(relativeJoint->translate);
 				VectorSet(relativeJoint->scale, 1, 1, 1);
@@ -190,18 +53,17 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 			VectorCopy(pose->scale, relativeJoint->scale);
 			QuatCopy(pose->rotate, relativeJoint->rotate);
 
-			if (pose_idx == spin_id)
-				QuatMultiply(relativeJoint->rotate, relativeJoint->rotate, spin_quat);
+			//if (pose_idx == spin_id)
+			//	QuatMultiply(relativeJoint->rotate, relativeJoint->rotate, spin_quat);
 		}
 	}
 	else
 	{
-		const float lerp = 1.0f - backlerp;
 		const iqm_transform_t* pose = &model->poses[frame * model->num_poses];
 		const iqm_transform_t* oldpose = &model->poses[oldframe * model->num_poses];
 		for (uint32_t pose_idx = 0; pose_idx < model->num_poses; pose_idx++, oldpose++, pose++, relativeJoint++)
 		{
-			if (pose_idx == skip_id)
+			if (pose_idx == model->root_id)
 			{
 				VectorClear(relativeJoint->translate);
 				VectorSet(relativeJoint->scale, 1, 1, 1);
@@ -219,13 +81,16 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 
 			QuatSlerp(oldpose->rotate, pose->rotate, lerp, relativeJoint->rotate);
 
-			if (pose_idx == spin_id)
-				QuatMultiply(relativeJoint->rotate, relativeJoint->rotate, spin_quat);
+			//if (pose_idx == spin_id)
+			//	QuatMultiply(relativeJoint->rotate, relativeJoint->rotate, spin_quat);
 		}
 	}
+}
 
+void R_ComputeIQMLocalSpaceMatricesFromRelative(const iqm_model_t *model, const iqm_transform_t *relativeJoints, float *pose_matrices)
+{
 	// multiply by inverse of bind pose and parent 'pose mat' (bind pose transform matrix)
-	relativeJoint = relativeJoints;
+	const iqm_transform_t *relativeJoint = relativeJoints;
 	const int* jointParent = model->jointParents;
 	const float* invBindMat = model->invBindJoints;
 	float* poseMat = pose_matrices;
@@ -246,6 +111,19 @@ bool R_ComputeIQMTransforms(const iqm_model_t* model, const entity_t* entity, fl
 			Matrix34Multiply(mat1, invBindMat, poseMat);
 		}
 	}
-
-	return true;
 }
+
+void R_ComputeIQMWorldSpaceMatricesFromRelative(const iqm_model_t *model, const iqm_transform_t *relativeJoints, float *pose_matrices)
+{
+	R_ComputeIQMLocalSpaceMatricesFromRelative(model, relativeJoints, pose_matrices);
+
+	float *poseMat = model->bindJoints;
+	float *outPose = pose_matrices;
+
+	for (size_t i = 0; i < model->num_poses; i++, poseMat += 12, outPose += 12) {
+		float inPose[12];
+		memcpy(inPose, outPose, sizeof(inPose));
+		Matrix34Multiply(inPose, poseMat, outPose);
+	}
+}
+
