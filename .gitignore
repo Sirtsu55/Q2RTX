@@ -33,3 +33,7 @@ save
 
 CMakeSettings.json
 /network
+
+baseq2/**/*.txt
+!baseq2/*.txt
+!baseq2/maps/sky/*.txt
