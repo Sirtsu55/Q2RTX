@@ -97,7 +97,7 @@ static void sort_and_deduplicate_materials(pbr_material_t* first, uint32_t* pCou
 }
 
 // Returns whether the current game is a custom game (not baseq2)
-static qboolean is_game_custom(void)
+static bool is_game_custom(void)
 {
 	return fs_game->string[0] && strcmp(fs_game->string, BASEGAME) != 0;
 }
@@ -770,14 +770,14 @@ static void load_material_image(image_t** image, const char* filename, pbr_mater
 	}
 }
 
-static qboolean game_image_identical_to_base(const char* name)
+static bool game_image_identical_to_base(const char* name)
 {
 	/* Check if a game image is actually different from the base version,
 	   as some games (eg rogue) ship image assets that are identical to the
 	   baseq2 version.
 	   If that is the case, ignore the game image, and just use everything
 	   from baseq2, especially overides/other images. */
-	qboolean result = false;
+	bool result = false;
 
 	qhandle_t base_file = -1, game_file = -1;
 	if((FS_FOpenFile(name, &base_file, FS_MODE_READ | FS_PATH_BASE | FS_BUF_NONE) >= 0)
