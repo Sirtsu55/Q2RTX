@@ -483,6 +483,7 @@ begin keys
     bind "drop item" invdrop
     bind "prev item" invprev
     bind "next item" invnext
+    bind "weapon inspect" inspect
     blank
     action "legacy keys..." pushmenu keys_legacy
 end
