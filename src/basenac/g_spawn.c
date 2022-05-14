@@ -885,7 +885,7 @@ void SP_worldspawn(edict_t *ent)
     SV_SetConfigString(CS_LIGHTS + 0, "m");
 
     // 1 FLICKER (first variety)
-    SV_SetConfigString(CS_LIGHTS + 1, "mmnmmommommnonmmonqnmmo");
+    SV_SetConfigString(CS_LIGHTS + 1, "kkokkrkkrkkorokkrovokkr");
 
     // 2 SLOW STRONG PULSE
     SV_SetConfigString(CS_LIGHTS + 2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
@@ -900,7 +900,7 @@ void SP_worldspawn(edict_t *ent)
     SV_SetConfigString(CS_LIGHTS + 5, "jklmnopqrstuvwxyzyxwvutsrqponmlkj");
 
     // 6 FLICKER (second variety)
-    SV_SetConfigString(CS_LIGHTS + 6, "nmonqnmomnmomomno");
+    SV_SetConfigString(CS_LIGHTS + 6, "okrovokrkokrkrkor");
 
     // 7 CANDLE (second variety)
     SV_SetConfigString(CS_LIGHTS + 7, "mmmaaaabcdefgmmmmaaaammmaamm");
