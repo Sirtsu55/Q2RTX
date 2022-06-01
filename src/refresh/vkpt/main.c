@@ -1914,7 +1914,9 @@ static void process_regular_entity(
 				transform_point(vec3_origin, (const float *) (&mat1_[0][0]), p);
 				transform_point(p, transform, p);
 
-				if (fabsf(entity->origin[2] - p[2]) < 1.f) {
+				if (fabsf(entity->origin[2] - p[2]) < 2.f) {
+					int parent = *(model->iqmData->jointParents + i);
+
 					particle_t *pr = &fd->particles[fd->num_particles++];
 					memset(pr, 0, sizeof(*pr));
 					pr->color = -1;
@@ -1925,11 +1927,16 @@ static void process_regular_entity(
 					VectorCopy(p, pr->origin);
 
 					if (CM_PointContents(pr->origin, cl.bsp->nodes) & CONTENTS_SOLID) {
-						relativeJoints[i].translate[0] -= 16.f;
+						for (size_t z = 0; z < STEPSIZE * 2; z++) {
+							if (!(CM_PointContents((vec3_t) { pr->origin[0], pr->origin[1], pr->origin[2] + z }, cl.bsp->nodes) & CONTENTS_SOLID)) {
+								relativeJoints[parent].translate[1] -= z;
+								break;
+							}
+						}
 					} else {
 						trace_t tr;
-						CM_BoxTrace(&tr, pr->origin, (vec3_t) { pr->origin[0], pr->origin[1], pr->origin[2] - STEPSIZE }, vec3_origin, vec3_origin, cl.bsp->nodes, MASK_SOLID);
-						relativeJoints[i].translate[0] -= (pr->origin[2] - tr.endpos[2]);
+						CM_BoxTrace(&tr, pr->origin, (vec3_t) { pr->origin[0], pr->origin[1], pr->origin[2] - STEPSIZE * 3 }, vec3_origin, vec3_origin, cl.bsp->nodes, MASK_SOLID);
+						relativeJoints[parent].translate[1] += (pr->origin[2] - tr.endpos[2]);
 					}
 				}
 			}
