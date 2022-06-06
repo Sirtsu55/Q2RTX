@@ -759,7 +759,6 @@ static void G_RunAnimation(edict_t *ent)
     // time to move to next frame
     if (!ent->anim.next_frame) {
         if (ent->s.frame + 1 > ent->anim.end) {
-            ent->s.frame = ent->anim.start;
 
             if (ent->anim.count) {
                 if (!--ent->anim.count_left) {
@@ -776,6 +775,8 @@ static void G_RunAnimation(edict_t *ent)
                 G_UseTargets(ent, ent->activator);
                 ent->target = old_target;
             }
+
+            ent->s.frame = ent->anim.start;
         }
         else
             ent->s.frame++;
