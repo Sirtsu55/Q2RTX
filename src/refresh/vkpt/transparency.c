@@ -659,6 +659,8 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 		// set up the quad - reference code is in function GL_DrawSpriteModel
 
 		vec3_t up, down, left, right;
+		float frameW2 = frame->width / 2;
+		float frameH2 = frame->height / 2;
 
 		if (cvar_pt_projection->integer == 1)
 		{
@@ -679,25 +681,84 @@ static void write_sprite_geometry(const float* view_matrix, const entity_t* enti
 		}
 		else
 		{
-			VectorScale(view_x, frame->origin_x, left);
-			VectorScale(view_x, frame->origin_x - frame->width, right);
+			if (model->sprite_fxup)
+			{
+				// Fixed Up/dn
+				vertex_positions[3][0] = e->origin[0] + frameW2;
+				vertex_positions[3][1] = e->origin[1] - frameH2;
+				vertex_positions[3][2] = e->origin[2];
 
-			/*if (model->sprite_vertical)
-			{*/
-				VectorScale(world_y, -frame->origin_y, down);
-				VectorScale(world_y, frame->height - frame->origin_y, up);
-			/*}
+				vertex_positions[0][0] = e->origin[0] - frameW2;
+				vertex_positions[0][1] = e->origin[1] - frameH2;
+				vertex_positions[0][2] = e->origin[2];
+
+				vertex_positions[1][0] = e->origin[0] - frameW2;
+				vertex_positions[1][1] = e->origin[1] + frameH2;
+				vertex_positions[1][2] = e->origin[2];
+
+				vertex_positions[2][0] = e->origin[0] + frameW2;
+				vertex_positions[2][1] = e->origin[1] + frameH2;
+				vertex_positions[2][2] = e->origin[2];
+			}
+			else if (model->sprite_fxft)
+			{
+				// Fixed Front/Back
+				vertex_positions[3][0] = e->origin[0] + frameW2;
+				vertex_positions[3][1] = e->origin[1];
+				vertex_positions[3][2] = e->origin[2] - frameH2;
+
+				vertex_positions[0][0] = e->origin[0] - frameW2;
+				vertex_positions[0][1] = e->origin[1];
+				vertex_positions[0][2] = e->origin[2] - frameH2;
+
+				vertex_positions[1][0] = e->origin[0] - frameW2;
+				vertex_positions[1][1] = e->origin[1];
+				vertex_positions[1][2] = e->origin[2] + frameH2;
+
+				vertex_positions[2][0] = e->origin[0] + frameW2;
+				vertex_positions[2][1] = e->origin[1];
+				vertex_positions[2][2] = e->origin[2] + frameH2;
+			}
+			else if (model->sprite_fxlt)
+			{
+				// Fixed Left/Right
+				vertex_positions[3][0] = e->origin[0];
+				vertex_positions[3][1] = e->origin[1] + frameW2;
+				vertex_positions[3][2] = e->origin[2] - frameH2;
+
+				vertex_positions[0][0] = e->origin[0];
+				vertex_positions[0][1] = e->origin[1] - frameW2;
+				vertex_positions[0][2] = e->origin[2] - frameH2;
+
+				vertex_positions[1][0] = e->origin[0];
+				vertex_positions[1][1] = e->origin[1] - frameW2;
+				vertex_positions[1][2] = e->origin[2] + frameH2;
+
+				vertex_positions[2][0] = e->origin[0];
+				vertex_positions[2][1] = e->origin[1] + frameW2;
+				vertex_positions[2][2] = e->origin[2] + frameH2;
+			}
 			else
 			{
-				VectorScale(view_y, -frame->origin_y, down);
-				VectorScale(view_y, frame->height - frame->origin_y, up);
-			}*/
-		}
+				VectorScale(view_x, frame->origin_x, left);
+				VectorScale(view_x, frame->origin_x - frame->width, right);
 
-		VectorAdd3(e->origin, down, left, vertex_positions[0]);
-		VectorAdd3(e->origin, up, left, vertex_positions[1]);
-		VectorAdd3(e->origin, up, right, vertex_positions[2]);
-		VectorAdd3(e->origin, down, right, vertex_positions[3]);
+				/*if (model->sprite_vertical)
+				{*/
+				VectorScale(world_y, -frame->origin_y, down);
+				VectorScale(world_y, frame->height - frame->origin_y, up);
+				/*}
+				else
+				{
+					VectorScale(view_y, -frame->origin_y, down);
+					VectorScale(view_y, frame->height - frame->origin_y, up);
+				}*/
+				VectorAdd3(e->origin, down, left, vertex_positions[0]);
+				VectorAdd3(e->origin, up, left, vertex_positions[1]);
+				VectorAdd3(e->origin, up, right, vertex_positions[2]);
+				VectorAdd3(e->origin, down, right, vertex_positions[3]);
+			}
+		}
 
 		vertex_positions += 4;
 		sprite_info += TR_SPRITE_INFO_SIZE / sizeof(int);
