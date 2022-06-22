@@ -962,7 +962,7 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             // origin[2] += offset;
 
             // V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
-            V_AddSphereLight(origin, 800.f, 1.40f, 0.7f, 0.2f, 0.3f);
+            V_AddSphereLight(origin, 400.f, 1.40f, 0.7f, 0.2f, 0.3f);
         }
         else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
                                                   // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));

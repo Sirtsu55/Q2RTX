@@ -285,6 +285,13 @@ static int MOD_LoadSP2(model_t *model, const void *rawdata, size_t length, const
         dst_frame++;
     }
 
+    if (strstr(model->name, "fxup"))
+        model->sprite_fxup = true;
+    else if (strstr(model->name, "fxft"))
+        model->sprite_fxft = true;
+    else if (strstr(model->name, "fxlt"))
+        model->sprite_fxlt = true;
+
     Hunk_End(&model->hunk);
 
     return Q_ERR_SUCCESS;
