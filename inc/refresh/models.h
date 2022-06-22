@@ -96,6 +96,8 @@ typedef struct model_s {
 
 	int num_light_polys;
 	light_poly_t* light_polys;
+
+    bool sprite_fxup, sprite_fxft, sprite_fxlt;
 } model_t;
 
 extern model_t      r_models[];
