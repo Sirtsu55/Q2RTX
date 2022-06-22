@@ -781,7 +781,7 @@ All players and monsters are affected.
 void target_earthquake_think(edict_t *self)
 {
     if (self->last_move_time < level.time) {
-        SV_PositionedSound(self->s.origin, self, CHAN_AUTO, self->noise_index, 1.0f, ATTN_NONE, 0);
+        SV_PositionedSound(self->s.origin, NULL, CHAN_BODY, self->noise_index, 1.0f, ATTN_NONE, 0);
         self->last_move_time = level.time + 500;
     }
 
