@@ -792,9 +792,9 @@ void target_earthquake_think(edict_t *self)
             continue;
 
         e->groundentity = NULL;
-        e->velocity[0] += crandom() * 150;
-        e->velocity[1] += crandom() * 150;
-        e->velocity[2] = self->speed * (100.0f / e->mass);
+        e->velocity[0] += self->speed * ((crandom() * 150) / e->mass);
+        e->velocity[1] += self->speed * ((crandom() * 150) / e->mass);
+        e->velocity[2] = self->speed * ((crandom() * 100) / e->mass);
     }
 
     if (level.time < self->timestamp)
