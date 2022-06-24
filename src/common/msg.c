@@ -152,6 +152,27 @@ void MSG_WriteLong(int c)
     buf[3] = c >> 24;
 }
 
+/*
+=============
+MSG_WriteLong
+=============
+*/
+void MSG_WriteFloat(float c)
+{
+    byte    *buf;
+    union
+    {
+        float v;
+        struct { uint8_t b[4]; };
+    } f2i = { c };
+
+    buf = SZ_GetSpace(&msg_write, 4);
+    buf[0] = f2i.b[0];
+    buf[1] = f2i.b[1];
+    buf[2] = f2i.b[2];
+    buf[3] = f2i.b[3];
+}
+
 void MSG_WriteVarInt(uint64_t c)
 {
     byte ba[8] = { 0 };
@@ -794,28 +815,54 @@ int MSG_WriteDeltaPlayerstate(const player_state_t    *from,
     }
 
     if (COORD2SHORT(to->pmove.origin[0]) != COORD2SHORT(from->pmove.origin[0]) ||
-        COORD2SHORT(to->pmove.origin[1]) != COORD2SHORT(from->pmove.origin[1])) {
+        COORD2SHORT(to->pmove.origin[1]) != COORD2SHORT(from->pmove.origin[1]) ||
+        to->pmove.pm_type != from->pmove.pm_type) {
         *pflags |= PS_M_ORIGIN;
-        MSG_WriteCoord(to->pmove.origin[0]);
-        MSG_WriteCoord(to->pmove.origin[1]);
+        if (to->pmove.pm_type == PM_SPECTATOR)
+        {
+            MSG_WriteFloat(to->pmove.origin[0]);
+            MSG_WriteFloat(to->pmove.origin[1]);
+        }
+        else
+        {
+            MSG_WriteCoord(to->pmove.origin[0]);
+            MSG_WriteCoord(to->pmove.origin[1]);
+        }
     }
 
-    if (COORD2SHORT(to->pmove.origin[2]) != COORD2SHORT(from->pmove.origin[2])) {
+    if (COORD2SHORT(to->pmove.origin[2]) != COORD2SHORT(from->pmove.origin[2]) ||
+        to->pmove.pm_type != from->pmove.pm_type) {
         eflags |= EPS_M_ORIGIN2;
-        MSG_WriteCoord(to->pmove.origin[2]);
+        if (to->pmove.pm_type == PM_SPECTATOR)
+            MSG_WriteFloat(to->pmove.origin[2]);
+        else
+            MSG_WriteCoord(to->pmove.origin[2]);
     }
 
     if (!(flags & MSG_PS_IGNORE_PREDICTION)) {
         if (COORD2SHORT(to->pmove.velocity[0]) != COORD2SHORT(from->pmove.velocity[0]) ||
-            COORD2SHORT(to->pmove.velocity[1]) != COORD2SHORT(from->pmove.velocity[1])) {
+            COORD2SHORT(to->pmove.velocity[1]) != COORD2SHORT(from->pmove.velocity[1]) ||
+            to->pmove.pm_type != from->pmove.pm_type) {
             *pflags |= PS_M_VELOCITY;
-            MSG_WriteCoord(to->pmove.velocity[0]);
-            MSG_WriteCoord(to->pmove.velocity[1]);
+            if (to->pmove.pm_type == PM_SPECTATOR)
+            {
+                MSG_WriteFloat(to->pmove.velocity[0]);
+                MSG_WriteFloat(to->pmove.velocity[1]);
+            }
+            else
+            {
+                MSG_WriteCoord(to->pmove.velocity[0]);
+                MSG_WriteCoord(to->pmove.velocity[1]);
+            }
         }
 
-        if (COORD2SHORT(to->pmove.velocity[2]) != COORD2SHORT(from->pmove.velocity[2])) {
+        if (COORD2SHORT(to->pmove.velocity[2]) != COORD2SHORT(from->pmove.velocity[2]) ||
+            to->pmove.pm_type != from->pmove.pm_type) {
             eflags |= EPS_M_VELOCITY2;
-            MSG_WriteCoord(to->pmove.velocity[2]);
+            if (to->pmove.pm_type == PM_SPECTATOR)
+                MSG_WriteFloat(to->pmove.velocity[2]);
+            else
+                MSG_WriteCoord(to->pmove.velocity[2]);
         }
 
         if (to->pmove.pm_time != from->pmove.pm_time) {
@@ -1077,6 +1124,24 @@ int MSG_ReadLong(void)
     }
 
     return c;
+}
+
+float MSG_ReadFloat(void)
+{
+    byte *buf = MSG_ReadData(4);
+    union
+    {
+        int c;
+        float v;
+    } i2f;
+
+    if (!buf) {
+        i2f.v = -1;
+    } else {
+        i2f.c = LittleLongMem(buf);
+    }
+
+    return i2f.v;
 }
 
 size_t MSG_ReadString(char *dest, size_t size)
@@ -1491,21 +1556,43 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
         to->pmove.pm_type = MSG_ReadByte();
 
     if (flags & PS_M_ORIGIN) {
-        to->pmove.origin[0] = MSG_ReadCoord();
-        to->pmove.origin[1] = MSG_ReadCoord();
+        if (to->pmove.pm_type == PM_SPECTATOR)
+        {
+            to->pmove.origin[0] = MSG_ReadFloat();
+            to->pmove.origin[1] = MSG_ReadFloat();
+        }
+        else
+        {
+            to->pmove.origin[0] = MSG_ReadCoord();
+            to->pmove.origin[1] = MSG_ReadCoord();
+        }
     }
 
     if (extraflags & EPS_M_ORIGIN2) {
-        to->pmove.origin[2] = MSG_ReadCoord();
+        if (to->pmove.pm_type == PM_SPECTATOR)
+            to->pmove.origin[2] = MSG_ReadFloat();
+        else
+            to->pmove.origin[2] = MSG_ReadCoord();
     }
 
     if (flags & PS_M_VELOCITY) {
-        to->pmove.velocity[0] = MSG_ReadCoord();
-        to->pmove.velocity[1] = MSG_ReadCoord();
+        if (to->pmove.pm_type == PM_SPECTATOR)
+        {
+            to->pmove.velocity[0] = MSG_ReadFloat();
+            to->pmove.velocity[1] = MSG_ReadFloat();
+        }
+        else
+        {
+            to->pmove.velocity[0] = MSG_ReadCoord();
+            to->pmove.velocity[1] = MSG_ReadCoord();
+        }
     }
 
     if (extraflags & EPS_M_VELOCITY2) {
-        to->pmove.velocity[2] = MSG_ReadCoord();
+        if (to->pmove.pm_type == PM_SPECTATOR)
+            to->pmove.velocity[2] = MSG_ReadFloat();
+        else
+            to->pmove.velocity[2] = MSG_ReadCoord();
     }
 
     if (flags & PS_M_TIME)

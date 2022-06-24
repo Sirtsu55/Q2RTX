@@ -878,7 +878,8 @@ void Pmove(pmove_t *pmove, pmoveParams_t *params)
     if (pm->s.pm_type == PM_SPECTATOR) {
         pml.frametime = pmp->speedmult * pm->cmd.msec * 0.001f;
         PM_FlyMove();
-        PM_SnapPosition();
+        VectorCopy(pml.velocity, pm->s.velocity);
+        VectorCopy(pml.origin, pm->s.origin);
         return;
     }
 

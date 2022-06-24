@@ -818,8 +818,11 @@ void ClientEndServerFrame(edict_t *ent)
     // If it wasn't updated here, the view position would lag a frame
     // behind the body position when pushed -- "sinking into plats"
     //
-    VectorSnapCoord(ent->s.origin, current_client->ps.pmove.origin);
-    VectorSnapCoord(ent->velocity, current_client->ps.pmove.velocity);
+    if (current_client->ps.pmove.pm_type != PM_SPECTATOR)
+    {
+        VectorSnapCoord(ent->s.origin, current_client->ps.pmove.origin);
+        VectorSnapCoord(ent->velocity, current_client->ps.pmove.velocity);
+    }
 
     //
     // If the end of unit layout is displayed, don't give
