@@ -86,7 +86,7 @@ typedef struct model_s {
     // sprite models
     struct mspriteframe_s *spriteframes;
 	bool sprite_vertical;
-
+ 
     // IQM models
 	iqm_model_t* iqmData;
     int spin_id;
