@@ -97,6 +97,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_MODEL_NAILS "models/items/ammo/nails/nailbox.iqm"
 
 #define ASSET_MODEL_SILVER_KEY "models/items/keys/gold_key/gold_key.md3"
+#define ASSET_MODEL_GOLD_KEY "models/items/keys/gold_key/gold_key.md3"
 
 #define ASSET_MODEL_QUAD_DAMAGE "models/items/powerups/quad/quad.md3"
 #define ASSET_SOUND_QUAD_ACTIVATE "items/damage.wav"
@@ -185,9 +186,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_MODEL_VORE "models/monsters/vore/vore.iqm"
 #define ASSET_MODEL_VORE_BALL "models/monsters/vore/vore_ball.iqm"
 #define ASSET_SOUND_VORE_BALL_CHASE "world/amb10.wav"
-#define ASSET_SOUND_VORE_HURT "world/amb1.wav"
-#define ASSET_SOUND_VORE_DEATH "world/amb1.wav"
-#define ASSET_SOUND_VORE_IDLE "world/amb1.wav"
-#define ASSET_SOUND_VORE_ATTACK "world/amb1.wav"
-#define ASSET_SOUND_VORE_ATTACK2 "world/amb1.wav"
-#define ASSET_SOUND_VORE_SIGHT "world/amb1.wav"
+#define ASSET_SOUND_VORE_HURT "nac_vore/pain.wav"
+#define ASSET_SOUND_VORE_DEATH "nac_vore/death.wav"
+#define ASSET_SOUND_VORE_IDLE "nac_vore/idle.wav"
+#define ASSET_SOUND_VORE_ATTACK "nac_vore/attack.wav"
+#define ASSET_SOUND_VORE_ATTACK2 "nac_vore/attack2.wav"
+#define ASSET_SOUND_VORE_SIGHT "nac_vore/sight.wav"
