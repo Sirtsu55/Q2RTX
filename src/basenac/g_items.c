@@ -217,7 +217,7 @@ static bool Pickup_Health(edict_t *ent, edict_t *other)
         if (other->health >= other->max_health)
             return false;
 
-    int count = ent->count ? ent->count : ent->item->quantity;
+    other->health += ent->count ? ent->count : ent->item->quantity;
 
     if (!(ent->item->flags & IT_HEALTH_IGNORE_MAX)) {
         if (other->health > other->max_health)
@@ -1008,15 +1008,15 @@ static gitem_t itemlist[] = {
 
     /*QUAKED item_health (0 .5 .8) (-16 -16 -16) (16 16 16)
    */
-        [ITEM_HEALTH_SMALL] = {
-            .classname = "item_health_small",
-            .pickup = Pickup_Health,
-            .pickup_sound = ASSET_SOUND_HEALTH_SMALL_PICKUP,
-            .world_model = ASSET_MODEL_HEALTH_SMALL,
-            .icon = "i_health",
-            .pickup_name = "Health",
-            .flags = IT_HEALTH,
-            .quantity = 2
+    [ITEM_HEALTH_SMALL] = {
+        .classname = "item_health_small",
+        .pickup = Pickup_Health,
+        .pickup_sound = ASSET_SOUND_HEALTH_SMALL_PICKUP,
+        .world_model = ASSET_MODEL_HEALTH_SMALL,
+        .icon = "i_health",
+        .pickup_name = "Health",
+        .flags = IT_HEALTH,
+        .quantity = 2
     },
 
     /*QUAKED item_health_rotten (0 .5 .8) (-16 -16 -16) (16 16 16)
