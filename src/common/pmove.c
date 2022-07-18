@@ -968,7 +968,7 @@ void PmoveInit(pmoveParams_t *pmp)
     // set up default pmove parameters
     memset(pmp, 0, sizeof(*pmp));
 
-    pmp->speedmult = 2;
+    pmp->speedmult = 0.3;
     pmp->flyfriction = 9;
 
     pmp->watermult = 0.7f;

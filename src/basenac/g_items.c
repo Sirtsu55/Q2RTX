@@ -990,6 +990,19 @@ static gitem_t itemlist[] = {
         .flags = IT_POWERUP
     },
 
+    /*QUAKED item_health (0 .5 .8) (-16 -16 -16) (16 16 16)
+   */
+        [ITEM_HEALTH_SMALL] = {
+            .classname = "item_health_small",
+            .pickup = Pickup_Health,
+            .pickup_sound = ASSET_SOUND_HEALTH_SMALL_PICKUP,
+            .world_model = ASSET_MODEL_HEALTH_SMALL,
+            .icon = "i_health",
+            .pickup_name = "Health",
+            .flags = IT_HEALTH,
+            .quantity = 2
+    },
+
     /*QUAKED item_health_rotten (0 .5 .8) (-16 -16 -16) (16 16 16)
     */
     [ITEM_HEALTH_ROTTEN] = {

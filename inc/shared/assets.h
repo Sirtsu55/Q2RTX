@@ -113,13 +113,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ASSET_MODEL_RING "models/items/powerups/ring/ring.md3"
 
-#define ASSET_MODEL_HEALTH_ROTTEN "models/items/healing/medium/tris.md2"
+#define ASSET_MODEL_HEALTH_SMALL "models/items/health/small.iqm"
+#define ASSET_SOUND_HEALTH_SMALL_PICKUP "items/s_health.wav"
+
+#define ASSET_MODEL_HEALTH_ROTTEN "models/items/health/medium.iqm"
 #define ASSET_SOUND_HEALTH_ROTTEN_PICKUP "items/n_health.wav"
 
-#define ASSET_MODEL_HEALTH "models/items/healing/large/tris.md2"
+#define ASSET_MODEL_HEALTH "models/items/health/large.iqm"
 #define ASSET_SOUND_HEALTH_PICKUP "items/l_health.wav"
 
-#define ASSET_MODEL_HEALTH_MEGA "models/items/mega_h/tris.md2"
+#define ASSET_MODEL_HEALTH_MEGA "models/items/health/mega.iqm"
 #define ASSET_SOUND_HEALTH_MEGA_PICKUP "items/m_health.wav"
 
 #define ASSET_SOUND_GENERIC_PICKUP "items/pkup.wav"
