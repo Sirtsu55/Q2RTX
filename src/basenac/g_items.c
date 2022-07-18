@@ -935,6 +935,22 @@ static gitem_t itemlist[] = {
         .flags = IT_STAY_COOP | IT_KEY,
     },
 
+    /*QUAKED key_gold_key (0 .5 .8) (-16 -16 -16) (16 16 16)
+   normal door key - gold
+   */
+   [ITEM_KEY_GOLD] = {
+       .classname = "key_gold_key",
+       .pickup = Pickup_Key,
+       .drop = Drop_General,
+       .pickup_sound = ASSET_SOUND_GENERIC_PICKUP,
+       .world_model = ASSET_MODEL_GOLD_KEY,
+       .world_model_flags = EF_ROTATE,
+       .skinnum = 1,
+       .icon = "k_goldkey",
+       .pickup_name = "Gold Key",
+       .flags = IT_STAY_COOP | IT_KEY,
+    },
+
     /*QUAKED item_quad (0 .5 .8) (-16 -16 -16) (16 16 16)
     */
     [ITEM_QUAD_DAMAGE] = {

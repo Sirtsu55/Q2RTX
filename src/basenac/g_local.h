@@ -288,6 +288,7 @@ typedef enum {
     ITEM_BIOSUIT,
 
     ITEM_KEY_SILVER,
+    ITEM_KEY_GOLD,
 
     // MUST ALWAYS BE AT THE END
     ITEM_TOTAL
