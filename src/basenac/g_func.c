@@ -1076,7 +1076,7 @@ void door_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
         return;
     self->touch_debounce_time = level.time + 5000;
 
-    SV_CenterPrint(other, "%s");
+    SV_CenterPrint(other, self->message);
     SV_StartSound(other, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE), 1, ATTN_NORM, 0);
 }
 
