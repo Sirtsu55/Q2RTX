@@ -155,12 +155,10 @@ create_poly(
 	uint32_t max_prim,
 	VboPrimitive* primitives_out)
 {
-	static const int max_vertices = 32;
-	float positions [3 * /*max_vertices*/ 32];
-	float tex_coords[2 * /*max_vertices*/ 32];
-	mbasis_t bases  [    /*max_vertices*/ 32];
+	float *positions = alloca(sizeof(float) * 3 * surf->numsurfedges);
+	float *tex_coords = alloca(sizeof(float) * 2 * surf->numsurfedges);
+	mbasis_t *bases = alloca(sizeof(mbasis_t) * surf->numsurfedges);
 	mtexinfo_t *texinfo = surf->texinfo;
-	assert(surf->numsurfedges < max_vertices);
 	
 	float sc[2] = { 1.f, 1.f };
 	if (texinfo->material)
@@ -894,7 +892,7 @@ collect_one_light_poly_entire_texture(bsp_t *bsp, mface_t *surf, mtexinfo_t *tex
 									  const vec3_t light_color, float emissive_factor, int light_style,
 									  int *num_lights, int *allocated_lights, light_poly_t **lights)
 {
-	float positions[3 * /*max_vertices*/ 32];
+	float *positions = alloca(sizeof(float) * 3 * surf->numsurfedges);
 
 	for (int i = 0; i < surf->numsurfedges; i++)
 	{
@@ -1248,7 +1246,7 @@ collect_sky_and_lava_light_polys(bsp_mesh_t *wm, bsp_t* bsp)
 		if (!is_sky && !is_lava)
 			continue;
 
-		float positions[3 * /*max_vertices*/ 32];
+		float *positions = alloca(sizeof(float) * 3 * surf->numsurfedges);
 
 		for (int i = 0; i < surf->numsurfedges; i++)
 		{
