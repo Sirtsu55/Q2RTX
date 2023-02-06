@@ -132,7 +132,7 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
                     ent->goalentity = ent->enemy;
                 float dz = ent->s.origin[2] - ent->goalentity->s.origin[2];
                 if (ent->goalentity->client) {
-                    if (dz > 40)
+                    if (dz > 120)
                         neworg[2] -= 4;
                     if (!((ent->flags & FL_SWIM) && (ent->waterlevel < 2)))
                         if (dz < 30)

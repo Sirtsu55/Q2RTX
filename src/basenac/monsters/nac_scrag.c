@@ -372,6 +372,8 @@ void SP_monster_scrag(edict_t* self)
     self->monsterinfo.currentmove = &scrag_move_stand;
     self->monsterinfo.load = scrag_load;
 
+    SV_ModelIndex(ASSET_MODEL_SCRAG_BALL);
+
     SV_LinkEntity(self);
 
     flymonster_start(self);
