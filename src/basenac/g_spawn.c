@@ -150,6 +150,7 @@ void SP_misc_property_swap(edict_t *ent);
 void SP_monster_knight(edict_t *self);
 void SP_monster_fiend(edict_t *self);
 void SP_monster_vore(edict_t *self);
+void SP_monster_scrag(edict_t* self);
 void SP_env_reverb(edict_t *ent);
 void SP_target_spotlight(edict_t *self);
 
@@ -278,6 +279,7 @@ static const spawn_func_t spawn_funcs[] = {
     { "monster_knight", SP_monster_knight },
     { "monster_fiend", SP_monster_fiend },
     { "monster_vore", SP_monster_vore },
+    { "monster_scrag", SP_monster_scrag },
     { "env_reverb", SP_env_reverb, ENT_PRIVATE },
 
     {NULL, NULL}

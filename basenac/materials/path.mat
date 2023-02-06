@@ -1,0 +1,90 @@
+textures/path/rough_wet_cobble:
+	texture_base textures/path/rough_wet_cobble.tga
+	texture_normals textures/path/rough_wet_cobble_n.tga
+	metalness_factor 0.000000
+
+textures/path/worn_stone_path:
+	texture_base textures/path/worn_stone_path.tga
+	texture_normals textures/path/worn_stone_path_n.tga
+	bump_scale 2.000000
+	metalness_factor 0.000000
+
+textures/path/variable_blocks_vegetation:
+	texture_base textures/path/variable_blocks_vegetation.tga
+	texture_normals textures/path/variable_blocks_vegetation_n.tga
+	bump_scale 1.500000
+	metalness_factor 0.000000
+
+textures/path/wet_cobble:
+	texture_base textures/path/wet_cobble.tga
+	texture_normals textures/path/wet_cobble_n.tga
+	metalness_factor 0.000000
+
+textures/path/wet_old_cobblestone:
+	texture_base textures/path/wet_old_cobblestone.tga
+	texture_normals textures/path/wet_old_cobblestone_n.tga
+	metalness_factor 0.000000
+
+textures/path/snow_covered_path:
+	texture_base textures/path/snow_covered_path.tga
+	texture_normals textures/path/snow_covered_path_n.tga
+	metalness_factor 0.000000
+
+textures/path/square_blocks_vegetation:
+	texture_base textures/path/square_blocks_vegetation.tga
+	texture_normals textures/path/square_blocks_vegetation_n.tga
+	metalness_factor 0.000000
+
+textures/path/stepping_stones:
+	texture_base textures/path/stepping_stones.tga
+	texture_normals textures/path/stepping_stones_n.tga
+	metalness_factor 0.000000
+
+textures/path/cobblestone_curved:
+	texture_base textures/path/cobblestone_curved.tga
+	texture_normals textures/path/cobblestone_curved_n.tga
+	metalness_factor 0.000000
+
+textures/path/dusty_cobble:
+	texture_base textures/path/dusty_cobble.tga
+	texture_normals textures/path/dusty_cobble_n.tga
+	bump_scale 2.000000
+	metalness_factor 0.000000
+
+textures/path/gravel_path:
+	texture_base textures/path/gravel_path.tga
+	texture_normals textures/path/gravel_path_n.tga
+	metalness_factor 0.000000
+
+textures/path/muddy_scattered_brickwork:
+	texture_base textures/path/muddy_scattered_brickwork.tga
+	texture_normals textures/path/muddy_scattered_brickwork_n.tga
+	metalness_factor 0.000000
+
+textures/path/cobblestone_curved2:
+	texture_base textures/path/cobblestone_curved2.tga
+	texture_normals textures/path/cobblestone_curved2_n.tga
+	metalness_factor 0.000000
+
+textures/path/concrete2:
+	texture_base textures/path/concrete2.tga
+	texture_normals textures/path/concrete2_n.tga
+	bump_scale 1.500000
+	metalness_factor 0.000000
+
+textures/path/concrete1:
+	texture_base textures/path/concrete1.tga
+	texture_normals textures/path/concrete1_n.tga
+	bump_scale 1.500000
+	metalness_factor 0.000000
+
+textures/path/angled_blocks_vegetation:
+	texture_base textures/path/angled_blocks_vegetation.tga
+	texture_normals textures/path/angled_blocks_vegetation_n.tga
+	bump_scale 1.500000
+	metalness_factor 0.000000
+
+textures/path/broken_down_stonework:
+	texture_base textures/path/broken_down_stonework.tga
+	texture_normals textures/path/broken_down_stonework_n.tga
+	metalness_factor 0.000000

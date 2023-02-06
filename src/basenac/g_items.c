@@ -21,6 +21,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern const weapon_animation_t weap_axe_activate;
 extern const weapon_animation_t weap_perf_activate;
 extern const weapon_animation_t weap_shotgun_activate;
+extern const weapon_animation_t weap_rocket_activate;
+extern const weapon_animation_t weap_launch_activate;
+extern const weapon_animation_t weap_thunder_activate;
 
 static gitem_armor_t greenarmor_info  = {100, 100, .30, .00};
 static gitem_armor_t yellowarmor_info = {150, 150, .60, .30};
@@ -887,6 +890,65 @@ static gitem_t itemlist[] = {
         .weapmodel = WEAP_CHAINGUN,
         .precaches = ASSET_SOUND_PERFORATOR_SPIN " " ASSET_MODEL_NAIL,
     },
+
+    /*QUAKED weapon_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_GRENADE_LAUNCHER] = {
+        .classname = "weapon_grenadelauncher",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_launch_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_LAUNCH_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_LAUNCH_VIEW,
+        .icon = "w_launch",
+        .pickup_name = "Grenade Launcher",
+        .quantity = 1,
+        .ammo = ITEM_SHELLS,
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .weapmodel = WEAP_GRENADELAUNCHER,
+        .precaches = ASSET_MODEL_GRENADE " " ASSET_SOUND_GRENADE_BOUNCE " " ASSET_SOUND_GRENADE_EXPLODE,
+    },
+
+    /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_ROCKET_LAUNCHER] = {
+        .classname = "weapon_rocketlauncher",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_rocket_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_ROCKET_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_ROCKET_VIEW,
+        .icon = "w_rocket",
+        .pickup_name = "Rocket Launcher",
+        .quantity = 1,
+        .ammo = ITEM_SHELLS,
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .weapmodel = WEAP_ROCKETLAUNCHER,
+        .precaches = ASSET_MODEL_ROCKET " " ASSET_SOUND_ROCKET_FLY " " ASSET_SOUND_ROCKET_FIRE " " ASSET_SOUND_ROCKET_EXPLODE,
+    },
+
+    /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_THUNDERBOLT] = {
+        .classname = "weapon_thunderbolt",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_thunder_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_THUNDER_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_THUNDER_VIEW,
+        .icon = "w_thunder",
+        .pickup_name = "Lightning Gun",
+        .quantity = 1,
+        .ammo = ITEM_SHELLS,
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .weapmodel = WEAP_HYPERBLASTER
+        },
 
     //
     // AMMO ITEMS

@@ -214,6 +214,12 @@ extern int parasite_move_start_fidget;
 extern int parasite_move_start_run;
 extern int parasite_move_start_walk;
 extern int parasite_move_walk;
+extern int scrag_move_attack;
+extern int scrag_move_death;
+extern int scrag_move_pain;
+extern int scrag_move_run;
+extern int scrag_move_stand;
+extern int scrag_move_walk;
 extern int soldier_move_attack1;
 extern int soldier_move_attack2;
 extern int soldier_move_attack3;
@@ -551,6 +557,18 @@ extern void rocket_touch(void);
 extern void rotating_blocked(void);
 extern void rotating_touch(void);
 extern void rotating_use(void);
+extern void scrag_attack(void);
+extern void scrag_bolt_animate(void);
+extern void scrag_bolt_touch(void);
+extern void scrag_die(void);
+extern void scrag_load(void);
+extern void scrag_pain(void);
+extern void scrag_run(void);
+extern void scrag_search(void);
+extern void scrag_search(void);
+extern void scrag_sight(void);
+extern void scrag_stand(void);
+extern void scrag_walk(void);
 extern void soldier_attack(void);
 extern void soldier_die(void);
 extern void soldier_dodge(void);
@@ -698,6 +716,7 @@ const save_ptr_t save_ptrs[] = {
 { P_think, Move_Final },
 { P_think, multi_wait },
 { P_think, plat_go_down },
+{ P_think, scrag_bolt_animate },
 { P_think, SP_CreateCoopSpots },
 { P_think, SP_FixCoopSpots },
 { P_think, swimmonster_start_go },
@@ -746,6 +765,7 @@ const save_ptr_t save_ptrs[] = {
 { P_touch, point_combat_touch },
 { P_touch, rocket_touch },
 { P_touch, rotating_touch },
+{ P_touch, scrag_bolt_touch },
 { P_touch, teleporter_touch },
 { P_touch, Touch_DoorTrigger },
 { P_touch, Touch_Item },
@@ -828,6 +848,7 @@ const save_ptr_t save_ptrs[] = {
 { P_pain, mutant_pain },
 { P_pain, parasite_pain },
 { P_pain, player_pain },
+{ P_pain, scrag_pain },
 { P_pain, soldier_pain },
 { P_pain, supertank_pain },
 { P_pain, tank_pain },
@@ -861,6 +882,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, mutant_die },
 { P_die, parasite_die },
 { P_die, player_die },
+{ P_die, scrag_die },
 { P_die, soldier_die },
 { P_die, supertank_die },
 { P_die, tank_die },
@@ -1092,6 +1114,12 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &parasite_move_start_run },
 { P_monsterinfo_currentmove, &parasite_move_start_walk },
 { P_monsterinfo_currentmove, &parasite_move_walk },
+{ P_monsterinfo_currentmove, &scrag_move_attack },
+{ P_monsterinfo_currentmove, &scrag_move_death },
+{ P_monsterinfo_currentmove, &scrag_move_pain },
+{ P_monsterinfo_currentmove, &scrag_move_run },
+{ P_monsterinfo_currentmove, &scrag_move_stand },
+{ P_monsterinfo_currentmove, &scrag_move_walk },
 { P_monsterinfo_currentmove, &soldier_move_attack1 },
 { P_monsterinfo_currentmove, &soldier_move_attack2 },
 { P_monsterinfo_currentmove, &soldier_move_attack3 },
@@ -1165,6 +1193,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, medic_stand },
 { P_monsterinfo_stand, mutant_stand },
 { P_monsterinfo_stand, parasite_stand },
+{ P_monsterinfo_stand, scrag_stand },
 { P_monsterinfo_stand, soldier_stand },
 { P_monsterinfo_stand, supertank_stand },
 { P_monsterinfo_stand, tank_stand },
@@ -1179,6 +1208,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_idle, medic_idle },
 { P_monsterinfo_idle, mutant_idle },
 { P_monsterinfo_idle, parasite_idle },
+{ P_monsterinfo_idle, scrag_search },
 { P_monsterinfo_idle, tank_idle },
 { P_monsterinfo_idle, vore_search },
 { P_monsterinfo_search, berserk_search },
@@ -1192,6 +1222,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_search, knight_search },
 { P_monsterinfo_search, medic_search },
 { P_monsterinfo_search, mutant_search },
+{ P_monsterinfo_search, scrag_search },
 { P_monsterinfo_search, supertank_search },
 { P_monsterinfo_search, vore_search },
 { P_monsterinfo_walk, berserk_walk },
@@ -1213,6 +1244,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_walk, medic_walk },
 { P_monsterinfo_walk, mutant_walk },
 { P_monsterinfo_walk, parasite_start_walk },
+{ P_monsterinfo_walk, scrag_walk },
 { P_monsterinfo_walk, soldier_walk },
 { P_monsterinfo_walk, supertank_walk },
 { P_monsterinfo_walk, tank_walk },
@@ -1236,6 +1268,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_run, medic_run },
 { P_monsterinfo_run, mutant_run },
 { P_monsterinfo_run, parasite_start_run },
+{ P_monsterinfo_run, scrag_run },
 { P_monsterinfo_run, soldier_run },
 { P_monsterinfo_run, supertank_run },
 { P_monsterinfo_run, tank_run },
@@ -1261,6 +1294,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_attack, medic_attack },
 { P_monsterinfo_attack, mutant_jump },
 { P_monsterinfo_attack, parasite_attack },
+{ P_monsterinfo_attack, scrag_attack },
 { P_monsterinfo_attack, soldier_attack },
 { P_monsterinfo_attack, supertank_attack },
 { P_monsterinfo_attack, tank_attack },
@@ -1291,6 +1325,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_sight, medic_sight },
 { P_monsterinfo_sight, mutant_sight },
 { P_monsterinfo_sight, parasite_sight },
+{ P_monsterinfo_sight, scrag_sight },
 { P_monsterinfo_sight, soldier_sight },
 { P_monsterinfo_sight, tank_sight },
 { P_monsterinfo_sight, vore_sight },
@@ -1302,6 +1337,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, mutant_checkattack },
 { P_monsterinfo_load, fiend_load },
 { P_monsterinfo_load, knight_load },
+{ P_monsterinfo_load, scrag_load },
 { P_monsterinfo_load, vore_load },
 };
 const int num_save_ptrs = sizeof(save_ptrs) / sizeof(save_ptrs[0]);

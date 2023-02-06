@@ -1,0 +1,198 @@
+textures/ground/cement_arcing_pattern:
+	texture_base textures/ground/cement_arcing_pattern.tga
+	texture_normals textures/ground/cement_arcing_pattern_n.tga
+	metalness_factor 0
+
+textures/ground/crusted_snow:
+	texture_base textures/ground/crusted_snow.tga
+	texture_normals textures/ground/crusted_snow_n.tga
+	metalness_factor 0
+
+textures/ground/rocky_shoreline:
+	texture_base textures/ground/rocky_shoreline.tga
+	texture_normals textures/ground/rocky_shoreline_n.tga
+	metalness_factor 0
+
+textures/ground/dusty_ground_gravel:
+	texture_base textures/ground/dusty_ground_gravel.tga
+	texture_normals textures/ground/dusty_ground_gravel_n.tga
+	metalness_factor 0
+
+textures/ground/dry_rocky_ground:
+	texture_base textures/ground/dry_rocky_ground.tga
+	texture_normals textures/ground/dry_rocky_ground_n.tga
+	metalness_factor 0
+
+textures/ground/dry_dirt2:
+	texture_base textures/ground/dry_dirt2.tga
+	texture_normals textures/ground/dry_dirt2_n.tga
+	metalness_factor 0
+
+textures/ground/iced_over_ground:
+	texture_base textures/ground/iced_over_ground.tga
+	texture_normals textures/ground/iced_over_ground_n.tga
+	metalness_factor 0
+
+textures/ground/ice_field:
+	texture_base textures/ground/ice_field.tga
+	texture_normals textures/ground/ice_field_n.tga
+	metalness_factor 0
+
+textures/ground/industrial_tile:
+	texture_base textures/ground/industrial_tile.tga
+	texture_normals textures/ground/industrial_tile_n.tga
+	metalness_factor 0
+	bump_scale 2
+
+textures/ground/badlands_boulders:
+	texture_base textures/ground/badlands_boulders.tga
+	texture_normals textures/ground/badlands_boulders_n.tga
+	metalness_factor 0
+
+textures/ground/aged_planks:
+	texture_base textures/ground/aged_planks.tga
+	texture_normals textures/ground/aged_planks_n.tga
+	metalness_factor 0
+
+textures/ground/branches_twisted:
+	texture_base textures/ground/branches_twisted.tga
+	texture_normals textures/ground/branches_twisted_n.tga
+	metalness_factor 0
+
+textures/ground/barren_ground_rock:
+	texture_base textures/ground/barren_ground_rock.tga
+	texture_normals textures/ground/barren_ground_rock_n.tga
+	metalness_factor 0
+
+textures/ground/mossy_mud:
+	texture_base textures/ground/mossy_mud.tga
+	texture_normals textures/ground/mossy_mud_n.tga
+	metalness_factor 0
+
+textures/ground/jagged_rocky_ground:
+	texture_base textures/ground/jagged_rocky_ground.tga
+	texture_normals textures/ground/jagged_rocky_ground_n.tga
+	metalness_factor 0
+
+textures/ground/mud_with_vegetation:
+	texture_base textures/ground/mud_with_vegetation.tga
+	texture_normals textures/ground/mud_with_vegetation_n.tga
+	metalness_factor 0
+
+textures/ground/rock_snow_ice:
+	texture_base textures/ground/rock_snow_ice.tga
+	texture_normals textures/ground/rock_snow_ice_n.tga
+	metalness_factor 0
+
+textures/ground/pocked_concrete:
+	texture_base textures/ground/pocked_concrete.tga
+	texture_normals textures/ground/pocked_concrete_n.tga
+	metalness_factor 0
+
+textures/ground/rocky_dirt:
+	texture_base textures/ground/rocky_dirt.tga
+	texture_normals textures/ground/rocky_dirt_n.tga
+	metalness_factor 0
+
+textures/ground/broken_down_concrete1:
+	texture_base textures/ground/broken_down_concrete1.tga
+	texture_normals textures/ground/broken_down_concrete1_n.tga
+	metalness_factor 0
+
+textures/ground/broken_down_concrete2:
+	texture_base textures/ground/broken_down_concrete2.tga
+	texture_normals textures/ground/broken_down_concrete2_n.tga
+	metalness_factor 0
+
+textures/ground/bumpy_worn_ground:
+	texture_base textures/ground/bumpy_worn_ground.tga
+	texture_normals textures/ground/bumpy_worn_ground_n.tga
+	metalness_factor 0
+
+textures/ground/concrete1:
+	texture_base textures/ground/concrete1.tga
+	texture_normals textures/ground/concrete1_n.tga
+	metalness_factor 0
+
+textures/ground/concrete2:
+	texture_base textures/ground/concrete2.tga
+	texture_normals textures/ground/concrete2_n.tga
+	metalness_factor 0
+
+textures/ground/concrete3:
+	texture_base textures/ground/concrete3.tga
+	texture_normals textures/ground/concrete3_n.tga
+	metalness_factor 0
+
+textures/ground/sandy_ground:
+	texture_base textures/ground/sandy_ground.tga
+	texture_normals textures/ground/sandy_ground_n.tga
+	metalness_factor 0
+
+textures/ground/rocky_worn_ground:
+	texture_base textures/ground/rocky_worn_ground.tga
+	texture_normals textures/ground/rocky_worn_ground_n.tga
+	metalness_factor 0
+
+textures/ground/saloon_wood_floor:
+	texture_base textures/ground/saloon_wood_floor.tga
+	texture_normals textures/ground/saloon_wood_floor_n.tga
+	metalness_factor 0
+
+textures/ground/snow_drift:
+	texture_base textures/ground/snow_drift.tga
+	texture_normals textures/ground/snow_drift_n.tga
+	metalness_factor 0
+	mat bump_factor 2
+
+textures/ground/sandy_rocks:
+	texture_base textures/ground/sandy_rocks.tga
+	texture_normals textures/ground/sandy_rocks_n.tga
+	metalness_factor 0
+
+textures/ground/snow_packed:
+	texture_base textures/ground/snow_packed.tga
+	texture_normals textures/ground/snow_packed_n.tga
+	metalness_factor 0
+
+textures/ground/desert_rocks:
+	texture_base textures/ground/desert_rocks.tga
+	texture_normals textures/ground/desert_rocks_n.tga
+	metalness_factor 0
+
+textures/ground/damp_dungeon_floor:
+	texture_base textures/ground/damp_dungeon_floor.tga
+	texture_normals textures/ground/damp_dungeon_floor_n.tga
+	metalness_factor 0
+
+textures/ground/damp_rocky_ground:
+	texture_base textures/ground/damp_rocky_ground.tga
+	texture_normals textures/ground/damp_rocky_ground_n.tga
+	metalness_factor 0
+	base_factor 0.2
+	specular_factor 0.2
+
+textures/ground/dirt_with_rocks:
+	texture_base textures/ground/dirt_with_rocks.tga
+	texture_normals textures/ground/dirt_with_rocks_n.tga
+	metalness_factor 0
+
+textures/ground/dry_dirt1:
+	texture_base textures/ground/dry_dirt1.tga
+	texture_normals textures/ground/dry_dirt1_n.tga
+	metalness_factor 0
+
+textures/ground/tavern_wood_planks:
+	texture_base textures/ground/tavern_wood_planks.tga
+	texture_normals textures/ground/tavern_wood_planks_n.tga
+	metalness_factor 0
+
+textures/ground/tiled_stone:
+	texture_base textures/ground/tiled_stone.tga
+	texture_normals textures/ground/tiled_stone_n.tga
+	metalness_factor 0
+
+textures/ground/wasteland:
+	texture_base textures/ground/wasteland.tga
+	texture_normals textures/ground/wasteland_n.tga
+	metalness_factor 0

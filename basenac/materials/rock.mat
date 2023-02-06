@@ -1,0 +1,252 @@
+textures/rock/lunar_rock:
+	texture_base textures/rock/lunar_rock.tga
+	texture_normals textures/rock/lunar_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/flaking_limestone:
+	texture_base textures/rock/flaking_limestone.tga
+	texture_normals textures/rock/flaking_limestone_n.tga
+
+textures/rock/vertical_streak_cliff:
+	texture_base textures/rock/vertical_streak_cliff.tga
+	texture_normals textures/rock/vertical_streak_cliff_n.tga
+	metalness_factor 0.000000
+
+textures/rock/pocked_stone:
+	texture_base textures/rock/pocked_stone.tga
+	texture_normals textures/rock/pocked_stone_n.tga
+	metalness_factor 0.000000
+
+textures/rock/ocean_rock:
+	texture_base textures/rock/ocean_rock.tga
+	texture_normals textures/rock/ocean_rock_n.tga
+	roughness_override 0.300000
+	metalness_factor 0.000000
+
+textures/rock/marble_speckled:
+	texture_base textures/rock/marble_speckled.tga
+	texture_normals textures/rock/marble_speckled_n.tga
+	metalness_factor 0.000000
+	bump_scale 2.0
+
+textures/rock/lunar_rock2:
+	texture_base textures/rock/lunar_rock2.tga
+	texture_normals textures/rock/lunar_rock2_n.tga
+	metalness_factor 0.000000
+
+textures/rock/granite_rockface:
+	texture_base textures/rock/granite_rockface.tga
+	texture_normals textures/rock/granite_rockface_n.tga
+	metalness_factor 0.000000
+
+textures/rock/granite_grey:
+	texture_base textures/rock/granite_grey.tga
+	texture_normals textures/rock/granite_grey_n.tga
+	metalness_factor 0.000000
+
+textures/rock/granite_gray_white:
+	texture_base textures/rock/granite_gray_white.tga
+	texture_normals textures/rock/granite_gray_white_n.tga
+	roughness_override 0.400000
+	metalness_factor 0.000000
+
+textures/rock/worn_bumpy_rock:
+	texture_base textures/rock/worn_bumpy_rock.tga
+	texture_normals textures/rock/worn_bumpy_rock_n.tga
+	metalness_factor 0.000000
+	roughness_override 0.3
+	bump_scale 1.5
+
+textures/rock/wet_cave_wall:
+	texture_base textures/rock/wet_cave_wall.tga
+	texture_normals textures/rock/wet_cave_wall_n.tga
+	metalness_factor 0.000000
+
+textures/rock/granite5:
+	texture_base textures/rock/granite5.tga
+	texture_normals textures/rock/granite5_n.tga
+	roughness_override 0.300000
+	metalness_factor 0.000000
+
+textures/rock/water_worn_stone:
+	texture_base textures/rock/water_worn_stone.tga
+	texture_normals textures/rock/water_worn_stone_n.tga
+	bump_scale 1.500000
+	roughness_override 0.400000
+	metalness_factor 0.000000
+
+textures/rock/limestone_marked:
+	texture_base textures/rock/limestone_marked.tga
+	texture_normals textures/rock/limestone_marked_n.tga
+	metalness_factor 0.000000
+
+textures/rock/limestone6:
+	texture_base textures/rock/limestone6.tga
+	texture_normals textures/rock/limestone6_n.tga
+	metalness_factor 0.000000
+
+textures/rock/limestone5:
+	texture_base textures/rock/limestone5.tga
+	texture_normals textures/rock/limestone5_n.tga
+	metalness_factor 0.000000
+
+textures/rock/limestone3:
+	texture_base textures/rock/limestone3.tga
+	texture_normals textures/rock/limestone3_n.tga
+	metalness_factor 0.000000
+
+textures/rock/light_bumped_rock:
+	texture_base textures/rock/light_bumped_rock.tga
+	texture_normals textures/rock/light_bumped_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/layered_rock2:
+	texture_base textures/rock/layered_rock2.tga
+	texture_normals textures/rock/layered_rock2_n.tga
+	metalness_factor 0.000000
+
+textures/rock/desert_cliff:
+	texture_base textures/rock/desert_cliff.tga
+	texture_normals textures/rock/desert_cliff_n.tga
+	metalness_factor 0.000000
+
+textures/rock/dungeon_stone:
+	texture_base textures/rock/dungeon_stone.tga
+	texture_normals textures/rock/dungeon_stone_n.tga
+	metalness_factor 0.000000
+
+textures/rock/dark_rough_rock:
+	texture_base textures/rock/dark_rough_rock.tga
+	texture_normals textures/rock/dark_rough_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/slimy_rock:
+	texture_base textures/rock/slimy_rock.tga
+	texture_normals textures/rock/slimy_rock_n.tga
+	roughness_override 0.300000
+	metalness_factor 0.000000
+
+textures/rock/cliff_rockface:
+	texture_base textures/rock/cliff_rockface.tga
+	texture_normals textures/rock/cliff_rockface_n.tga
+	bump_scale 1.500000
+	metalness_factor 0.000000
+
+textures/rock/slate:
+	texture_base textures/rock/slate.tga
+	texture_normals textures/rock/slate_n.tga
+	metalness_factor 0.000000
+
+textures/rock/cratered_rock:
+	texture_base textures/rock/cratered_rock.tga
+	texture_normals textures/rock/cratered_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/slate_cliffrock:
+	texture_base textures/rock/slate_cliffrock.tga
+	texture_normals textures/rock/slate_cliffrock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/cavern_walls:
+	texture_base textures/rock/cavern_walls.tga
+	texture_normals textures/rock/cavern_walls_n.tga
+	roughness_override 0.500000
+	bump_scale 2
+	metalness_factor 0.000000
+
+textures/rock/cavern_deposits:
+	texture_base textures/rock/cavern_deposits.tga
+	texture_normals textures/rock/cavern_deposits_n.tga
+	metalness_factor 0.000000
+
+textures/rock/sharp_rockface2:
+	texture_base textures/rock/sharp_rockface2.tga
+	texture_normals textures/rock/sharp_rockface2_n.tga
+	metalness_factor 0.000000
+
+textures/rock/sharp_rockface1:
+	texture_base textures/rock/sharp_rockface1.tga
+	texture_normals textures/rock/sharp_rockface1_n.tga
+	metalness_factor 0.000000
+
+textures/rock/layered_rock1:
+	texture_base textures/rock/layered_rock1.tga
+	texture_normals textures/rock/layered_rock1_n.tga
+	roughness_override 0.300000
+	metalness_factor 0.000000
+
+textures/rock/layered_cliff:
+	texture_base textures/rock/layered_cliff.tga
+	texture_normals textures/rock/layered_cliff_n.tga
+	metalness_factor 0.000000
+
+textures/rock/jagged_rockface:
+	texture_base textures/rock/jagged_rockface.tga
+	texture_normals textures/rock/jagged_rockface_n.tga
+	metalness_factor 0.000000
+
+textures/rock/jagged_cliff:
+	texture_base textures/rock/jagged_cliff.tga
+	texture_normals textures/rock/jagged_cliff_n.tga
+	metalness_factor 0.000000
+
+textures/rock/holey_rock:
+	texture_base textures/rock/holey_rock.tga
+	texture_normals textures/rock/holey_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/carved_limestone_ground:
+	texture_base textures/rock/carved_limestone_ground.tga
+	texture_normals textures/rock/carved_limestone_ground_n.tga
+	metalness_factor 0.000000
+
+textures/rock/rough_rock:
+	texture_base textures/rock/rough_rock.tga
+	texture_normals textures/rock/rough_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/cave_floor2:
+	texture_base textures/rock/cave_floor2.tga
+	texture_normals textures/rock/cave_floor2_n.tga
+	metalness_factor 0.000000
+
+textures/rock/rough_rockface2:
+	texture_base textures/rock/rough_rockface2.tga
+	texture_normals textures/rock/rough_rockface2_n.tga
+	metalness_factor 0.000000
+
+textures/rock/cave_floor1:
+	texture_base textures/rock/cave_floor1.tga
+	texture_normals textures/rock/cave_floor1_n.tga
+	metalness_factor 0.000000
+
+textures/rock/rough_rockface1:
+	texture_base textures/rock/rough_rockface1.tga
+	texture_normals textures/rock/rough_rockface1_n.tga
+	metalness_factor 0.000000
+
+textures/rock/black_rock:
+	texture_base textures/rock/black_rock.tga
+	texture_normals textures/rock/black_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/rock_sliced:
+	texture_base textures/rock/rock_sliced.tga
+	texture_normals textures/rock/rock_sliced_n.tga
+	metalness_factor 0.000000
+
+textures/rock/black_streaked_rock:
+	texture_base textures/rock/black_streaked_rock.tga
+	texture_normals textures/rock/black_streaked_rock_n.tga
+	metalness_factor 0.000000
+
+textures/rock/rock_vstreaks:
+	texture_base textures/rock/rock_vstreaks.tga
+	texture_normals textures/rock/rock_vstreaks_n.tga
+	metalness_factor 0.000000
+	
+textures/pbr/lava_rock:
+	texture_base textures/pbr/lava_rock.tga
+	texture_normals textures/pbr/lava_rock_n.tga
+	bump_scale 2.000000
+	metalness_factor 0.000000

@@ -64,10 +64,15 @@ const weapon_animation_t weap_axe_deactivate = {
 
 extern const weapon_animation_t weap_axe_idle;
 
+extern bool is_quad;
+
 static void Axe_Attack(edict_t *ent, int damage)
 {
     if (!ent->client->axe_attack)
         return;
+
+    if (is_quad)
+        damage *= 4;
 
     vec3_t forward, right, start, end, offset;
 

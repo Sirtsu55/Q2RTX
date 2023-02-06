@@ -1,0 +1,3238 @@
+textures/__tb_empty:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explode/skin:
+	texture_base models/objects/explode/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/smoke/skin:
+	texture_base models/objects/smoke/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/flash/skin:
+	texture_base models/objects/flash/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/parasite/segment/skin:
+	texture_base models/monsters/parasite/segment/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin1:
+	texture_base models/objects/r_explode/skin1.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin2:
+	texture_base models/objects/r_explode/skin2.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin3:
+	texture_base models/objects/r_explode/skin3.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin4:
+	texture_base models/objects/r_explode/skin4.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin5:
+	texture_base models/objects/r_explode/skin5.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin6:
+	texture_base models/objects/r_explode/skin6.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/r_explode/skin7:
+	texture_base models/objects/r_explode/skin7.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/effect/skin:
+	texture_base models/items/armor/effect/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/laser/skin:
+	texture_base models/objects/laser/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/dmspot/skin:
+	texture_base models/objects/dmspot/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/dmspot/skin2:
+	texture_base models/objects/dmspot/skin2.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/arm_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_axe/axe_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/gibs/sm_meat/skin:
+	texture_base models/objects/gibs/sm_meat/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/gibs/bone/skin:
+	texture_base models/objects/gibs/bone/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/gibs/chest/skin:
+	texture_base models/objects/gibs/chest/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/gibs/skull/skin:
+	texture_base models/objects/gibs/skull/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/gibs/head2/skin:
+	texture_base models/objects/gibs/head2/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/gibs/head2/player:
+	texture_base models/objects/gibs/head2/player.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_shotg/v_shotg_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_shotg/v_shotg_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/shells/shellbox_small_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/g_perf/v_perf_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/weapons/v_perf/v_perf_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/ammo/nails/nailbox_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/nail/nail_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/knight/knight_sword_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/debris1/skin:
+	texture_base models/objects/debris1/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/debris2/skin:
+	texture_base models/objects/debris2/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/debris3/skin:
+	texture_base models/objects/debris3/skin.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/objects/explobox/explobox2_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/armor/armorshard_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/healthboxes_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/glass_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/liquid_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/large_cross_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/props/torch1/torch1_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/fiend/fiend_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/monsters/vore/vore_ball_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/env/bones/arch/head_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/stimpack_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_1:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_2:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_3:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_4:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_5:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_6:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_7:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_8:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_9:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_10:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_11:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_12:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_13:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_14:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_15:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_16:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_17:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_18:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_19:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_20:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_21:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_22:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_23:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_24:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_25:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_26:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_27:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_28:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_29:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_30:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+models/items/health/hal_31:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+smalltentacle:
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+players/male/weapon:
+	texture_base players/male/weapon.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+
+players/male/grunt:
+	texture_base players/male/grunt.pcx
+	metalness_factor 0.000000
+	specular_factor 0.000000
+

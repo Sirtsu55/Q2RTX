@@ -619,12 +619,12 @@ bool M_CheckAttack(edict_t *self)
         return true;
     }
 
-    if (self->flags & FL_FLY) {
-        if (random() < 0.3f)
-            self->monsterinfo.attack_state = AS_SLIDING;
-        else
-            self->monsterinfo.attack_state = AS_STRAIGHT;
-    }
+    //if (self->flags & FL_FLY) {
+        //if (random() < 0.3f)
+        //    self->monsterinfo.attack_state = AS_SLIDING;
+       // else
+       //     self->monsterinfo.attack_state = AS_STRAIGHT;
+   // }
 
     return false;
 }

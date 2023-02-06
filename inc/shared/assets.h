@@ -93,6 +93,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_PERFORATOR_SPIN "weapons/perf/perf_spin.wav"
 #define ASSET_MODEL_NAIL "models/objects/nail/nail.iqm"
 
+#define ASSET_MODEL_ROCKET_WORLD "models/weapons/g_rocket/g_rocket.iqm"
+#define ASSET_MODEL_ROCKET_VIEW "models/weapons/v_rocket/v_rocket.iqm"
+
+#define ASSET_MODEL_LAUNCH_WORLD "models/weapons/g_launch/g_launch.iqm"
+#define ASSET_MODEL_LAUNCH_VIEW "models/weapons/v_launch/v_launch.iqm"
+
+#define ASSET_MODEL_THUNDER_WORLD "models/weapons/g_bolt/g_bolt.iqm"
+#define ASSET_MODEL_THUNDER_VIEW "models/weapons/v_bolt/v_bolt.iqm"
+
 #define ASSET_MODEL_SHELLS "models/items/ammo/shells/shellbox_small.iqm"
 #define ASSET_MODEL_NAILS "models/items/ammo/nails/nailbox.iqm"
 
@@ -141,7 +150,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_GRENADE_BOUNCE "weapons/grenlb1b.wav"
 #define ASSET_SOUND_GRENADE_EXPLODE "weapons/grenlx1a.wav"
 
-#define ASSET_MODEL_ROCKET "models/objects/rocket/tris.md2"
+#define ASSET_MODEL_ROCKET "models/objects/rocket/rocket.iqm"
 #define ASSET_SOUND_ROCKET_FLY "weapons/rockfly.wav"
 #define ASSET_SOUND_ROCKET_EXPLODE "weapons/rocklx1a.wav"
 
@@ -192,3 +201,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_VORE_ATTACK "nac_vore/attack.wav"
 #define ASSET_SOUND_VORE_ATTACK2 "nac_vore/attack2.wav"
 #define ASSET_SOUND_VORE_SIGHT "nac_vore/sight.wav"
+
+// Scrag
+#define ASSET_MODEL_SCRAG "models/monsters/scrag/scrag.iqm"
+#define ASSET_MODEL_SCRAG_BALL "models/monsters/scrag/scrag_slime.md3"
+#define ASSET_SOUND_SCRAG_HURT "nac_scrag/pain.wav"
+#define ASSET_SOUND_SCRAG_DEATH "nac_scrag/death.wav"
+#define ASSET_SOUND_SCRAG_IDLE "nac_scrag/idle.wav"
+#define ASSET_SOUND_SCRAG_FIRE "nac_scrag/fire.wav"
+#define ASSET_SOUND_SCRAG_SIGHT "nac_scrag/sight.wav"
+#define ASSET_SOUND_SCRAG_SPLAT "nac_scrag/splat.wav"

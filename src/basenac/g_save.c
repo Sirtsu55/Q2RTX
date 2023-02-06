@@ -248,13 +248,13 @@ static const save_field_t entityfields[] = {
     I(monsterinfo.linkcount),
 
     // Paril - entity animation stuff
-    S(anim.target),
+    L(anim.target),
     I(anim.start),
     I(anim.end),
     I(anim.frame_delay),
-    I(anim.animating),
-    I(anim.reset_on_trigger),
-    I(anim.is_active),
+    B(anim.animating),
+    B(anim.reset_on_trigger),
+    B(anim.is_active),
     I(anim.next_frame),
     I(anim.count),
     I(anim.count_left),
@@ -944,6 +944,7 @@ void ReadGame(const char *filename)
     game.clients = Z_TagMallocz(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
     for (i = 0; i < game.maxclients; i++) {
         read_fields(f, clientfields, &game.clients[i]);
+        game.clients[i].weapanim[0] = game.clients[i].weapanim[1] = NULL;
     }
 
     fclose(f);
@@ -1079,6 +1080,7 @@ void ReadLevel(const char *filename)
         ent = &globals.entities[i + 1];
         ent->client = game.clients + i;
         ent->client->pers.connected = false;
+        ent->client->weapanim[0] = ent->client->weapanim[1] = NULL;
     }
 
     // do any load time things at this point

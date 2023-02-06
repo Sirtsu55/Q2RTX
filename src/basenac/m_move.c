@@ -133,17 +133,17 @@ bool SV_movestep(edict_t *ent, vec3_t move, bool relink)
                 float dz = ent->s.origin[2] - ent->goalentity->s.origin[2];
                 if (ent->goalentity->client) {
                     if (dz > 40)
-                        neworg[2] -= 8;
+                        neworg[2] -= 4;
                     if (!((ent->flags & FL_SWIM) && (ent->waterlevel < 2)))
                         if (dz < 30)
-                            neworg[2] += 8;
+                            neworg[2] += 4;
                 } else {
-                    if (dz > 8)
-                        neworg[2] -= 8;
+                    if (dz > 4)
+                        neworg[2] -= 4;
                     else if (dz > 0)
                         neworg[2] -= dz;
-                    else if (dz < -8)
-                        neworg[2] += 8;
+                    else if (dz < -4)
+                        neworg[2] += 4;
                     else
                         neworg[2] += dz;
                 }
