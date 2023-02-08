@@ -72,7 +72,7 @@ static void Axe_Attack(edict_t *ent, int damage)
         return;
 
     if (is_quad)
-        damage *= 4;
+        damage *= 6;
 
     vec3_t forward, right, start, end, offset;
 
@@ -191,21 +191,21 @@ static bool Axe_ChargeReady(edict_t *ent)
         P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
         if (!(ent->client->ps.pmove.pm_flags & PMF_ON_GROUND))
-            ent->velocity[2] = 115.f;
+            ent->velocity[2] = 120.f;
         else
         {
             if (ent->client->v_angle[0] < -2.f)
             {
                 ent->s.origin[2] -= 2.f;
                 ent->client->ps.pmove.origin[2] -= 2.f;
-                ent->velocity[2] = 115.f;
+                ent->velocity[2] = 120.f;
                 ent->groundentity = NULL;
 
                 SV_LinkEntity(ent);
             }
         }
 
-        VectorMA(ent->velocity, 275.f, forward, ent->velocity);
+        VectorMA(ent->velocity, 300.f, forward, ent->velocity);
 
         ent->client->ps.pmove.pm_flags &= ~PMF_ON_GROUND;
         ent->client->ps.pmove.pm_flags |= PMF_TIME_LAND;
