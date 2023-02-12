@@ -276,32 +276,32 @@ void CL_MuzzleFlash(void)
 
     pl = &cl_entities[mz.entity];
 
-#if USE_DLIGHTS
-    dl = CL_AllocDlight(mz.entity);
-    AngleVectors(pl->current.angles, fv, rv, dv);
-    if (mz.entity == cl.clientNum + 1) {
-        VectorCopy(cl.refdef.vieworg, dl->origin);
-        VectorMA(dl->origin, 6, fv, dl->origin);
-        VectorMA(dl->origin, 6, dv, dl->origin);
-    } else {
-        VectorCopy(pl->current.origin,  dl->origin);
-        VectorMA(dl->origin, 18, fv, dl->origin);
-        VectorMA(dl->origin, 16, rv, dl->origin);
-    }
-    if (mz.silenced)
-        dl->radius = 0.3;
-    else
-        dl->radius = 0.5;
+//#if USE_DLIGHTS
+  //  dl = CL_AllocDlight(mz.entity);
+    //AngleVectors(pl->current.angles, fv, rv, dv);
+    //if (mz.entity == cl.clientNum + 1) {
+      //  VectorCopy(cl.refdef.vieworg, dl->origin);
+        //VectorMA(dl->origin, 6, fv, dl->origin);
+        //VectorMA(dl->origin, 6, dv, dl->origin);
+    //} else {
+      //  VectorCopy(pl->current.origin,  dl->origin);
+        //VectorMA(dl->origin, 18, fv, dl->origin);
+        //VectorMA(dl->origin, 16, rv, dl->origin);
+    //}
+    //if (mz.silenced)
+   //     dl->radius = 0.3;
+    //else
+   //     dl->radius = 0.5;
     //dl->minlight = 32;
-    dl->die = cl.time + 16;
-#define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
-#define DL_RADIUS(r)        (dl->radius = r)
-#define DL_DIE(t)           (dl->die = cl.time + t)
-#else
+    //dl->die = cl.time + 16;
+//#define DL_COLOR(r, g, b)   VectorSet(dl->color, r, g, b)
+//#define DL_RADIUS(r)        (dl->radius = r)
+//#define DL_DIE(t)           (dl->die = cl.time + t)
+//#else
 #define DL_COLOR(r, g, b)
 #define DL_RADIUS(r)
 #define DL_DIE(t)
-#endif
+//#endif
 
     if (mz.silenced)
         volume = 0.2f;
@@ -368,7 +368,7 @@ void CL_MuzzleFlash(void)
         break;
     case MZ_GRENADE:
         DL_COLOR(1, 0.5f, 0);
-        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound("weapons/grenlf1a.wav"), volume, ATTN_NORM, 0, 0);
+        S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound(ASSET_SOUND_GRENADE_FIRE), volume, ATTN_NORM, 0, 0);
         S_StartSound(NULL, mz.entity, CHAN_AUTO,   S_RegisterSound("weapons/grenlr1b.wav"), volume, ATTN_NORM, 0.1f, 0);
         break;
     case MZ_BFG:

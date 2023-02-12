@@ -146,8 +146,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_MODEL_LASER "models/objects/laser/tris.md2"
 #define ASSET_SOUND_LASER_FLY "misc/lasfly.wav"
 
-#define ASSET_MODEL_GRENADE "models/objects/grenade/tris.md2"
-#define ASSET_SOUND_GRENADE_BOUNCE "weapons/grenlb1b.wav"
+#define ASSET_MODEL_GRENADE "models/objects/grenade/grenade.iqm"
+#define ASSET_SOUND_GRENADE_BOUNCE "weapons/gren/gren_bounce.wav"
+#define ASSET_SOUND_GRENADE_FIRE "weapons/gren/gren_fire.wav"
 #define ASSET_SOUND_GRENADE_EXPLODE "weapons/grenlx1a.wav"
 
 #define ASSET_MODEL_ROCKET "models/objects/rocket/rocket.iqm"

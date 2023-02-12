@@ -908,7 +908,7 @@ static gitem_t itemlist[] = {
         .ammo = ITEM_SHELLS,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_GRENADELAUNCHER,
-        .precaches = ASSET_MODEL_GRENADE " " ASSET_SOUND_GRENADE_BOUNCE " " ASSET_SOUND_GRENADE_EXPLODE,
+        .precaches = ASSET_MODEL_GRENADE " " ASSET_SOUND_GRENADE_BOUNCE " " ASSET_SOUND_GRENADE_FIRE " " ASSET_SOUND_GRENADE_EXPLODE,
     },
 
     /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
