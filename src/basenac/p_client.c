@@ -572,15 +572,24 @@ but is called after each death and level change in deathmatch
 ==============
 */
 void InitClientPersistant(gclient_t *client)
+
 {
 	memset(&client->pers, 0, sizeof(client->pers));
 
 	client->pers.selected_item = ITEM_AXE;
 	client->pers.inventory[client->pers.selected_item] = 1;
+    if (deathmatch.integer) {
+        client->pers.selected_item = ITEM_SHOTGUN;
+        client->pers.inventory[client->pers.selected_item] = 1;
+        client->pers.inventory[ITEM_SHELLS] = 20;
+      }
 
 	client->pers.weapon         = GetItemByIndex(client->pers.selected_item);
     client->pers.health         = 100;
     client->pers.max_health     = 100;
+    if (deathmatch.integer) {
+        client->pers.health = 120;
+    }
 
     client->pers.max_nails      = 200;
     client->pers.max_shells     = 100;

@@ -1077,7 +1077,7 @@ static gitem_t itemlist[] = {
         .world_model = ASSET_MODEL_HEALTH_SMALL,
         .icon = "i_health",
         .pickup_name = "Health",
-        .flags = IT_HEALTH,
+        .flags = IT_HEALTH | IT_HEALTH_IGNORE_MAX,
         .quantity = 2
     },
 
