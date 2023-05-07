@@ -64,7 +64,7 @@ texture_base textures/fx/+0lavafx.wal
 	specular_factor 0.000000
     bump_scale 0
 	base_factor 0
-	emissive_factor 0.02
+	emissive_factor 0.01
 
 textures/fx/+0lavapour,
 textures/fx/+1lavapour,  
@@ -134,4 +134,32 @@ textures/fx/+61lavapour:
 	specular_factor 0.000000
     bump_scale 0
 	base_factor 0
-	emissive_factor 0.02
+	emissive_factor 0.01
+		
+textures/fx/+0starfield,
+textures/fx/+1starfield,  
+textures/fx/+2starfield,
+textures/fx/+3starfield,  
+textures/fx/+4starfield,  
+textures/fx/+5starfield,  
+textures/fx/+6starfield,  
+textures/fx/+7starfield,  
+textures/fx/+8starfield,  
+textures/fx/+9starfield,  
+textures/fx/+10starfield,  
+textures/fx/+11starfield,  
+textures/fx/+12starfield,  
+textures/fx/+13starfield,
+textures/fx/+14starfield,
+textures/fx/+15starfield,  
+textures/fx/+16starfield,
+textures/fx/+17starfield,  
+textures/fx/+18starfield,  
+textures/fx/+19starfield:   
+	texture_base textures/fx/+0starfield.wal
+	texture_emissive textures/fx/*_light.tga
+	metalness_factor 0.000000
+	specular_factor 0.000000
+    bump_scale 0
+	base_factor 0
+	emissive_factor 0.3

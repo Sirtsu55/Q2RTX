@@ -1664,6 +1664,9 @@ void SP_func_clock(edict_t *self)
 
 //=================================================================================
 
+const int SPAWNFLAG_NO_EFFECTS = 1;
+const int SPAWNFLAG_KEEP_VELOCITY = 2;
+
 void teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
     edict_t     *dest;
@@ -1684,20 +1687,30 @@ void teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t
     other->s.origin[2] += 10;
 
     // clear the velocity and hold them in place briefly
-    VectorClear(other->velocity);
-    other->client->ps.pmove.pm_time = 160 >> 3;     // hold time
-    other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
+    if (!(self->spawnflags & SPAWNFLAG_KEEP_VELOCITY))
+    {
+        VectorClear(other->velocity);
+        other->client->ps.pmove.pm_time = 160 >> 3;     // hold time
+        other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
+    }
 
     // draw the teleport splash at source and on the player
-    self->owner->s.event = EV_PLAYER_TELEPORT;
-    other->s.event = EV_PLAYER_TELEPORT;
+    if (!(self->spawnflags & SPAWNFLAG_NO_EFFECTS))
+    {
+        if (self->owner)
+            self->owner->s.event = EV_PLAYER_TELEPORT;
+        other->s.event = EV_PLAYER_TELEPORT;
+    }
 
     // set angles
-    VectorSubtract(dest->s.angles, other->client->resp.cmd_angles, other->client->ps.pmove.delta_angles);
+    if (!(self->spawnflags & SPAWNFLAG_KEEP_VELOCITY))
+    {
+        VectorSubtract(dest->s.angles, other->client->resp.cmd_angles, other->client->ps.pmove.delta_angles);
 
-    VectorClear(other->s.angles);
-    VectorClear(other->client->ps.viewangles);
-    VectorClear(other->client->v_angle);
+        VectorClear(other->s.angles);
+        VectorClear(other->client->ps.viewangles);
+        VectorClear(other->client->v_angle);
+    }
 
     // kill anything at the destination
     KillBox(other);
@@ -1733,11 +1746,27 @@ void SP_misc_teleporter(edict_t *ent)
     trig->solid = SOLID_TRIGGER;
     trig->target = ent->target;
     trig->owner = ent;
+    trig->spawnflags = ent->spawnflags;
     VectorCopy(ent->s.origin, trig->s.origin);
     VectorSet(trig->mins, -8, -8, 8);
     VectorSet(trig->maxs, 8, 8, 24);
     SV_LinkEntity(trig);
 
+}
+
+void InitTrigger(edict_t *self);
+
+void SP_trigger_teleport(edict_t *ent)
+{
+    if (!ent->target) {
+        Com_WPrint("teleporter without a target.\n");
+        G_FreeEdict(ent);
+        return;
+    }
+
+    InitTrigger(ent);
+    ent->touch = teleporter_touch;
+    SV_LinkEntity(ent);
 }
 
 /*QUAKED misc_teleporter_dest (1 0 0) (-32 -32 -24) (32 32 -16)

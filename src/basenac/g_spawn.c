@@ -64,6 +64,7 @@ void SP_trigger_counter(edict_t *ent);
 void SP_trigger_elevator(edict_t *ent);
 void SP_trigger_gravity(edict_t *ent);
 void SP_trigger_monsterjump(edict_t *ent);
+void SP_trigger_teleport(edict_t *ent);
 
 void SP_target_temp_entity(edict_t *ent);
 void SP_target_speaker(edict_t *ent);
@@ -188,6 +189,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"trigger_elevator", SP_trigger_elevator, ENT_PRIVATE},
     {"trigger_gravity", SP_trigger_gravity, ENT_PRIVATE},
     {"trigger_monsterjump", SP_trigger_monsterjump, ENT_PRIVATE},
+    {"trigger_teleport", SP_trigger_teleport},
 
     {"target_temp_entity", SP_target_temp_entity, ENT_PRIVATE},
     {"target_speaker", SP_target_speaker, ENT_AMBIENT},

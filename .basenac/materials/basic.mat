@@ -4,72 +4,6 @@ textures/basic/sky:
 	specular_factor 0.000000
 	kind SKY
 
-textures/basic/emissive_1:
-	texture_base textures/basic/emissive_1.wal
-	texture_emissive textures/basic/emissive_1_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_2:
-	texture_base textures/basic/emissive_2.wal
-	texture_emissive textures/basic/emissive_2_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_3:
-	texture_base textures/basic/emissive_3.wal
-	texture_emissive textures/basic/emissive_3_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_4:
-	texture_base textures/basic/emissive_4.wal
-	texture_emissive textures/basic/emissive_4_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_5:
-	texture_base textures/basic/emissive_5.wal
-	texture_emissive textures/basic/emissive_5_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_6:
-	texture_base textures/basic/emissive_6.wal
-	texture_emissive textures/basic/emissive_6_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_7:
-	texture_base textures/basic/emissive_7.wal
-	texture_emissive textures/basic/emissive_7_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/glossy_black:
-	texture_base textures/basic/glossy_black.tga
-	texture_normals textures/basic/glossy_black_n.tga
-	metalness_factor 0.000000
-
-textures/basic/glossy_blue:
-	texture_base textures/basic/glossy_blue.tga
-	texture_normals textures/basic/glossy_blue_n.tga
-	metalness_factor 0.000000
-
 textures/skip:
 	texture_base textures/basic/skip.wal
 	metalness_factor 0.000000
@@ -114,76 +48,6 @@ textures/basic/void:
 	texture_normals textures/basic/void_n.tga
 	metalness_factor 2.000000
 
-textures/basic/glossy_green:
-	texture_base textures/basic/glossy_green.tga
-	texture_normals textures/basic/glossy_green_n.tga
-	metalness_factor 0.000000
-
-textures/basic/glossy_red:
-	texture_base textures/basic/glossy_red.tga
-	texture_normals textures/basic/glossy_red_n.tga
-	metalness_factor 0.000000
-
-textures/basic/glossy_white:
-	texture_base textures/basic/glossy_white.tga
-	texture_normals textures/basic/glossy_white_n.tga
-	metalness_factor 0.000000
-
-textures/basic/emissive_9:
-	texture_base textures/basic/emissive_9.wal
-	texture_emissive textures/basic/emissive_9_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	is_light 1
-
-textures/basic/emissive_baselight:
-	texture_base textures/basic/emissive_baselight.tga
-	texture_emissive textures/basic/emissive_baselight_light.tga
-	metalness_factor 0.000000
-	emissive_factor 10.000000
-	specular_factor 0.000000
-	is_light 1
-
-textures/basic/emissive_blue:
-	texture_base textures/basic/emissive_blue.tga
-	texture_emissive textures/basic/emissive_blue_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_green:
-	texture_base textures/basic/emissive_green.tga
-	texture_emissive textures/basic/emissive_green_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_red:
-	texture_base textures/basic/emissive_red.tga
-	texture_emissive textures/basic/emissive_red_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_white:
-	texture_base textures/basic/emissive_white.tga
-	texture_emissive textures/basic/emissive_white_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
-textures/basic/emissive_8:
-	texture_base textures/basic/emissive_8.wal
-	texture_emissive textures/basic/emissive_8_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-	emissive_factor 0.100000
-	is_light 1
-
 textures/basic/hint:
 	texture_base textures/basic/hint.wal
 	metalness_factor 0.000000
@@ -201,30 +65,5 @@ textures/basic/hintskip:
 
 textures/basic/clip:
 	texture_base textures/basic/clip.wal
-	metalness_factor 0.000000
-	specular_factor 0.000000
-
-textures/basic/matte_black:
-	texture_base textures/basic/matte_black.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-
-textures/basic/matte_blue:
-	texture_base textures/basic/matte_blue.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-
-textures/basic/matte_green:
-	texture_base textures/basic/matte_green.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-
-textures/basic/matte_red:
-	texture_base textures/basic/matte_red.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-
-textures/basic/matte_white:
-	texture_base textures/basic/matte_white.tga
 	metalness_factor 0.000000
 	specular_factor 0.000000

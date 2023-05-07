@@ -72,9 +72,9 @@ textures/q1nac/tech04_5:
 textures/q1nac/sfloor4_2:
 	texture_base textures/q1nac/sfloor4_2.tga
 	texture_normals textures/q1nac/sfloor4_2_n.tga
-	roughness_override 0.500000
+	roughness_override 0.600000
 	metalness_factor 1.500000
-	bump_scale 2.0
+	bump_scale 2.5
 	
 textures/q1nac/tech01_5:
 	texture_base textures/q1nac/tech01_5.tga
@@ -97,6 +97,13 @@ textures/q1nac/wall14_5:
 	metalness_factor 0.000000
 	specular_factor 0.800000
 	bump_scale 2.0
+	
+textures/q1nac/exit02_2:
+	texture_base models/env/bones/arch/bonetile.tga
+	texture_normals models/env/bones/arch/bonetile_n.tga
+	bump_scale 2.000000
+	metalness_factor 0.000000
+	base_factor 2.000000
 
 textures/q1nac/tech11_2:
 	texture_base textures/q1nac/tech11_2.tga
@@ -106,6 +113,7 @@ textures/q1nac/tech11_2:
 	specular_factor 0.900000
 	base_factor 1.100000
 	bump_scale 2.0
+	emissive_factor 0.1
 
 textures/q1nac/wceiling5:
 	texture_base textures/q1nac/wceiling5.tga

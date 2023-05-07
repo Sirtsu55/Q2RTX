@@ -15,7 +15,7 @@ textures/q2nac/floor3_1:
 	texture_base textures/q2nac/floor3_1.tga
 	texture_normals textures/q2nac/floor3_1_n.tga
 	roughness_override 0.300000
-	bump_scale 2.0
+	bump_scale 2.5
 	
 textures/q2nac/c_met5_2:
 	texture_base textures/q2nac/c_met5_2.tga
