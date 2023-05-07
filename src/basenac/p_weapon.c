@@ -130,15 +130,25 @@ static bool G_HasWeaponAndAmmo(edict_t *ent, gitem_id_t weapon)
 NoAmmoWeaponChange
 =================
 */
-static void NoAmmoWeaponChange(edict_t *ent)
+static bool NoAmmoWeaponChange(edict_t *ent)
 {
     if (G_HasWeaponAndAmmo(ent, ITEM_PERFORATOR)) {
         ent->client->newweapon = GetItemByIndex(ITEM_PERFORATOR);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_THUNDERBOLT)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_THUNDERBOLT);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_ROCKET_LAUNCHER)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_ROCKET_LAUNCHER);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_GRENADE_LAUNCHER)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_GRENADE_LAUNCHER);
     } else if (G_HasWeaponAndAmmo(ent, ITEM_SHOTGUN)) {
         ent->client->newweapon = GetItemByIndex(ITEM_SHOTGUN);
-    } else {
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_AXE)) {
         ent->client->newweapon = GetItemByIndex(ITEM_AXE);
+    } else {
+        return false;
     }
+
+    return true;
 }
 
 // not animation function; returns true if
@@ -152,9 +162,9 @@ bool Weapon_AmmoCheck(edict_t *ent)
         return true;
     }
 
-    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
-
-    NoAmmoWeaponChange(ent);
+    if (NoAmmoWeaponChange(ent)) {
+        SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
+    }
 
     return false;
 }
@@ -340,6 +350,10 @@ void Think_Weapon(edict_t *ent)
 
         for (currentWeaponId = 0; currentWeaponId < WEAPID_TOTAL; currentWeaponId++) {
             Weapon_RunAnimation(ent);
+        }
+    } else {
+        if (ent->client->newweapon) {
+            Weapon_Activate(ent, true);
         }
     }
 }
