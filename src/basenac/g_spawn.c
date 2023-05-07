@@ -202,7 +202,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_goal", SP_target_goal, ENT_AMBIENT},
     {"target_splash", SP_target_splash, ENT_PRIVATE},
     {"target_spawner", SP_target_spawner, ENT_PRIVATE},
-    {"target_blaster", SP_target_blaster, ENT_PRIVATE},
+    {"target_blaster", SP_target_blaster},
     {"target_crosslevel_trigger", SP_target_crosslevel_trigger, ENT_PRIVATE},
     {"target_crosslevel_target", SP_target_crosslevel_target, ENT_PRIVATE},
     {"target_laser", SP_target_laser},
