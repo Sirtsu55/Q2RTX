@@ -130,7 +130,7 @@ static bool G_HasWeaponAndAmmo(edict_t *ent, gitem_id_t weapon)
 NoAmmoWeaponChange
 =================
 */
-static bool NoAmmoWeaponChange(edict_t *ent)
+bool NoAmmoWeaponChange(edict_t *ent)
 {
     if (G_HasWeaponAndAmmo(ent, ITEM_PERFORATOR)) {
         ent->client->newweapon = GetItemByIndex(ITEM_PERFORATOR);
@@ -144,6 +144,8 @@ static bool NoAmmoWeaponChange(edict_t *ent)
         ent->client->newweapon = GetItemByIndex(ITEM_SHOTGUN);
     } else if (G_HasWeaponAndAmmo(ent, ITEM_AXE)) {
         ent->client->newweapon = GetItemByIndex(ITEM_AXE);
+    } else if (ent->client->pers.weapon) {
+        ent->client->newweapon = NULL;
     } else {
         return false;
     }
@@ -155,7 +157,7 @@ static bool NoAmmoWeaponChange(edict_t *ent)
 // we can keep firing
 bool Weapon_AmmoCheck(edict_t *ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
         return false;
 
     if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {

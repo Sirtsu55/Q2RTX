@@ -842,3 +842,27 @@ void SP_target_gravity(edict_t *self)
 
     self->use = target_gravity_use;
 }
+
+bool NoAmmoWeaponChange(edict_t *ent);
+
+void target_removeweapons_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+    for (int i = 0; i < game.maxclients; i++)
+    {
+        gclient_t *cl = &game.clients[i];
+
+        for (int x = ITEM_AXE; x <= ITEM_THUNDERBOLT; x++)
+            if (cl->pers.inventory[x])
+                cl->pers.inventory[x] = 0;
+
+        edict_t *e = &globals.entities[i + 1];
+
+        if (e->inuse)
+            NoAmmoWeaponChange(e);
+    }
+}
+
+void SP_target_removeweapons(edict_t *self)
+{
+    self->use = target_removeweapons_use;
+}

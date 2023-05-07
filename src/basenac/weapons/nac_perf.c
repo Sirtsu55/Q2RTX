@@ -194,7 +194,7 @@ static bool Perf_Firing(edict_t *ent)
 
 static bool Perf_Idle(edict_t *ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
     {
         Weapon_SetAnimation(ent, &weap_perf_deactivate);
         Weapon_Activate(ent, true);

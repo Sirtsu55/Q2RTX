@@ -87,6 +87,7 @@ void SP_target_setskill(edict_t *ent);
 
 // Paril: gravity change support
 void SP_target_gravity(edict_t *ent);
+void SP_target_removeweapons(edict_t *self);
 
 void SP_worldspawn(edict_t *ent);
 
@@ -215,6 +216,7 @@ static const spawn_func_t spawn_funcs[] = {
 
     // Paril: gravity change support
     {"target_gravity", SP_target_gravity, ENT_PRIVATE},
+    {"target_removeweapons", SP_target_removeweapons, ENT_PRIVATE},
 
     {"worldspawn", SP_worldspawn},
 

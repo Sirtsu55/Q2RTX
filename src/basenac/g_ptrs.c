@@ -605,6 +605,7 @@ extern void target_laser_think(void);
 extern void target_laser_use(void);
 extern void target_lightramp_think(void);
 extern void target_lightramp_use(void);
+extern void target_removeweapons_use(void);
 extern void target_setskill(void);
 extern void target_string_use(void);
 extern void teleporter_touch(void);
@@ -804,6 +805,7 @@ const save_ptr_t save_ptrs[] = {
 { P_use, target_gravity_use },
 { P_use, target_laser_use },
 { P_use, target_lightramp_use },
+{ P_use, target_removeweapons_use },
 { P_use, target_setskill },
 { P_use, target_string_use },
 { P_use, teleporter_use },

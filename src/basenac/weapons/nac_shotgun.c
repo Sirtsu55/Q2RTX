@@ -114,7 +114,7 @@ static bool Shotgun_PickIdle(edict_t *ent)
 
 static bool Shotgun_Idle(edict_t *ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
     {
         Weapon_SetAnimation(ent, &weap_shotgun_deactivate);
         Weapon_Activate(ent, true);

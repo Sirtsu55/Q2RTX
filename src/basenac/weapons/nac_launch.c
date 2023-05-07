@@ -112,7 +112,7 @@ static bool Launch_PickIdle(edict_t* ent)
 
 static bool Launch_Idle(edict_t* ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
     {
         Weapon_SetAnimation(ent, &weap_launch_deactivate);
         Weapon_Activate(ent, true);

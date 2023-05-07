@@ -1629,7 +1629,11 @@ spawnflags(Flags) =
 	]
 ]
 
-@PointClass base(Appearflags, Targetname) color(128 128 128) = trigger_setskill : "Set skill"
+@PointClass base(Appearflags, Targetname) color(128 128 128) = target_setskill : "Set skill"
 [
 	count(integer) : "Skill value (0 easy, 1 normal, 2 hard, 3 nightmare)"
+]
+
+@PointClass base(Appearflags, Targetname) color(128 128 128) = target_removeweapons : "Remove all weapons"
+[
 ]
