@@ -37,7 +37,10 @@ enum {
     ANIMATION(PAIN, 10),
     ANIMATION(DEATH, 14),
     ANIMATION(WALK, 25),
-    ANIMATION(STAND, 44)
+    ANIMATION(STAND, 44),
+    ANIMATION(DUCK_DOWN, 11),
+    ANIMATION(DUCK_HOLD, 17),
+    ANIMATION(DUCK_RELEASE, 8)
 };
 
 void vore_sight(edict_t *self, edict_t *other)
@@ -87,6 +90,8 @@ mmove_t vore_move_run = {
 
 void vore_run(edict_t *self)
 {
+    self->maxs[2] = 56;
+
     if (self->monsterinfo.aiflags & AI_STAND_GROUND)
         self->monsterinfo.currentmove = &vore_move_stand;
     else
@@ -273,6 +278,7 @@ void vore_pain(edict_t *self, edict_t *other, float kick, int damage)
     }
 
     self->monsterinfo.currentmove = &vore_move_pain;
+    self->maxs[2] = 56;
 }
 
 void vore_dead(edict_t *self)
@@ -322,6 +328,58 @@ void vore_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
     }
 
     self->monsterinfo.currentmove = &vore_move_death;
+}
+
+void vore_ducked_down(edict_t *self);
+void vore_ducked_think(edict_t *self);
+
+mmove_t vore_duck_down = {
+    .firstframe = FRAME_DUCK_DOWN_FIRST,
+    .lastframe = FRAME_DUCK_DOWN_LAST,
+    .frame = (mframe_t [FRAME_DUCK_DOWN_COUNT]) { 0 },
+    .endfunc = vore_ducked_down,
+    .default_aifunc = ai_move
+};
+
+mmove_t vore_duck_loop = {
+    .firstframe = FRAME_DUCK_HOLD_FIRST,
+    .lastframe = FRAME_DUCK_HOLD_LAST,
+    .frame = (mframe_t [FRAME_DUCK_HOLD_COUNT]) { 0 },
+    .default_aifunc = ai_move,
+    .thinkfunc = vore_ducked_think
+};
+
+mmove_t vore_duck_up = {
+    .firstframe = FRAME_DUCK_RELEASE_FIRST,
+    .lastframe = FRAME_DUCK_RELEASE_LAST,
+    .frame = (mframe_t [FRAME_DUCK_RELEASE_COUNT]) { 0 },
+    .endfunc = vore_run,
+    .default_aifunc = ai_move
+};
+
+void vore_ducked_down(edict_t *self)
+{
+    if (self->monsterinfo.pause_time < level.time)
+        self->monsterinfo.currentmove = &vore_duck_up;
+    else
+        self->monsterinfo.currentmove = &vore_duck_loop;
+}
+
+void vore_ducked_think(edict_t *self)
+{
+    if (self->monsterinfo.pause_time < level.time)
+        self->monsterinfo.currentmove = &vore_duck_up;
+}
+
+void vore_dodge(edict_t *self, edict_t *other, float eta)
+{
+    if (random() > 0.5)
+        return;
+
+    self->monsterinfo.pause_time = level.time + G_SecToMs(eta + 0.3f);
+    self->monsterinfo.currentmove = &vore_duck_down;
+    self->maxs[2] = 56 * 0.5f;
+    SV_LinkEntity(self);
 }
 
 static bool vore_inititalized = false;
@@ -389,6 +447,7 @@ void SP_monster_vore(edict_t *self)
     self->monsterinfo.sight = vore_sight;
     self->monsterinfo.search = vore_search;
     self->monsterinfo.idle = vore_search;
+    self->monsterinfo.dodge = vore_dodge;
 
     self->monsterinfo.currentmove = &vore_move_stand;
     self->monsterinfo.load = vore_load;
