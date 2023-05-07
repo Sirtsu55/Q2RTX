@@ -271,6 +271,15 @@ void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation,
     else
         ent->client->ps.gun[currentWeaponId].frame = frame;
 
+    int32_t currentFrame = ent->client->ps.gun[currentWeaponId].frame;
+
+    // run events
+    for (const weapon_event_t *event = animation->events; event && event->func; event++)
+        if ((event->start == WEAPON_EVENT_MINMAX || currentFrame >= event->start) &&
+            (event->end == WEAPON_EVENT_MINMAX || currentFrame <= event->end))
+            if (!event->func(ent))
+                return;
+
     //Com_Printf("(%f) change to frame %i\n", G_MsToSec(level.time), frame);
 }
 
