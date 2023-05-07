@@ -576,6 +576,7 @@ void InitClientPersistant(gclient_t *client)
 {
 	memset(&client->pers, 0, sizeof(client->pers));
 
+	/*
     client->pers.selected_item = ITEM_AXE;
 	client->pers.inventory[client->pers.selected_item] = 1;
     if (deathmatch.integer) {
@@ -585,7 +586,7 @@ void InitClientPersistant(gclient_t *client)
     }
 
 	client->pers.weapon         = GetItemByIndex(client->pers.selected_item);
-
+    */
     client->pers.health         = 100;
     client->pers.max_health     = 100;
     if (deathmatch.integer) {
