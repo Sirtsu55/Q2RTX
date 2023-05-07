@@ -83,6 +83,7 @@ void SP_target_lightramp(edict_t *self);
 void SP_target_earthquake(edict_t *ent);
 void SP_target_character(edict_t *ent);
 void SP_target_string(edict_t *ent);
+void SP_target_setskill(edict_t *ent);
 
 // Paril: gravity change support
 void SP_target_gravity(edict_t *ent);
@@ -210,6 +211,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_earthquake", SP_target_earthquake, ENT_PRIVATE},
     {"target_character", SP_target_character},
     {"target_string", SP_target_string, ENT_PRIVATE},
+    {"target_setskill", SP_target_setskill, ENT_PRIVATE},
 
     // Paril: gravity change support
     {"target_gravity", SP_target_gravity, ENT_PRIVATE},

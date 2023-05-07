@@ -1513,6 +1513,16 @@ void SP_target_string(edict_t *self)
     self->use = target_string_use;
 }
 
+void target_setskill(edict_t *self, edict_t *other, edict_t *activator)
+{
+    Cvar_SetInteger(&skill, self->count, true);
+}
+
+void SP_target_setskill(edict_t *self)
+{
+    self->use = target_setskill;
+}
+
 
 /*QUAKED func_clock (0 0 1) (-8 -8 -8) (8 8 8) TIMER_UP TIMER_DOWN START_OFF MULTI_USE
 target a target_string with this
@@ -1667,6 +1677,9 @@ void SP_func_clock(edict_t *self)
 const int SPAWNFLAG_NO_EFFECTS = 1;
 const int SPAWNFLAG_KEEP_VELOCITY = 2;
 
+const int SPAWNFLAG_TELEPORT_TOGGLE = 4;
+const int SPAWNFLAG_TELEPORT_START_OFF = 8;
+
 void teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
     edict_t     *dest;
@@ -1756,6 +1769,14 @@ void SP_misc_teleporter(edict_t *ent)
 
 void InitTrigger(edict_t *self);
 
+void teleporter_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+    if (self->touch)
+        self->touch = NULL;
+    else
+        self->touch = teleporter_touch;
+}
+
 void SP_trigger_teleport(edict_t *ent)
 {
     if (!ent->target) {
@@ -1765,7 +1786,17 @@ void SP_trigger_teleport(edict_t *ent)
     }
 
     InitTrigger(ent);
+
     ent->touch = teleporter_touch;
+
+    if ((ent->spawnflags & SPAWNFLAG_TELEPORT_TOGGLE))
+    {
+        ent->use = teleporter_use;
+
+        if (ent->spawnflags & SPAWNFLAG_TELEPORT_START_OFF)
+            ent->touch = NULL;
+    }
+
     SV_LinkEntity(ent);
 }
 

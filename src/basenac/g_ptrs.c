@@ -605,8 +605,10 @@ extern void target_laser_think(void);
 extern void target_laser_use(void);
 extern void target_lightramp_think(void);
 extern void target_lightramp_use(void);
+extern void target_setskill(void);
 extern void target_string_use(void);
 extern void teleporter_touch(void);
+extern void teleporter_use(void);
 extern void Think_AccelMove(void);
 extern void Think_Boss3Stand(void);
 extern void Think_CalcMoveSpeed(void);
@@ -802,7 +804,9 @@ const save_ptr_t save_ptrs[] = {
 { P_use, target_gravity_use },
 { P_use, target_laser_use },
 { P_use, target_lightramp_use },
+{ P_use, target_setskill },
 { P_use, target_string_use },
+{ P_use, teleporter_use },
 { P_use, train_use },
 { P_use, trigger_counter_use },
 { P_use, trigger_crosslevel_trigger_use },
