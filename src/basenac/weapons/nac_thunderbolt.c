@@ -37,7 +37,7 @@ void fire_lightning(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int 
     bool        water;
     float       lastfrac;
 
-    VectorMA(start, 8192, aimdir, end);
+    VectorMA(start, 768, aimdir, end);
     VectorCopy(start, from);
     ignore = self;
     water = false;

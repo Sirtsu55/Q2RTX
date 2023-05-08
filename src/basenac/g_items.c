@@ -147,6 +147,12 @@ bool Add_Ammo(edict_t *ent, gitem_t *item, int count)
         max = ent->client->pers.max_shells;
     else if (index == ITEM_NAILS)
         max = ent->client->pers.max_nails;
+    else if (index == ITEM_CELLS)
+        max = ent->client->pers.max_cells;
+    else if (index == ITEM_ROCKETS)
+        max = ent->client->pers.max_rockets;
+    else if (index == ITEM_GRENADES)
+        max = ent->client->pers.max_grenades;
     else
         return false;
 
@@ -945,7 +951,7 @@ static gitem_t itemlist[] = {
         .icon = "w_thunder",
         .pickup_name = "Lightning Gun",
         .quantity = 1,
-        .ammo = ITEM_SHELLS,
+        .ammo = ITEM_CELLS,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_HYPERBLASTER
         },
@@ -979,6 +985,48 @@ static gitem_t itemlist[] = {
         .icon = "a_nails",
         .pickup_name = "Nails",
         .quantity = 50,
+        .flags = IT_AMMO
+    },
+
+    /*QUAKED ammo_cells (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_CELLS] = {
+        .classname = "ammo_cells",
+        .pickup = Pickup_Ammo,
+        .drop = Drop_Ammo,
+        .pickup_sound = ASSET_SOUND_AMMO_PICKUP,
+        .world_model = ASSET_MODEL_CELLS,
+        .icon = "a_cells",
+        .pickup_name = "Cells",
+        .quantity = 25,
+        .flags = IT_AMMO
+    },
+
+    /*QUAKED ammo_rockets (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_ROCKETS] = {
+        .classname = "ammo_rockets",
+        .pickup = Pickup_Ammo,
+        .drop = Drop_Ammo,
+        .pickup_sound = ASSET_SOUND_AMMO_PICKUP,
+        .world_model = ASSET_MODEL_ROCKETS,
+        .icon = "a_rockets",
+        .pickup_name = "Rockets",
+        .quantity = 5,
+        .flags = IT_AMMO
+    },
+
+    /*QUAKED ammo_grenades (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_GRENADES] = {
+        .classname = "ammo_grenades",
+        .pickup = Pickup_Ammo,
+        .drop = Drop_Ammo,
+        .pickup_sound = ASSET_SOUND_AMMO_PICKUP,
+        .world_model = ASSET_MODEL_GRENADES,
+        .icon = "a_grenades",
+        .pickup_name = "Grenades",
+        .quantity = 5,
         .flags = IT_AMMO
     },
 

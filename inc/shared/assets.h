@@ -104,6 +104,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ASSET_MODEL_SHELLS "models/items/ammo/shells/shellbox_small.iqm"
 #define ASSET_MODEL_NAILS "models/items/ammo/nails/nailbox.iqm"
+#define ASSET_MODEL_CELLS "models/items/ammo/cells/cellbox.iqm"
+#define ASSET_MODEL_ROCKETS "models/items/ammo/rockets/rocketbox.iqm"
+#define ASSET_MODEL_GRENADES "models/items/ammo/grenades/grenadebox.iqm"
 
 #define ASSET_MODEL_SILVER_KEY "models/items/keys/gold_key/gold_key.md3"
 #define ASSET_MODEL_GOLD_KEY "models/items/keys/gold_key/gold_key.md3"

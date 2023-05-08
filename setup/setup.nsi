@@ -15,7 +15,7 @@ ${StrRep}
 !define GAME_EXE "$INSTDIR\q2rtx.exe"
 !define UNINSTALL_EXE "$INSTDIR\Uninstall.exe"
 
-!define MUI_ICON "..\src\windows\res\q2rtx.ico"
+!define MUI_ICON "..\src\windows\res\nac.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "WelcomeImage.bmp"
 !define MUI_ABORTWARNING
 

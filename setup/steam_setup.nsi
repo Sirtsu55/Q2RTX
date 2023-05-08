@@ -12,7 +12,7 @@ ${StrRep}
 
 !define SOURCE_DIR ".."
 
-!define MUI_ICON "..\src\windows\res\q2rtx.ico"
+!define MUI_ICON "..\src\windows\res\nac.ico"
 !define MUI_ABORTWARNING
 
 Outfile "Quake2RTX-Steam-Setup.exe"

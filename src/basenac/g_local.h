@@ -284,6 +284,9 @@ typedef enum {
 
     ITEM_SHELLS,
     ITEM_NAILS,
+    ITEM_CELLS,
+    ITEM_ROCKETS,
+    ITEM_GRENADES,
 
     ITEM_QUAD_DAMAGE,
     ITEM_PENTAGRAM,
@@ -924,6 +927,7 @@ typedef struct {
     int         max_nails;
     int         max_shells;
     int         max_rockets;
+    int         max_grenades;
     int         max_cells;
 
     gitem_t     *weapon;

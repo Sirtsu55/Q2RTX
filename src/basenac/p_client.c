@@ -593,8 +593,9 @@ void InitClientPersistant(gclient_t *client)
 
     client->pers.max_nails      = 200;
     client->pers.max_shells     = 100;
-    client->pers.max_rockets    = 50;
-    client->pers.max_cells      = 200;
+    client->pers.max_rockets = 50;
+    client->pers.max_grenades = 50;
+    client->pers.max_cells      = 100;
 
     client->pers.connected = true;
 }
