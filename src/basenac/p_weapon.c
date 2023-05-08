@@ -130,31 +130,43 @@ static bool G_HasWeaponAndAmmo(edict_t *ent, gitem_id_t weapon)
 NoAmmoWeaponChange
 =================
 */
-static void NoAmmoWeaponChange(edict_t *ent)
+bool NoAmmoWeaponChange(edict_t *ent)
 {
     if (G_HasWeaponAndAmmo(ent, ITEM_PERFORATOR)) {
         ent->client->newweapon = GetItemByIndex(ITEM_PERFORATOR);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_THUNDERBOLT)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_THUNDERBOLT);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_ROCKET_LAUNCHER)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_ROCKET_LAUNCHER);
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_GRENADE_LAUNCHER)) {
+        ent->client->newweapon = GetItemByIndex(ITEM_GRENADE_LAUNCHER);
     } else if (G_HasWeaponAndAmmo(ent, ITEM_SHOTGUN)) {
         ent->client->newweapon = GetItemByIndex(ITEM_SHOTGUN);
-    } else {
+    } else if (G_HasWeaponAndAmmo(ent, ITEM_AXE)) {
         ent->client->newweapon = GetItemByIndex(ITEM_AXE);
+    } else if (ent->client->pers.weapon) {
+        ent->client->newweapon = NULL;
+    } else {
+        return false;
     }
+
+    return true;
 }
 
 // not animation function; returns true if
 // we can keep firing
 bool Weapon_AmmoCheck(edict_t *ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
         return false;
 
     if (ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity) {
         return true;
     }
 
-    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
-
-    NoAmmoWeaponChange(ent);
+    if (NoAmmoWeaponChange(ent)) {
+        SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
+    }
 
     return false;
 }
@@ -259,6 +271,15 @@ void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation,
     else
         ent->client->ps.gun[currentWeaponId].frame = frame;
 
+    int32_t currentFrame = ent->client->ps.gun[currentWeaponId].frame;
+
+    // run events
+    for (const weapon_event_t *event = animation->events; event && event->func; event++)
+        if ((event->start == WEAPON_EVENT_MINMAX || currentFrame >= event->start) &&
+            (event->end == WEAPON_EVENT_MINMAX || currentFrame <= event->end))
+            if (!event->func(ent))
+                return;
+
     //Com_Printf("(%f) change to frame %i\n", G_MsToSec(level.time), frame);
 }
 
@@ -340,6 +361,10 @@ void Think_Weapon(edict_t *ent)
 
         for (currentWeaponId = 0; currentWeaponId < WEAPID_TOTAL; currentWeaponId++) {
             Weapon_RunAnimation(ent);
+        }
+    } else {
+        if (ent->client->newweapon) {
+            Weapon_Activate(ent, true);
         }
     }
 }

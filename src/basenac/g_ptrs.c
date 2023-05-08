@@ -268,6 +268,9 @@ extern int tank_move_run;
 extern int tank_move_stand;
 extern int tank_move_start_run;
 extern int tank_move_walk;
+extern int vore_duck_down;
+extern int vore_duck_loop;
+extern int vore_duck_up;
 extern int vore_move_attack;
 extern int vore_move_death;
 extern int vore_move_pain;
@@ -605,8 +608,11 @@ extern void target_laser_think(void);
 extern void target_laser_use(void);
 extern void target_lightramp_think(void);
 extern void target_lightramp_use(void);
+extern void target_removeweapons_use(void);
+extern void target_setskill(void);
 extern void target_string_use(void);
 extern void teleporter_touch(void);
+extern void teleporter_use(void);
 extern void Think_AccelMove(void);
 extern void Think_Boss3Stand(void);
 extern void Think_CalcMoveSpeed(void);
@@ -660,6 +666,7 @@ extern void vore_ball_chase(void);
 extern void vore_ball_think(void);
 extern void vore_ball_touch(void);
 extern void vore_die(void);
+extern void vore_dodge(void);
 extern void vore_load(void);
 extern void vore_pain(void);
 extern void vore_run(void);
@@ -802,7 +809,10 @@ const save_ptr_t save_ptrs[] = {
 { P_use, target_gravity_use },
 { P_use, target_laser_use },
 { P_use, target_lightramp_use },
+{ P_use, target_removeweapons_use },
+{ P_use, target_setskill },
 { P_use, target_string_use },
+{ P_use, teleporter_use },
 { P_use, train_use },
 { P_use, trigger_counter_use },
 { P_use, trigger_crosslevel_trigger_use },
@@ -1168,6 +1178,9 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &tank_move_stand },
 { P_monsterinfo_currentmove, &tank_move_start_run },
 { P_monsterinfo_currentmove, &tank_move_walk },
+{ P_monsterinfo_currentmove, &vore_duck_down },
+{ P_monsterinfo_currentmove, &vore_duck_loop },
+{ P_monsterinfo_currentmove, &vore_duck_up },
 { P_monsterinfo_currentmove, &vore_move_attack },
 { P_monsterinfo_currentmove, &vore_move_death },
 { P_monsterinfo_currentmove, &vore_move_pain },
@@ -1279,6 +1292,7 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_dodge, infantry_dodge },
 { P_monsterinfo_dodge, medic_dodge },
 { P_monsterinfo_dodge, soldier_dodge },
+{ P_monsterinfo_dodge, vore_dodge },
 { P_monsterinfo_attack, boss2_attack },
 { P_monsterinfo_attack, chick_attack },
 { P_monsterinfo_attack, fiend_attack },

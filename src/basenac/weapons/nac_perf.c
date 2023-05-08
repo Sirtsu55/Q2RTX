@@ -62,9 +62,20 @@ static bool Perf_SpinDown(edict_t *ent)
 static bool Perf_Idle(edict_t *ent);
 static bool Perf_Firing(edict_t *ent);
 
+static bool Perforator_ActivateSound(edict_t *ent)
+{
+    // todo sound on inspect
+    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
+    return true;
+}
+
 const weapon_animation_t weap_perf_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
-    .finished = Perf_PickIdle
+    .finished = Perf_PickIdle,
+    .events = (const weapon_event_t []) {
+        { Perforator_ActivateSound, 0, 0 },
+        { NULL }
+    }
 };
 
 const weapon_animation_t weap_perf_deactivate = {
@@ -194,7 +205,7 @@ static bool Perf_Firing(edict_t *ent)
 
 static bool Perf_Idle(edict_t *ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
     {
         Weapon_SetAnimation(ent, &weap_perf_deactivate);
         Weapon_Activate(ent, true);
@@ -232,6 +243,9 @@ static bool Perf_PickIdle(edict_t *ent)
     }
     
     Weapon_SetAnimation(ent, &weap_perf_inspect);
+
+    // todo sound on inspect
+    SV_StartSound(ent, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_OUT_OF_AMMO), 1, ATTN_NORM, 0);
 
     ent->client->inspect = false;
 

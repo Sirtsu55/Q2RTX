@@ -395,16 +395,20 @@ void SP_target_spawner(edict_t *self)
 
 //==========================================================
 
-/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NOTRAIL NOEFFECTS
+/*QUAKED target_blaster (1 0 0) (-8 -8 -8) (8 8 8) NOTRAIL NOEFFECTS NAIL ROCKET GRENADE HOMING
 Fires a blaster bolt in the set direction when triggered.
 
 dmg     default is 15
 speed   default is 1000
 */
 
+const int SPAWNFLAG_BLASTER_NAIL = 4;
+const int SPAWNFLAG_BLASTER_ROCKET = 8;
+const int SPAWNFLAG_BLASTER_GRENADE = 16;
+const int SPAWNFLAG_BLASTER_HOMING = 32;
+
 void use_target_blaster(edict_t *self, edict_t *other, edict_t *activator)
 {
-#if 0
     int effect;
 
     if (self->spawnflags & 2)
@@ -413,9 +417,25 @@ void use_target_blaster(edict_t *self, edict_t *other, edict_t *activator)
         effect = EF_HYPERBLASTER;
     else
         effect = EF_BLASTER;
-#endif
+    
+    vec3_t dir;
 
-    fire_blaster(self, self->s.origin, self->movedir, self->dmg, self->speed, EF_BLASTER, MOD_TARGET_BLASTER);
+    if (self->spawnflags & SPAWNFLAG_BLASTER_HOMING) {
+        VectorSubtract(activator->s.origin, self->s.origin, dir);
+        VectorNormalize(dir);
+    } else {
+        VectorCopy(self->movedir, dir);
+    }
+
+    if (self->spawnflags & SPAWNFLAG_BLASTER_NAIL) {
+        fire_nail(self, self->s.origin, dir, self->dmg, self->speed);
+    } else if (self->spawnflags & SPAWNFLAG_BLASTER_ROCKET) {
+        fire_rocket(self, self->s.origin, dir, self->dmg, self->speed, self->dmg + 140, self->dmg);
+    } else if (self->spawnflags & SPAWNFLAG_BLASTER_GRENADE) {
+        fire_grenade(self, self->s.origin, dir, self->dmg, self->speed, 2.5, self->dmg + 140);
+    } else {
+        fire_blaster(self, self->s.origin, dir, self->dmg, self->speed, effect, MOD_TARGET_BLASTER);
+    }
     SV_StartSound(self, CHAN_VOICE, self->noise_index, 1, ATTN_NORM, 0);
 }
 
@@ -423,7 +443,11 @@ void SP_target_blaster(edict_t *self)
 {
     self->use = use_target_blaster;
     G_SetMovedir(self->s.angles, self->movedir);
-    self->noise_index = SV_SoundIndex("weapons/laser2.wav");
+
+    if (st.noise)
+        self->noise_index = SV_SoundIndex(st.noise);
+    else
+        self->noise_index = SV_SoundIndex("weapons/laser2.wav");
 
     if (!self->dmg)
         self->dmg = 15;
@@ -841,4 +865,28 @@ void SP_target_gravity(edict_t *self)
         self->dmg = atof(st.gravity);
 
     self->use = target_gravity_use;
+}
+
+bool NoAmmoWeaponChange(edict_t *ent);
+
+void target_removeweapons_use(edict_t *self, edict_t *other, edict_t *activator)
+{
+    for (int i = 0; i < game.maxclients; i++)
+    {
+        gclient_t *cl = &game.clients[i];
+
+        for (int x = ITEM_AXE; x <= ITEM_THUNDERBOLT; x++)
+            if (cl->pers.inventory[x])
+                cl->pers.inventory[x] = 0;
+
+        edict_t *e = &globals.entities[i + 1];
+
+        if (e->inuse)
+            NoAmmoWeaponChange(e);
+    }
+}
+
+void SP_target_removeweapons(edict_t *self)
+{
+    self->use = target_removeweapons_use;
 }

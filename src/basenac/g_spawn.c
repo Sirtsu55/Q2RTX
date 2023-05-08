@@ -64,6 +64,7 @@ void SP_trigger_counter(edict_t *ent);
 void SP_trigger_elevator(edict_t *ent);
 void SP_trigger_gravity(edict_t *ent);
 void SP_trigger_monsterjump(edict_t *ent);
+void SP_trigger_teleport(edict_t *ent);
 
 void SP_target_temp_entity(edict_t *ent);
 void SP_target_speaker(edict_t *ent);
@@ -82,9 +83,11 @@ void SP_target_lightramp(edict_t *self);
 void SP_target_earthquake(edict_t *ent);
 void SP_target_character(edict_t *ent);
 void SP_target_string(edict_t *ent);
+void SP_target_setskill(edict_t *ent);
 
 // Paril: gravity change support
 void SP_target_gravity(edict_t *ent);
+void SP_target_removeweapons(edict_t *self);
 
 void SP_worldspawn(edict_t *ent);
 
@@ -188,6 +191,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"trigger_elevator", SP_trigger_elevator, ENT_PRIVATE},
     {"trigger_gravity", SP_trigger_gravity, ENT_PRIVATE},
     {"trigger_monsterjump", SP_trigger_monsterjump, ENT_PRIVATE},
+    {"trigger_teleport", SP_trigger_teleport},
 
     {"target_temp_entity", SP_target_temp_entity, ENT_PRIVATE},
     {"target_speaker", SP_target_speaker, ENT_AMBIENT},
@@ -198,7 +202,7 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_goal", SP_target_goal, ENT_AMBIENT},
     {"target_splash", SP_target_splash, ENT_PRIVATE},
     {"target_spawner", SP_target_spawner, ENT_PRIVATE},
-    {"target_blaster", SP_target_blaster, ENT_PRIVATE},
+    {"target_blaster", SP_target_blaster},
     {"target_crosslevel_trigger", SP_target_crosslevel_trigger, ENT_PRIVATE},
     {"target_crosslevel_target", SP_target_crosslevel_target, ENT_PRIVATE},
     {"target_laser", SP_target_laser},
@@ -208,9 +212,11 @@ static const spawn_func_t spawn_funcs[] = {
     {"target_earthquake", SP_target_earthquake, ENT_PRIVATE},
     {"target_character", SP_target_character},
     {"target_string", SP_target_string, ENT_PRIVATE},
+    {"target_setskill", SP_target_setskill, ENT_PRIVATE},
 
     // Paril: gravity change support
     {"target_gravity", SP_target_gravity, ENT_PRIVATE},
+    {"target_removeweapons", SP_target_removeweapons, ENT_PRIVATE},
 
     {"worldspawn", SP_worldspawn},
 

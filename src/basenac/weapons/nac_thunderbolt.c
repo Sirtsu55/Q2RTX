@@ -194,7 +194,7 @@ static bool Thunder_PickIdle(edict_t* ent)
 
 static bool Thunder_Idle(edict_t* ent)
 {
-    if (ent->client->newweapon)
+    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
     {
         Weapon_SetAnimation(ent, &weap_thunder_deactivate);
         Weapon_Activate(ent, true);

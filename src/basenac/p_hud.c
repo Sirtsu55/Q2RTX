@@ -409,7 +409,7 @@ void G_SetStats(edict_t *ent)
     //
     // selected item
     //
-    if (ent->client->pers.selected_item == -1)
+    if (ent->client->pers.selected_item <= 0)
         ent->client->ps.stats[STAT_SELECTED_ICON] = 0;
     else
         ent->client->ps.stats[STAT_SELECTED_ICON] = SV_ImageIndex(GetItemByIndex(ent->client->pers.selected_item)->icon);

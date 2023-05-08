@@ -42,9 +42,14 @@ static void check_dodge(edict_t *self, vec3_t start, vec3_t dir, int speed)
     VectorMA(start, 8192, dir, end);
     tr = SV_Trace(start, NULL, NULL, end, self, MASK_SHOT);
     if ((tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self)) {
-        VectorSubtract(tr.endpos, start, v);
-        eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
-        tr.ent->monsterinfo.dodge(tr.ent, self, eta);
+
+        float shot_height = tr.endpos[2] - tr.ent->absmin[2];
+
+        if (shot_height >= (tr.ent->maxs[2] - tr.ent->mins[2]) * 0.75) {
+            VectorSubtract(tr.endpos, start, v);
+            eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
+            tr.ent->monsterinfo.dodge(tr.ent, self, eta);
+        }
     }
 }
 

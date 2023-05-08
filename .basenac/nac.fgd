@@ -1,0 +1,1639 @@
+//
+// Nail & Crescent game definition file (.fgd)
+//
+// Created by PalmliX, new entities by Paril
+// Based off Quake 2 FGD:
+// Originally written by by autolycus
+// Special thanks to: Disruptor, Zoid, Zaphod, Imaginos, and EutecTic.
+//
+// Lasted updated by xaGe : 20200415
+
+//
+// worldspawn
+//
+
+// 0302 - added "nextmap" key
+@SolidClass = worldspawn : "World entity"
+[
+	sky(string) : "Environment map name"
+	skyaxis(string) : "Vector axis for rotating sky"
+	skyrotate(string) : "Speed of rotation (degrees/second)"
+	sounds(integer) : "CD Track Number" : 1
+	gravity(integer) : "Gravity" : 800
+	message(string) : "Level name"
+	nextmap(string) : "Next map (DM only)"
+	default_reverb(choices) : "Default world reverb setting: 0 for none" : 0 =
+[
+	   	0 : "NONE"
+		1 : "GENERIC"
+		2 : "PADDED CELL"
+		3 : "ROOM"
+		4 : "BATHROOM"
+		5 : "LIVING ROOM"
+		6 : "STONE ROOM"
+		7 : "AUDITORIUM"
+		8 : "CONCERT HALL"
+		9 : "CAVE"
+		10 : "ARENA"
+		11 : "HANGAR"
+		12 : "CARPETED HALLWAY"
+		13 : "HALLWAY"
+		14 : "STONE CORRIDOR"
+		15 : "ALLEY"
+		16 : "FOREST"
+		17 : "CITY"
+		18 : "MOUNTAINS"
+		19 : "QUARRY"
+		20 : "PLAIN"
+		21 : "PARKING LOT"
+		22 : "SEWER PIPE"
+		23 : "UNDER WATER"
+		24 : "DRUGGED"
+		25 : "DIZZY"
+		26 : "PSYCHOTIC"
+		27 : "CASTLE_SMALL ROOM"
+		28 : "CASTLE_SHORT PASSAGE"
+		29 : "CASTLE_MEDIUM ROOM"
+		30 : "CASTLE_LARGE ROOM"
+		31 : "CASTLE_LONG PASSAGE"
+		32 : "CASTLE_HALL"
+		33 : "CASTLE_CUPBOARD"
+		34 : "CASTLE_COURTYARD"
+		35 : "CASTLE_ALCOVE"
+		36 : "FACTORY_SMALL ROOM"
+		37 : "FACTORY_SHORT PASSAGE"
+		38 : "FACTORY_MEDIUM ROOM"
+		39 : "FACTORY_LARGE ROOM"
+		40 : "FACTORY_LONG PASSAGE"
+		41 : "FACTORY_HALL"
+		42 : "FACTORY_CUPBOARD"
+		43 : "FACTORY_COURTYARD"
+		44 : "FACTORY_ALCOVE"
+		45 : "ICEPALACE_SMALL ROOM"
+		46 : "ICEPALACE_SHORT PASSAGE"
+		47 : "ICEPALACE_MEDIUM ROOM"
+		48 : "ICEPALACE_LARGE ROOM"
+		49 : "ICEPALACE_LONG PASSAGE"
+		50 : "ICEPALACE_HALL"
+		51 : "ICEPALACE_CUPBOARD"
+		52 : "ICEPALACE_COURTYARD"
+		53 : "ICEPALACE_ALCOVE"
+		54 : "SPACESTATION_SMALL ROOM"
+		55 : "SPACESTATION_SHORT PASSAGE"
+		56 : "SPACESTATION_MEDIUM ROOM"
+		57 : "SPACESTATION_LARGE ROOM"
+		58 : "SPACESTATION_LONG PASSAGE"
+		59 : "SPACESTATION_HALL"
+		60 : "SPACESTATION_CUPBOARD"
+		61 : "SPACESTATION_ALCOVE"
+		62 : "WOODEN_SMALL ROOM"
+		63 : "WOODEN_SHORT PASSAGE"
+		64 : "WOODEN_MEDIUM ROOM"
+		65 : "WOODEN_LARGE ROOM"
+		66 : "WOODEN_LONG PASSAGE"
+		67 : "WOODEN_HALL"
+		68 : "WOODEN_CUPBOARD"
+		69 : "WOODEN_COURTYARD"
+		70 : "WOODEN_ALCOVE"
+		71 : "SPORT_EMPTY STADIUM"
+		72 : "SPORT_SQUASH COURT"
+		73 : "SPORT_SMALL SWIMMING POOL"
+		74 : "SPORT_LARGE SWIMMING POOL"
+		75 : "SPORT_GYMNASIUM"
+		76 : "SPORT_FULL STADIUM"
+		77 : "SPORT_STADIUM TANNOY"
+		78 : "PREFAB_WORKSHOP"
+		79 : "PREFAB_SCHOOL ROOM"
+		80 : "PREFAB_PRACTISE ROOM"
+		81 : "PREFAB_OUT HOUSE"
+		82 : "PREFAB_CARAVAN"
+		83 : "DOME_TOMB"
+		84 : "PIPE_SMALL"
+		85 : "DOME_SAINT PAULS"
+		86 : "PIPE_LONGTHIN"
+		87 : "PIPE_LARGE"
+		88 : "PIPE_RESONANT"
+		89 : "OUTDOORS_BACKYARD"
+		90 : "OUTDOORS_ROLLING PLAINS"
+		91 : "OUTDOORS_DEEP CANYON"
+		92 : "OUTDOORS_CREEK"
+		93 : "OUTDOORS_VALLEY"
+		94 : "MOOD_HEAVEN"
+		95 : "MOOD_HELL"
+		96 : "MOOD_MEMORY"
+		97 : "DRIVING_COMMENTATOR"
+		98 : "DRIVING_PIT GARAGE"
+		99 : "DRIVING_INCAR_RACER"
+		100 : "DRIVING_INCAR_SPORTS"
+		101 : "DRIVING_INCAR_LUXURY"
+		102 : "DRIVING_FULL GRANDSTAND"
+		103 : "DRIVING_EMPTY GRANDSTAND"
+		104 : "DRIVING_TUNNEL"
+		105 : "CITY_STREETS"
+		106 : "CITY_SUBWAY"
+		107 : "CITY_MUSEUM"
+		108 : "CITY_LIBRARY"
+		109 : "CITY_UNDERPASS"
+		110 : "CITY_ABANDONED"
+		111 : "DUSTY ROOM"
+		112 : "CHAPEL"
+		113 : "SMALL WATER ROOM"
+	]
+]
+
+@baseclass = Appearflags [
+	spawnflags(Flags) =
+	[
+		256 : "Not in Easy" : 0
+		512 : "Not in Normal" : 0
+		1024 : "Not in Hard" : 0
+		2048 : "Not in Deathmatch" : 0
+	]
+]
+@baseclass = Avelocity [ avelocity(string) : "pitch yaw roll velocity, for making things spin(degrees/second" : "0 0 0" ]
+@baseclass = Noise	[ noise(string) : "Noise>sound (path/file.wav)" ]
+@baseclass = Angles [ angles(string) : "Angles>pitch yaw roll" : "0 0 0" ]
+@baseclass = Angle [ angle(integer) : "Direction> 360 degrees for yaw, -1 for up -2 for down" ]
+@baseclass = Targetname [ targetname(target_source) : "Name" ]
+@baseclass = Target [ target(target_destination) : "Target> use  ,  to seperate multiple targets" ]
+@baseclass = Anim_Target [ anim_target(target) : "when this entity is fired, any entities (model_spawn) with animation stuff set will be toggled" ]
+@baseclass = Effects
+[
+	effects(choices) : "Dynamic Lights & Effects> must use origin brush for bmodels/func objects" : 0 =
+	[
+		0: "0>combine:add values"
+		1: "1>rotate"
+		2: "2>gib"
+		8: "8>blaster"
+		16: "16>rocket"
+		32: "32>grenade"
+		64: "64>hyperblaster"
+		128: "128>bfg"
+		256: "256>color_shell"
+		512: "512>powerscreen"
+		16384: "16384>flies"
+		32768: "32768>quad"
+		65536: "65536>pent"
+		131072: "131072>teleporter"
+		262144: "262144>flag1"
+		524288: "524288>flag2"
+		1048576: "1048576>Candle Light"
+		2097152: "2097152>greengib"
+		4194304: "4194304>Flame Light"
+		8388608: "8388608>spinning_lights"
+		16777216: "16777216>plasma"
+		33554432: "33554432>trap"
+		67108864: "67108864>tracker"
+		134217728: "134217728>double"
+		268435456: "268435456>spheretrans"
+		536870912: "536870912>tagtrail"
+		1073741824: "1073741824>half_damage"
+		2147483648: "2147483648>tracker_trail"
+	]
+]
+@baseclass = Renderfx
+[
+	renderfx(choices) : "RenderFX>eyecandy" : 0 =
+	[
+		0: "0>combine:add values"
+		1: "1>minlight"
+		2: "2>viewermodel"
+		4: "4>weaponmodel"
+		8: "8>fullbright"
+		16: "16>depthhack"
+		32: "32>translucent"
+		64: "64>framelerp"
+		128: "128>beam"
+		512: "512>glow"
+		1024: "1024>shell_red"
+		2048: "2048>shell_green"
+		4096: "4096>shell_blue"
+		32768: "32768>ir_visible"
+		65536: "65536>shell_double"
+		131072: "131072>shell_half_damage"
+		262144: "262144>use_disguise"
+		524288: "524288>vampire"
+	]
+]
+@baseclass = Reverb
+[
+	sounds(choices) : "Reverb environment preset: 0 is use world default, -1 is no reverb" : 0 =
+	[
+	   -1 : "NONE"
+		0 : "WORLD DEFAULT"
+		1 : "GENERIC"
+		2 : "PADDED CELL"
+		3 : "ROOM"
+		4 : "BATHROOM"
+		5 : "LIVING ROOM"
+		6 : "STONE ROOM"
+		7 : "AUDITORIUM"
+		8 : "CONCERT HALL"
+		9 : "CAVE"
+		10 : "ARENA"
+		11 : "HANGAR"
+		12 : "CARPETED HALLWAY"
+		13 : "HALLWAY"
+		14 : "STONE CORRIDOR"
+		15 : "ALLEY"
+		16 : "FOREST"
+		17 : "CITY"
+		18 : "MOUNTAINS"
+		19 : "QUARRY"
+		20 : "PLAIN"
+		21 : "PARKING LOT"
+		22 : "SEWER PIPE"
+		23 : "UNDER WATER"
+		24 : "DRUGGED"
+		25 : "DIZZY"
+		26 : "PSYCHOTIC"
+		27 : "CASTLE_SMALL ROOM"
+		28 : "CASTLE_SHORT PASSAGE"
+		29 : "CASTLE_MEDIUM ROOM"
+		30 : "CASTLE_LARGE ROOM"
+		31 : "CASTLE_LONG PASSAGE"
+		32 : "CASTLE_HALL"
+		33 : "CASTLE_CUPBOARD"
+		34 : "CASTLE_COURTYARD"
+		35 : "CASTLE_ALCOVE"
+		36 : "FACTORY_SMALL ROOM"
+		37 : "FACTORY_SHORT PASSAGE"
+		38 : "FACTORY_MEDIUM ROOM"
+		39 : "FACTORY_LARGE ROOM"
+		40 : "FACTORY_LONG PASSAGE"
+		41 : "FACTORY_HALL"
+		42 : "FACTORY_CUPBOARD"
+		43 : "FACTORY_COURTYARD"
+		44 : "FACTORY_ALCOVE"
+		45 : "ICEPALACE_SMALL ROOM"
+		46 : "ICEPALACE_SHORT PASSAGE"
+		47 : "ICEPALACE_MEDIUM ROOM"
+		48 : "ICEPALACE_LARGE ROOM"
+		49 : "ICEPALACE_LONG PASSAGE"
+		50 : "ICEPALACE_HALL"
+		51 : "ICEPALACE_CUPBOARD"
+		52 : "ICEPALACE_COURTYARD"
+		53 : "ICEPALACE_ALCOVE"
+		54 : "SPACESTATION_SMALL ROOM"
+		55 : "SPACESTATION_SHORT PASSAGE"
+		56 : "SPACESTATION_MEDIUM ROOM"
+		57 : "SPACESTATION_LARGE ROOM"
+		58 : "SPACESTATION_LONG PASSAGE"
+		59 : "SPACESTATION_HALL"
+		60 : "SPACESTATION_CUPBOARD"
+		61 : "SPACESTATION_ALCOVE"
+		62 : "WOODEN_SMALL ROOM"
+		63 : "WOODEN_SHORT PASSAGE"
+		64 : "WOODEN_MEDIUM ROOM"
+		65 : "WOODEN_LARGE ROOM"
+		66 : "WOODEN_LONG PASSAGE"
+		67 : "WOODEN_HALL"
+		68 : "WOODEN_CUPBOARD"
+		69 : "WOODEN_COURTYARD"
+		70 : "WOODEN_ALCOVE"
+		71 : "SPORT_EMPTY STADIUM"
+		72 : "SPORT_SQUASH COURT"
+		73 : "SPORT_SMALL SWIMMING POOL"
+		74 : "SPORT_LARGE SWIMMING POOL"
+		75 : "SPORT_GYMNASIUM"
+		76 : "SPORT_FULL STADIUM"
+		77 : "SPORT_STADIUM TANNOY"
+		78 : "PREFAB_WORKSHOP"
+		79 : "PREFAB_SCHOOL ROOM"
+		80 : "PREFAB_PRACTISE ROOM"
+		81 : "PREFAB_OUT HOUSE"
+		82 : "PREFAB_CARAVAN"
+		83 : "DOME_TOMB"
+		84 : "PIPE_SMALL"
+		85 : "DOME_SAINT PAULS"
+		86 : "PIPE_LONGTHIN"
+		87 : "PIPE_LARGE"
+		88 : "PIPE_RESONANT"
+		89 : "OUTDOORS_BACKYARD"
+		90 : "OUTDOORS_ROLLING PLAINS"
+		91 : "OUTDOORS_DEEP CANYON"
+		92 : "OUTDOORS_CREEK"
+		93 : "OUTDOORS_VALLEY"
+		94 : "MOOD_HEAVEN"
+		95 : "MOOD_HELL"
+		96 : "MOOD_MEMORY"
+		97 : "DRIVING_COMMENTATOR"
+		98 : "DRIVING_PIT GARAGE"
+		99 : "DRIVING_INCAR_RACER"
+		100 : "DRIVING_INCAR_SPORTS"
+		101 : "DRIVING_INCAR_LUXURY"
+		102 : "DRIVING_FULL GRANDSTAND"
+		103 : "DRIVING_EMPTY GRANDSTAND"
+		104 : "DRIVING_TUNNEL"
+		105 : "CITY_STREETS"
+		106 : "CITY_SUBWAY"
+		107 : "CITY_MUSEUM"
+		108 : "CITY_LIBRARY"
+		109 : "CITY_UNDERPASS"
+		110 : "CITY_ABANDONED"
+		111 : "DUSTY ROOM"
+		112 : "CHAPEL"
+		113 : "SMALL WATER ROOM"
+	]
+]
+@baseclass = Animation 
+[
+	anim_start(integer) : "start frame for animations"
+	anim_end(integer) : "end frame for animations"
+	anim_frame_delay(integer) : "delay in frames between animation ticks"
+	anim_animating(boolean) : "1 or 0, whether we're currently animating"
+	anim_reset_on_trigger(boolean) : "1 or 0, whether we should reset back to anim_start when triggered again or not"
+	anim_count(integer) : "number of times to run the animation; 0 is infinite"
+	anim_finished_target(target) : "fired when the animation is finished"
+]
+@baseclass = Phong 
+[
+	_phong(choices) : "Phong Shading" :  : "1 enables phong shading on this model with a default '_phong_angle' of 89 degrees. Simply put, phong shading attempts to hide the 'hard' edges on rounded bruskwork to give the appearance of a smooth rounded surface. For instance, pipes, columns etc."  = [
+	    0 : "OFF(def)"
+		1 : "Enabled(Smooth Edges)"
+	]
+	_phong_angle(integer) : "Phong Angle (override, def=89)" :  : "Enter a custom angle for phong shading calculations. Adjacent faces with normals 'x' many degrees apart, or less will, be smoothed. Consider setting '_anglescale' to '1' on lights or in worldspawn to make the effect of phong shading more visible." 
+	_phong_angle_concave(integer) : "Phong Angle Concave" : : "Optional key for setting a different angle threshold for 'concave' joints. If it’s 0 or unset, the same value as '_phong_angle' is used."
+]
+//
+// player start, deathmatch, coop, deathmatch intermission
+//
+
+@baseclass base(Appearflags, Targetname) size(-16 -16 -24, 16 16 32) color(0 255 0) model({ "path": ":models/monsters/insane/tris.md2", "frame":209, "skin":1}) = PlayerClass []
+@PointClass base(PlayerClass) = info_player_start : "Player 1 start" []
+@PointClass base(PlayerClass) = info_player_deathmatch : "Player deathmatch start" []
+@PointClass base(PlayerClass) = info_player_coop : "Player cooperative start" []
+@PointClass base(PlayerClass) = info_player_intermission : "Deathmatch intermission point"
+[
+	angles(string) : "pitch yaw roll"
+]
+
+// Notes on the 'team' key: First of all, it's really only useful in DM because it creates a
+// random respawn pattern. Let's say that in one spot, you want to have the shotgun, Quad
+// damage and mega health item to respawn in alternance. Place all of them in approximately
+// the same location, team them and voila! The FIRST item that you place in the map will be
+// the team MASTER - the others will be SLAVES. In DM play, the Master will be the first one
+// to spawn. Once the Master is picked up, the respawn pattern becomes RANDOM: it could be
+// the same or one of the other 2. If you try to use this in a Single Player map, it's
+// pretty useless because only the team MASTER spawns and the others never appear obviously.
+
+@BaseClass base(Appearflags, Target) color(76 76 255) size(-16 -16 -16, 16 16 16) = Ammo
+[
+	team(string) : "Team"
+]
+
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/shells/shellbox_small.md2" }) = ammo_shells : "Shotgun ammo" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/nails/nailbox.md2" }) = ammo_nails : "Nailgun ammo" []
+@PointClass base(Ammo) model({ "path": ":models/items/ammo/cells/cellbox.md2" }) = ammo_cells : "Energy ammo" []
+// @PointClass base(Ammo) model({ "path": ":models/items/ammo/cells/medium/tris.md2" }) = ammo_cells : "Blaster/BFG ammo" []
+// @PointClass base(Ammo) model({ "path": ":models/items/ammo/grenades/medium/tris.md2" }) = ammo_grenades : "Grenades" []
+// @PointClass base(Ammo) model({ "path": ":models/items/ammo/rockets/medium/tris.md2" }) = ammo_rockets : "Rockets" []
+// @PointClass base(Ammo) model({ "path": ":models/items/ammo/slugs/medium/tris.md2" }) = ammo_slugs : "Rail gun ammo" []
+
+// Keep in mind when using func_areaportal that it must
+// *completely* separate two areas.  otherwise, you will
+// get an error message and the areaportal will not work
+//
+// 0221 - is there any point in a "style" key?
+@SolidClass base(Appearflags, Targetname) = func_areaportal : "Area portal (Vis blocker)" []
+
+// 0221 - added "pathtarget"
+// 0221 - changed "sounds" information
+@SolidClass base(Appearflags, Target, Targetname, Anim_Target, Angle, Angles, Avelocity, Phong, Effects) color(0 128 204) = func_button : "Button"
+[
+	pathtarget(string) : "Elevator level target"
+	speed(integer) : "Speed" : 40
+	wait(choices) : "Wait before reset" : 1 =
+	[
+		-1 : "Never Return"
+	]
+	lip(integer) : "Lip remaining after move" : 4
+	health(integer) : "Health (shootable)"
+	sounds(choices) : "Sounds" : 0 =
+	[
+		0 : "Audible"
+		1 : "Silent"
+	]
+//	sounds(choices) : "Sounds" : 2 =
+//	[
+//		1 : "Silent"
+//		2 : "Steam Metal"
+//		3 : "Wodden Clunk"
+//		4 : "Metallic Click"
+//		5 : "In-Out"
+//	]
+	message(string) : "Activation message"
+]
+
+// 0221 - added "count" key...oops :)
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = func_clock : "Clock"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Timer Up" : 0
+		2 : "Timer Down" : 0
+		4 : "Start Off" : 0
+		8 : "Multi Use" : 0
+	]
+	count(integer) : "Clock Count"
+	pathtarget(string) : "Target"
+	style(choices) : "Style" : 0 =
+	[
+		0 : "xx"
+		1 : "xx:xx"
+		2 : "xx:xx:xx"
+	]
+]
+
+@PointClass base(Appearflags, Targetname, Reverb) color(0 0 255) size(-8 -8 -8, 8 8 8) = env_reverb : "Sets a reverb environment based on a list of presets. Can define an activation radius (not for brush version)"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Off" : 0
+	]
+	radius(integer) : "Activation radius in units" : 64 
+]
+// 0221 - updated "sounds" information
+// 0221 - added "killtarget"
+@SolidClass base(Angle, Angles, Phong, Avelocity, Appearflags, Targetname, Target, Effects, Renderfx) color(0 128 204) = func_door : "Door"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Open" : 0
+		4 : "Crusher" : 0
+		8 : "No Monsters" : 0
+		16 : "Animated" : 0
+		32 : "Toggle" : 0
+		64 : "Animated Fast" : 0
+	]
+	killtarget(string) : "Kill Target"
+	team(string) : "Team"
+	model2(string) : "model2>model (path/file.md2,md3,iqm,sp2)>use model2 to set the second modelindex; this should allow you to use a main brush model (nodraw for clip brushes basically) with a second model drawn over top"
+	message(string) : "Trigger message"
+	health(integer) : "Health (shootable)"
+	speed(integer) : "Speed" : 100
+	wait(choices) : "Wait before close" : 3 =
+	[
+		-1 : "Stay open"
+	]
+	lip(integer) : "Lip remaining after move" : 8
+	dmg(integer) : "Damage when blocked" : 2
+	sounds(choices) : "Sounds" : 0 =
+	[
+		0 : "Audible"
+		1 : "Silent"
+	]
+//	sounds(choices) : "Sounds" : 3 =
+//	[
+//		1 : "Silent"
+//		2 : "Light"
+//		3 : "Medium"
+//		4 : "Heavy"
+//	]
+]
+
+// 0221 - added "killtarget" and "target" keys
+// 0221 - updated "sounds" info
+// 0221 - removed "lip" key
+@SolidClass base(Appearflags, Targetname, Target, Angle, Angles, Phong, Avelocity, Effects, Renderfx) color(0 128 204) = func_door_rotating : "Rotating Door"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Open" : 0
+		2 : "Reverse" : 0
+		4 : "Crusher" : 0
+		8 : "No Monsters" : 0
+		16 : "Animated" : 0
+		32 : "Toggle" : 0
+		64 : "X Axis" : 0
+		128 : "Y Axis" : 0
+	]
+	killtarget(string) : "Kill Target"
+	team(string) : "Team"
+	distance(integer) : "Degrees of rotation" : 90
+	message(string) : "Trigger message"
+	health(integer) : "Health (shootable)"
+	speed(integer) : "Speed" : 100
+	wait(choices) : "Wait before close" : 3 =
+	[
+		-1 : "Stay open"
+	]
+	dmg(integer) : "Damage when blocked" : 2
+	sounds(choices) : "Sounds" : 0 =
+	[
+		0 : "Audible"
+		1 : "Silent"
+	]
+//	sounds(choices) : "Sounds" : 3 =
+//	[
+//		1 : "Silent"
+//		2 : "Light"
+//		3 : "Medium"
+//		4 : "Heavy"
+//	]
+]
+
+// 0221 - added "message" key
+// 0221 - removed "team" key
+@SolidClass base(Angle, Appearflags, Targetname, Angles, Avelocity, Phong, Effects, Renderfx) color(0 128 204) = func_door_secret : "Secret Door"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Always shoot" : 0
+		2 : "1st Left" : 0
+		4 : "1st Down" : 0
+	]
+	dmg(integer) : "Damage when blocked" : 2
+	wait(choices) : "Wait before close" : 5 =
+	[
+		-1 : "Stay open"
+	]
+	message(string) : "Message"
+]
+
+// not visible in DM mode
+//
+@SolidClass base(Appearflags, Targetname, Target, Anim_Target, Angle, Angles, Avelocity, Phong, Effects, Renderfx) color(0 128 204) = func_explosive : "Exploding/Breakable brush"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Trigger Spawn" : 0
+		2 : "Animated" : 0
+		4 : "Animated Fast" : 0
+	]
+	health(integer) : "Health" : 10
+	mass(integer) : "Mass (debris)" : 800
+	dmg(integer) : "Damage" : 0
+]
+
+@SolidClass base(Appearflags, Targetname, Angle, Angles, Avelocity, Phong, Effects) color(255 0 0) = func_killbox : "Instant death" []
+
+@SolidClass base(Appearflags, Targetname, Angle, Angles, Phong, Avelocity, Effects, Renderfx) color (0 128 204) = func_object : "Solid bmodel, will fall if its support is removed"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Trigger Spawn" : 0
+		2 : "Animated" : 0
+		4 : "Animated Fast" : 0
+	]
+]
+
+// 0221 - removed "sounds" key
+@SolidClass base(Appearflags, Targetname, Angle, Angles, Avelocity, Phong, Effects, Renderfx) color(0 128 204) = func_plat : "Platform"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Plat Low Trigger" : 0
+	]
+	speed(integer) : "Speed" : 100
+	accel(integer) : "Acceleration" : 500
+	lip(integer) : "Lip remaining after move" : 8
+	height(integer) : "Movement distance"
+]
+
+// 0222 - added "team" key
+@SolidClass base(Appearflags, Targetname, Angle, Angles, Avelocity, Phong, Effects, Renderfx) color(0 128 204) = func_rotating : "Rotating brush"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+		2 : "Reverse" : 0
+		4 : "X Axis" : 0
+		8 : "Y Axis" : 0
+		16 : "Pain on Touch" : 0
+		32 : "Block Stops" : 0
+		64 : "Animated" : 0
+		128 : "Animated Fast" : 0
+	]
+	team(string) : "Team"
+	speed(integer) : "Speed" : 100
+	dmg(integer) : "Damage when blocked" : 2
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(76 25 153) size(-8 -8 -8, 8 8 8) = func_timer : "Timer"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+	]
+	wait(integer) : "Base wait time" : 1
+	random(integer) : "Wait variance (+/-)"
+	delay(integer) : "Delay before first firing"
+	pausetime(integer) : "Additional delay"
+]
+
+// 0219 - added "team" key
+@SolidClass base(Appearflags, Targetname, Angle, Angles, Avelocity, Phong, Effects, Renderfx) color(0 128 204) = func_train : "Moving platform"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+		2 : "Toggle" : 0
+		4 : "Block Stops" : 0
+	]
+	target(string) : "First stop target"
+	team(string) : "Team"
+	speed(integer) : "Speed" : 100
+	dmg(integer) : "Damage when blocked" : 2
+	noise(string) : "Sound (path/file.wav)"
+	model2(string) : "model2>model (path/file.md2,md3,iqm,sp2)>use model2 to set the second modelindex; this should allow you to use a main brush model (nodraw for clip brushes basically) with a second model drawn over top"
+]
+
+@SolidClass base(Appearflags, Targetname, Avelocity, Phong, Angle, Angles, Effects, Renderfx) color(0 128 204) = func_wall : "Solid Wall"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Trigger Spawn" : 0
+		2 : "Toggle" : 0
+		4 : "Start On" : 0
+		8 : "Animated" : 0
+		16 : "Animated Fast" : 0
+	]
+]
+@SolidClass base(Appearflags, Targetname, Angle, Angles, Avelocity, Phong, Effects, Renderfx) color(0 128 204) = func_water : "Moveable water"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Open" : 0
+	]
+	speed(integer) : "Speed" : 25
+	wait(choices) : "Wait before return" : -1 =
+	[
+		-1 : "Toggle"
+	]
+	lip(integer) : "Lip remaining after move"
+	sounds(Choices) : "Sounds" : 1 =
+	[
+		0 : "No Sounds"
+		1 : "Water"
+		2 : "Lava"
+	]
+	team(string) : "Team"
+]
+
+@PointClass base(Appearflags, Targetname, Angle, Angles) color(0 128 0) size(-4 -4 -4, 4 4 4) = info_null : "Spotlight target" []
+@PointClass base(info_null) = info_notnull : "Lightning target" []
+
+@BaseClass base(Appearflags, Target) color(76 76 255) size(-16 -16 -16, 16 16 16) = Items
+[
+	team(string) : "Team"
+]
+
+@PointClass base(Items) model({ "path": ":models/items/armor/armor.md2", "skin": 2 }) = item_armor_red : "Red armor" []
+@PointClass base(Items) model({ "path": ":models/items/armor/armor.md2" }) = item_armor_yellow : "Yellow armor" []
+@PointClass base(Items) model({ "path": ":models/items/armor/armor.md2", "skin": 1 }) = item_armor_green : "Green armor" []
+@PointClass base(Items) model({ "path": ":models/items/armor/armor_shard.md2" }) = item_armor_shard : "Armor shard" []
+@PointClass base(Items) model({ "path": ":models/items/health/medium.md2" }) = item_health_rotten : "+15 health" []
+@PointClass base(Items) model({ "path": ":models/items/health/small.md2" }) = item_health_small : "+2 health" []
+@PointClass base(Items) model({ "path": ":models/items/health/large.md2" }) = item_health : "+25 health" []
+@PointClass base(Items) model({ "path": ":models/items/health/mega.md2" }) = item_health_mega : "+100 health" []
+@PointClass base(Items) model({ "path": ":models/items/invulner/tris.md2" }) = item_invulnerability : "Invulnerability" []
+@PointClass base(Items) model({ "path": ":models/items/pack/tris.md2" }) = item_pack : "Heavy backpack" []
+@PointClass base(Items) model({ "path": ":models/items/quaddama/tris.md2" }) = item_quad : "Quad damage" []
+
+@BaseClass base(Appearflags, Target) color(0 128 204) size(-16 -16 -16, 16 16 16) = Keys []
+
+@PointClass base(Keys) model({ "path": ":models/items/keys/gold_key/gold_key.md2" }) = key_silver_key : "Normal door key - silver" []
+@PointClass base(Keys) model({ "path": ":models/items/keys/gold_key/gold_key.md2", "skin": 1 }) = key_gold_key : "Normal door key - gold" []
+
+@PointClass base(Appearflags, Target, Targetname) color(0 255 0) size(-8 -8 -8, 8 8 8) = light : "Light"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Off" : 0
+	]
+//	light(integer) : "Brightness" : 300
+	style(Choices) : "Style" : 0 =
+	[
+		0 : "Normal"
+		1 : "Flicker #1"
+		6 : "Flicker #2"
+		2 : "Slow Strong Pulse"
+		3 : "Candle #1"
+		7 : "Candle #2"
+		8 : "Candle #3"
+		4 : "Fast Strobe"
+		5 : "Gentle Pulse #1"
+		9 : "Slow Strobe"
+		10 : "Fluorescent Flicker"
+		11 : "Slow pulse, no black"
+	]
+//	_cone(integer) : "Size of light (spotlight)" : 10
+	style2(string) : "for switchable custom light style string, i.e. az for flashing on and off"
+]
+
+@PointClass base(light) color(0 255 0) size(-2 -2 -12, 2 2 12) model({ "path": ":models/objects/minelite/light1/tris.md2", "skin": 0 }) = light_mine1 : "Clean fluorescent light fixture"	[spawnflags(Flags) =	[	1 : "" : 0	]]
+@PointClass base(light) color(0 255 0) size(-2 -2 -12, 2 2 12) model({ "path": ":models/objects/minelite/light2/tris.md2", "skin": 0 }) = light_mine2 : "Dusty fluorescent light fixture"	[spawnflags(Flags) = [	1 : "" : 0]]
+
+// 0225 - removed "target" key - id concluded being able to target
+// something with a movable barrel was a bug and removed that function :(
+@PointClass base(Appearflags, Targetname, Angle, Angles) color(0 128 204) size(-16 -16 0, 16 16 64) model({ "path": ":models/objects/explobox/explobox.md2" }) = misc_explobox : "Large exploding box"
+[
+	mass(integer) : "Mass" : 370
+	health(integer) : "Health" : 10
+	dmg(integer) : "Damage" : 250
+]
+
+@PointClass base(Appearflags, Targetname, Angle, Angles) color(0 128 204) size(-16 -16 0, 16 16 32) model({ "path": ":models/objects/explobox/explobox2.md2" }) = misc_explobox2 : "Small exploding box"
+[
+	mass(integer) : "Mass" : 185
+	health(integer) : "Health" : 10
+	dmg(integer) : "Damage" : 125
+]
+
+@PointClass base(Appearflags, Targetname, Effects, Renderfx, Target) color(255 0 0) size(-8 -8 -8, 8 8 8) = misc_property_swap : "Swap properties with targetted entity, note that if the target matches multiple entities, it will only remember the value used by the last model (so basically only use it to change properties of identical entities, otherwise things will get weird). When the various spawnflags are set, it copies the model/effects/renderfx/sound/skinnum/model2/model3/model4 of itself between the linked entities so to make it disappear, set the model spawnflag but leave model unset then it will swap it with 0"
+[
+	model(string) : "model>model (path/file.md2,md3,iqm,sp2)"
+	model2(string) : "model2>model (path/file.md2,md3,iqm,sp2)"
+	noise(string) : "Noise>sound (path/file.wav)" 
+	skinnum(integer) : "Skinnum>Skin number"
+	frame(integer) : "frame>current frame number (static)"	
+spawnflags(Flags) =
+	[
+		1 : "Model" : 0
+		2 : "Effects" : 0
+		4 : "RenderFX" : 0
+		8 : "Noise" : 0
+		16 : "Model2" : 0
+		32 : "Model3" : 0
+		64 : "Model4" : 0
+		128 : "Skinnum" : 0
+		256 : "Frame #" : 0
+	]
+]
+
+// set angle for gib direction, otherwise it just drops
+@PointClass base(Appearflags, Angle, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/arm/tris.md2" }) = misc_gib_arm : "arm gib, use with target_spawner" []
+@PointClass base(Appearflags, Angle, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/head/tris.md2" }) = misc_gib_head : "head gib, use with target_spawner" []
+@PointClass base(Appearflags, Angle, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/arm/tris.md2" }) = misc_gib_leg : "leg gib, use with target_spawner" []
+
+@PointClass base(Appearflags, Targetname, Angle, Angles) color(255 0 0) size(-32 -32 -24, 32 32 -16) model({ "path": ":models/objects/dmspot/tris.md2", "skin": 1 }) = misc_teleporter : "Teleporter: To hide the teleport pads, place them units 10 units into a brush."	[	target(string) : "Teleport Destination"	]
+@PointClass base(Appearflags, Targetname, Angle, Angles) color(255 0 0) size(-32 -32 -24, 32 32 -16) model({ "path": ":models/objects/dmspot/tris.md2", "skin": 0 }) = misc_teleporter_dest : "Teleport Destination: To hide the teleport pads, place them units 10 units into a brush." []
+@PointClass base(Appearflags, Targetname, Angle, Angles, Noise, Animation, Effects, Renderfx, Target, Avelocity) color(255 0 0) size(-8 -8 -8, 8 8 8) = model_spawn : "Model & Sprite spawner with animation controls" 
+[
+	model(string) : "model>model (path/file.md2,md3,iqm,sp2)"
+	skinnum(integer) : "Skinnum>Skin number"
+]
+
+//
+// Monsters!
+//
+
+@BaseClass base(Appearflags, Target, Targetname, Anim_Target, Angle) color(255 128 0) size(-16 -16 -24, 16 16 32) = Monsters
+[
+	spawnflags(Flags) =
+	[
+		1 : "Ambush" : 0
+		2 : "Trigger Spawn" : 0
+		4 : "Sight" : 0
+	]
+	combattarget(string) : "Point combat target"
+	deathtarget(string) : "Entity to trigger at death"
+	killtarget(string) : "Entity to remove at death"
+	item(string) : "Spawn Item"
+]
+
+@PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/knight/knight.md2" }) = monster_knight : "Knight" []
+@PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/fiend/fiend.md2" }) = monster_fiend : "Fiend" []
+@PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/vore/vore.md2" }) = monster_vore : "Vore" []
+@PointClass base(Monsters, Effects, Renderfx) size(-16 -16 -38, 16 16 36) model({ "path": ":models/monsters/scrag/scrag.md2" }) = monster_scrag : "Scrag" []
+
+
+// using a "wait" value of -1 on a path corner causes a func_train to go silent between
+// itself and the next path corner when the train is restarted. The train's sound will
+// resume as soon as it reaches a path corner with a "wait" value other than -1
+@PointClass base(Appearflags, Targetname) color(128 76 0) size(-8 -8 -8, 8 8 8) = path_corner : "Path marker"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Teleport" : 0
+	]
+	target(string) : "Next path target"
+	pathtarget(string) : "Event to trigger"
+	wait(choices) : "Wait" : 0 =
+	[
+		-1 : "Wait for retrigger"
+	]
+]
+
+// "target" doesn't work (for now)...a separate trigger is needed
+@PointClass base(Appearflags, Targetname, Target, Angle) color(128 76 9) size(-8 -8 -8, 8 8 8) = point_combat : "1st point of combat"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Hold" : 0
+	]
+]
+
+@PointClass base(Appearflags, Targetname, Angle) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_blaster : "Blaster"
+[
+	spawnflags(Flags) =
+	[
+		1 : "No Trail" : 0
+		2 : "No Effects" : 0
+	]
+	dmg(integer) : "Damage" : 15
+	speed(integer) : "Speed" : 1000
+]
+
+// set "map" value to "mapname$playername" where playername equals
+// the targetname of a corresponding info_player_start in the
+// next map.  To play a cinematic before starting the level, the
+// "map" value should be "cinemeatic.cin+mapname$playername". Note
+// that a playername is not required if the corresponding info_player_start
+// doesn't have a targetname.  If you want this to be designated as the last
+// level of a unit, place an asterix (*) before the map name.
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_changelevel : "Change level"
+[
+	map(string) : "Next map"
+]
+
+@SolidClass base(Appearflags, Targetname) color(0 0 255) = target_character : "Use with target_string and func_clock"
+[
+	team(string) : "Team"
+	count(integer) : "Position in the string"
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(128 128 128) size(-8 -8 -8, 8 8 8) = target_crosslevel_trigger : "Cross-level trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Trigger 1" : 0
+		2 : "Trigger 2" : 0
+		4 : "Trigger 3" : 0
+		8 : "Trigger 4" : 0
+		16 : "Trigger 5" : 0
+		32 : "Trigger 6" : 0
+		64 : "Trigger 7" : 0
+		128 : "Trigger 8" : 0
+	]
+	killtarget(string) : "Kill Target"
+	message(string) : "Message"
+	delay(integer) : "Trigger delay"
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(128 128 128) size(-8 -8 -8, 8 8 8) = target_crosslevel_target : "Cross-level trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Trigger 1" : 0
+		2 : "Trigger 2" : 0
+		4 : "Trigger 3" : 0
+		8 : "Trigger 4" : 0
+		16 : "Trigger 5" : 0
+		32 : "Trigger 6" : 0
+		64 : "Trigger 7" : 0
+		128 : "Trigger 8" : 0
+	]
+	killtarget(string) : "Kill Target"
+	delay(integer) : "Trigger delay (if activated)" : 1
+]
+
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_earthquake : "Level wide earthquake"
+[
+	speed(integer) : "Severity of quake" : 200
+	count(integer) : "Duration" : 5
+]
+
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_explosion : "Explosion"
+[
+	delay(integer) : "Delay before explosion"
+	dmg(integer) : "Radius damage" : 0
+]
+
+@PointClass base(Appearflags, Targetname) color(255 0 255) size(-8 -8 -8, 8 8 8) = target_goal : "Counts a goal completed" []
+
+@PointClass base(Appearflags, Targetname) color(255 0 255) size(-8 -8 -8, 8 8 8) = target_help : "Computer help message"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Main Onjective" : 0
+	]
+	message(string) : "Computer message"
+]
+
+// if no color spawnflags are set, the laser color defaults to dim gray (and hard to see
+// setting the damage to 0 makes it use the default damage of 1
+// setting the damage to a negative number will actually give health
+@PointClass base(Appearflags, Targetname, Target) color(0 128 204) size(-8 -8 -8, 8 8 8) = target_laser : "Laser> Use Target to point the laser at targetted entity, health can set the thickness manually and combattarget allows the laser origin to follow the targetted entity"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+		2 : "Red" : 0
+		4 : "Green" : 0
+		8 : "Blue" : 0
+		16 : "Yellow" : 0
+		32 : "Orange" : 0
+		64 : "Fat" : 0
+	]
+	dmg(integer) : "Damage"
+	health(integer) : "set thickness of laser manually"
+	combattarget(string) : "allows laser origin to follow targetted entity"
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(0 128 204) size(-8 -8 -8, 8 8 8) = target_spotlight : "Spotlight> Use Target to point the spotlight at a targetted entity (will follow moving targets), combattarget allows the spotlight origin to follow the targetted entity"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+	]
+	falloff_angle(integer) : "spotlight inner falloff radius, must be smaller than width_angle"
+	color(string) : "RGB Color" : "1 1 1"
+	width_angle(integer) : "spotlight outer radius"
+	intensity(integer) : "set spotlight brightness"
+	combattarget(string) : "allows spotlight origin to follow targetted entity"
+]
+
+// 0221 - added "target" key
+@PointClass base(Appearflags, Targetname, Target) color(0 128 204) size(-8 -8 -8, 8 8 8) = target_lightramp : "Light ramp"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Toggle" : 0
+	]
+	speed(integer) : "Speed"
+	message(string) : "start/end light level"
+]
+
+@PointClass base(Appearflags, Targetname) color(255 0 255) size(-8 -8 -8, 8 8 8) = target_secret : "Counts a secret found"
+[
+	message(string) : "Message to print" : "You have found a secret."
+]
+
+// set speed and angle, otherwise spawned object drops
+//
+// 0221 - changed "target" key description for clarity
+@PointClass base(Appearflags, Targetname, Angle) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_spawner : "Monster/Item spawner"
+[
+	target(string) : "Monster/Item to spawn"
+	speed(integer) : "Speed"
+]
+
+// looped sounds are automatically volume 1, attenuation 3 :\
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_speaker : "Sound player"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Looped On" : 0
+		2 : "Looped Off" : 0
+		4 : "Reliable" : 0
+	]
+	noise(string) : "Sound (path/file.wav)"
+	attenuation(Choices) : "Attenuation" : 1 =
+	[
+		-1 : "None, send to whole level"
+		1 : "Normal fighting sounds"
+		2 : "Idle sound level"
+		3 : "Ambient sound level"
+	]
+	volume(integer) : "Volume (0.0 - 1.0)" : 1
+]
+
+// "sounds" values other than 1 are silent.  leaving in the other
+// options for availability to mods/fixes
+//
+// 0221 - clarified "count" description
+@PointClass base(Appearflags, Targetname, Angle) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_splash : "Creates a splash when used"
+[
+	sounds(choices) : "Type of splash" : 2 =
+	[
+		1 : "Sparks"
+		2 : "Blue water"
+		3 : "Brown water"
+		4 : "Slime"
+		5 : "Lava"
+		6 : "Blood"
+	]
+	count(integer) : "Number of pixels in splash (1 - 255)"
+	dmg(integer) : "Radius damage"
+]
+
+// 0221 - removed "message" key (?)
+@PointClass base(Appearflags, Targetname) color(0 0 255) size(-8 -8 -8, 8 8 8) = target_string : "String"
+[
+	team(string) : "Team"
+]
+
+// eye candy... Particles #2 (style 22) is quite cool
+@PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_temp_entity : "Temp entity"
+[
+	style(choices) : "Style" : 22 =
+	[
+		20 : "Green Fireball"
+		21 : "Particles #1"
+		22 : "Particles #2"
+	]
+]
+
+// 0221 - added "delay" and "killtarget" keys
+@PointClass base(Appearflags, Target) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_always : "Always triggers"
+[
+	killtarget(string) : "Kill Target"
+	delay(integer) : "Time before triggering"
+]
+
+@SolidClass base(Appearflags, Targetname, Anim_Target, Target) color(128 128 128) = trigger_counter : "Counter"
+[
+	spawnflags(Flags) =
+	[
+		1 : "No Message" : 0
+	]
+	count(integer) : "Count before trigger" : 2
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(76 25 153) = trigger_elevator : "Elevator trigger" []
+
+@SolidClass base(Appearflags) color(128 128 128) = trigger_gravity : "Change gravity"
+[
+	gravity(integer) : "Gravity (standard = 1.0)" : 1
+]
+
+@SolidClass base(Appearflags, Targetname) color(128 128 128) = trigger_hurt : "Hurts on touch"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Off" : 0
+		2 : "Toggle" : 0
+		4 : "Silent" : 0
+		8 : "No Protection" : 0
+		16 : "Slow hurt" : 0
+	]
+	dmg(integer) : "Damage" : 5
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(128 128 128) size(-8 -8 -8, 8 8 8) = trigger_key : "Triggers with key"
+[
+	killtarget(string) : "Kill target"
+	item(string) : "Item classname" : "key_silver_key"
+]
+
+@SolidClass base(Appearflags, Angle, Angles) color(128 128 128) = trigger_monsterjump : "Makes monsters jump"
+[
+	speed(integer) : "Speed thrown forward" : 200
+	height(integer) : "Height thrown upward" : 200
+	spawnflags(Flags) =
+	[
+		1 : "Toggle" : 0
+		2 : "Triggered" : 0
+	]
+]
+
+// 0221 - switched around _relay, _once, and _multiple
+@PointClass base(Appearflags, Targetname, Anim_Target, Target) color(128 128 128) = trigger_relay : "Relay trigger"
+[
+	killtarget(string) : "Kill Target"
+	delay(integer) : "Time before triggering"
+	message(string) : "Trigger message"
+]
+
+@SolidClass base(trigger_relay) = trigger_once : "Single fire trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Monster" : 0
+		2 : "Not Player" : 0
+		4 : "Start Off" : 0
+		8 : "Shootable" : 0
+       16 : "Toggle" : 0	
+	]
+	health(integer) : "set Shootable spawnflag" : 0
+	sounds(choices) : "Sounds" : 0 =
+	[
+		0 : "Click"
+		1 : "Error"
+		2 : "Alert"
+		3 : "Silent"
+	]
+]
+
+@SolidClass base(trigger_once) = trigger_multiple : "Multiple fire trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Monster" : 0
+		2 : "Not Player" : 0
+		4 : "Start Off" : 0
+		8 : "Shootable" : 0
+       16 : "Toggle" : 0	
+	]
+	health(integer) : "set Shootable spawnflag" : 0
+	sounds(choices) : "Sounds" : 0 =
+	[
+		0 : "Click"
+		1 : "Error"
+		2 : "Alert"
+		3 : "Silent"
+	]
+	wait(integer) : "Seconds between triggers" : 0
+]
+
+@SolidClass base(Appearflags, Angle, Angles, Targetname) color(128 128 128) = trigger_push : "Push trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Push Once" : 0
+		2 : "Start Off" : 2
+		4 : "Toggle"    : 4
+		8 : "Silent"	: 8
+	]
+	speed(integer) : "Speed of push" : 1000
+]
+
+@PointClass base(Appearflags, Targetname, Target) color(128 128 128) = target_gravity : "Gravity trigger"
+[
+	gravity(integer) : "Set global gravity, lower number means less gravity, default is 800" : 800
+]
+
+@PointClass base(Appearflags) color(0 128 204) size(-8 -8 -8, 8 8 8) = viewthing : "Just for debugging level - dont use" []
+@BaseClass base(Appearflags, Target, Anim_Target, Angle) color(76 76 255) size(-16 -16 -16, 16 16 16) = Weapons
+[
+	team(string) : "Team"
+]
+
+//
+// Weapons!
+//
+
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg/g_shotg.md2" }) = weapon_shotgun : "Shotgun" []
+// @PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg2/tris.md2" }) = weapon_supershotgun : "Super shotgun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_perf/g_perf.md2" }) = weapon_perforator : "Perforator" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_launch/g_launch.md2" }) = weapon_grenadelauncher : "Grenade launcher" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_rocket/g_rocket.md2" }) = weapon_rocketlauncher : "Rocket launcher" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_bolt/g_bolt.md2" }) = weapon_thunderbolt : "Thunderbolt" []
+
+// ALIAS ENTITY
+// PROP_TORCH_1 - Medieval Torch on Hanger 
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-6 -6 -18, 6 6 18) model({ "path": ":models/props/torch1/torch_1.md2", "skin": 0 }) = prop_torch_1 : "Medieval Torch on Hanger"
+[
+	model(string) : "Usermodel>model (path/file.md2)" : "models/props/torch1/torch_1.iqm"
+]
+
+// ALIAS ENTITY
+// PROP_TORCH_2 - Medieval Torch on Hanger 
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-6 -6 -18, 6 6 18) model({ "path": ":models/props/torch2/torch_2.md2", "skin": 0 }) = prop_torch_2 : "Medieval Torch on Hanger"
+[
+	model(string) : "Usermodel>model (path/file.md2)" : "models/props/torch2/torch_2.md3"
+]
+
+// ALIAS ENTITY
+// PROP_TORCH_2a - Medieval Torch w/out Hanger
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 -20, 4 4 16) model({ "path": ":models/props/torch2/torch_2a.md2", "skin": 0 }) = prop_torch_2a : "Medieval Torch w/out Hanger"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/torch1/torch_2a.md3"
+]
+
+// ALIAS ENTITY
+// PROP_SLIPGATE_PAD - Slipgate Pad
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-32 -32 0, 32 32 16) model({ "path": ":models/props/slipgate/slipgate_pad.md2", "skin": 0 }) = prop_slipgate_pad : "Slipgate Pad"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/slipgate/slipgate_pad.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_SLIPGATE - Slipgate
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-64 -64 0, 64 64 196) model({ "path": ":models/props/slipgate/slipgate.md2", "skin": 0 }) = prop_slipgate : "Slipgate"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/slipgate/slipgate.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONEARCH - Bone Arch
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-32 -160 0, 32 160 256) model({ "path": ":models/env/bones/arch/bone_arch.md2", "skin": 0 }) = prop_bone_arch : "Bone Arch"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone_arch.iqm"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_1 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -16 -8, 8 16 64) model({ "path": ":models/env/gravestones/grave_01.md2", "skin": 0 }) = prop_grave_1 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_01.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_2 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -16 -8, 16 16 24) model({ "path": ":models/env/gravestones/grave_02.md2", "skin": 0 }) = prop_grave_2 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_02.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_3 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-12 -16 -8, 12 16 56) model({ "path": ":models/env/gravestones/grave_03.md2", "skin": 0 }) = prop_grave_3 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_03.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_4 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-12 -16 -8, 12 16 96) model({ "path": ":models/env/gravestones/grave_04.md2", "skin": 0 }) = prop_grave_4 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_04.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_5 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -16 -8, 4 16 24) model({ "path": ":models/env/gravestones/grave_cluster_01.md2", "skin": 0 }) = prop_grave_5 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_cluster01.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_6 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-6 -16 -8, 6 16 32) model({ "path": ":models/env/gravestones/grave_cluster_02.md2", "skin": 0 }) = prop_grave_6 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_cluster02.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_7 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-6 -16 -8, 6 16 46) model({ "path": ":models/env/gravestones/grave_cluster_03.md2", "skin": 0 }) = prop_grave_7 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_cluster03.md3"
+]
+
+// ALIAS ENTITY
+// PROP_GRAVE_8 - Gravestone
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-6 -16 -8, 6 16 32) model({ "path": ":models/env/gravestones/grave_cluster_04.md2", "skin": 0 }) = prop_grave_8 : "Gravestone"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_cluster04.md3"
+]
+
+// ALIAS ENTITY
+// PROP_WINDOW03_FRAME - Decorative Window Frame
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-64 -64 -64, 64 64 64) model({ "path": ":models/env/window_03/window03_frame.md2", "skin": 0 }) = prop_window03_frame : "Window 03 Frame"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/window_03/window03_frame.md3"
+]
+
+// ALIAS ENTITY
+// PROP_WINDOW03_FRAME_2 - Decorative Window Frame 2
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-64 -64 -64, 64 64 64) model({ "path": ":models/env/window_03/window03_frame_2.md2", "skin": 0 }) = prop_window03_frame_2 : "Window 03 Frame 2/Clean Version"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/window_03/window03_frame_2.iqm"
+]
+
+// ALIAS ENTITY
+// PROP_WINDOW03_MOUNT - Decorative Window Frame Mount
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-32 -32 -32, 32 32 32) model({ "path": ":models/env/window_03/window03_mount.md2", "skin": 0 }) = prop_window03_mount : "Window 03 Mount"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/window_03/window03_mount.iqm"
+]
+
+// ALIAS ENTITY
+// PROP_WINDOW03_GLASS - Decorative Window Frame Glass
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-32 -64 -32, 32 64 32) model({ "path": ":models/env/window_03/window03_glass.md2", "skin": 0 }) = prop_window03_glass : "Window 03 Glass"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/window_03/window03_glass.md3"
+]
+
+// ALIAS ENTITY
+// PROP_PYRAMID_LIGHT - Base Themed Pyramid Light 
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-12 -12 0, 12 12 56) model({ "path": ":models/env/pyramid_light/pyramidlight.md2", "skin": 0 }) = prop_pyramid_light : "Base Pyramid Light"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/pyramid_light/pyramidlight.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_TLIGHT_07 - Base Themed Light Fixture 
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-12 -12 -12, 12 12 12) model({ "path": ":models/env/tlight_07/tlight_07.md2", "skin": 0 }) = prop_tlight_07 : "Base Light Fixture"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/tlight_07/tlight_07.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE1 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/props/candles/candle1.md2", "skin": 0 }) = prop_candle1 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle1.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE3 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-6 -8 0, 6 8 4) model({ "path": ":models/props/candles/candle3.md2", "skin": 0 }) = prop_candle3 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle3.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE5 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/props/candles/candle5.md2", "skin": 0 }) = prop_candle5 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle5.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE6 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 6) model({ "path": ":models/props/candles/candle6.md2", "skin": 0 }) = prop_candle6 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle6.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE7 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 24) model({ "path": ":models/props/candles/candle7.md2", "skin": 0 }) = prop_candle7 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle7.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE8 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/props/candles/candle8.md2", "skin": 0 }) = prop_candle8 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle8.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE9 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-2 -2 0, 2 2 14) model({ "path": ":models/props/candles/candle9.md2", "skin": 0 }) = prop_candle9 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle9.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE10 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/props/candles/candle10.md2", "skin": 0 }) = prop_candle10 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle10.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE11 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 28) model({ "path": ":models/props/candles/candle11.md2", "skin": 0 }) = prop_candle11 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle11.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE12 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 0, 4 4 16) model({ "path": ":models/props/candles/candle12.md2", "skin": 0 }) = prop_candle12 : "Candle - Skinnum 1 for unlit / non emissive variation"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candle12.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE_CLUSTER1 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -8 0, 8 8 20) model({ "path": ":models/props/candles/candlemerge1.md2", "skin": 0 }) = prop_candle_cluster1 : "Candle Cluster"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candlemerge1.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE_CLUSTER2 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -8 0, 8 8 16) model({ "path": ":models/props/candles/candlemerge2.md2", "skin": 0 }) = prop_candle_cluster2 : "Candle Cluster"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candlemerge2.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE_CLUSTER3 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -8 0, 8 8 16) model({ "path": ":models/props/candles/candlemerge3.md2", "skin": 0 }) = prop_candle_cluster3 : "Candle Cluster"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candlemerge3.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_CANDLE_CLUSTER4 - Candle
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -8 0, 8 8 16) model({ "path": ":models/props/candles/candlemerge4.md2", "skin": 0 }) = prop_candle_cluster4 : "Candle Cluster"
+[
+	model(string) : "model>model (path/file.md2)" : "models/props/candles/candlemerge4.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_DEMON_HEAD - Demon Head
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/demon_head/demon_head.md2", "skin": 0 }) = prop_demon_head : "Demon Head"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/demon_head/demon_head.md3"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_DEMON_SKULL - Demon Skull
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/demon_skull.md2", "skin": 0 }) = prop_demon_skull : "Demon Skull"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/demon_skull.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_DEMON_SKULL_2 - Demon Skull 2
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/window_03/demon_skull_2.md2", "skin": 0 }) = prop_demon_skull_2 : "Demon Skull 2"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/window_03/demon_skull_2.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_FACE1 - Face 1
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/face1.md2", "skin": 0 }) = prop_face1 : "Face 1"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/face1.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_FACE2 - Face 2
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/face2.md2", "skin": 0 }) = prop_face2 : "Face 2"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/face2iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_FLAG1 - Flag 1
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/flag1.md2", "skin": 0 }) = prop_flag1 : "Flag 1"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/flag1.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_FLAG2 - Flag 2
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/flag2.md2", "skin": 0 }) = prop_flag2 : "Flag 2"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/flag2.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_FLAG3 - Flag 3
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/flag3.md2", "skin": 0 }) = prop_flag3 : "Flag 3"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/flag3.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_FLAG4 - Flag 4
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/env/bones/arch/flag4.md2", "skin": 0 }) = prop_flag4 : "Flag 4"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/flag4.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_WYRM_BASE - Wyrm Base
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-64 -64 16, 64 64 0) model({ "path": ":models/monsters/wyrm/wyrm_base.md2", "skin": 0 }) = prop_wyrm_base : "Wyrm Base"
+[
+	model(string) : "model>model (path/file.md2)" : "models/monsters/wyrm/wyrm_base.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_SKULL - Skull
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -8 8, 8 8 -8) model({ "path": ":models/env/bones/arch/skull.md2", "skin": 0 }) = prop_skull : "Skull"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/skull.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE1 - Bone 1
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone1.md2", "skin": 0 }) = prop_bone1 : "Bone 1"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone1.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE2 - Bone 2
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone2.md2", "skin": 0 }) = prop_bone2 : "Bone 2"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone2.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE3 - Bone 3
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone3.md2", "skin": 0 }) = prop_bone3 : "Bone 3"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone3.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE4 - Bone 4
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone4.md2", "skin": 0 }) = prop_bone4 : "Bone 4"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone4.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE5 - Bone 5
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone5.md2", "skin": 0 }) = prop_bone5 : "Bone 5"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone5.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE6 - Bone 6
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone6.md2", "skin": 0 }) = prop_bone6 : "Bone 6"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone6.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE7 - Bone 7
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone7.md2", "skin": 0 }) = prop_bone7 : "Bone 7"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone7.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE8 - Bone 8
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone8.md2", "skin": 0 }) = prop_bone8 : "Bone 8"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone8.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// PROP_BONE9 - Bone 9
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-4 -4 4, 4 4 -4) model({ "path": ":models/env/bones/arch/bone9.md2", "skin": 0 }) = prop_bone9 : "Bone 9"
+[
+	model(string) : "model>model (path/file.md2)" : "models/env/bones/arch/bone9.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+// ALIAS ENTITY
+// SPRITE_TORCHFLAME1
+@PointClass base(Appearflags, Targetname, Effects, Renderfx, Animation) color(0 0 255) size(-2 -2 -8, 2 2 4) model({ "path": ":models/sprites/torchflame1/torchflame1.md2", "skin": 0 }) = sprite_torchflame1 : "38 frames looping - Timing Variations: torchflame1_2.sp2 - 1_3.sp2 -  1_4.sp2"
+[
+	model(string) : "model>model (path/file.md3)" : "sprites/fx/torchflame1_1.sp2"
+	noise(string) : "Noise>sound (path/file.wav)" : "env/fire1.wav"
+	anim_start(integer) : "start frame for animations" : 0
+	anim_end(integer) : "end frame for animations" : 37
+	anim_animating(boolean) : "1 or 0, whether we're currently animating" : 1
+]
+
+// ALIAS ENTITY
+// SPRITE_TORCHFLAME2
+@PointClass base(Appearflags, Targetname, Effects, Renderfx, Animation) color(0 0 255) size(-2 -2 -8, 2 2 12) model({ "path": ":models/sprites/torchflame2/torchflame2.md2", "skin": 0 }) = sprite_torchflame2 : "56 frames looping - Timing Variations: torchflame2_2.sp2 - 2_3.sp2 -  2_4.sp2"
+[
+	model(string) : "model>model (path/file.md3)" : "sprites/fx/torchflame2_1.sp2"
+	noise(string) : "Noise>sound (path/file.wav)" : "env/fire1.wav"
+	anim_start(integer) : "start frame for animations" : 0
+	anim_end(integer) : "end frame for animations" : 55
+	anim_animating(boolean) : "1 or 0, whether we're currently animating" : 1
+]
+
+//ALIAS ENTITY
+// SPRITE_CANDLEFLAME
+@PointClass base(Appearflags, Targetname, Effects, Renderfx, Animation, Noise) color(0 0 255) size(-1 -1 -3, 1 1 12) model({ "path": ":models/sprites/candleflame/candleflame.md2", "skin": 0 }) = sprite_candleflame : "44 frames looping - Timing Variations: candleflame1_2.sp2 - 1_3.sp2 -  1_4.sp2"
+[
+	model(string) : "model>model (path/file.md3)" : "sprites/fx/candleflame1_1.sp2"
+	anim_start(integer) : "start frame for animations" : 0
+	anim_end(integer) : "end frame for animations" : 43
+	anim_animating(boolean) : "1 or 0, whether we're currently animating" : 1
+]
+
+// ALIAS ENTITY
+// PROP_DOORFRAME - Door Frame
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-16 -16 16, 16 16 -16) model({ "path": ":models/tdem/door/doorframe.md2", "skin": 0 }) = prop_doorframe : "Door Frame"
+[
+	model(string) : "model>model (path/file.md2)" : "models/tdem/door/doorframe.iqm"
+	skinnum(integer) : "Skinnum>Skin number" : 0
+]
+
+@SolidClass base(Appearflags, Target, Targetname) color(128 128 128) = trigger_teleport : "Teleport trigger"
+[
+	spawnflags(Flags) =
+	[
+		1 : "No Effects" : 0
+		2 : "Keep Velocity/Angles" : 0
+		4 : "Toggle" : 0
+		8 : "Start Off" : 0
+	]
+]
+
+@PointClass base(Appearflags, Targetname) color(128 128 128) = target_setskill : "Set skill"
+[
+	count(integer) : "Skill value (0 easy, 1 normal, 2 hard, 3 nightmare)"
+]
+
+@PointClass base(Appearflags, Targetname) color(128 128 128) = target_removeweapons : "Remove all weapons"
+[
+]
