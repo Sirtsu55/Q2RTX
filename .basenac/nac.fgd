@@ -827,13 +827,17 @@ spawnflags(Flags) =
 
 @PointClass base(Appearflags, Targetname, Angle) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_blaster : "Blaster"
 [
-	spawnflags(Flags) =
-	[
-		1 : "No Trail" : 0
-		2 : "No Effects" : 0
-	]
-	dmg(integer) : "Damage" : 15
-	speed(integer) : "Speed" : 1000
+    spawnflags(Flags) =
+    [
+        1 : "No Trail" : 0
+        2 : "No Effects" : 0
+        4 : "Nail" : 0
+        8 : "Rocket" : 0
+        16 : "Grenade" : 0
+        32 : "Homing" : 0
+    ]
+    dmg(integer) : "Damage" : 15
+    speed(integer) : "Speed" : 1000
 ]
 
 // set "map" value to "mapname$playername" where playername equals
