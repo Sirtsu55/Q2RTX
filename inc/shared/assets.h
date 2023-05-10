@@ -80,7 +80,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_ARMOR_SHARD_PICKUP "misc/ar2_pkup.wav"
 #define ASSET_MODEL_ARMOR_SHARD "models/items/armor/armor_shard.iqm"
 
-#define ASSET_MODEL_AXE_VIEW "models/weapons/v_axe/axe.iqm"
+#define ASSET_MODEL_AXE_WORLD "models/weapons/g_axe/g_axe.iqm"
+#define ASSET_MODEL_AXE_VIEW "models/weapons/v_axe/v_axe.iqm"
 #define ASSET_SOUND_AXE_HIT "makron/brain1.wav"
 
 #define ASSET_MODEL_SHOTGUN_WORLD "models/weapons/g_shotg/g_shotg.iqm"

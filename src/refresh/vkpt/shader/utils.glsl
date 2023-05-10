@@ -508,7 +508,7 @@ void perturb_tex_coord(uint material_id, float time, inout vec2 tex_coord)
 {
     if((material_id & MATERIAL_FLAG_FLOWING) != 0)
     {
-        tex_coord.x -= time * 0.5;
+        tex_coord.x -= time * 0.1;
     }
 
     if((material_id & MATERIAL_FLAG_WARP) != 0)

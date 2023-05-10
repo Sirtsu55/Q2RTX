@@ -848,11 +848,16 @@ static gitem_t itemlist[] = {
     */
     [ITEM_AXE] = {
         .classname = "weapon_axe",
+        .pickup = Pickup_Weapon,
         .use = Use_Weapon,
+        .drop = Drop_Weapon,
         .animation = &weap_axe_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_AXE_WORLD, .world_model_flags = EF_ROTATE,
         .view_model = ASSET_MODEL_AXE_VIEW,
         .icon = "w_axe",
         .pickup_name = "Axe",
+        .quantity = 1,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_BLASTER,
         .weapid = WEAPID_AXE
