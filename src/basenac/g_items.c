@@ -413,13 +413,16 @@ static bool Pickup_Weapon(edict_t *ent, edict_t *other)
     other->client->pers.inventory[index]++;
 
     if (!(ent->spawnflags & DROPPED_ITEM)) {
-        // give them some ammo with it
-        ammo = GetItemByIndex(ent->item->ammo);
 
-        if (dmflags.integer & DF_INFINITE_AMMO)
-            Add_Ammo(other, ammo, 1000);
-        else
-            Add_Ammo(other, ammo, ammo->quantity);
+        if (ent->item->ammo) {
+            // give them some ammo with it
+            ammo = GetItemByIndex(ent->item->ammo);
+
+            if (dmflags.integer & DF_INFINITE_AMMO)
+                Add_Ammo(other, ammo, 1000);
+            else
+                Add_Ammo(other, ammo, ammo->quantity);
+        }
 
         if (!(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
             if (deathmatch.integer) {
