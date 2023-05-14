@@ -1703,6 +1703,7 @@ void teleporter_touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t
     if (!(self->spawnflags & SPAWNFLAG_KEEP_VELOCITY))
     {
         VectorClear(other->velocity);
+        VectorClear(other->client->oldvelocity);
         other->client->ps.pmove.pm_time = 160 >> 3;     // hold time
         other->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
     }
