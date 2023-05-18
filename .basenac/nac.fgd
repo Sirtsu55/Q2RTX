@@ -359,7 +359,7 @@
 // player start, deathmatch, coop, deathmatch intermission
 //
 
-@baseclass base(Appearflags, Targetname) size(-16 -16 -24, 16 16 32) color(0 255 0) model({ "path": ":models/monsters/insane/tris.md2", "frame":209, "skin":1}) = PlayerClass []
+@baseclass base(Appearflags, Targetname) size(-16 -16 -24, 16 16 32) color(0 255 0) model({ "path": ":models/ranger/ranger.md2" }) = PlayerClass []
 @PointClass base(PlayerClass) = info_player_start : "Player 1 start" []
 @PointClass base(PlayerClass) = info_player_deathmatch : "Player deathmatch start" []
 @PointClass base(PlayerClass) = info_player_coop : "Player cooperative start" []
@@ -1104,7 +1104,7 @@ spawnflags(Flags) =
 	health(integer) : "set Shootable spawnflag" : 0
 	sounds(choices) : "Sounds" : 0 =
 	[
-		0 : "Click"
+		0 : "Beep"
 		1 : "Error"
 		2 : "Alert"
 		3 : "Silent"
@@ -1124,7 +1124,7 @@ spawnflags(Flags) =
 	health(integer) : "set Shootable spawnflag" : 0
 	sounds(choices) : "Sounds" : 0 =
 	[
-		0 : "Click"
+		0 : "Beep"
 		1 : "Error"
 		2 : "Alert"
 		3 : "Silent"
@@ -1220,7 +1220,7 @@ spawnflags(Flags) =
 
 // ALIAS ENTITY
 // PROP_GRAVE_2 - Gravestone
-@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-8 -16 -8, 16 16 24) model({ "path": ":models/env/gravestones/grave_02.md2", "skin": 0 }) = prop_grave_2 : "Gravestone"
+@PointClass base(Appearflags, Targetname, Angles, Angle, Noise, Effects, Renderfx, Avelocity) color(0 255 0) size(-12 -16 -8, 12 16 56) model({ "path": ":models/env/gravestones/grave_02.md2", "skin": 0 }) = prop_grave_2 : "Gravestone"
 [
 	model(string) : "model>model (path/file.md2)" : "models/env/gravestones/grave_02.md3"
 ]

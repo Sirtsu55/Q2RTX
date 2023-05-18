@@ -144,7 +144,9 @@ void trigger_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 void SP_trigger_multiple(edict_t *ent)
 {
-    if (ent->sounds == 1)
+    if (ent->sounds == 0)
+        ent->noise_index = SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE);
+    else if (ent->sounds == 1)
         ent->noise_index = SV_SoundIndex(ASSET_SOUND_SECRET_FOUND);
     else if (ent->sounds == 2)
         ent->noise_index = SV_SoundIndex(ASSET_SOUND_CHAT);

@@ -248,7 +248,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
 //
     if ((ent->message) && !(activator->svflags & SVF_MONSTER)) {
         SV_CenterPrint(activator, ent->message);
-        if (ent->noise_index)
+        if (ent->noise_index >= 0)
             SV_StartSound(activator, CHAN_AUTO, ent->noise_index, 1, ATTN_NORM, 0);
         else
             SV_StartSound(activator, CHAN_AUTO, SV_SoundIndex(ASSET_SOUND_GAME_MESSAGE), 1, ATTN_NORM, 0);
