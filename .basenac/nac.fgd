@@ -6,7 +6,7 @@
 // Originally written by by autolycus
 // Special thanks to: Disruptor, Zoid, Zaphod, Imaginos, and EutecTic.
 //
-// Lasted updated by xaGe : 20200415
+//
 
 //
 // worldspawn
@@ -177,9 +177,9 @@
 		131072: "131072>teleporter"
 		262144: "262144>flag1"
 		524288: "524288>flag2"
-		1048576: "1048576>Candle Light"
+		1048576: "1048576>Flickering Candle Light"
 		2097152: "2097152>greengib"
-		4194304: "4194304>Flame Light"
+		4194304: "4194304>Flickering Flame Light"
 		8388608: "8388608>spinning_lights"
 		16777216: "16777216>plasma"
 		33554432: "33554432>trap"
@@ -468,7 +468,7 @@
 	]
 	killtarget(string) : "Kill Target"
 	team(string) : "Team"
-	model2(string) : "model2>model (path/file.md2,md3,iqm,sp2)>use model2 to set the second modelindex; this should allow you to use a main brush model (nodraw for clip brushes basically) with a second model drawn over top"
+	model2(string) : "model2>model (path/file.md2,md3,iqm,sp2)>use model2 to set the second modelindex; this should allow you to use a main brush model (nodraw for clip brushes) with a second model drawn over top"
 	message(string) : "Trigger message"
 	health(integer) : "Health (shootable)"
 	speed(integer) : "Speed" : 100
@@ -741,7 +741,7 @@
 	dmg(integer) : "Damage" : 125
 ]
 
-@PointClass base(Appearflags, Targetname, Effects, Renderfx, Target) color(255 0 0) size(-8 -8 -8, 8 8 8) = misc_property_swap : "Swap properties with targetted entity, note that if the target matches multiple entities, it will only remember the value used by the last model (so basically only use it to change properties of identical entities, otherwise things will get weird). When the various spawnflags are set, it copies the model/effects/renderfx/sound/skinnum/model2/model3/model4 of itself between the linked entities so to make it disappear, set the model spawnflag but leave model unset then it will swap it with 0"
+@PointClass base(Appearflags, Targetname, Effects, Renderfx, Target) color(255 0 0) size(-8 -8 -8, 8 8 8) = misc_property_swap : "Swap properties with targetted entity, note that if the target matches multiple entities, it will only remember the value used by the last model (only use it to change properties of identical entities, otherwise things will get weird). When the various spawnflags are set, it copies the model/effects/renderfx/sound/skinnum/model2/model3/model4 of itself between the linked entities so to make it disappear, set the model spawnflag but leave model unset then it will swap it with 0"
 [
 	model(string) : "model>model (path/file.md2,md3,iqm,sp2)"
 	model2(string) : "model2>model (path/file.md2,md3,iqm,sp2)"
@@ -767,8 +767,6 @@ spawnflags(Flags) =
 @PointClass base(Appearflags, Angle, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/head/tris.md2" }) = misc_gib_head : "head gib, use with target_spawner" []
 @PointClass base(Appearflags, Angle, Angles) color(255 0 0) size(-8 -8 -8, 8 8 8) model({ "path": ":models/objects/gibs/arm/tris.md2" }) = misc_gib_leg : "leg gib, use with target_spawner" []
 
-@PointClass base(Appearflags, Targetname, Angle, Angles) color(255 0 0) size(-32 -32 -24, 32 32 -16) model({ "path": ":models/objects/dmspot/tris.md2", "skin": 1 }) = misc_teleporter : "Teleporter: To hide the teleport pads, place them units 10 units into a brush."	[	target(string) : "Teleport Destination"	]
-@PointClass base(Appearflags, Targetname, Angle, Angles) color(255 0 0) size(-32 -32 -24, 32 32 -16) model({ "path": ":models/objects/dmspot/tris.md2", "skin": 0 }) = misc_teleporter_dest : "Teleport Destination: To hide the teleport pads, place them units 10 units into a brush." []
 @PointClass base(Appearflags, Targetname, Angle, Angles, Noise, Animation, Effects, Renderfx, Target, Avelocity) color(255 0 0) size(-8 -8 -8, 8 8 8) = model_spawn : "Model & Sprite spawner with animation controls" 
 [
 	model(string) : "model>model (path/file.md2,md3,iqm,sp2)"

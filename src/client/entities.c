@@ -952,30 +952,30 @@ static void CL_AddEntity(centity_t *cent, entity_state_t *s1)
             CL_DiminishingTrail(cent->lerp_origin, ent.origin, cent, effects);
         }
         else if (effects & EF_IONRIPPER) { // N&C - Turned into flickering candle light
-                                           // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.2)) / (3.24356 - (frand() / 3.24356));
+                                           float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.2)) / (3.24356 - (frand() / 3.24356));
 
-                                           //  float offset = anim * 0.0f;
-                                           // float brightness = anim * 1.2f + 1.6f;
+                                           float offset = anim * 0.0f;
+                                           float brightness = anim * 1.2f + 1.6f;
 
             vec3_t origin;
             VectorCopy(ent.origin, origin);
-            // origin[2] += offset;
+            origin[2] += offset;
 
-            // V_AddLightEx(origin, 100.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
-            V_AddSphereLight(origin, 400.f, 1.40f, 0.7f, 0.2f, 0.3f);
+            V_AddSphereLight(origin, 110.f, 1.40f * brightness, 0.7f * brightness, 0.2f * brightness, 0.85f);
+            //V_AddSphereLight(origin, 400.f, 1.40f, 0.7f, 0.2f, 0.3f);
         }
         else if (effects & EF_BLUEHYPERBLASTER) { // N&C - Turned into flickering flame light
-                                                  // float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
+                                                  float anim = sinf((float)ent.id + ((float)cl.time / 60.f + frand() * 3.3)) / (3.14356 - (frand() / 3.14356));
 
-                                                  //  float offset = anim * 0.0f;
-                                                  //  float brightness = anim * 1.2f + 1.6f;
+                                                  float offset = anim * 0.0f;
+                                                  float brightness = anim * 1.2f + 1.6f;
 
             vec3_t origin;
             VectorCopy(ent.origin, origin);
-            // origin[2] += offset;
+            origin[2] += offset;
 
-            // V_AddLightEx(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
-            V_AddSphereLight(origin, 5500.f, 1.6f, 0.7f, 0.2f, 0.5f);
+            V_AddSphereLight(origin, 25.f, 1.6f * brightness, 0.7f * brightness, 0.2f * brightness, 6.0f);
+           // V_AddSphereLight(origin, 5500.f, 1.6f, 0.7f, 0.2f, 0.5f);
         } else if (effects & EF_PLASMA) {
             if (effects & EF_ANIM_ALLFAST) {
                 CL_BlasterTrail(cent->lerp_origin, ent.origin);
