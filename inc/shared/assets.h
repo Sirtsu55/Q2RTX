@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ASSET_SOUND_CHAT "misc/talk.wav"
 
-#define ASSET_SOUND_TELEPORT "misc/tele1.wav"
+#define ASSET_SOUND_TELEPORT "tele/teleexit.wav"
 
 #define ASSET_SOUND_PLAYER_LAND "player/land1.wav"
 
