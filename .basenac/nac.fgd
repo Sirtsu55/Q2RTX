@@ -902,6 +902,11 @@ spawnflags(Flags) =
 [
 	speed(integer) : "Severity of quake" : 200
 	count(integer) : "Duration" : 5
+	
+	spawnflags(Flags) =
+	[
+		1 : "Silent" : 0
+	]
 ]
 
 @PointClass base(Appearflags, Targetname) color(255 0 0) size(-8 -8 -8, 8 8 8) = target_explosion : "Explosion"
