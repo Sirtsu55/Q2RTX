@@ -1887,7 +1887,7 @@ void misc_property_swap_use(edict_t *ent, edict_t *other, edict_t *activator)
             new_skinnum = t->s.skinnum;
             t->s.skinnum = ent->s.skinnum;
         }
-        if (ent->spawnflags & PROPERTY_SPAWNFLAG_SKINNUM)
+        if (ent->spawnflags & PROPERTY_SPAWNFLAG_FRAME)
         {
             new_frame = t->s.frame;
             t->s.frame = ent->s.frame;

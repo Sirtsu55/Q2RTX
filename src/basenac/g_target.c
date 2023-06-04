@@ -849,7 +849,6 @@ void SP_target_earthquake(edict_t *self)
     self->use = target_earthquake_use;
 
     if (!(self->spawnflags & 1))
- 
         self->noise_index = SV_SoundIndex("world/quake.wav");
 }
 

@@ -364,7 +364,7 @@ void CL_MuzzleFlash(void)
     case MZ_ROCKET:
         DL_COLOR(1, 0.5f, 0.2f);
         S_StartSound(NULL, mz.entity, CHAN_WEAPON, S_RegisterSound(ASSET_SOUND_ROCKET_FIRE), volume, ATTN_NORM, 0, 0);
-        S_StartSound(NULL, mz.entity, CHAN_AUTO,   S_RegisterSound("weapons/rocklr1b.wav"), volume, ATTN_NORM, 0.1f, 0);
+       // S_StartSound(NULL, mz.entity, CHAN_AUTO,   S_RegisterSound("weapons/rocklr1b.wav"), volume, ATTN_NORM, 0.1f, 0);
         break;
     case MZ_GRENADE:
         DL_COLOR(1, 0.5f, 0);

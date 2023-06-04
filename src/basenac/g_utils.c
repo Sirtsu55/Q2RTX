@@ -302,7 +302,7 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
 
             t->activator = activator;
             t->anim.animating = !t->anim.animating;
-
+          
             if (t->anim.reset_on_trigger) {
                 t->s.frame = t->anim.start;
             }

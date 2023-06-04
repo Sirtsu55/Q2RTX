@@ -1171,7 +1171,7 @@ spawnflags(Flags) =
 
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_axe/g_axe.md2" }) = weapon_axe : "Axe" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg/g_shotg.md2" }) = weapon_shotgun : "Shotgun" []
-// @PointClass base(Weapons) model({ "path": ":models/weapons/g_shotg2/tris.md2" }) = weapon_supershotgun : "Super shotgun" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_sshotg/g_sshotg.md2" }) = weapon_supershotgun : "Super Shotgun" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_perf/g_perf.md2" }) = weapon_perforator : "Perforator" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_launch/g_launch.md2" }) = weapon_grenadelauncher : "Grenade launcher" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_rocket/g_rocket.md2" }) = weapon_rocketlauncher : "Rocket launcher" []
