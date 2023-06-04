@@ -196,8 +196,8 @@ static bool Axe_ChargeReady(edict_t *ent)
         {
             if (ent->client->v_angle[0] < -2.f)
             {
-                ent->s.origin[2] -= 2.f;
-                ent->client->ps.pmove.origin[2] -= 2.f;
+                //ent->s.origin[2] += 2.f;
+                //ent->client->ps.pmove.origin[2] += 2.f;
                 ent->velocity[2] = 120.f;
                 ent->groundentity = NULL;
 

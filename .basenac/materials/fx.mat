@@ -1,71 +1,3 @@
-textures/fx/+0lavafx,
-textures/fx/+1lavafx,
-textures/fx/+2lavafx, 
-textures/fx/+3lavafx, 
-textures/fx/+4lavafx, 
-textures/fx/+5lavafx, 
-textures/fx/+6lavafx, 
-textures/fx/+7lavafx, 
-textures/fx/+8lavafx, 
-textures/fx/+9lavafx, 
-textures/fx/+10lavafx,
-textures/fx/+11lavafx,
-textures/fx/+12lavafx,
-textures/fx/+13lavafx,
-textures/fx/+14lavafx,
-textures/fx/+15lavafx,
-textures/fx/+16lavafx,
-textures/fx/+17lavafx,
-textures/fx/+18lavafx,
-textures/fx/+19lavafx,
-textures/fx/+20lavafx,
-textures/fx/+21lavafx,
-textures/fx/+22lavafx,
-textures/fx/+23lavafx,
-textures/fx/+24lavafx,
-textures/fx/+25lavafx,
-textures/fx/+26lavafx,
-textures/fx/+27lavafx,
-textures/fx/+28lavafx,
-textures/fx/+29lavafx,
-textures/fx/+30lavafx,
-textures/fx/+31lavafx,
-textures/fx/+32lavafx,
-textures/fx/+33lavafx,
-textures/fx/+34lavafx,
-textures/fx/+35lavafx,
-textures/fx/+36lavafx,
-textures/fx/+37lavafx,
-textures/fx/+38lavafx,
-textures/fx/+39lavafx, 
-textures/fx/+40lavafx,
-textures/fx/+41lavafx,
-textures/fx/+42lavafx,
-textures/fx/+43lavafx,
-textures/fx/+44lavafx,
-textures/fx/+45lavafx,
-textures/fx/+46lavafx,
-textures/fx/+47lavafx,
-textures/fx/+48lavafx,
-textures/fx/+49lavafx,
-textures/fx/+50lavafx,
-textures/fx/+51lavafx,
-textures/fx/+52lavafx,
-textures/fx/+53lavafx,
-textures/fx/+54lavafx,
-textures/fx/+55lavafx,
-textures/fx/+56lavafx,
-textures/fx/+57lavafx,
-textures/fx/+58lavafx,
-textures/fx/+59lavafx: 
-texture_base textures/fx/+0lavafx.wal
-	texture_emissive textures/fx/*_light.tga
-	metalness_factor 0.000000
-	specular_factor 0.000000
-    bump_scale 0
-	base_factor 0
-	emissive_factor 0.01
-
 textures/fx/+0lavapour,
 textures/fx/+1lavapour,  
 textures/fx/+2lavapour,
@@ -162,4 +94,5 @@ textures/fx/+19starfield:
 	specular_factor 0.000000
     bump_scale 0
 	base_factor 0
-	emissive_factor 0.3
+	emissive_factor 1.0
+	

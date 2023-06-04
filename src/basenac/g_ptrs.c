@@ -49,6 +49,16 @@ extern int chick_move_start_attack1;
 extern int chick_move_start_run;
 extern int chick_move_start_slash;
 extern int chick_move_walk;
+extern int enforcer_move_attack;
+extern int enforcer_move_death1;
+extern int enforcer_move_death2;
+extern int enforcer_move_pain1;
+extern int enforcer_move_pain2;
+extern int enforcer_move_pain3;
+extern int enforcer_move_pain4;
+extern int enforcer_move_run;
+extern int enforcer_move_stand;
+extern int enforcer_move_walk;
 extern int fiend_move_attack_claw;
 extern int fiend_move_death;
 extern int fiend_move_leap;
@@ -96,6 +106,15 @@ extern int gladiator_move_pain_air;
 extern int gladiator_move_run;
 extern int gladiator_move_stand;
 extern int gladiator_move_walk;
+extern int grunt_move_attack;
+extern int grunt_move_death1;
+extern int grunt_move_death2;
+extern int grunt_move_pain1;
+extern int grunt_move_pain2;
+extern int grunt_move_pain3;
+extern int grunt_move_run;
+extern int grunt_move_stand;
+extern int grunt_move_walk;
 extern int gunner_move_attack_chain;
 extern int gunner_move_attack_grenade;
 extern int gunner_move_death;
@@ -355,6 +374,13 @@ extern void DoRespawn(void);
 extern void drop_make_touchable(void);
 extern void drop_temp_touch(void);
 extern void droptofloor(void);
+extern void enforcer_attack(void);
+extern void enforcer_die(void);
+extern void enforcer_load(void);
+extern void enforcer_pain(void);
+extern void enforcer_run(void);
+extern void enforcer_stand(void);
+extern void enforcer_walk(void);
 extern void env_reverb_touch(void);
 extern void env_reverb_use(void);
 extern void fiend_attack(void);
@@ -424,6 +450,13 @@ extern void gladiator_stand(void);
 extern void gladiator_walk(void);
 extern void Grenade_Explode(void);
 extern void Grenade_Touch(void);
+extern void grunt_attack(void);
+extern void grunt_die(void);
+extern void grunt_load(void);
+extern void grunt_pain(void);
+extern void grunt_run(void);
+extern void grunt_stand(void);
+extern void grunt_walk(void);
 extern void gunner_attack(void);
 extern void gunner_die(void);
 extern void gunner_dodge(void);
@@ -842,11 +875,13 @@ const save_ptr_t save_ptrs[] = {
 { P_pain, boss2_pain },
 { P_pain, brain_pain },
 { P_pain, chick_pain },
+{ P_pain, enforcer_pain },
 { P_pain, fiend_pain },
 { P_pain, flipper_pain },
 { P_pain, floater_pain },
 { P_pain, flyer_pain },
 { P_pain, gladiator_pain },
+{ P_pain, grunt_pain },
 { P_pain, gunner_pain },
 { P_pain, hover_pain },
 { P_pain, infantry_pain },
@@ -873,6 +908,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, debris_die },
 { P_die, door_killed },
 { P_die, door_secret_die },
+{ P_die, enforcer_die },
 { P_die, fiend_die },
 { P_die, flipper_die },
 { P_die, floater_die },
@@ -880,6 +916,7 @@ const save_ptr_t save_ptrs[] = {
 { P_die, func_explosive_explode },
 { P_die, gib_die },
 { P_die, gladiator_die },
+{ P_die, grunt_die },
 { P_die, gunner_die },
 { P_die, hover_die },
 { P_die, infantry_die },
@@ -959,6 +996,16 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &chick_move_start_run },
 { P_monsterinfo_currentmove, &chick_move_start_slash },
 { P_monsterinfo_currentmove, &chick_move_walk },
+{ P_monsterinfo_currentmove, &enforcer_move_attack },
+{ P_monsterinfo_currentmove, &enforcer_move_death1 },
+{ P_monsterinfo_currentmove, &enforcer_move_death2 },
+{ P_monsterinfo_currentmove, &enforcer_move_pain1 },
+{ P_monsterinfo_currentmove, &enforcer_move_pain2 },
+{ P_monsterinfo_currentmove, &enforcer_move_pain3 },
+{ P_monsterinfo_currentmove, &enforcer_move_pain4 },
+{ P_monsterinfo_currentmove, &enforcer_move_run },
+{ P_monsterinfo_currentmove, &enforcer_move_stand },
+{ P_monsterinfo_currentmove, &enforcer_move_walk },
 { P_monsterinfo_currentmove, &fiend_move_attack_claw },
 { P_monsterinfo_currentmove, &fiend_move_death },
 { P_monsterinfo_currentmove, &fiend_move_leap },
@@ -1006,6 +1053,15 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_currentmove, &gladiator_move_run },
 { P_monsterinfo_currentmove, &gladiator_move_stand },
 { P_monsterinfo_currentmove, &gladiator_move_walk },
+{ P_monsterinfo_currentmove, &grunt_move_attack },
+{ P_monsterinfo_currentmove, &grunt_move_death1 },
+{ P_monsterinfo_currentmove, &grunt_move_death2 },
+{ P_monsterinfo_currentmove, &grunt_move_pain1 },
+{ P_monsterinfo_currentmove, &grunt_move_pain2 },
+{ P_monsterinfo_currentmove, &grunt_move_pain3 },
+{ P_monsterinfo_currentmove, &grunt_move_run },
+{ P_monsterinfo_currentmove, &grunt_move_stand },
+{ P_monsterinfo_currentmove, &grunt_move_walk },
 { P_monsterinfo_currentmove, &gunner_move_attack_chain },
 { P_monsterinfo_currentmove, &gunner_move_attack_grenade },
 { P_monsterinfo_currentmove, &gunner_move_death },
@@ -1191,11 +1247,13 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, boss2_stand },
 { P_monsterinfo_stand, brain_stand },
 { P_monsterinfo_stand, chick_stand },
+{ P_monsterinfo_stand, enforcer_stand },
 { P_monsterinfo_stand, fiend_stand },
 { P_monsterinfo_stand, flipper_stand },
 { P_monsterinfo_stand, floater_stand },
 { P_monsterinfo_stand, flyer_stand },
 { P_monsterinfo_stand, gladiator_stand },
+{ P_monsterinfo_stand, grunt_stand },
 { P_monsterinfo_stand, gunner_stand },
 { P_monsterinfo_stand, hover_stand },
 { P_monsterinfo_stand, infantry_stand },
@@ -1242,11 +1300,13 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_walk, boss2_walk },
 { P_monsterinfo_walk, brain_walk },
 { P_monsterinfo_walk, chick_walk },
+{ P_monsterinfo_walk, enforcer_walk },
 { P_monsterinfo_walk, fiend_walk },
 { P_monsterinfo_walk, flipper_walk },
 { P_monsterinfo_walk, floater_walk },
 { P_monsterinfo_walk, flyer_walk },
 { P_monsterinfo_walk, gladiator_walk },
+{ P_monsterinfo_walk, grunt_walk },
 { P_monsterinfo_walk, gunner_walk },
 { P_monsterinfo_walk, hover_walk },
 { P_monsterinfo_walk, infantry_walk },
@@ -1266,11 +1326,13 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_run, boss2_run },
 { P_monsterinfo_run, brain_run },
 { P_monsterinfo_run, chick_run },
+{ P_monsterinfo_run, enforcer_run },
 { P_monsterinfo_run, fiend_run },
 { P_monsterinfo_run, flipper_start_run },
 { P_monsterinfo_run, floater_run },
 { P_monsterinfo_run, flyer_run },
 { P_monsterinfo_run, gladiator_run },
+{ P_monsterinfo_run, grunt_run },
 { P_monsterinfo_run, gunner_run },
 { P_monsterinfo_run, hover_run },
 { P_monsterinfo_run, infantry_run },
@@ -1295,10 +1357,12 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_dodge, vore_dodge },
 { P_monsterinfo_attack, boss2_attack },
 { P_monsterinfo_attack, chick_attack },
+{ P_monsterinfo_attack, enforcer_attack },
 { P_monsterinfo_attack, fiend_attack },
 { P_monsterinfo_attack, floater_attack },
 { P_monsterinfo_attack, flyer_attack },
 { P_monsterinfo_attack, gladiator_attack },
+{ P_monsterinfo_attack, grunt_attack },
 { P_monsterinfo_attack, gunner_attack },
 { P_monsterinfo_attack, hover_start_attack },
 { P_monsterinfo_attack, infantry_attack },
@@ -1349,7 +1413,9 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_checkattack, Makron_CheckAttack },
 { P_monsterinfo_checkattack, medic_checkattack },
 { P_monsterinfo_checkattack, mutant_checkattack },
+{ P_monsterinfo_load, enforcer_load },
 { P_monsterinfo_load, fiend_load },
+{ P_monsterinfo_load, grunt_load },
 { P_monsterinfo_load, knight_load },
 { P_monsterinfo_load, scrag_load },
 { P_monsterinfo_load, vore_load },

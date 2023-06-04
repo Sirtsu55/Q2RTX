@@ -1955,9 +1955,13 @@ void SV_Init(void)
     Cvar_Get("protocol", STRINGIFY(PROTOCOL_VERSION_NAC), CVAR_SERVERINFO | CVAR_ROM);
 
     Cvar_Get("skill", "1", CVAR_LATCH);
-    Cvar_Get("deathmatch", "1", CVAR_SERVERINFO | CVAR_LATCH);
+    Cvar_Get("deathmatch", "0", CVAR_SERVERINFO | CVAR_LATCH);
     Cvar_Get("coop", "0", CVAR_SERVERINFO|CVAR_LATCH);
+#ifdef _DEBUG
+    Cvar_Get("cheats", "1", CVAR_SERVERINFO);
+#else
     Cvar_Get("cheats", "0", CVAR_SERVERINFO);
+#endif
     Cvar_Get("dmflags", va("%i", DF_INSTANT_ITEMS), CVAR_SERVERINFO);
     Cvar_Get("fraglimit", "0", CVAR_SERVERINFO);
     Cvar_Get("timelimit", "0", CVAR_SERVERINFO);

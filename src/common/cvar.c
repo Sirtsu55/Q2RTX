@@ -781,8 +781,8 @@ void Cvar_WriteVariables(qhandle_t f, int mask, bool modified)
             continue;
 
         s = var->latched_string ? var->latched_string : var->string;
-        if (modified && !strcmp(s, var->default_string))
-            continue;
+        //if (modified && !strcmp(s, var->default_string))
+        //    continue;
 
         a = !modified && (var->flags & CVAR_ARCHIVE) ? "a" : "";
         FS_FPrintf(f, "set%s %s \"%s\"\n", a, var->name, s);

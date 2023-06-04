@@ -7,8 +7,8 @@ textures/q1nac/window02_1:
 	texture_base textures/q1nac/window02_1.tga
 	texture_normals textures/q1nac/window02_1_n.tga
 	base_factor 2.000000
-	kind GLASS
 	bump_scale 2.0
+	kind GLASS
 
 textures/q1nac/cop1_2:
 	texture_base textures/q1nac/cop1_2.tga
@@ -18,10 +18,10 @@ textures/q1nac/cop1_2:
 textures/q1nac/window01_4:
 	texture_base textures/q1nac/window01_4.tga
 	texture_normals textures/q1nac/window01_4_n.tga
-	bump_scale 2.0
 	base_factor 2.000000
+	bump_scale 2.0
 	kind GLASS
-
+	
 textures/q1nac/cop1_3:
 	texture_base textures/q1nac/cop1_3.tga
 	texture_normals textures/q1nac/cop1_3_n.png

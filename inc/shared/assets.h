@@ -87,11 +87,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_MODEL_SHOTGUN_WORLD "models/weapons/g_shotg/g_shotg.iqm"
 #define ASSET_MODEL_SHOTGUN_VIEW "models/weapons/v_shotg/v_shotg.iqm"
 #define ASSET_SOUND_SHOTGUN_FIRE "weapons/shotg/shotg_fire.wav"
-#define ASSET_SOUND_PERFORATOR_FIRE "weapons/perf/perf_fire.wav"
+
+#define ASSET_MODEL_SSHOTGUN_WORLD "models/weapons/g_sshotg/g_sshotg.iqm"
+#define ASSET_MODEL_SSHOTGUN_VIEW "models/weapons/v_sshotg/v_sshotg.iqm"
+#define ASSET_SOUND_SSHOTGUN_FIRE "weapons/shotg/shotg_fire.wav"
+
+#define ASSET_MODEL_BLASTER_WORLD "models/weapons/g_blaster/g_blaster.iqm"
+#define ASSET_MODEL_BLASTER_VIEW "models/weapons/v_blaster/v_blaster.iqm"
+#define ASSET_SOUND_BLASTER_FIRE "weapons/shotg/shotg_fire.wav"
 
 #define ASSET_MODEL_PERFORATOR_WORLD "models/weapons/g_perf/g_perf.iqm"
 #define ASSET_MODEL_PERFORATOR_VIEW "models/weapons/v_perf/v_perf.iqm"
 #define ASSET_SOUND_PERFORATOR_SPIN "weapons/perf/perf_spin.wav"
+#define ASSET_SOUND_PERFORATOR_FIRE "weapons/perf/perf_fire.wav"
 #define ASSET_MODEL_NAIL "models/objects/nail/nail.iqm"
 
 #define ASSET_MODEL_ROCKET_WORLD "models/weapons/g_rocket/g_rocket.iqm"
@@ -183,6 +191,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_KNIGHT_IDLE "nac_knight/idle.wav"
 #define ASSET_SOUND_KNIGHT_SWORD "nac_knight/sword1.wav"
 #define ASSET_SOUND_KNIGHT_SIGHT "nac_knight/ksight.wav"
+
+
+// Grunt
+#define ASSET_MODEL_GRUNT "models/monsters/grunt/grunt.iqm"
+
+
+// Enforcer
+#define ASSET_MODEL_ENFORCER "models/monsters/enforcer/enforcer.iqm"
 
 
 // Fiend

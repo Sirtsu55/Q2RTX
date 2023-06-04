@@ -21,9 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern const weapon_animation_t weap_axe_activate;
 extern const weapon_animation_t weap_perf_activate;
 extern const weapon_animation_t weap_shotgun_activate;
+extern const weapon_animation_t weap_sshotgun_activate;
 extern const weapon_animation_t weap_rocket_activate;
 extern const weapon_animation_t weap_launch_activate;
 extern const weapon_animation_t weap_thunder_activate;
+extern const weapon_animation_t weap_blaster_activate;
 
 static gitem_armor_t greenarmor_info  = {100, 100, .30, .00};
 static gitem_armor_t yellowarmor_info = {150, 150, .60, .30};
@@ -883,6 +885,44 @@ static gitem_t itemlist[] = {
         .ammo = ITEM_SHELLS,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_SHOTGUN
+    },
+
+    /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_SSHOTGUN] = {
+        .classname = "weapon_supershotgun",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_sshotgun_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_SSHOTGUN_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_SSHOTGUN_VIEW,
+        .icon = "w_sshotgun",
+        .pickup_name = "Double-Barreled Shotgun",
+        .quantity = 2,
+        .ammo = ITEM_SHELLS,
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .weapmodel = WEAP_SUPERSHOTGUN
+    },
+
+    /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_BLASTER] = {
+        .classname = "weapon_hyperblaster",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_blaster_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_BLASTER_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_BLASTER_VIEW,
+        .icon = "w_hyperb",
+        .pickup_name = "Blaster",
+        .quantity = 1,
+        .ammo = ITEM_CELLS,
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .weapmodel = WEAP_HYPERBLASTER
     },
 
     /*QUAKED weapon_perforator (.3 .3 1) (-16 -16 -16) (16 16 16)

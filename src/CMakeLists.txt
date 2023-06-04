@@ -58,12 +58,16 @@ SET(SRC_BASENAC
 	basenac/weapons/nac_axe.c
 	basenac/weapons/nac_perf.c
 	basenac/weapons/nac_shotgun.c
+	basenac/weapons/nac_sshotgun.c
+	basenac/weapons/nac_blaster.c
 	basenac/weapons/nac_rocket.c
 	basenac/weapons/nac_launch.c
 	basenac/weapons/nac_thunderbolt.c
 	basenac/monsters/nac_monster.c
 	basenac/monsters/nac_knight.c
 	basenac/monsters/nac_fiend.c
+	basenac/monsters/nac_grunt.c
+	basenac/monsters/nac_enforcer.c
 	basenac/monsters/nac_vore.c
 	basenac/monsters/nac_scrag.c
 	basenac/entities/nac_env_reverb.c
