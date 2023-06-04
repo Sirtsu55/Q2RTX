@@ -296,15 +296,22 @@ void G_UseTargets(edict_t *ent, edict_t *activator)
     if (ent->anim.target) {
         t = NULL;
         while ((t = G_Find(t, FOFS(targetname), ent->anim.target))) {
-            if (t->anim.count && !t->anim.count_left) {
+            if (t->anim.count && !t->anim.count_left && !t->anim.reset_on_trigger) {
                 continue;
             }
 
             t->activator = activator;
-            t->anim.animating = !t->anim.animating;
           
             if (t->anim.reset_on_trigger) {
                 t->s.frame = t->anim.start;
+
+                if (!t->anim.count_left) {
+                    t->anim.count_left = t->anim.count;
+                }
+
+                t->anim.animating = true;
+            } else {
+                t->anim.animating = !t->anim.animating;
             }
 
             t->anim.next_frame++;
