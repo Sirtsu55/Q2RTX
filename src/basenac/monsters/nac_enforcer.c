@@ -38,6 +38,40 @@ enum {
     ANIMATION(PAIN4, 38)
 };
 
+static int sound_death;
+static int sound_idle;
+static int sound_pain1;
+static int sound_pain2;
+static int sound_sight1;
+static int sound_sight2;
+static int sound_sight3;
+static int sound_sight4;
+
+void enforcer_sight(edict_t *self)
+{
+    switch (Q_rand_uniform(4))
+    {
+    case 0:
+        SV_StartSound(self, CHAN_VOICE, sound_sight1, 1, ATTN_NORM, 0);
+        break;
+    case 1:
+        SV_StartSound(self, CHAN_VOICE, sound_sight2, 1, ATTN_NORM, 0);
+        break;
+    case 2:
+        SV_StartSound(self, CHAN_VOICE, sound_sight3, 1, ATTN_NORM, 0);
+        break;
+    case 3:
+        SV_StartSound(self, CHAN_VOICE, sound_sight4, 1, ATTN_NORM, 0);
+        break;
+    }
+}
+
+void enforcer_search(edict_t *self)
+{
+    if (frand() < 0.2)
+        SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_NORM, 0);
+}
+
 mmove_t enforcer_move_stand = {
     .firstframe = FRAME_IDLE_FIRST,
     .lastframe = FRAME_IDLE_LAST,
@@ -166,7 +200,11 @@ void enforcer_pain(edict_t *self, edict_t *other, float kick, int damage)
         return;
 
     self->pain_debounce_time = level.time + 3000;
-    //SV_StartSound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+
+    if (Q_rand_uniform(2) == 0)
+        SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+    else
+        SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 
     if (skill.integer == 3)
         return;     // no pain anims in nightmare
@@ -226,7 +264,7 @@ void enforcer_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int dama
     if (self->deadflag == DEAD_DEAD)
         return;
 
-    //SV_StartSound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->svflags |= SVF_DEADMONSTER;
@@ -267,6 +305,15 @@ void SP_monster_enforcer(edict_t *self)
         return;
     }
 
+    sound_death = SV_SoundIndex(ASSET_SOUND_ENFORCER_DEATH);
+    sound_idle = SV_SoundIndex(ASSET_SOUND_ENFORCER_IDLE);
+    sound_pain1 = SV_SoundIndex(ASSET_SOUND_ENFORCER_PAIN1);
+    sound_pain2 = SV_SoundIndex(ASSET_SOUND_ENFORCER_PAIN2);
+    sound_sight1 = SV_SoundIndex(ASSET_SOUND_ENFORCER_SIGHT1);
+    sound_sight2 = SV_SoundIndex(ASSET_SOUND_ENFORCER_SIGHT2);
+    sound_sight3 = SV_SoundIndex(ASSET_SOUND_ENFORCER_SIGHT3);
+    sound_sight4 = SV_SoundIndex(ASSET_SOUND_ENFORCER_SIGHT4);
+
     self->s.modelindex = SV_ModelIndex(ASSET_MODEL_ENFORCER);
     VectorSet(self->mins, -16, -16, -0);
     VectorSet(self->maxs, 16, 16, 56);
@@ -287,9 +334,9 @@ void SP_monster_enforcer(edict_t *self)
     self->monsterinfo.walk = enforcer_walk;
     self->monsterinfo.run = enforcer_run;
     self->monsterinfo.attack = enforcer_attack;
-    //self->monsterinfo.sight = enforcer_sight;
-    //self->monsterinfo.search = enforcer_search;
-    //self->monsterinfo.idle = enforcer_search;
+    self->monsterinfo.sight = enforcer_sight;
+    self->monsterinfo.search = enforcer_search;
+    self->monsterinfo.idle = enforcer_search;
 
     self->monsterinfo.currentmove = &enforcer_move_stand;
     self->monsterinfo.load = enforcer_load;

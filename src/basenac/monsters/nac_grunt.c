@@ -45,6 +45,23 @@ mmove_t grunt_move_stand = {
     .default_aifunc = ai_stand
 };
 
+static int sound_idle;
+static int sound_sight;
+static int sound_pain1;
+static int sound_pain2;
+static int sound_death;
+
+void grunt_sight(edict_t *self)
+{
+    SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
+}
+
+void grunt_search(edict_t *self)
+{
+    if (frand() < 0.2)
+        SV_StartSound(self, CHAN_VOICE, sound_idle, 1, ATTN_NORM, 0);
+}
+
 void grunt_stand(edict_t *self)
 {
     self->monsterinfo.currentmove = &grunt_move_stand;
@@ -136,7 +153,11 @@ void grunt_pain(edict_t *self, edict_t *other, float kick, int damage)
         return;
 
     self->pain_debounce_time = level.time + 3000;
-    //SV_StartSound(self, CHAN_VOICE, sound_pain, 1, ATTN_NORM, 0);
+
+    if (Q_rand_uniform(2) == 0)
+        SV_StartSound(self, CHAN_VOICE, sound_pain1, 1, ATTN_NORM, 0);
+    else
+        SV_StartSound(self, CHAN_VOICE, sound_pain2, 1, ATTN_NORM, 0);
 
     if (skill.integer == 3)
         return;     // no pain anims in nightmare
@@ -194,7 +215,7 @@ void grunt_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
     if (self->deadflag == DEAD_DEAD)
         return;
 
-    //SV_StartSound(self, CHAN_VOICE, sound_die, 1, ATTN_NORM, 0);
+    SV_StartSound(self, CHAN_VOICE, sound_death, 1, ATTN_NORM, 0);
     self->deadflag = DEAD_DEAD;
     self->takedamage = DAMAGE_YES;
     self->svflags |= SVF_DEADMONSTER;
@@ -235,6 +256,12 @@ void SP_monster_grunt(edict_t *self)
         return;
     }
 
+    sound_idle = SV_SoundIndex(ASSET_SOUND_GRUNT_IDLE);
+    sound_sight = SV_SoundIndex(ASSET_SOUND_GRUNT_SIGHT);
+    sound_pain1 = SV_SoundIndex(ASSET_SOUND_GRUNT_PAIN1);
+    sound_pain2 = SV_SoundIndex(ASSET_SOUND_GRUNT_PAIN2);
+    sound_death = SV_SoundIndex(ASSET_SOUND_GRUNT_DEATH);
+
     self->s.modelindex = SV_ModelIndex(ASSET_MODEL_GRUNT);
     VectorSet(self->mins, -16, -16, -0);
     VectorSet(self->maxs, 16, 16, 56);
@@ -255,9 +282,9 @@ void SP_monster_grunt(edict_t *self)
     self->monsterinfo.walk = grunt_walk;
     self->monsterinfo.run = grunt_run;
     self->monsterinfo.attack = grunt_attack;
-    //self->monsterinfo.sight = grunt_sight;
-    //self->monsterinfo.search = grunt_search;
-    //self->monsterinfo.idle = grunt_search;
+    self->monsterinfo.sight = grunt_sight;
+    self->monsterinfo.search = grunt_search;
+    self->monsterinfo.idle = grunt_search;
 
     self->monsterinfo.currentmove = &grunt_move_stand;
     self->monsterinfo.load = grunt_load;

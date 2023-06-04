@@ -195,10 +195,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Grunt
 #define ASSET_MODEL_GRUNT "models/monsters/grunt/grunt.iqm"
+#define ASSET_SOUND_GRUNT_IDLE "nac_grunt/idle.wav"
+#define ASSET_SOUND_GRUNT_PAIN1 "nac_grunt/pain1.wav"
+#define ASSET_SOUND_GRUNT_PAIN2 "nac_grunt/pain2.wav"
+#define ASSET_SOUND_GRUNT_SIGHT "nac_grunt/sight.wav"
+#define ASSET_SOUND_GRUNT_DEATH "nac_grunt/death.wav"
 
 
 // Enforcer
 #define ASSET_MODEL_ENFORCER "models/monsters/enforcer/enforcer.iqm"
+#define ASSET_SOUND_ENFORCER_DEATH "nac_enforcer/death1.wav"
+#define ASSET_SOUND_ENFORCER_IDLE "nac_enforcer/idle.wav"
+#define ASSET_SOUND_ENFORCER_PAIN1 "nac_enforcer/pain1.wav"
+#define ASSET_SOUND_ENFORCER_PAIN2 "nac_enforcer/pain2.wav"
+#define ASSET_SOUND_ENFORCER_SIGHT1 "nac_enforcer/sight1.wav"
+#define ASSET_SOUND_ENFORCER_SIGHT2 "nac_enforcer/sight2.wav"
+#define ASSET_SOUND_ENFORCER_SIGHT3 "nac_enforcer/sight3.wav"
+#define ASSET_SOUND_ENFORCER_SIGHT4 "nac_enforcer/sight4.wav"
 
 
 // Fiend

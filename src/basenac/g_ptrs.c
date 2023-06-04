@@ -379,6 +379,9 @@ extern void enforcer_die(void);
 extern void enforcer_load(void);
 extern void enforcer_pain(void);
 extern void enforcer_run(void);
+extern void enforcer_search(void);
+extern void enforcer_search(void);
+extern void enforcer_sight(void);
 extern void enforcer_stand(void);
 extern void enforcer_walk(void);
 extern void env_reverb_touch(void);
@@ -455,6 +458,9 @@ extern void grunt_die(void);
 extern void grunt_load(void);
 extern void grunt_pain(void);
 extern void grunt_run(void);
+extern void grunt_search(void);
+extern void grunt_search(void);
+extern void grunt_sight(void);
 extern void grunt_stand(void);
 extern void grunt_walk(void);
 extern void gunner_attack(void);
@@ -1270,10 +1276,12 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_stand, tank_stand },
 { P_monsterinfo_stand, vore_stand },
 { P_monsterinfo_idle, brain_idle },
+{ P_monsterinfo_idle, enforcer_search },
 { P_monsterinfo_idle, fiend_search },
 { P_monsterinfo_idle, floater_idle },
 { P_monsterinfo_idle, flyer_idle },
 { P_monsterinfo_idle, gladiator_idle },
+{ P_monsterinfo_idle, grunt_search },
 { P_monsterinfo_idle, infantry_fidget },
 { P_monsterinfo_idle, knight_search },
 { P_monsterinfo_idle, medic_idle },
@@ -1285,8 +1293,10 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_search, berserk_search },
 { P_monsterinfo_search, boss2_search },
 { P_monsterinfo_search, brain_search },
+{ P_monsterinfo_search, enforcer_search },
 { P_monsterinfo_search, fiend_search },
 { P_monsterinfo_search, gladiator_search },
+{ P_monsterinfo_search, grunt_search },
 { P_monsterinfo_search, gunner_search },
 { P_monsterinfo_search, hover_search },
 { P_monsterinfo_search, jorg_search },
@@ -1390,11 +1400,13 @@ const save_ptr_t save_ptrs[] = {
 { P_monsterinfo_sight, berserk_sight },
 { P_monsterinfo_sight, brain_sight },
 { P_monsterinfo_sight, chick_sight },
+{ P_monsterinfo_sight, enforcer_sight },
 { P_monsterinfo_sight, fiend_sight },
 { P_monsterinfo_sight, flipper_sight },
 { P_monsterinfo_sight, floater_sight },
 { P_monsterinfo_sight, flyer_sight },
 { P_monsterinfo_sight, gladiator_sight },
+{ P_monsterinfo_sight, grunt_sight },
 { P_monsterinfo_sight, gunner_sight },
 { P_monsterinfo_sight, hover_sight },
 { P_monsterinfo_sight, infantry_sight },
