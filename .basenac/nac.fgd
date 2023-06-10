@@ -799,6 +799,8 @@ spawnflags(Flags) =
 ]
 
 @PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/knight/knight.md2" }) = monster_knight : "Knight" []
+@PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/grunt/grunt.md2", "skin": 0 }) = monster_grunt : "Soldier" []
+@PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/enforcer/enforcer.md2" }) = monster_enforcer : "Enforcer" []
 @PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/fiend/fiend.md2" }) = monster_fiend : "Fiend" []
 @PointClass base(Monsters, Effects, Renderfx) model({ "path": ":models/monsters/vore/vore.md2" }) = monster_vore : "Vore" []
 @PointClass base(Monsters, Effects, Renderfx) size(-16 -16 -38, 16 16 36) model({ "path": ":models/monsters/scrag/scrag.md2" }) = monster_scrag : "Scrag" []
@@ -1176,6 +1178,7 @@ spawnflags(Flags) =
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_launch/g_launch.md2" }) = weapon_grenadelauncher : "Grenade launcher" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_rocket/g_rocket.md2" }) = weapon_rocketlauncher : "Rocket launcher" []
 @PointClass base(Weapons) model({ "path": ":models/weapons/g_bolt/g_bolt.md2" }) = weapon_thunderbolt : "Thunderbolt" []
+@PointClass base(Weapons) model({ "path": ":models/weapons/g_blaster/g_blaster.md2" }) = weapon_blaster : "Blaster" []
 
 // ALIAS ENTITY
 // PROP_TORCH_1 - Medieval Torch on Hanger 

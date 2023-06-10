@@ -146,8 +146,8 @@ mmove_t grunt_move_pain3 = {
 
 void grunt_pain(edict_t *self, edict_t *other, float kick, int damage)
 {
-    //if (self->health < (self->max_health / 2))
-    //    self->s.skinnum = 1;
+    if (self->health < (self->max_health / 2))
+        self->s.skinnum = 1;
 
     if (level.time < self->pain_debounce_time)
         return;
