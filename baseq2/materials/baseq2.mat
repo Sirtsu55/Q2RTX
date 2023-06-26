@@ -5,7 +5,7 @@ develop/objects/ShaderBallArray/M_ShaderBall_01:
 develop/objects/ShaderBallArray/M_ShaderBall_02:
 	texture_base develop/objects/ShaderBallArray/M_ShaderBall_02.tga
 	texture_normals develop/objects/ShaderBallArray/M_ShaderBall_02_n.tga
-	kind UNLIT
+	kind CHROME
 
 develop/objects/ShaderBallArray/M_ShaderBall_03:
 	texture_base develop/objects/ShaderBallArray/M_ShaderBall_03.tga
@@ -264,7 +264,7 @@ models/items/keys/data_cd/skin:
 	texture_base models/items/keys/data_cd/skin.tga
 	texture_normals models/items/keys/data_cd/skin_n.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 
 models/items/keys/key/skin:
 	texture_base models/items/keys/key/skin.tga
@@ -838,7 +838,7 @@ models/objects/black/skin:
 	texture_base models/objects/black/skin.tga
 	texture_normals models/objects/black/skin_n.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/objects/bomb/skin:
@@ -1173,7 +1173,7 @@ models/weapons/v_bfg/skin:
 	texture_normals models/weapons/v_bfg/skin_n.tga
 	texture_emissive models/weapons/v_bfg/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 
 models/weapons/v_bfg/skin_hands:
 	texture_base models/weapons/v_bfg/skin_hands.tga
@@ -1187,7 +1187,7 @@ models/weapons/v_blast/skin:
 	texture_normals models/weapons/v_blast/skin_n.tga
 	texture_emissive models/weapons/v_blast/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/weapons/v_blast/skin_hand:
@@ -1206,7 +1206,7 @@ models/weapons/v_chain/skin:
 	texture_base models/weapons/v_chain/skin.tga
 	texture_normals models/weapons/v_chain/skin_n.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/weapons/v_flareg/base:
@@ -1219,7 +1219,7 @@ models/weapons/v_flareg/skin:
 	texture_normals models/weapons/v_flareg/skin_n.tga
 	texture_emissive models/weapons/v_flareg/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 
 models/weapons/v_flareg/skin_hand:
 	texture_base models/weapons/v_flareg/skin_hand.tga
@@ -1240,7 +1240,7 @@ models/weapons/v_hyperb/skin:
 	texture_normals models/weapons/v_hyperb/skin_n.tga
 	texture_emissive models/weapons/v_hyperb/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/weapons/v_hyperb/skin_hands:
@@ -1255,7 +1255,7 @@ models/weapons/v_launch/skin:
 	texture_normals models/weapons/v_launch/skin_n.tga
 	texture_emissive models/weapons/v_launch/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/weapons/v_launch/skin_hands:
@@ -1275,7 +1275,7 @@ models/weapons/v_machn/skin:
 	texture_base models/weapons/v_machn/skin.tga
 	texture_normals models/weapons/v_machn/skin_n.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/weapons/v_machn/skin_hands:
@@ -1290,14 +1290,14 @@ models/weapons/v_rail/skin:
 	texture_normals models/weapons/v_rail/skin_n.tga
 	texture_emissive models/weapons/v_rail/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 
 models/weapons/v_rocket/skin:
 	texture_base models/weapons/v_rocket/skin.tga
 	texture_normals models/weapons/v_rocket/skin_n.tga
 	texture_emissive models/weapons/v_rocket/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 models/weapons/v_shotg/skin:
@@ -1319,7 +1319,7 @@ models/weapons/v_shotg2/skin:
 	texture_normals models/weapons/v_shotg2/skin_n.tga
 	texture_emissive models/weapons/v_shotg2/skin_light.tga
 	emissive_factor 0.1
-	kind UNLIT
+	kind CHROME
 
 models/weapons/v_shotg2/skin_hands:
 	texture_base models/weapons/v_shotg2/skin_hands.tga
@@ -2315,7 +2315,7 @@ textures/e1u1/dr01_2:
 textures/e1u1/dr02_1:
 	texture_base overrides/dr02_1.tga
 	texture_normals overrides/dr02_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e1u1/dr02_2:
@@ -3101,7 +3101,7 @@ textures/e1u1/pipe1_3:
 	texture_base overrides/pipe1_3.tga
 	texture_normals overrides/pipe1_3_n.tga
 	roughness_override 0.362
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e1u1/pipe1_4:
@@ -5525,7 +5525,7 @@ textures/e1u3/doorswt3:
 textures/e1u3/dr02_1:
 	texture_base overrides/dr02_1.tga
 	texture_normals overrides/dr02_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e1u3/exit1:
@@ -6096,7 +6096,7 @@ textures/e1u3/pipe1_1:
 textures/e1u3/pipe1_3:
 	texture_base overrides/pipe1_3.tga
 	texture_normals overrides/pipe1_3_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e1u3/pipe1_4:
@@ -6367,7 +6367,7 @@ textures/e1u3/tcmet4_4:
 	texture_base overrides/tcmet4_4.tga
 	texture_normals overrides/tcmet4_4_n.tga
 	texture_emissive overrides/tcmet4_4_light.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e1u3/tcmet5_2:
@@ -6787,7 +6787,7 @@ textures/e1u4/tcmet4_4:
 	texture_base overrides/tcmet4_4.tga
 	texture_normals overrides/tcmet4_4_n.tga
 	texture_emissive overrides/tcmet4_4_light.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e1u4/tcmet5_2:
@@ -7456,7 +7456,7 @@ textures/e2u1/mindr1_1:
 textures/e2u1/mine02_1:
 	texture_base overrides/mine02_1.tga
 	texture_normals overrides/mine02_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine02_2:
@@ -7467,19 +7467,19 @@ textures/e2u1/mine02_2:
 textures/e2u1/mine03_1:
 	texture_base overrides/mine03_1.tga
 	texture_normals overrides/mine03_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine03_2:
 	texture_base overrides/mine03_2.tga
 	texture_normals overrides/mine03_2_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine04_1:
 	texture_base overrides/mine04_1.tga
 	texture_normals overrides/mine04_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine04_2:
@@ -7490,31 +7490,31 @@ textures/e2u1/mine04_2:
 textures/e2u1/mine05_1:
 	texture_base overrides/mine05_1.tga
 	texture_normals overrides/mine05_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine05_2:
 	texture_base overrides/mine05_2.tga
 	texture_normals overrides/mine05_2_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine06_1:
 	texture_base overrides/mine06_1.tga
 	texture_normals overrides/mine06_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine06_2:
 	texture_base overrides/mine06_2.tga
 	texture_normals overrides/mine06_2_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine06_3:
 	texture_base overrides/mine06_3.tga
 	texture_normals overrides/mine06_3_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine06_4:
@@ -7525,19 +7525,19 @@ textures/e2u1/mine06_4:
 textures/e2u1/mine07_1:
 	texture_base overrides/mine07_1.tga
 	texture_normals overrides/mine07_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine07_2:
 	texture_base overrides/mine07_2.tga
 	texture_normals overrides/mine07_2_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine07_3:
 	texture_base overrides/mine07_3.tga
 	texture_normals overrides/mine07_3_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine07_4:
@@ -7548,7 +7548,7 @@ textures/e2u1/mine07_4:
 textures/e2u1/mine08_1:
 	texture_base overrides/mine08_1.tga
 	texture_normals overrides/mine08_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine08_3:
@@ -7569,13 +7569,13 @@ textures/e2u1/mine08_4:
 textures/e2u1/mine10_1:
 	texture_base overrides/mine10_1.tga
 	texture_normals overrides/mine10_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine10_2:
 	texture_base overrides/mine10_2.tga
 	texture_normals overrides/mine10_2_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine13_1:
@@ -7583,7 +7583,7 @@ textures/e2u1/mine13_1:
 	texture_normals overrides/mine13_1_n.tga
 	texture_emissive overrides/mine13_1_light.tga
 	emissive_factor 0.05
-	kind UNLIT
+	kind CHROME
 	is_light 1
 	base_factor 2.5
 
@@ -7592,7 +7592,7 @@ textures/e2u1/mine13_2:
 	texture_normals overrides/mine13_2_n.tga
 	texture_emissive overrides/mine13_2_light.tga
 	emissive_factor 0.05
-	kind UNLIT
+	kind CHROME
 	is_light 1
 	base_factor 2.5
 
@@ -7604,13 +7604,13 @@ textures/e2u1/mine14_1:
 textures/e2u1/mine15_1:
 	texture_base overrides/mine15_1.tga
 	texture_normals overrides/mine15_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/mine9_1:
 	texture_base overrides/mine9_1.tga
 	texture_normals overrides/mine9_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u1/minlt1_1:
@@ -8528,19 +8528,19 @@ textures/e2u2/metal47_2:
 textures/e2u2/mine03_1:
 	texture_base overrides/mine03_1.tga
 	texture_normals overrides/mine03_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u2/mine03_2:
 	texture_base overrides/mine03_2.tga
 	texture_normals overrides/mine03_2_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u2/mine04_1:
 	texture_base overrides/mine04_1.tga
 	texture_normals overrides/mine04_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u2/mine04_2:
@@ -8551,7 +8551,7 @@ textures/e2u2/mine04_2:
 textures/e2u2/mine05_1:
 	texture_base overrides/mine05_1.tga
 	texture_normals overrides/mine05_1_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e2u2/notch1_1:
@@ -12571,7 +12571,7 @@ textures/e3u2/origin:
 textures/e3u2/pipe1_3:
 	texture_base overrides/pipe1_3.tga
 	texture_normals overrides/pipe1_3_n.tga
-	kind UNLIT
+	kind CHROME
 	base_factor 2.5
 
 textures/e3u2/pipe1_6:
