@@ -50,7 +50,7 @@ direct_lighting(ivec2 ipos, bool is_odd_checkerboard, out vec3 high_freq, out ve
 	uint material_id = floatBitsToUint(position_material.w);
 
 	// don't compute lighting for invalid surfaces
-	if(material_id == 0)
+	if(material_id == 0 || material_id == MATERIAL_KIND_UNLIT)
 		return;
 
 	vec4 view_direction = texelFetch(TEX_PT_VIEW_DIRECTION, ipos, 0);
