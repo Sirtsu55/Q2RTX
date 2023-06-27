@@ -1869,19 +1869,25 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 	mi->alpha_and_frame = (entity->frame << 16) | floatToHalf(model_alpha);
 	mi->render_buffer_idx = VERTEX_BUFFER_WORLD;
 	mi->render_prim_offset = model->geometry.prim_offsets[0];
-	
-	instance_model_lights(model->num_light_polys, model->light_polys, transform);
 
+	instance_model_lights(model->num_light_polys, model->light_polys, transform);
+	
 	if (model->geometry.accel)
 	{
-		vkpt_pt_instance_model_blas(&model->geometry, mi->transform, VERTEX_BUFFER_WORLD, current_instance_idx, (model_alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0);
+
+		uint32_t override_masks = (mi->alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0;
+		//if (entity->flags& RF_NOSHADOW)
+
+		override_masks |= AS_FLAG_OPAQUE_NO_SHADOW;
+
+		vkpt_pt_instance_model_blas(&model->geometry, mi->transform, VERTEX_BUFFER_WORLD, current_instance_idx, override_masks);
 	}
 
 	if (!model->transparent)
 	{
 		vkpt_shadow_map_add_instance(transform, qvk.buf_world.buffer, vkpt_refdef.bsp_mesh_world.vertex_data_offset
 			+ mi->render_prim_offset * sizeof(prim_positions_t), mi->prim_count);
-	}
+    }
 
 	(*instance_count)++;
 }
@@ -1906,7 +1912,7 @@ static void process_regular_entity(
 	float* iqm_matrix_data)
 {
 	InstanceBuffer* uniform_instance_buffer = &vkpt_refdef.uniform_instance_buffer;
-
+	
 	float transform[16];
 	create_entity_matrix(transform, (entity_t*)entity, is_viewer_weapon);
 	
@@ -1949,7 +1955,7 @@ static void process_regular_entity(
 			geom = &vbo->geom_transparent;
 		else
 			geom = &vbo->geom_opaque;
-		
+
 		if (geom->accel)
 		{
 			// ugly typecast
@@ -1958,7 +1964,11 @@ static void process_regular_entity(
 
 			uint32_t model_index = (uint32_t)(model - r_models);
 
-			vkpt_pt_instance_model_blas(geom, transform_, VERTEX_BUFFER_FIRST_MODEL + model_index, current_instance_index, (alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0);
+			uint32_t override_masks = (alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0;
+			if(entity->flags & RF_NOSHADOW)
+				override_masks |=  AS_FLAG_OPAQUE_NO_SHADOW;
+
+			vkpt_pt_instance_model_blas(geom, transform_, VERTEX_BUFFER_FIRST_MODEL + model_index, current_instance_index, override_masks);
 		}
 	}
 
