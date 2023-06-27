@@ -1965,6 +1965,7 @@ static void process_regular_entity(
 			uint32_t model_index = (uint32_t)(model - r_models);
 
 			uint32_t override_masks = (alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0;
+
 			if(entity->flags & RF_NOSHADOW)
 				override_masks |=  AS_FLAG_OPAQUE_NO_SHADOW;
 
