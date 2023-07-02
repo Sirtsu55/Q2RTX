@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/ui.h"
 #include "client/video.h"
 #include "refresh/refresh.h"
-#include "res/q2pro.xbm"
+#include "res/nacicon.xbm"
 #ifdef _WINDOWS
 #include <ShellScalingAPI.h>
 
