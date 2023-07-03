@@ -47,7 +47,7 @@ static int sound_sight2;
 static int sound_sight3;
 static int sound_sight4;
 
-void enforcer_sight(edict_t *self)
+void enforcer_sight(edict_t *self, edict_t *other)
 {
     switch (Q_rand_uniform(4))
     {
@@ -113,8 +113,8 @@ void enforcer_run(edict_t *self)
 
 void enforcer_fire(edict_t *self)
 {
-    vec3_t  start, dir, aim, end;
-    vec3_t  forward, right, up;
+    vec3_t  start;
+    vec3_t  forward, right, aim, end;
 
     AngleVectors(self->s.angles, forward, right, NULL);
 

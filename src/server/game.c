@@ -356,7 +356,7 @@ static void PF_WriteFloat(float f)
     Com_Error(ERR_DROP, "PF_WriteFloat not implemented");
 }
 
-static bool SV_InVis(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas)
+static bool SV_InVis(const vec3_t p1, const vec3_t p2, vis_set_t vis, bool ignore_areas)
 {
     mleaf_t *leaf1, *leaf2;
     byte mask[VIS_MAX_BYTES];
@@ -409,8 +409,8 @@ If origin is NULL, the origin is determined from the entity origin
 or the midpoint of the entity box for bmodels.
 ==================
 */
-static void SV_StartSound(vec3_t origin, edict_t *edict, int channel,
-                          int soundindex, float volume,
+static void SV_StartSound(const vec3_t origin, edict_t *edict,
+                          int channel, int soundindex, float volume,
                           float attenuation, int pitch_shift)
 {
     int         ent, flags, sendchan;
@@ -750,7 +750,7 @@ static size_t PF_Cmd_RawArgs(char *buffer, size_t size)
     return Q_strlcpy(buffer, Cmd_RawArgs(), size);
 }
 
-static bool SV_EntityCollide(vec3_t mins, vec3_t maxs, edict_t *ent)
+static bool SV_EntityCollide(const vec3_t mins, const vec3_t maxs, edict_t *ent)
 {
     mnode_t *headnode = SV_HullForEntity(ent);
     trace_t tr;

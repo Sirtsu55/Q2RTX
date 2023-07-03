@@ -1,12 +1,8 @@
 cmake_minimum_required (VERSION 3.9)
 cmake_policy(SET CMP0069 NEW)
 
-if (UNIX)
-	FIND_PACKAGE(OpenAL)
-	if (NOT OPENAL_INCLUDE_DIR)
-		message(FATAL_ERROR "Can't find OpenAL. Please install the libopenal-dev package.")
-	endif()
-endif()
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 SET(SRC_BASENAC
 	basenac/g_ai.c
 	basenac/g_chase.c
@@ -356,7 +352,44 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
+add_compile_definitions($<$<CONFIG:Debug>:USE_DEBUG>)
+
+if(NOT WIN32)
+    add_compile_definitions(_GNU_SOURCE)
+endif()
+
+# Check whether compiler supports 'flagstr', and if so, set ${flagvar} to that value
+function(CCompilerFlagString flagvar flagstr)
+    CHECK_C_COMPILER_FLAG("${flagstr}" ${flagvar}_FOUND)
+    if(${flagvar}_FOUND)
+        set(${flagvar} "${flagstr}" PARENT_SCOPE)
+    endif()
+endfunction()
+# Check whether compiler supports 'flagstr', and if so, append that value to ${flagvar}
+function(CCompilerFlagStringAppend flagvar flagstr)
+    string(TOUPPER "${flagstr}" auto_flag_var)
+    string(REGEX REPLACE "[^A-Z0-9]" "_" auto_flag_var "${auto_flag_var}")
+    CCompilerFlagString (C_${auto_flag_var} "${flagstr}")
+    if(NOT "${C_${auto_flag_var}}" EQUAL "")
+        set(${flagvar} "${${flagvar}} ${C_${auto_flag_var}} " PARENT_SCOPE)
+    endif()
+endfunction()
+
+if(NOT MSVC)
+    CCompilerFlagStringAppend(CMAKE_C_FLAGS "-fsigned-char")
+    CCompilerFlagStringAppend(CMAKE_C_FLAGS "-Wall")
+    CCompilerFlagStringAppend(CMAKE_C_FLAGS "-Wpointer-arith")
+    CCompilerFlagStringAppend(CMAKE_C_FLAGS "-Wformat-security")
+    CCompilerFlagStringAppend(CMAKE_C_FLAGS "-Werror=vla")
+    CCompilerFlagStringAppend(CMAKE_C_FLAGS "-Wstrict-prototypes")
+    # CCompilerFlagString(WARN_MISSING_PROTOTYPES "-Wmissing-prototypes")
+endif()
+
 ADD_LIBRARY(basenac SHARED ${SRC_BASENAC} ${HEADERS_BASENAC} ${SRC_SHARED})
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    # Workaround for GCC 10 linking shared libgcc by default
+    target_link_options(baseq2 PRIVATE "-static-libgcc")
+endif()
 
 set(FAKE_TARGET fakeTarget)
 
@@ -406,10 +439,12 @@ ELSE()
     )
 ENDIF()
 
-TARGET_COMPILE_DEFINITIONS(server PRIVATE USE_SERVER=1 USE_CLIENT=0)
+TARGET_COMPILE_DEFINITIONS(server PRIVATE USE_SERVER=1)
+target_compile_options(server PRIVATE "${WARN_MISSING_PROTOTYPES}")
 
 IF (TARGET client)
-    TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_SERVER=1 USE_CLIENT=1)
+    TARGET_COMPILE_DEFINITIONS(client PRIVATE USE_CLIENT=1 USE_FIXED_LIBAL=1 USE_SDL=1)
+    target_compile_options(client PRIVATE "${WARN_MISSING_PROTOTYPES}")
 
     IF(CONFIG_USE_CURL)
         TARGET_SOURCES(client PRIVATE ${SRC_CLIENT_HTTP})
@@ -560,6 +595,12 @@ IF(IS_64_BIT)
 			LIBRARY_OUTPUT_NAME "gameaarch64"
 			RUNTIME_OUTPUT_NAME "gameaarch64"
 		)
+	ELSEIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64le")
+		SET_TARGET_PROPERTIES(baseq2
+			PROPERTIES
+			LIBRARY_OUTPUT_NAME "gameppc64le"
+			RUNTIME_OUTPUT_NAME "gameppc64le"
+                )
 	ELSE()
 		SET_TARGET_PROPERTIES(basenac
 			PROPERTIES

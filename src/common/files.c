@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#define _GNU_SOURCE
 #include "shared/shared.h"
 #include "shared/list.h"
 #include "common/common.h"
@@ -69,7 +68,7 @@ QUAKE FILESYSTEM
 #define ZIP_CENTRALHEADERMAGIC  0x02014b50
 #define ZIP_ENDHEADERMAGIC      0x06054b50
 
-#ifdef _DEBUG
+#if USE_DEBUG
 #define FS_DPrintf(...) \
     if (fs_debug && fs_debug->integer) \
         Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
@@ -170,7 +169,7 @@ static list_t       fs_soft_links;
 
 static file_t       fs_files[MAX_FILE_HANDLES];
 
-#ifdef _DEBUG
+#if USE_DEBUG
 static int          fs_count_read;
 static int          fs_count_open;
 static int          fs_count_strcmp;
@@ -186,7 +185,7 @@ static int          fs_count_strlwr;
 #define FS_COUNT_STRLWR     (void)0
 #endif
 
-#ifdef _DEBUG
+#if USE_DEBUG
 static cvar_t       *fs_debug;
 #endif
 
@@ -3103,7 +3102,7 @@ static void FS_Path_f(void)
     }
 }
 
-#ifdef _DEBUG
+#if USE_DEBUG
 /*
 ================
 FS_Stats_f
@@ -3160,7 +3159,7 @@ static void FS_Stats_f(void)
         }
     }
 }
-#endif // _DEBUG
+#endif // USE_DEBUG
 
 static void FS_Link_g(genctx_t *ctx)
 {
@@ -3456,7 +3455,7 @@ static const cmdreg_t c_fs[] = {
     { "path", FS_Path_f },
     { "fdir", FS_FDir_f },
     { "dir", FS_Dir_f },
-#ifdef _DEBUG
+#if USE_DEBUG
     { "fs_stats", FS_Stats_f },
 #endif
     { "whereis", FS_WhereIs_f },
@@ -3576,7 +3575,7 @@ void FS_Init(void)
 
     Cmd_Register(c_fs);
 
-#ifdef _DEBUG
+#if USE_DEBUG
     fs_debug = Cvar_Get("fs_debug", "0", 0);
 #endif
 

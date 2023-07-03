@@ -139,8 +139,7 @@ typedef enum {
 #define MAXERRORMSG     1024
 
 void    Com_LPrint(print_type_t type, const char *message);
-void    Com_LPrintf(print_type_t type, const char *fmt, ...)
-q_printf(2, 3);
+void    Com_LPrintf(print_type_t type, const char *fmt, ...) q_printf(2, 3);
 _Noreturn void Com_Error(error_type_t type, const char *message);
 _Noreturn void Com_Errorf(error_type_t code, const char *fmt, ...) q_printf(2, 3);
 
@@ -206,7 +205,7 @@ typedef int fixed16_t;
 
 struct cplane_s;
 
-extern vec3_t vec3_origin;
+extern const vec3_t vec3_origin;
 
 typedef struct vrect_s {
     int             x, y, width, height;
@@ -478,11 +477,11 @@ static inline void Matrix34Multiply(const float *a, const float *b, float *out)
 
 void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 vec_t VectorNormalize(vec3_t v);        // returns vector length
-vec_t VectorNormalize2(vec3_t v, vec3_t out);
+vec_t VectorNormalize2(const vec3_t v, vec3_t out);
 void ClearBounds(vec3_t mins, vec3_t maxs);
 void AddPointToBounds(const vec3_t v, vec3_t mins, vec3_t maxs);
 vec_t RadiusFromBounds(const vec3_t mins, const vec3_t maxs);
-void UnionBounds(vec3_t a[2], vec3_t b[2], vec3_t c[2]);
+void UnionBounds(const vec3_t a[2], const vec3_t b[2], vec3_t c[2]);
 
 /*
 ==================
@@ -522,7 +521,7 @@ static inline void TransposeAxis(vec3_t axis[3])
     axis[2][1] = temp;
 }
 
-static inline void RotatePoint(vec3_t point, vec3_t axis[3])
+static inline void RotatePoint(vec3_t point, const vec3_t axis[3])
 {
     vec3_t temp;
 
@@ -705,7 +704,7 @@ char *Q_strcasestr(const char *s1, const char *s2);
 
 char *Q_strchrnul(const char *s, int c);
 void *Q_memccpy(void *dst, const void *src, int c, size_t size);
-void Q_setenv(const char *name, const char *value);
+size_t Q_strnlen(const char *s, size_t maxlen);
 
 char *COM_SkipPath(const char *pathname);
 size_t COM_StripExtension(char *out, const char *in, size_t size);
@@ -750,6 +749,7 @@ size_t Q_scnprintf(char *dest, size_t size, const char *fmt, ...) q_printf(3, 4)
     va_start(argptr, fmt); \
     size_t len = Q_vsnprintf(buffer, buffer_length, fmt, argptr); \
     va_end(argptr)
+char    *vtos(const vec3_t v);
 
 // Convenience macro to handle varargs
 #define Com_VarArgsBuf(buffer) \
@@ -1093,8 +1093,8 @@ typedef struct {
     vec3_t      gunangles;
 
     // callbacks to test the world
-    void        (*trace)(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
-    int         (*pointcontents)(vec3_t point);
+    void        (*trace)(trace_t *tr, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end);
+    int         (*pointcontents)(const vec3_t point);
 } pmove_t;
 
 

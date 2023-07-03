@@ -32,7 +32,6 @@
 #define USE_PMTUDISC 1
 #define USE_SYSCON 1
 #define USE_DBGHELP 1
-#define USE_MAPCHECKSUM 1
 
 #if USE_CLIENT
 #define VID_MODELIST "640x480 800x600 1024x768 1280x720"
@@ -42,9 +41,11 @@
 #define USE_JPG 1
 #define USE_TGA 1
 #define USE_MD3 1
-#define USE_DLIGHTS 1
 #define USE_AUTOREPLY 1
 #endif
+
+
+#define USE_AC_SERVER USE_SERVER
 
 #if USE_SERVER
 #define USE_PACKETDUP 1
@@ -63,8 +64,9 @@ typedef __int32     ssize_t;
 #define SSIZE_MAX   _I32_MAX
 #endif
 
+#if defined(_MSC_VER)
 #pragma warning(disable:4018)
 #pragma warning(disable:4244)
 #pragma warning(disable:4267)
 #pragma warning(disable:4305)
-
+#endif

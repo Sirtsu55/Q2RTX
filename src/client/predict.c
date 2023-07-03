@@ -75,7 +75,7 @@ CL_ClipMoveToEntities
 
 ====================
 */
-void CL_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, trace_t *tr, int mask)
+void CL_ClipMoveToEntities(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, trace_t *tr, int mask)
 {
     int         i;
     trace_t     trace;
@@ -112,7 +112,7 @@ void CL_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, t
 CL_PMTrace
 ================
 */
-static CL_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
+static void CL_Trace(trace_t *tr, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end)
 {
     // check against world
     CM_BoxTrace(tr, start, end, mins, maxs, cl.bsp->nodes, MASK_PLAYERSOLID);
@@ -124,7 +124,7 @@ static CL_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
     CL_ClipMoveToEntities(start, mins, maxs, end, tr, MASK_PLAYERSOLID);
 }
 
-static int CL_PointContents(vec3_t point)
+static int CL_PointContents(const vec3_t point)
 {
     int         i;
     centity_t   *ent;

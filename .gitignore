@@ -37,3 +37,4 @@ CMakeSettings.json
 baseq2/**/*.txt
 !baseq2/*.txt
 !baseq2/maps/sky/*.txt
+!baseq2/pics/flashlight_profile.png

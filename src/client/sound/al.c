@@ -187,7 +187,7 @@ void AL_SoundInfo(void)
 * Set up the stream sources
 */
 static void
-AL_InitStreamSource()
+AL_InitStreamSource(void)
 {
 	alSource3f(streamSource, AL_POSITION, 0.0, 0.0, 0.0);
 	alSource3f(streamSource, AL_VELOCITY, 0.0, 0.0, 0.0);
@@ -445,7 +445,7 @@ static void AL_Spatialize(channel_t *ch)
 
 void AL_StopChannel(channel_t *ch)
 {
-#ifdef _DEBUG
+#if USE_DEBUG
     if (s_show->integer > 1)
         Com_Printf("%s: %s\n", __func__, ch->sfx->name);
 #endif
@@ -460,7 +460,7 @@ void AL_PlayChannel(channel_t *ch)
 {
     sfxcache_t *sc = ch->sfx->cache;
 
-#ifdef _DEBUG
+#if USE_DEBUG
     if (s_show->integer > 1)
         Com_Printf("%s: %s\n", __func__, ch->sfx->name);
 #endif
@@ -775,7 +775,7 @@ void AL_Update(void)
             }
         }
 
-#ifdef _DEBUG
+#if USE_DEBUG
         if (s_show->integer) {
             Com_Printf("%.1f %s\n", ch->master_vol, ch->sfx->name);
             //    total++;

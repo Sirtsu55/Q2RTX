@@ -689,7 +689,7 @@ bool SV_EntityLinked(edict_t *ent)
     return gi.SV_EntityLinked(ent);
 }
 
-trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+trace_t SV_Trace(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
                  edict_t *passedict, int contentmask)
 {
     trace_t tr;
@@ -697,22 +697,22 @@ trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
     return tr;
 }
 
-int SV_PointContents(vec3_t p)
+int SV_PointContents(const vec3_t p)
 {
     return gi.SV_PointContents(p);
 }
 
-size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype)
+size_t SV_AreaEdicts(const vec3_t mins, const vec3_t maxs, edict_t **list, size_t maxcount, int areatype)
 {
     return gi.SV_AreaEdicts(mins, maxs, list, maxcount, areatype);
 }
 
-bool SV_EntityCollide(vec3_t mins, vec3_t maxs, edict_t *ent)
+bool SV_EntityCollide(const vec3_t mins, const vec3_t maxs, edict_t *ent)
 {
     return gi.SV_EntityCollide(mins, maxs, ent);
 }
 
-void SV_PositionedSound(vec3_t origin, edict_t *entity, int channel,
+void SV_PositionedSound(const vec3_t origin, edict_t *entity, int channel,
                         int soundindex, float volume,
                         float attenuation, int pitch_shift)
 {
@@ -734,7 +734,7 @@ void SV_StartSound(edict_t *entity, int channel,
     gi.SV_StartSound(NULL, entity, channel, soundindex, volume, attenuation, pitch_shift);
 }
 
-bool SV_InVis(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas)
+bool SV_InVis(const vec3_t p1, const vec3_t p2, vis_set_t vis, bool ignore_areas)
 {
     return gi.SV_InVis(p1, p2, vis, ignore_areas);
 }
@@ -764,7 +764,7 @@ void SV_DropClient(edict_t *ent, const char *reason)
     gi.SV_DropClient(ent, reason);
 }
 
-void SV_Multicast(vec3_t origin, multicast_t to, bool reliable)
+void SV_Multicast(const vec3_t origin, multicast_t to, bool reliable)
 {
     gi.SV_Multicast(origin, to, reliable);
 }

@@ -51,7 +51,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SV_LoadFile(path, buf)  FS_LoadFileEx(path, buf, 0, TAG_SERVER)
 #define SV_FreeFile(buf)        Z_Free(buf)
 
-#ifdef _DEBUG
+#if USE_DEBUG
 #define SV_DPrintf(level,...) \
     if (sv_debug && sv_debug->integer > level) \
         Com_LPrintf(PRINT_DEVELOPER, __VA_ARGS__)
@@ -404,7 +404,7 @@ extern cvar_t       *sv_enforcetime;
 extern cvar_t       *sv_force_reconnect;
 extern cvar_t       *sv_iplimit;
 
-#ifdef _DEBUG
+#if USE_DEBUG
 extern cvar_t       *sv_debug;
 extern cvar_t       *sv_pad_packets;
 #endif
@@ -497,7 +497,7 @@ void SV_FlushRedirect(int redirected, char *outputbuf, size_t len);
 void SV_SendClientMessages(void);
 void SV_SendAsyncPackets(void);
 
-void SV_Multicast(vec3_t origin, multicast_t to, bool reliable);
+void SV_Multicast(const vec3_t origin, multicast_t to, bool reliable);
 void SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...) q_printf(3, 4);
 void SV_BroadcastPrintf(int level, const char *fmt, ...) q_printf(2, 3);
 void SV_ClientCommand(client_t *cl, const char *fmt, ...) q_printf(2, 3);
@@ -587,7 +587,7 @@ void PF_LinkEdict(edict_t *ent);
 // sets ent->leafnums[] for pvs determination even if the entity
 // is not solid
 
-size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
+size_t SV_AreaEdicts(const vec3_t mins, const vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
 // fills in a table of edict pointers with edicts that have bounding boxes
 // that intersect the given area.  It is possible for a non-axial bmodel
 // to be returned that doesn't actually intersect the area on an exact
@@ -600,11 +600,11 @@ size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, 
 //
 // functions that interact with everything apropriate
 //
-int SV_PointContents(vec3_t p);
+int SV_PointContents(const vec3_t p);
 // returns the CONTENTS_* value from the world at the given point.
 // Quake 2 extends this to also check entities, to allow moving liquids
 
-void SV_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+void SV_Trace(trace_t *tr, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
               edict_t *passedict, int contentmask);
 // mins and maxs are relative
 

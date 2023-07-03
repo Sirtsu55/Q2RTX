@@ -118,7 +118,7 @@ void    MSG_ParseDeltaAmbientEntity(const entity_state_t *from, entity_state_t *
 void    MSG_ParseDeltaPlayerstate(const player_state_t *from, player_state_t *to, int flags, int extraflags);
 #endif
 
-#ifdef _DEBUG
+#if USE_DEBUG
 #if USE_CLIENT
 void    MSG_ShowDeltaPlayerstateBits(int flags, int extraflags);
 void    MSG_ShowDeltaUsercmdBits(int bits);
@@ -128,7 +128,7 @@ const char *MSG_ServerCommandString(int cmd);
     Com_LPrintf(PRINT_DEVELOPER, "%3zu:%s\n", msg_read.readcount - 1, \
         MSG_ServerCommandString(cmd))
 #endif // USE_CLIENT
-#endif // _DEBUG
+#endif // USE_DEBUG
 
 
 //============================================================================

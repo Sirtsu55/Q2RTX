@@ -345,10 +345,34 @@ STB_IMAGE LOADING
 =================================================================
 */
 
+static bool supports_extended_pixel_format(void)
+{
+	return true;
+}
+
 IMG_LOAD(STB)
 {
 	int w, h, channels;
-	byte* data = stbi_load_from_memory(rawdata, rawlen, &w, &h, &channels, 4);
+	byte* data = NULL;
+	if(supports_extended_pixel_format())
+	{
+		int img_comp;
+		stbi_info_from_memory(rawdata, rawlen, NULL, NULL, &img_comp);
+		bool img_is_16 = stbi_is_16_bit_from_memory(rawdata, rawlen);
+
+		if(img_comp == 1 && img_is_16)
+		{
+			// Special: 16bpc grayscale
+			data = (byte*)stbi_load_16_from_memory(rawdata, rawlen, &w, &h, &channels, 1);
+			image->pixel_format = PF_R16_UNORM;
+		}
+		// else: handle default case (8bpc RGBA) below
+	}
+	if(!data)
+	{
+		data = stbi_load_from_memory(rawdata, rawlen, &w, &h, &channels, 4);
+		image->pixel_format = PF_R8G8B8A8_UNORM;
+	}
 
 	if (!data)
 		return Q_ERR_LIBRARY_ERROR;
@@ -515,7 +539,7 @@ static int create_screenshot(char *buffer, size_t size, FILE **f,
     return Q_ERR_OUT_OF_SLOTS;
 }
 
-static bool is_render_hdr()
+static bool is_render_hdr(void)
 {
     return R_IsHDR && R_IsHDR();
 }
@@ -1156,7 +1180,7 @@ load_img(const char *name, image_t *image)
 {
     byte            *pic;
     imageformat_t   fmt;
-    int             ret;
+    int             ret = Q_ERR_INVAL;
 
 	size_t len = strlen(name);
 
@@ -1753,6 +1777,7 @@ static const cmdreg_t img_cmd[] = {
     { "screenshottga", IMG_ScreenShotTGA_f },
     { "screenshotjpg", IMG_ScreenShotJPG_f },
     { "screenshotpng", IMG_ScreenShotPNG_f },
+    { "screenshothdr", IMG_ScreenShotHDR_f },
     { NULL }
 };
 

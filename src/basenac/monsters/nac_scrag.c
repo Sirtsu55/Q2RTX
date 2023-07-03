@@ -104,8 +104,6 @@ Fires a single blaster bolt.  Used by the blaster and hyper blaster.
 */
 void scrag_bolt_touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
 {
-    int     mod;
-
     if (other == self->owner)
         return;
 
@@ -204,7 +202,6 @@ void scrag_attack_spike(edict_t* self)
     vec3_t  forward, right;
     vec3_t  end;
     vec3_t  dir;
-    int     effect;
 
     AngleVectors(self->s.angles, forward, right, NULL);
     G_ProjectSource(self->s.origin, (vec3_t) { 0.f, 0.f, (self->s.frame > FRAME_ATTACK_FIRST + 9) ? 29.f : 24.f }, forward, right, start);

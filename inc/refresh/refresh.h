@@ -100,6 +100,12 @@ typedef enum dlight_type_e
     DLIGHT_SPOT
 } dlight_type;
 
+typedef enum dlight_spot_emission_profile_e
+{
+    DLIGHT_SPOT_EMISSION_PROFILE_FALLOFF = 0,
+    DLIGHT_SPOT_EMISSION_PROFILE_AXIS_ANGLE_TEXTURE
+} dlight_spot_emission_profile;
+
 typedef struct dlight_s {
     vec3_t  origin;
     vec3_t  color;
@@ -108,10 +114,28 @@ typedef struct dlight_s {
 
     // VKPT light types support
     dlight_type light_type;
+    // Spotlight options
     struct {
+        // Spotlight emission profile
+        dlight_spot_emission_profile emission_profile;
+        // Spotlight direction
         vec3_t  direction;
+        union {
+            // Options for DLIGHT_SPOT_EMISSION_PROFILE_FALLOFF
+            struct {
+                // Cosine of angle of spotlight cone width (no emission beyond that)
         float   cos_total_width;
+                // Cosine of angle of start of falloff (full emission below that)
         float   cos_falloff_start;
+            };
+            // Options for DLIGHT_SPOT_EMISSION_PROFILE_AXIS_ANGLE_TEXTURE
+            struct {
+                // Angle of spotlight cone width (no emission beyond that), in radians
+                float   total_width;
+                // Emission profile texture, indexed by 'angle / total_width'
+                qhandle_t texture;
+            };
+        };
     } spot;
 } dlight_t;
 
@@ -219,7 +243,8 @@ typedef enum {
     IF_FAKE_EMISSIVE= (1 << 10),
     IF_EXACT        = (1 << 11),
     IF_NORMAL_MAP   = (1 << 12),
-    IF_NO_NEW_MAT   = (1 << 13),
+    IF_BILERP       = (1 << 13), // always lerp, independent of bilerp_pics cvar
+    IF_NO_NEW_MAT   = (1 << 14), // N&C
 
     // Image source indicator/requirement flags
     IF_SRC_BASE     = (0x1 << 16),
@@ -268,7 +293,7 @@ qhandle_t R_RegisterRawImage(const char *name, int width, int height, byte* pic,
                           imageflags_t flags);
 void R_UnregisterImage(qhandle_t handle);
 
-void    R_SetSky(const char *name, float rotate, vec3_t axis);
+void    R_SetSky(const char *name, float rotate, const vec3_t axis);
 void    R_EndRegistration(void);
 
 #define R_RegisterPic(name)     R_RegisterImage(name, IT_PIC, IF_PERMANENT | IF_SRGB, NULL)
@@ -277,7 +302,7 @@ void    R_EndRegistration(void);
 #define R_RegisterSkin(name)    R_RegisterImage(name, IT_SKIN, IF_SRGB, NULL)
 
 void    R_RenderFrame(refdef_t *fd);
-void    R_LightPoint(vec3_t origin, vec3_t light);
+void    R_LightPoint(const vec3_t origin, vec3_t light);
 
 void    R_ClearColor(void);
 void    R_SetAlpha(float clpha);

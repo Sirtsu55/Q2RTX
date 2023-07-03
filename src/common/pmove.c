@@ -146,7 +146,7 @@ PM_Accelerate
 Handles user intended acceleration
 ==============
 */
-static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
+static void PM_Accelerate(const vec3_t wishdir, float wishspeed, float accel)
 {
     int         i;
     float       addspeed, accelspeed, currentspeed;
@@ -163,7 +163,7 @@ static void PM_Accelerate(vec3_t wishdir, float wishspeed, float accel)
         pml.velocity[i] += accelspeed * wishdir[i];
 }
 
-static void PM_AirAccelerate(vec3_t wishdir, float wishspeed, float accel)
+static void PM_AirAccelerate(const vec3_t wishdir, float wishspeed, float accel)
 {
     int         i;
     float       addspeed, accelspeed, currentspeed, wishspd = wishspeed;

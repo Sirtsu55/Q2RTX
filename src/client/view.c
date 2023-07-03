@@ -30,21 +30,17 @@ qhandle_t   gun_model;
 //=============
 
 static cvar_t   *cl_add_particles;
-#if USE_DLIGHTS
 static cvar_t   *cl_add_lights;
 static cvar_t   *cl_show_lights;
 static cvar_t   *cl_flashlight;
 static cvar_t   *cl_flashlight_intensity;
-#endif
 static cvar_t   *cl_add_entities;
 static cvar_t   *cl_add_blend;
 
-#ifdef _DEBUG
+#if USE_DEBUG
 static cvar_t   *cl_testparticles;
 static cvar_t   *cl_testentities;
-#if USE_DLIGHTS
 static cvar_t   *cl_testlights;
-#endif
 static cvar_t   *cl_testblend;
 
 static cvar_t   *cl_stats;
@@ -52,10 +48,9 @@ static cvar_t   *cl_stats;
 
 static cvar_t   *cl_adjustfov;
 
-#if USE_DLIGHTS
 int         r_numdlights;
 dlight_t    r_dlights[MAX_DLIGHTS];
-#endif
+static qhandle_t flashlight_profile_tex;
 
 int         r_numentities;
 entity_t    r_entities[MAX_ENTITIES];
@@ -74,9 +69,7 @@ Specifies the model that will be used as the world
 */
 static void V_ClearScene(void)
 {
-#if USE_DLIGHTS
     r_numdlights = 0;
-#endif
     r_numentities = 0;
     r_numparticles = 0;
 }
@@ -110,14 +103,13 @@ void V_AddParticle(particle_t *p)
     r_particles[r_numparticles++] = *p;
 }
 
-#if USE_DLIGHTS
 /*
 =====================
 V_AddLight
 
 =====================
 */
-void V_AddSphereLight(vec3_t org, float intensity, float r, float g, float b, float radius)
+void V_AddSphereLight(const vec3_t org, float intensity, float r, float g, float b, float radius)
 {
     dlight_t    *dl;
 
@@ -148,12 +140,12 @@ void V_AddSphereLight(vec3_t org, float intensity, float r, float g, float b, fl
 	}
 }
 
-void V_AddSpotLight(vec3_t org, vec3_t dir, float intensity, float r, float g, float b, float width_angle, float falloff_angle)
+static dlight_t* add_spot_light_common(const vec3_t org, const vec3_t dir, float intensity, float r, float g, float b)
 {
     dlight_t    *dl;
 
     if (r_numdlights >= MAX_DLIGHTS)
-        return;
+        return NULL;
     dl = &r_dlights[r_numdlights++];
     memset(dl, 0, sizeof(dlight_t));
     VectorCopy(org, dl->origin);
@@ -164,13 +156,35 @@ void V_AddSpotLight(vec3_t org, vec3_t dir, float intensity, float r, float g, f
     dl->radius = 1.0f;
     dl->light_type = DLIGHT_SPOT;
     VectorCopy(dir, dl->spot.direction);
-    dl->spot.cos_total_width = cosf(DEG2RAD(width_angle));
-    dl->spot.cos_falloff_start = cosf(DEG2RAD(falloff_angle));
 
     // what would make sense for cl_show_lights here?
+
+    return dl;
 }
 
-void V_AddLight(vec3_t org, float intensity, float r, float g, float b)
+void V_AddSpotLight(const vec3_t org, const vec3_t dir, float intensity, float r, float g, float b, float width_angle, float falloff_angle)
+{
+    dlight_t *dl = add_spot_light_common(org, dir, intensity, r, g, b);
+    if(!dl)
+        return;
+
+    dl->spot.emission_profile = DLIGHT_SPOT_EMISSION_PROFILE_FALLOFF;
+    dl->spot.cos_total_width = cosf(DEG2RAD(width_angle));
+    dl->spot.cos_falloff_start = cosf(DEG2RAD(falloff_angle));
+}
+
+void V_AddSpotLightTexEmission(const vec3_t org, const vec3_t dir, float intensity, float r, float g, float b, float width_angle, qhandle_t emission_tex)
+{
+    dlight_t *dl = add_spot_light_common(org, dir, intensity, r, g, b);
+    if(!dl)
+        return;
+
+    dl->spot.emission_profile = DLIGHT_SPOT_EMISSION_PROFILE_AXIS_ANGLE_TEXTURE;
+    dl->spot.total_width = DEG2RAD(width_angle);
+    dl->spot.texture = emission_tex;
+}
+
+void V_AddLight(const vec3_t org, float intensity, float r, float g, float b)
 {
 	V_AddSphereLight(org, intensity, r, g, b, 10.f);
 }
@@ -218,10 +232,8 @@ void V_Flashlight(void)
     VectorMA(light_pos, leftright, right_dir, light_pos);
     VectorMA(light_pos, -8, up_dir, light_pos);
 
-    V_AddSpotLight(light_pos, view_dir, cl_flashlight_intensity->value, 1.f, 1.f, 1.f, 30.f, 15.f);
+        V_AddSpotLightTexEmission(light_pos, view_dir, cl_flashlight_intensity->value, 1.f, 1.f, 1.f, 90.0f, flashlight_profile_tex);
 }
-
-#endif
 
 /*
 =====================
@@ -229,7 +241,7 @@ V_AddLightStyle
 
 =====================
 */
-void V_AddLightStyle(int style, vec4_t value)
+void V_AddLightStyle(int style, float value)
 {
     lightstyle_t    *ls;
 
@@ -237,14 +249,11 @@ void V_AddLightStyle(int style, vec4_t value)
         Com_Errorf(ERR_DROP, "Bad light style %i", style);
     ls = &r_lightstyles[style];
 
-    //ls->white = r+g+b;
-    ls->rgb[0] = value[0];
-    ls->rgb[1] = value[1];
-    ls->rgb[2] = value[2];
-    ls->white = value[3];
+    VectorSet(ls->rgb, value, value, value);
+    ls->white = value;
 }
 
-#ifdef _DEBUG
+#if USE_DEBUG
 
 /*
 ================
@@ -306,7 +315,6 @@ static void V_TestEntities(void)
     }
 }
 
-#if USE_DLIGHTS
 /*
 ================
 V_TestLights
@@ -354,7 +362,6 @@ static void V_TestLights(void)
         dl->radius = 16;
     }
 }
-#endif
 
 #endif
 
@@ -465,15 +472,13 @@ void V_RenderView(void)
         // v_forward, etc.
         CL_AddEntities();
 
-#ifdef _DEBUG
+#if USE_DEBUG
         if (cl_testparticles->integer)
             V_TestParticles();
         if (cl_testentities->integer)
             V_TestEntities();
-#if USE_DLIGHTS
         if (cl_testlights->integer)
             V_TestLights();
-#endif
         if (cl_testblend->integer) {
             cl.refdef.blend[0] = 1;
             cl.refdef.blend[1] = 0.5f;
@@ -482,10 +487,8 @@ void V_RenderView(void)
         }
 #endif
 
-#if USE_DLIGHTS
         if(cl_flashlight->integer)
             V_Flashlight();
-#endif
 
         // never let it sit exactly on a node line, because a water plane can
         // dissapear when viewed with the eye exactly on it.
@@ -522,10 +525,8 @@ void V_RenderView(void)
             r_numentities = 0;
         if (!cl_add_particles->integer)
             r_numparticles = 0;
-#if USE_DLIGHTS
         if (!cl_add_lights->integer)
             r_numdlights = 0;
-#endif
         if (!cl_add_blend->integer)
             Vector4Clear(cl.refdef.blend);
 
@@ -533,10 +534,8 @@ void V_RenderView(void)
         cl.refdef.entities = r_entities;
         cl.refdef.num_particles = r_numparticles;
         cl.refdef.particles = r_particles;
-#if USE_DLIGHTS
         cl.refdef.num_dlights = r_numdlights;
         cl.refdef.dlights = r_dlights;
-#endif
         cl.refdef.lightstyles = r_lightstyles;
 
         cl.refdef.rdflags = cl.frame.ps.rdflags;
@@ -546,13 +545,9 @@ void V_RenderView(void)
     }
 
     R_RenderFrame(&cl.refdef);
-#ifdef _DEBUG
+#if USE_DEBUG
     if (cl_stats->integer)
-#if USE_DLIGHTS
         Com_Printf("ent:%i  lt:%i  part:%i\n", r_numentities, r_numdlights, r_numparticles);
-#else
-        Com_Printf("ent:%i  part:%i\n", r_numentities, r_numparticles);
-#endif
 #endif
 
     V_SetLightLevel();
@@ -566,9 +561,7 @@ V_Viewpos_f
 */
 static void V_Viewpos_f(void)
 {
-    Com_Printf("(%.f %.f %.f) : %.f\n", cl.refdef.vieworg[0],
-               cl.refdef.vieworg[1], cl.refdef.vieworg[2],
-               cl.refdef.viewangles[YAW]);
+    Com_Printf("%s : %.f\n", vtos(cl.refdef.vieworg), cl.refdef.viewangles[YAW]);
 }
 
 static const cmdreg_t v_cmds[] = {
@@ -588,23 +581,20 @@ void V_Init(void)
 {
     Cmd_Register(v_cmds);
 
-#ifdef _DEBUG
+#if USE_DEBUG
     cl_testblend = Cvar_Get("cl_testblend", "0", 0);
     cl_testparticles = Cvar_Get("cl_testparticles", "0", 0);
     cl_testentities = Cvar_Get("cl_testentities", "0", 0);
-#if USE_DLIGHTS
     cl_testlights = Cvar_Get("cl_testlights", "0", CVAR_CHEAT);
-#endif
 
     cl_stats = Cvar_Get("cl_stats", "0", 0);
 #endif
 
-#if USE_DLIGHTS
     cl_add_lights = Cvar_Get("cl_lights", "1", 0);
 	cl_show_lights = Cvar_Get("cl_show_lights", "0", 0);
     cl_flashlight = Cvar_Get("cl_flashlight", "0", 0);
     cl_flashlight_intensity = Cvar_Get("cl_flashlight_intensity", "10000", CVAR_CHEAT);
-#endif
+    flashlight_profile_tex = R_RegisterImage("flashlight_profile", IT_PIC, IF_PERMANENT | IF_BILERP, NULL);
     cl_add_particles = Cvar_Get("cl_particles", "1", 0);
     cl_add_entities = Cvar_Get("cl_entities", "1", 0);
     cl_add_blend = Cvar_Get("cl_blend", "1", 0);
@@ -614,6 +604,8 @@ void V_Init(void)
 
 void V_Shutdown(void)
 {
+    if(flashlight_profile_tex != -1)
+        R_UnregisterImage(flashlight_profile_tex);
     Cmd_Deregister(v_cmds);
 }
 

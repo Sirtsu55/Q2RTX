@@ -42,7 +42,7 @@ typedef struct areanode_s {
 static areanode_t   sv_areanodes[AREA_NODES];
 static int          sv_numareanodes;
 
-static float    *area_mins, *area_maxs;
+static const vec_t  *area_mins, *area_maxs;
 static edict_t  **area_list;
 static size_t   area_count, area_maxcount;
 static int      area_type;
@@ -54,7 +54,7 @@ SV_CreateAreaNode
 Builds a uniformly subdivided tree for the given world size
 ===============
 */
-static areanode_t *SV_CreateAreaNode(int depth, vec3_t mins, vec3_t maxs)
+static areanode_t *SV_CreateAreaNode(int depth, const vec3_t mins, const vec3_t maxs)
 {
     areanode_t  *anode;
     vec3_t      size;
@@ -183,8 +183,7 @@ static void SV_LinkEdict(cm_t *cm, edict_t *ent, server_entity_t *sent)
             // but nothing should evern need more than that
             if (ent->areanum && ent->areanum != area) {
                 if (ent->areanum2 && ent->areanum2 != area && sv.state == ss_loading) {
-                    Com_DPrintf("Object touching 3 areas at %f %f %f\n",
-                                ent->absmin[0], ent->absmin[1], ent->absmin[2]);
+                    Com_DPrintf("Object touching 3 areas at %s\n", vtos(ent->absmin));
                 }
                 ent->areanum2 = area;
             } else
@@ -371,7 +370,7 @@ static void SV_AreaEdicts_r(areanode_t *node)
 SV_AreaEdicts
 ================
 */
-size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list,
+size_t SV_AreaEdicts(const vec3_t mins, const vec3_t maxs, edict_t **list,
                      size_t maxcount, int areatype)
 {
     area_mins = mins;
@@ -417,7 +416,7 @@ mnode_t *SV_HullForEntity(edict_t *ent)
 SV_PointContents
 =============
 */
-int SV_PointContents(vec3_t p)
+int SV_PointContents(const vec3_t p)
 {
     edict_t     *touch[MAXTOUCH * 4], *hit;
     int         i, num;
@@ -450,7 +449,8 @@ SV_ClipMoveToEntities
 
 ====================
 */
-static void SV_ClipMoveToEntities(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+static void SV_ClipMoveToEntities(const vec3_t start, const vec3_t mins,
+                                  const vec3_t maxs, const vec3_t end,
                                   edict_t *passedict, int contentmask, trace_t *tr)
 {
     vec3_t      boxmins, boxmaxs;
@@ -509,7 +509,7 @@ Moves the given mins/maxs volume through the world from start to end.
 Passedict and edicts owned by passedict are explicitly not checked.
 ==================
 */
-void SV_Trace(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+void SV_Trace(trace_t *tr, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
               edict_t *passedict, int contentmask)
 {
     if (!sv.cm.cache) {

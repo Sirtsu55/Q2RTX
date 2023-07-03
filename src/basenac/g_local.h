@@ -597,6 +597,7 @@ extern  cvarRef_t  needpass;
 extern  cvarRef_t  g_select_empty;
 extern  cvarRef_t  dedicated;
 extern  cvarRef_t  nomonsters;
+extern  cvar_t  *aimfix;
 
 extern  cvarRef_t  filterban;
 
@@ -705,7 +706,6 @@ void    G_FreeEdict(edict_t *e);
 void    G_TouchTriggers(edict_t *ent);
 
 float   *tv(float x, float y, float z);
-char    *vtos(vec3_t v);
 
 float vectoyaw(vec3_t vec);
 void vectoangles(vec3_t vec, vec3_t angles);
@@ -715,7 +715,7 @@ void vectoangles(vec3_t vec, vec3_t angles);
 //
 bool OnSameTeam(edict_t *ent1, edict_t *ent2);
 bool CanDamage(edict_t *targ, edict_t *inflictor);
-void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod);
+void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t dir, vec3_t point, const vec3_t normal, int damage, int knockback, int dflags, int mod);
 void T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod);
 
 // damage flags
@@ -1212,7 +1212,7 @@ void SV_ClientPrintf(edict_t *ent, client_print_type_t level, const char *fmt, .
 void SV_StartSound(edict_t *entity, int channel,
                    int soundindex, float volume,
                    float attenuation, int pitch_shift);
-void SV_PositionedSound(vec3_t origin, edict_t *entity, int channel,
+void SV_PositionedSound(const vec3_t origin, edict_t *entity, int channel,
                         int soundindex, float volume,
                         float attenuation, int pitch_shift);
 
@@ -1220,7 +1220,7 @@ int SV_ModelIndex(const char *name);
 int SV_SoundIndex(const char *name);
 int SV_ImageIndex(const char *name);
 
-bool SV_InVis(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas);
+bool SV_InVis(const vec3_t p1, const vec3_t p2, vis_set_t vis, bool ignore_areas);
 void SV_SetAreaPortalState(int portalnum, bool open);
 bool SV_GetAreaPortalState(int portalnum);
 bool SV_AreasConnected(int area1, int area2);
@@ -1228,11 +1228,11 @@ void SV_SetBrushModel(edict_t *ent, const char *model);
 void SV_LinkEntity(edict_t *ent);
 bool SV_EntityLinked(edict_t *ent);
 void SV_UnlinkEntity(edict_t *ent);
-trace_t SV_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+trace_t SV_Trace(const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
                  edict_t *passedict, int contentmask);
-int SV_PointContents(vec3_t p);
-size_t SV_AreaEdicts(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
-bool SV_EntityCollide(vec3_t mins, vec3_t maxs, edict_t *ent);
+int SV_PointContents(const vec3_t p);
+size_t SV_AreaEdicts(const vec3_t mins, const vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
+bool SV_EntityCollide(const vec3_t mins, const vec3_t maxs, edict_t *ent);
 
 int Cmd_Argc(void);
 char *Cmd_Argv(int arg);
@@ -1260,7 +1260,7 @@ void SV_SetConfigString(uint32_t num, const char *string);
 size_t SV_GetConfigString(uint32_t num, char *buffer, size_t len);
 
 void SV_DropClient(edict_t *ent, const char *reason);
-void SV_Multicast(vec3_t origin, multicast_t to, bool reliable);
+void SV_Multicast(const vec3_t origin, multicast_t to, bool reliable);
 void SV_Unicast(edict_t *ent, bool reliable);
 void SV_WriteChar(int c);
 void SV_WriteByte(int c);

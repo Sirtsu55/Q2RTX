@@ -51,7 +51,7 @@ static int sound_pain1;
 static int sound_pain2;
 static int sound_death;
 
-void grunt_sight(edict_t *self)
+void grunt_sight(edict_t *self, edict_t *other)
 {
     SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 }

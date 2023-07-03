@@ -1691,7 +1691,7 @@ void MSG_ParseDeltaPlayerstate(const player_state_t    *from,
 ==============================================================================
 */
 
-#ifdef _DEBUG
+#if USE_DEBUG
 
 #define SHOWBITS(x) Com_LPrintf(PRINT_DEVELOPER, x " ")
 
@@ -1828,5 +1828,5 @@ const char *MSG_ServerCommandString(int cmd)
 
 #endif // USE_CLIENT
 
-#endif // _DEBUG
+#endif // USE_DEBUG
 

@@ -106,7 +106,7 @@ typedef struct {
     void (*Com_LPrint)(print_type_t type, const char *message);
     void (*SV_ClientPrint)(edict_t *ent, client_print_type_t printlevel, const char *message);
     void (*SV_CenterPrint)(edict_t *ent, const char *message);
-    void (*SV_StartSound)(vec3_t origin, edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
+    void (*SV_StartSound)(const vec3_t origin, edict_t *ent, int channel, int soundindex, float volume, float attenuation, int pitch_shift);
 
     // config strings hold all the index strings, the lightstyles,
     // and misc data like the sky definition and cdtrack.
@@ -125,9 +125,9 @@ typedef struct {
     void (*SV_SetBrushModel)(edict_t *ent, const char *name);
 
     // collision detection
-    void (*SV_Trace)(trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask);
-    int (*SV_PointContents)(vec3_t point);
-    bool (*SV_InVis)(vec3_t p1, vec3_t p2, vis_set_t vis, bool ignore_areas);
+    void (*SV_Trace)(trace_t *tr, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, edict_t *passent, int contentmask);
+    int (*SV_PointContents)(const vec3_t point);
+    bool (*SV_InVis)(const vec3_t p1, const vec3_t p2, vis_set_t vis, bool ignore_areas);
     void (*SV_SetAreaPortalState)(int portalnum, bool open);
     bool (*SV_GetAreaPortalState)(int portalnum);
     bool (*SV_AreasConnected)(int area1, int area2);
@@ -138,13 +138,13 @@ typedef struct {
     void (*SV_LinkEntity)(edict_t *ent);
     void (*SV_UnlinkEntity)(edict_t *ent);     // call before removing an interactive edict
     bool (*SV_EntityLinked)(edict_t *ent);
-    size_t (*SV_AreaEdicts)(vec3_t mins, vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
-    bool (*SV_EntityCollide)(vec3_t mins, vec3_t maxs, edict_t *ent);
+    size_t (*SV_AreaEdicts)(const vec3_t mins, const vec3_t maxs, edict_t **list, size_t maxcount, int areatype);
+    bool (*SV_EntityCollide)(const vec3_t mins, const vec3_t maxs, edict_t *ent);
     void (*Pmove)(pmove_t *pmove);          // player movement code common with client prediction
 
     // network messaging
     void (*SV_DropClient)(edict_t *ent, const char *reason);
-    void (*SV_Multicast)(vec3_t origin, multicast_t to, bool reliable);
+    void (*SV_Multicast)(const vec3_t origin, multicast_t to, bool reliable);
     void (*SV_Unicast)(edict_t *ent, bool reliable);
     void (*WriteChar)(int c);
     void (*WriteByte)(int c);
