@@ -749,7 +749,8 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 		light->direction_envmap[2] = sinf(elevation_rad);
 	}
 
-	light->angular_size_rad = max(1.f, min(10.f, sun_angle->value)) * M_PI / 180.f;
+	//light->angular_size_rad = max(1.f, min(10.f, sun_angle->value)) * M_PI / 180.f;
+	light->angular_size_rad = max(1.f, sun_angle->value) * M_PI / 180.f;
 
 	light->use_physical_sky = true;
 
