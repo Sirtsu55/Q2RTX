@@ -100,10 +100,7 @@ static int write_level_file(void)
         if (!s[0])
             continue;
 
-        len = strlen(s);
-        if (len > MAX_QPATH)
-            len = MAX_QPATH;
-
+        len = Q_strnlen(s, MAX_QPATH);
         MSG_WriteShort(i);
         MSG_WriteData(s, len);
         MSG_WriteByte(0);
@@ -500,11 +497,11 @@ void SV_AutoSaveBegin(mapcmd_t *cmd)
 
 void SV_AutoSaveEnd(void)
 {
-    if (sv.state != ss_game)
-        return;
+	if (sv.state != ss_game)
+		return;
 
-    if (SV_NoSaveGames())
-        return;
+	if (SV_NoSaveGames())
+		return;
 
 	// save the map just entered to include the player position (client edict shell)
 	if (write_level_file())
