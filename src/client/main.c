@@ -49,7 +49,6 @@ cvar_t  *cl_thirdperson_range;
 
 cvar_t  *cl_disable_particles;
 cvar_t  *cl_disable_explosions;
-cvar_t  *cl_dlight_hacks;
 
 cvar_t  *cl_chat_notify;
 cvar_t  *cl_chat_sound;

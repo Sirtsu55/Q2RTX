@@ -1214,9 +1214,6 @@ void CL_ParseTEnt(void)
         if (!(cl_disable_particles->integer & NOPART_GRENADE_EXPLOSION))
             CL_ExplosionParticles(te.pos1);
 
-        if (cl_dlight_hacks->integer & DLHACK_SMALLER_EXPLOSION)
-            ex->light = 200;
-
         if (te.type == TE_GRENADE_EXPLOSION_WATER)
             S_StartSound(te.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0, 0);
         else
@@ -1248,9 +1245,6 @@ void CL_ParseTEnt(void)
 
         if (!(cl_disable_particles->integer & NOPART_ROCKET_EXPLOSION))
             CL_ExplosionParticles(te.pos1);
-
-        if (cl_dlight_hacks->integer & DLHACK_SMALLER_EXPLOSION)
-            ex->light = 200;
 
         if (te.type == TE_ROCKET_EXPLOSION_WATER)
             S_StartSound(te.pos1, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0, 0);
