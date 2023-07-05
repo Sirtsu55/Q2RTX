@@ -963,10 +963,24 @@ void UpdatePhysicalSkyCVars()
 {
 	PhysicalSkyDesc_t const * sky = GetSkyPreset(physical_sky->integer);
 
-	// sun
-	for (int i = 0; i < 3; ++i)
-		Cvar_SetValue(sun_color[i], sky->sunColor[i], FROM_CODE);
+	bool has_custom_color = false;
 
+	for (int i = 0; i < 3; ++i)
+	{
+		if (sun_color[i]->value != 1.0) // 1.0 is the default value when initialized and if not changed by the user in cfg
+		{
+			has_custom_color = true;
+			break;
+		}
+	}
+
+
+	// sun
+	if (!has_custom_color)
+	{
+		for (int i = 0; i < 3; ++i)
+			Cvar_SetValue(sun_color[i], sky->sunColor[i], FROM_CODE);
+	}
 	Cvar_SetValue(sun_angle, sky->sunAngularDiameter, FROM_CODE);
 
 	skyNeedsUpdate = VK_TRUE;
