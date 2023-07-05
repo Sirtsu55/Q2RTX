@@ -127,8 +127,7 @@ int num_accumulated_frames = 0;
 
 static bool frame_ready = false;
 
-static float sky_rotation = 0.f;
-static int sky_autorotate = 0;
+static float requested_sky_rotation = 0.f;
 static vec3_t sky_axis = { 0.f };
 
 #define NUM_TAA_SAMPLES 128
@@ -2562,9 +2561,14 @@ evaluate_taa_settings(const reference_mode_t* ref_mode)
 static void
 prepare_sky_matrix(float time, vec3_t sky_matrix[3])
 {
-	if (sky_rotation != 0.f)
+	// check if user wants to rotate the sky
+	cvar_t* sky_rotation = Cvar_Get("physical_sky_rotate", "0", 0); // cvar defined in physical_sky.c
+	if(sky_rotation->value != -1.0f) // -1.0f means "use the value from the map"
+		requested_sky_rotation = sky_rotation->value;
+
+	if (requested_sky_rotation != 0.f)
 	{
-		SetupRotationMatrix(sky_matrix, sky_axis, (sky_autorotate ? time : 1.f) * sky_rotation);
+		SetupRotationMatrix(sky_matrix, sky_axis, time * requested_sky_rotation);
 	}
 	else
 	{
@@ -4059,8 +4063,7 @@ R_SetSky_RTX(const char *name, float rotate, int autorotate, const vec3_t axis)
 
 	byte *data = NULL;
 
-	sky_rotation = rotate;
-	sky_autorotate = autorotate;
+	requested_sky_rotation = rotate;
 	VectorNormalize2(axis, sky_axis);
 
 	int avg_color[3] = { 0 };
