@@ -215,8 +215,8 @@ vec4 integratePlanet(SunInfo sun, PlanetInfo planet, vec3 dirView) {
     vec2 fPlanetNearFar; 
     vec2 fAtmosphereNearFar;
 
-    bool bPlanetIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fInnerRadius2, fPlanetNearFar);
-    bool bAtmosphereIntersection = intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2, fAtmosphereNearFar);
+    bool bPlanetIntersection = global_ubo.planet_render != 0 ? intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fInnerRadius2, fPlanetNearFar) : false;
+    bool bAtmosphereIntersection = global_ubo.planet_render != 0 ? intersectSphere(v3CameraPos, v3Ray, fCameraHeight2, fOuterRadius2, fAtmosphereNearFar) : false;
 
     if (bPlanetIntersection) {
 
@@ -372,6 +372,7 @@ void main() {
 	// planet
 	planet.albedoMap = global_ubo.planet_albedo_map;
 	planet.normalMap = global_ubo.planet_normal_map;
+	planet.outerRadius = global_ubo.planet_radius;
 	
 	vec4 planet_color = integratePlanet(sun, planet, eyeVec);
 	radiance = mix(radiance, planet_color.rgb, planet_color.a);
