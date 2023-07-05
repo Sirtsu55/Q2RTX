@@ -57,6 +57,9 @@ cvar_t *physical_sky_draw_clouds;
 cvar_t *physical_sky_space;
 cvar_t *physical_sky_brightness;
 
+cvar_t *physical_sky_planet_radius;
+cvar_t *physical_sky_planet_render;
+
 cvar_t *sky_scattering;
 cvar_t *sky_transmittance;
 cvar_t *sky_phase_g;
@@ -857,6 +860,9 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
     ubo->planet_albedo_map = physical_sky_planet_albedo_map;
     ubo->planet_normal_map = physical_sky_planet_normal_map;
 
+	ubo->planet_radius = physical_sky_planet_radius->value;
+	ubo->planet_render = physical_sky_planet_render->integer;
+
 	ubo->sun_visible = light->visible;
 
 	if (render_world && !(skyDesc->flags & PHYSICAL_SKY_FLAG_USE_SKYBOX))
@@ -943,6 +949,14 @@ void InitialiseSkyCVars()
 
 	physical_sky_brightness = Cvar_Get("physical_sky_brightness", "0", 0);
 	physical_sky_brightness->changed = physical_sky_cvar_changed;
+
+	// planet
+
+	physical_sky_planet_radius = Cvar_Get("planet_radius", "0.4", 0);
+	physical_sky_planet_radius->changed = physical_sky_cvar_changed;
+
+	physical_sky_planet_render = Cvar_Get("planet_render", "1", 0);
+	physical_sky_planet_render->changed = physical_sky_cvar_changed;
 }
 
 void UpdatePhysicalSkyCVars()

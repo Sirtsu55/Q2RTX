@@ -229,6 +229,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	\
 	GLOBAL_UBO_VAR_LIST_DO(int,             weapon_left_handed) \
 	\
+	GLOBAL_UBO_VAR_LIST_DO(float,           planet_radius) \
+	GLOBAL_UBO_VAR_LIST_DO(int,				planet_render) \
+	\
 	UBO_CVAR_LIST // WARNING: Do not put any other members into global_ubo after this: the CVAR list is not vec4-aligned
 
 BEGIN_SHADER_STRUCT( DynLightData )
