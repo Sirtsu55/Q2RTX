@@ -53,12 +53,14 @@ cvar_t *sun_preset;
 cvar_t *sun_latitude;
 
 cvar_t *physical_sky;
+cvar_t *physical_sky_rotate;
 cvar_t *physical_sky_draw_clouds;
 cvar_t *physical_sky_space;
 cvar_t *physical_sky_brightness;
 
 cvar_t *physical_sky_planet_radius;
 cvar_t *physical_sky_planet_render;
+cvar_t *physical_sky_planet_position[3];
 
 cvar_t *sky_scattering;
 cvar_t *sky_transmittance;
@@ -863,6 +865,9 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	ubo->planet_radius = physical_sky_planet_radius->value;
 	ubo->planet_render = physical_sky_planet_render->integer;
 
+	vec3_t planet_position = { physical_sky_planet_position[0]->value, physical_sky_planet_position[1]->value, physical_sky_planet_position[2]->value };
+	VectorCopy(planet_position, ubo->planet_position);
+
 	ubo->sun_visible = light->visible;
 
 	if (render_world && !(skyDesc->flags & PHYSICAL_SKY_FLAG_USE_SKYBOX))
@@ -887,7 +892,8 @@ void physical_sky_cvar_changed(cvar_t *self)
 
 void InitialiseSkyCVars()
 {
-    static char _rgb[3] = {'r', 'g', 'b'};
+	static char _rgb[3] = {'r', 'g', 'b'};
+	static char _xyz[3] = {'x', 'y', 'z'};
 
     // sun
     for (int i = 0; i < 3; ++i)
@@ -941,6 +947,9 @@ void InitialiseSkyCVars()
     physical_sky = Cvar_Get("physical_sky", "2", 0);
     physical_sky->changed = physical_sky_cvar_changed;
 
+	physical_sky_rotate = Cvar_Get("physical_sky_rotate", "-1.0", 0); // -1.0 = auto-rotate
+	physical_sky_rotate->changed = physical_sky_cvar_changed;
+
     physical_sky_draw_clouds = Cvar_Get("physical_sky_draw_clouds", "1", 0);
     physical_sky_draw_clouds->changed = physical_sky_cvar_changed;
 
@@ -957,6 +966,15 @@ void InitialiseSkyCVars()
 
 	physical_sky_planet_render = Cvar_Get("planet_render", "1", 0);
 	physical_sky_planet_render->changed = physical_sky_cvar_changed;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		if(i == 0)
+			physical_sky_planet_position[i] = Cvar_Get(va("planet_position_%c", _xyz[i]), "-1.0", 0); // default to left
+		else
+			physical_sky_planet_position[i] = Cvar_Get(va("planet_position_%c", _xyz[i]), "0.0", 0);
+		physical_sky_planet_position[i]->changed = physical_sky_cvar_changed;
+	}
 }
 
 void UpdatePhysicalSkyCVars()
