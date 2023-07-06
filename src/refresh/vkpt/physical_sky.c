@@ -48,9 +48,12 @@ cvar_t *sun_brightness;
 cvar_t *sun_bounce;
 cvar_t *sun_animate;
 cvar_t *sun_gamepad;
+cvar_t* sun_render;
 
 cvar_t *sun_preset;
 cvar_t *sun_latitude;
+cvar_t *sun_surface_map_render;
+cvar_t *sun_surface_map_scale;
 
 cvar_t *physical_sky;
 cvar_t *physical_sky_rotate;
@@ -69,6 +72,8 @@ cvar_t *sky_amb_phase_g;
 
 static uint32_t physical_sky_planet_albedo_map = 0;
 static uint32_t physical_sky_planet_normal_map = 0;
+
+static uint32_t physical_sky_sun_surface_map = 0;
 
 static time_t latched_local_time;
 
@@ -362,6 +367,14 @@ vkpt_physical_sky_endRegistration()
             physical_sky_planet_normal_map = normal_map - r_images;
         }
     }
+	if (physical_sky->integer > 0 || physical_sky_space->integer > 0)
+	{
+		image_t const * sun_surface_map = IMG_Find("env/sun_surface_map.tga", IT_SKIN, IF_SRGB);
+		if (sun_surface_map != R_NOTEXTURE) {
+			physical_sky_sun_surface_map = sun_surface_map - r_images;
+		}
+
+	}
     return VK_SUCCESS;
 }
 
@@ -798,6 +811,14 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	ubo->sun_tan_half_angle = tanf(light->angular_size_rad * 0.5f);
 	ubo->sun_cos_half_angle = cosf(light->angular_size_rad * 0.5f);
 	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(light->angular_size_rad * 0.5)); // use double for precision
+
+	if(sun_surface_map_render->integer)
+		ubo->sun_surface_map = physical_sky_sun_surface_map; // the texture map for the sun
+	else
+		ubo->sun_surface_map = -1; // no texture map for the sun
+
+	ubo->sun_surface_map_scale = sun_surface_map_scale->value;
+
 	//ubo->sun_solid_angle = max(ubo->sun_solid_angle, 1e-3f);
 
 	VectorCopy(light->color, ubo->sun_color);
@@ -863,7 +884,8 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
     ubo->planet_normal_map = physical_sky_planet_normal_map;
 
 	ubo->planet_radius = physical_sky_planet_radius->value;
-	ubo->planet_render = physical_sky_planet_render->integer;
+	ubo->physical_sky_flags |= physical_sky_planet_render->integer ? PHYSICAL_SKY_FLAG_DRAW_PLANET : 0x0;
+	ubo->physical_sky_flags |= sun_render->integer ? PHYSICAL_SKY_FLAG_DRAW_SUN : 0x0;
 
 	vec3_t planet_position = { physical_sky_planet_position[0]->value, physical_sky_planet_position[1]->value, physical_sky_planet_position[2]->value };
 	VectorCopy(planet_position, ubo->planet_position);
@@ -941,6 +963,15 @@ void InitialiseSkyCVars()
 	sun_latitude->changed = physical_sky_cvar_changed;
 
 	sun_gamepad = Cvar_Get("sun_gamepad", "0", 0);
+
+	sun_surface_map_render = Cvar_Get("sun_surface_map_render", "0", 0);
+	sun_surface_map_render->changed = physical_sky_cvar_changed;
+
+	sun_surface_map_scale = Cvar_Get("sun_surface_map_scale", "1.0", 0);
+	sun_surface_map_scale->changed = physical_sky_cvar_changed;
+
+	sun_render = Cvar_Get("sun_render", "1", 0);
+	sun_render->changed = physical_sky_cvar_changed;
 
     // sky
 
