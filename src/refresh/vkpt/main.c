@@ -2543,6 +2543,8 @@ prepare_sky_matrix(float time, vec3_t sky_matrix[3])
 
 	if (requested_sky_rotation != 0.f)
 	{
+		// TODO: sky axis is 0 if the map doesn't have any rotation so making it a cvar, 
+		// or a constant would allow the sky to rotate even if the map doesn't have any rotation
 		SetupRotationMatrix(sky_matrix, sky_axis, time * requested_sky_rotation);
 	}
 	else
