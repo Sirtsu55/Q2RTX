@@ -112,7 +112,7 @@ env_map(vec3 direction, bool remove_sun)
 		if (remove_sun)
 		{
 			// roughly remove the sun from the env map
-			envmap = min(envmap, vec3((1 - dot(direction, global_ubo.sun_direction_envmap)) * 200));
+			envmap = min(envmap, vec3((1 - dot(direction, global_ubo.sun_direction_envmap)) * 1000));
 		}
 	}
 	else if (global_ubo.environment_type == ENVIRONMENT_STATIC)
