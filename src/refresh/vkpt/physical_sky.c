@@ -57,12 +57,15 @@ cvar_t *sun_surface_map_scale;
 
 cvar_t *physical_sky;
 cvar_t *physical_sky_rotate;
+cvar_t *physical_sky_orientation;
 cvar_t *physical_sky_draw_clouds;
 cvar_t *physical_sky_space;
 cvar_t *physical_sky_brightness;
+cvar_t *physical_sky_sun_texture;
 
 cvar_t *physical_sky_planet_radius;
 cvar_t *physical_sky_planet_render;
+cvar_t *physical_sky_planet_texture;
 cvar_t *physical_sky_planet_position[3];
 
 cvar_t *sky_scattering;
@@ -357,19 +360,42 @@ vkpt_physical_sky_endRegistration()
 {
     if (physical_sky_space->integer > 0)
     {
-        image_t const * albedo_map = IMG_Find("env/planet_albedo.tga", IT_SKIN, IF_SRGB);
+		char planet_albedo_path[64];
+		char planet_normal_path[64];
+		// null terminate
+		planet_albedo_path[0] = "\0";
+		planet_normal_path[0] = "\0";
+
+		{
+			strcpy(planet_albedo_path, "env/"); // first has to be strcpy
+			strcat(planet_albedo_path, physical_sky_planet_texture->string);
+			strcat(planet_albedo_path, "_albedo.tga");
+
+			strcpy(planet_normal_path, "env/");
+			strcat(planet_normal_path, physical_sky_planet_texture->string);
+			strcat(planet_normal_path, "_normal.tga");
+		}
+
+        image_t const * albedo_map = IMG_Find(planet_albedo_path, IT_SKIN, IF_SRGB);
         if (albedo_map != R_NOTEXTURE) {
             physical_sky_planet_albedo_map = albedo_map - r_images;
         }
 
-        image_t const * normal_map = IMG_Find("env/planet_normal.tga", IT_SKIN, IF_SRGB);
+        image_t const * normal_map = IMG_Find(planet_normal_path, IT_SKIN, IF_SRGB);
         if (normal_map != R_NOTEXTURE) {
             physical_sky_planet_normal_map = normal_map - r_images;
         }
     }
+	char sun_surface_path[64];
+	sun_surface_path[0] = "\0";
+
+	strcpy(sun_surface_path, "env/");
+	strcat(sun_surface_path, physical_sky_sun_texture->string);
+	strcat(sun_surface_path, ".tga");
+
 	if (physical_sky->integer > 0 || physical_sky_space->integer > 0)
 	{
-		image_t const * sun_surface_map = IMG_Find("env/sun_surface_map.tga", IT_SKIN, IF_SRGB);
+		image_t const * sun_surface_map = IMG_Find(sun_surface_path, IT_SKIN, IF_SRGB);
 		if (sun_surface_map != R_NOTEXTURE) {
 			physical_sky_sun_surface_map = sun_surface_map - r_images;
 		}
@@ -967,6 +993,8 @@ void InitialiseSkyCVars()
 	sun_surface_map_render = Cvar_Get("sun_surface_map_render", "0", 0);
 	sun_surface_map_render->changed = physical_sky_cvar_changed;
 
+	physical_sky_sun_texture = Cvar_Get("sun_surface_map_texture", "sun_surface_map", 0);
+
 	sun_surface_map_scale = Cvar_Get("sun_surface_map_scale", "1.0", 0);
 	sun_surface_map_scale->changed = physical_sky_cvar_changed;
 
@@ -981,6 +1009,8 @@ void InitialiseSkyCVars()
 	physical_sky_rotate = Cvar_Get("physical_sky_rotate", "-1.0", 0); // -1.0 = auto-rotate
 	physical_sky_rotate->changed = physical_sky_cvar_changed;
 
+	physical_sky_orientation = Cvar_Get("physical_sky_orientation", "0.0", 0);
+
     physical_sky_draw_clouds = Cvar_Get("physical_sky_draw_clouds", "1", 0);
     physical_sky_draw_clouds->changed = physical_sky_cvar_changed;
 
@@ -994,6 +1024,8 @@ void InitialiseSkyCVars()
 
 	physical_sky_planet_radius = Cvar_Get("planet_radius", "0.4", 0);
 	physical_sky_planet_radius->changed = physical_sky_cvar_changed;
+
+	physical_sky_planet_texture = Cvar_Get("planet_texture", "planet", 0);
 
 	physical_sky_planet_render = Cvar_Get("planet_render", "1", 0);
 	physical_sky_planet_render->changed = physical_sky_cvar_changed;
