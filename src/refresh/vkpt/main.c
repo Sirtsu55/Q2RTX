@@ -2563,14 +2563,18 @@ prepare_sky_matrix(float time, vec3_t sky_matrix[3])
 {
 	// check if user wants to rotate the sky
 	cvar_t* sky_rotation = Cvar_Get("physical_sky_rotate", "0", 0); // cvar defined in physical_sky.c
+	cvar_t* sky_orientation = Cvar_Get("physical_sky_orientation", "0.0", 0); // cvar defined in physical_sky.c
+
 	if(sky_rotation->value != -1.0f) // -1.0f means "use the value from the map"
 		requested_sky_rotation = sky_rotation->value;
 
 	if (requested_sky_rotation != 0.f)
 	{
-		// TODO: sky axis is 0 if the map doesn't have any rotation so making it a cvar, 
-		// or a constant would allow the sky to rotate even if the map doesn't have any rotation
 		SetupRotationMatrix(sky_matrix, sky_axis, time * requested_sky_rotation);
+	}
+	else if(sky_orientation->value != 0.0)
+	{
+		SetupRotationMatrix(sky_matrix, sky_axis, sky_orientation->value); // set the default orientation
 	}
 	else
 	{
