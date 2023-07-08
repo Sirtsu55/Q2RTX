@@ -2,7 +2,7 @@
 .q2pro/
 .q2proded/
 .baseq2/
-baseq2/maps
+baseq2/maps.lst
 q2rtx
 q2rtxded
 game*.so
