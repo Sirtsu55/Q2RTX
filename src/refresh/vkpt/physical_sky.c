@@ -66,7 +66,9 @@ cvar_t *physical_sky_sun_texture;
 cvar_t *physical_sky_planet_radius;
 cvar_t *physical_sky_planet_render;
 cvar_t *physical_sky_planet_texture;
-cvar_t *physical_sky_planet_position[3];
+
+cvar_t *physical_sky_planet_azimuth;
+cvar_t *physical_sky_planet_elevation;
 
 cvar_t *sky_scattering;
 cvar_t *sky_transmittance;
@@ -363,8 +365,8 @@ vkpt_physical_sky_endRegistration()
 		char planet_albedo_path[64];
 		char planet_normal_path[64];
 		// null terminate
-		planet_albedo_path[0] = "\0";
-		planet_normal_path[0] = "\0";
+		planet_albedo_path[0] = '\0';
+		planet_normal_path[0] = '\0';
 
 		{
 			strcpy(planet_albedo_path, "env/"); // first has to be strcpy
@@ -387,7 +389,7 @@ vkpt_physical_sky_endRegistration()
         }
     }
 	char sun_surface_path[64];
-	sun_surface_path[0] = "\0";
+	sun_surface_path[0] = '\0';
 
 	strcpy(sun_surface_path, "env/");
 	strcat(sun_surface_path, physical_sky_sun_texture->string);
@@ -913,7 +915,12 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	ubo->physical_sky_flags |= physical_sky_planet_render->integer ? PHYSICAL_SKY_FLAG_DRAW_PLANET : 0x0;
 	ubo->physical_sky_flags |= sun_render->integer ? PHYSICAL_SKY_FLAG_DRAW_SUN : 0x0;
 
-	vec3_t planet_position = { physical_sky_planet_position[0]->value, physical_sky_planet_position[1]->value, physical_sky_planet_position[2]->value };
+	vec3_t planet_position;
+	vec2_t planet_spherical_position = { ConvertAngleToRadians(physical_sky_planet_azimuth->value), ConvertAngleToRadians(physical_sky_planet_elevation->value) };
+
+	// compute planet position	
+	ConvertSphericalToCartesian(planet_spherical_position, planet_position);
+
 	VectorCopy(planet_position, ubo->planet_position);
 
 	ubo->sun_visible = light->visible;
@@ -1030,14 +1037,12 @@ void InitialiseSkyCVars()
 	physical_sky_planet_render = Cvar_Get("planet_render", "1", 0);
 	physical_sky_planet_render->changed = physical_sky_cvar_changed;
 
-	for (int i = 0; i < 3; ++i)
-	{
-		if(i == 0)
-			physical_sky_planet_position[i] = Cvar_Get(va("planet_position_%c", _xyz[i]), "-1.0", 0); // default to left
-		else
-			physical_sky_planet_position[i] = Cvar_Get(va("planet_position_%c", _xyz[i]), "0.0", 0);
-		physical_sky_planet_position[i]->changed = physical_sky_cvar_changed;
-	}
+	physical_sky_planet_azimuth = Cvar_Get("planet_azimuth", "0.0", 0);
+	physical_sky_planet_azimuth->changed = physical_sky_cvar_changed;
+
+	physical_sky_planet_elevation = Cvar_Get("planet_elevation", "0.0", 0);
+	physical_sky_planet_elevation->changed = physical_sky_cvar_changed;
+	
 }
 
 void UpdatePhysicalSkyCVars()
@@ -1146,6 +1151,23 @@ static void quatMult(vec4_t const a, vec4_t const b, vec4_t result)
     result[1] = a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2];
     result[2] = a[0] * b[2] + a[2] * b[0] + a[3] * b[1] - a[1] * b[3];
     result[3] = a[0] * b[3] + a[3] * b[0] + a[1] * b[2] - a[2] * b[1];
+}
+
+float ConvertAngleToRadians(float angle)
+{
+	return angle * (M_PI / 180.0f);
+}
+
+
+void ConvertSphericalToCartesian(const vec2_t spherical, vec3_t result)
+{
+	float const sinTheta = sinf(spherical[0]);
+	float const cosTheta = cosf(spherical[0]);
+	float const sinPhi = sinf(spherical[1]);
+	float const cosPhi = cosf(spherical[1]);
+	result[0] = sinTheta * cosPhi;
+	result[1] = sinTheta * sinPhi;
+	result[2] = cosTheta;
 }
 
 void CalculateDirectionToSun(float DayOfYear, float TimeOfDay, float LatitudeDegrees, vec3_t result)
