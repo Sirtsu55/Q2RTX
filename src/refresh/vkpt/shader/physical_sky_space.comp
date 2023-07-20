@@ -369,10 +369,6 @@ void main() {
 
 	// sun disk
 	vec3 sun_direct_radiance = global_ubo.sun_color;
-
-    if(draw_sun != 0) // if we want to draw the sun then we need to calculate the direct radiance
-        sun_direct_radiance /= global_ubo.sun_solid_angle; // falls off as sun_angle is bigger
-
     sun_direct_radiance *= pow(clamp((dot(eyeVec, sun.direction) - global_ubo.sun_cos_half_angle) * 1000 + 0.5, 0, 1), 10) / global_ubo.sun_solid_angle;
 
 	radiance += sun_direct_radiance;
