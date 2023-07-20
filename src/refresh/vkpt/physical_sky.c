@@ -916,7 +916,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	ubo->physical_sky_flags |= sun_render->integer ? PHYSICAL_SKY_FLAG_DRAW_SUN : 0x0;
 
 	vec3_t planet_position;
-	vec2_t planet_spherical_position = { ConvertAngleToRadians(physical_sky_planet_azimuth->value), ConvertAngleToRadians(physical_sky_planet_elevation->value) };
+	vec2_t planet_spherical_position = { ConvertAngleToRadians(physical_sky_planet_elevation->value), ConvertAngleToRadians(physical_sky_planet_azimuth->value) };
 
 	// compute planet position	
 	ConvertSphericalToCartesian(planet_spherical_position, planet_position);
