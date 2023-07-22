@@ -393,7 +393,6 @@ void main() {
         // This one is "we don't want the sun disc"
         vec3 out_radiance = (draw_sun != 0 ? sun_direct_radiance : vec3(0,0,0)) + radiance;
 
-        // This one is the "if there was a sun disc"
         radiance += sun_direct_radiance;
 
 		
