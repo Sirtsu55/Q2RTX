@@ -43,3 +43,6 @@ baseq2/**/*.txt
 !baseq2/*.txt
 !baseq2/maps/sky/*.txt
 !baseq2/pics/flashlight_profile.png
+/baseq2/env/overlay_clouds.tga
+/baseq2/env/overlay_clouds.tga
+/baseq2/env
