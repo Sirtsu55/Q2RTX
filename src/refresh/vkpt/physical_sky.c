@@ -58,7 +58,12 @@ cvar_t *sun_surface_map_scale;
 cvar_t *physical_sky;
 cvar_t *physical_sky_rotate;
 cvar_t *physical_sky_orientation;
+
 cvar_t *physical_sky_draw_clouds;
+cvar_t* physical_sky_clouds_overlay;
+cvar_t *physical_sky_clouds_overlay_speed;
+cvar_t *physical_sky_clouds_overlay_scale;
+
 cvar_t *physical_sky_space;
 cvar_t *physical_sky_brightness;
 cvar_t *physical_sky_sun_texture;
@@ -79,6 +84,8 @@ static uint32_t physical_sky_planet_albedo_map = 0;
 static uint32_t physical_sky_planet_normal_map = 0;
 
 static uint32_t physical_sky_sun_surface_map = 0;
+
+static uint32_t physical_sky_clouds_overlay_map = 0;
 
 static time_t latched_local_time;
 
@@ -388,21 +395,34 @@ vkpt_physical_sky_endRegistration()
             physical_sky_planet_normal_map = normal_map - r_images;
         }
     }
-	char sun_surface_path[64];
-	sun_surface_path[0] = '\0';
+	// load sun surface map
+	char file_path[64];
+	file_path[0] = '\0';
 
-	strcpy(sun_surface_path, "env/");
-	strcat(sun_surface_path, physical_sky_sun_texture->string);
-	strcat(sun_surface_path, ".tga");
+	strcpy(file_path, "env/");
+	strcat(file_path, physical_sky_sun_texture->string);
+	strcat(file_path, ".tga");
 
 	if (physical_sky->integer > 0 || physical_sky_space->integer > 0)
 	{
-		image_t const * sun_surface_map = IMG_Find(sun_surface_path, IT_SKIN, IF_SRGB);
+		image_t const * sun_surface_map = IMG_Find(file_path, IT_SKIN, IF_SRGB);
 		if (sun_surface_map != R_NOTEXTURE) {
 			physical_sky_sun_surface_map = sun_surface_map - r_images;
 		}
 
+
+		image_t const * overlay_cloud_map = IMG_Find(file_path, IT_SKIN, IF_SRGB);
+		// load cloud map
+		overlay_cloud_map = IMG_Find("env/overlay_clouds.tga", IT_SKIN, IF_SRGB);
+
+		if(overlay_cloud_map != R_NOTEXTURE)
+		{
+			physical_sky_clouds_overlay_map = overlay_cloud_map - r_images;
+		}
 	}
+
+
+
     return VK_SUCCESS;
 }
 
@@ -892,6 +912,9 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
             flags = flags | PHYSICAL_SKY_FLAG_DRAW_CLOUDS;
         else
             flags = flags & (~PHYSICAL_SKY_FLAG_DRAW_CLOUDS);
+		
+		if(physical_sky_clouds_overlay->value > 0)
+			flags = flags | PHYSICAL_SKY_FLAG_OVERLAY_CLOUDS;
 
         ubo->physical_sky_flags = flags;
 
@@ -906,7 +929,13 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t * ubo, const sun_light_t* light,
 	else
 		skyNeedsUpdate = VK_FALSE;
 
-    // planet
+	// Cloud Map
+	
+	ubo->cloud_overlay_map = physical_sky_clouds_overlay_map;
+	ubo->cloud_overlay_speed = physical_sky_clouds_overlay_speed->value;
+	ubo->cloud_overlay_scale = physical_sky_clouds_overlay_scale->value;
+
+	// planet
 
     ubo->planet_albedo_map = physical_sky_planet_albedo_map;
     ubo->planet_normal_map = physical_sky_planet_normal_map;
@@ -1020,6 +1049,15 @@ void InitialiseSkyCVars()
 
     physical_sky_draw_clouds = Cvar_Get("physical_sky_draw_clouds", "1", 0);
     physical_sky_draw_clouds->changed = physical_sky_cvar_changed;
+
+	physical_sky_clouds_overlay = Cvar_Get("physical_sky_clouds_overlay", "0", 0);
+	physical_sky_clouds_overlay->changed = physical_sky_cvar_changed;
+
+	physical_sky_clouds_overlay_speed = Cvar_Get("physical_sky_clouds_overlay_speed", "1.0", 0);
+	physical_sky_clouds_overlay_speed->changed = physical_sky_cvar_changed;
+
+	physical_sky_clouds_overlay_scale = Cvar_Get("physical_sky_clouds_overlay_scale", "1.0", 0);
+	physical_sky_clouds_overlay_scale->changed = physical_sky_cvar_changed;
 
     physical_sky_space = Cvar_Get("physical_sky_space", "0", 0);
 	physical_sky_space->changed = physical_sky_cvar_changed;
