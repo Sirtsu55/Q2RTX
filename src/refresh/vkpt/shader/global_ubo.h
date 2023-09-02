@@ -231,7 +231,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	\
 	GLOBAL_UBO_VAR_LIST_DO(float,			sun_surface_map_scale) \
 	GLOBAL_UBO_VAR_LIST_DO(int,				sun_surface_map) \
-	GLOBAL_UBO_VAR_LIST_DO(float,		    padding) \
+	GLOBAL_UBO_VAR_LIST_DO(int,		        enable_underwater_warp) \
 	GLOBAL_UBO_VAR_LIST_DO(vec3,			planet_position) \
 	GLOBAL_UBO_VAR_LIST_DO(float,           planet_radius) \
     \

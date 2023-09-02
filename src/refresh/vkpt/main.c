@@ -59,6 +59,7 @@ cvar_t *cvar_pt_caustics = NULL;
 cvar_t *cvar_pt_enable_nodraw = NULL;
 cvar_t *cvar_pt_enable_surface_lights = NULL;
 cvar_t *cvar_pt_enable_surface_lights_warp = NULL;
+cvar_t *cvar_pt_enable_underwater_warp = NULL;
 cvar_t* cvar_pt_surface_lights_fake_emissive_algo = NULL;
 cvar_t* cvar_pt_surface_lights_threshold = NULL;
 cvar_t* cvar_pt_bsp_radiance_scale = NULL;
@@ -166,6 +167,9 @@ VkptInit_t vkpt_initialization[] = {
 	{ "bloom|",   vkpt_bloom_create_pipelines,         vkpt_bloom_destroy_pipelines,         VKPT_INIT_RELOAD_SHADER,      0 },
 	{ "tonemap",  vkpt_tone_mapping_initialize,        vkpt_tone_mapping_destroy,            VKPT_INIT_DEFAULT,            0 },
 	{ "tonemap|", vkpt_tone_mapping_create_pipelines,  vkpt_tone_mapping_destroy_pipelines,  VKPT_INIT_RELOAD_SHADER,      0 },
+	{ "post_process", vkpt_postprocess_initialize,     vkpt_postprocess_destroy_pipeline,    VKPT_INIT_RELOAD_SHADER,      0 },
+	{ "post_process|",vkpt_postprocess_create_pipelines,     vkpt_postprocess_destroy_pipeline,    VKPT_INIT_RELOAD_SHADER,     0 },
+
 	{ "fsr",      vkpt_fsr_initialize,                 vkpt_fsr_destroy,                     VKPT_INIT_DEFAULT,            0 },
 	{ "fsr|",     vkpt_fsr_create_pipelines,           vkpt_fsr_destroy_pipelines,           VKPT_INIT_RELOAD_SHADER,      0 },
 
@@ -2696,6 +2700,8 @@ prepare_ubo(refdef_t *fd, mleaf_t* viewleaf, const reference_mode_t* ref_mode, c
 	else
 		ubo->medium = MEDIUM_NONE;
 
+	ubo->enable_underwater_warp = cvar_pt_enable_underwater_warp->integer;
+
 	ubo->time = fd->time;
 	ubo->num_static_primitives = 0;
 	if (wm->geom_opaque.prim_counts)      ubo->num_static_primitives += wm->geom_opaque.prim_counts[0];
@@ -3138,12 +3144,12 @@ R_RenderFrame_RTX(refdef_t *fd)
 
 		vkpt_interleave(post_cmd_buf);
 
-		vkpt_taa(post_cmd_buf);
+		vkpt_taa(post_cmd_buf); // Outputs to VKPT_IMG_TAA_OUTPUT
 
 		BEGIN_PERF_MARKER(post_cmd_buf, PROFILER_BLOOM);
 		if (cvar_bloom_enable->integer != 0 || qvk.frame_menu_mode)
 		{
-			vkpt_bloom_record_cmd_buffer(post_cmd_buf);
+			vkpt_bloom_record_cmd_buffer(post_cmd_buf); // Operates on VKPT_IMG_TAA_OUTPUT
 		}
 		END_PERF_MARKER(post_cmd_buf, PROFILER_BLOOM);
 
@@ -3157,9 +3163,13 @@ R_RenderFrame_RTX(refdef_t *fd)
 		BEGIN_PERF_MARKER(post_cmd_buf, PROFILER_TONE_MAPPING);
 		if (cvar_tm_enable->integer != 0)
 		{
+			// Read from VKPT_IMG_TAA_OUTPUT
+			// Write to VKPT_IMG_POST_PROCESS_INPUT
 			vkpt_tone_mapping_record_cmd_buffer(post_cmd_buf, frame_time <= 0.f ? frame_wallclock_time : frame_time);
 		}
 		END_PERF_MARKER(post_cmd_buf, PROFILER_TONE_MAPPING);
+
+		vkpt_postprocess_record_cmd_buffer(post_cmd_buf); // reads from VKPT_IMG_POST_PROCESS_INPUT
 
 		// Skip FSR (upscaling) if image is going to be heavily blurred anyway (menu mode)
 		if(vkpt_fsr_is_enabled() && !qvk.frame_menu_mode)
@@ -3628,6 +3638,11 @@ R_Init_RTX(bool total)
 	 * 1: hack up a material that emits light but doesn't render with an emissive texture
 	 * 2: "full" synthesis (incl emissive texture) */
 	cvar_pt_enable_surface_lights_warp = Cvar_Get("pt_enable_surface_lights_warp", "0", CVAR_FILES);
+	/*
+	* 0: disabled, does not distort the underwater view
+	* 1: enabled, warps the underwater view to add the "underwater" effect that most games have
+	*/
+	cvar_pt_enable_underwater_warp = Cvar_Get("pt_enable_underwater_warp", "1", 0);
 	/* How to choose emissive texture for LIGHT flag synthesis:
 	 * 0: Just use diffuse texture
 	 * 1: Use (diffuse) pixels above a certain relative brightness for emissive texture */
