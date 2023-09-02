@@ -433,7 +433,7 @@ void main() {
                 const vec3 sun_y = normalize(cross(sun_x, sun.direction));
         
                 // project texture to sun disk
-                vec2 sun_uv = vec2(dot(sun_x, eyeVec), dot(sun_y, eyeVec)) * global_ubo.sun_surface_map_scale;
+                vec2 sun_uv = vec2(dot(sun_x, eyeVec), dot(sun_y, eyeVec)) / global_ubo.sun_surface_map_scale;
                 sun_uv = sun_uv * 0.5 + 0.5;
 
                 radiance *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
