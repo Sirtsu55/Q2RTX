@@ -151,16 +151,21 @@ main()
 		// Photo mode or legacy TAA - use higher quality sampling
 		pixel_offset = vec2(get_rng(RNG_PRIMARY_OFF_X), get_rng(RNG_PRIMARY_OFF_Y));
 		pixel_offset -= vec2(0.5);
+
+
 	}
 	else 
 	{
 		// Real-time mode - use predictable sampling for TAAU
 		pixel_offset = global_ubo.sub_pixel_jitter;
 	}
-	
+
+
 	const ivec2 image_position = get_image_position();
 	const vec2 pixel_center = vec2(image_position) + vec2(0.5);
-	const vec2 inUV = (pixel_center + pixel_offset) / vec2(get_image_size());
+	vec2 inUV = (pixel_center + pixel_offset) / vec2(get_image_size());
+
+
 
 	Ray ray = get_primary_ray(inUV);
 
