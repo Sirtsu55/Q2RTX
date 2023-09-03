@@ -1878,7 +1878,7 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 	if (model->geometry.accel)
 	{
 
-		uint32_t override_masks = (mi->alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0;
+		uint32_t override_masks = (mi->alpha_and_frame < 1.f) ? AS_FLAG_TRANSPARENT : 0;
 		
 		if (entity->flags& RF_NOSHADOW)
 			override_masks |= AS_FLAG_OPAQUE_NO_SHADOW;
