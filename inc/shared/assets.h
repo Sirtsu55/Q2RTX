@@ -114,6 +114,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ASSET_MODEL_THUNDER_WORLD "models/weapons/g_bolt/g_bolt.iqm"
 #define ASSET_MODEL_THUNDER_VIEW "models/weapons/v_bolt/v_bolt.iqm"
+#define ASSET_SOUND_THUNDERBOLT_END_FIRE "weapons/GRENLX1A.WAV"
+#define ASSET_SOUND_THUNDERBOLT_FIRING "tele/teletunnel.wav"
 
 #define ASSET_MODEL_SHELLS "models/items/ammo/shells/shellbox_small.iqm"
 #define ASSET_MODEL_NAILS "models/items/ammo/nails/nailbox.iqm"

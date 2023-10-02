@@ -132,6 +132,8 @@ static void Thunder_Fire(edict_t* ent)
     SV_WriteByte(MZ_SHOTGUN);
     SV_Multicast(ent->s.origin, MULTICAST_PVS, false);*/
 
+    ent->client->weapon_sound = SV_SoundIndex(ASSET_SOUND_THUNDERBOLT_FIRING);
+
     Thunder_SpinUp(ent, WEAPID_GUN);
 
     PlayerNoise(ent, ent->s.origin, PNOISE_WEAPON);
@@ -186,6 +188,7 @@ const weapon_animation_t weap_thunder_fire = {
 static bool Thunder_Firing(edict_t* ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK) || !Weapon_AmmoCheck(ent)) {
+        SV_StartSound(ent, CHAN_WEAPON, SV_SoundIndex(ASSET_SOUND_THUNDERBOLT_END_FIRE), 1, ATTN_NORM, 0);
         Weapon_SetAnimation(ent, id, &weap_thunder_idle);
         return false;
     }
@@ -212,6 +215,8 @@ static bool Thunder_PickIdle(edict_t* ent, weapon_id_t id)
 
 static bool Thunder_Idle(edict_t* ent, weapon_id_t id)
 {
+    ent->client->weapon_sound = 0;
+
     Thunder_SpinDown(ent, id);
 
     // check weapon change
