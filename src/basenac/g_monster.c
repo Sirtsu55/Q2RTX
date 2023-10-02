@@ -22,9 +22,17 @@ void SpawnGibs(edict_t *self, int damage, const gib_def_t *gibs, size_t gib_coun
     for (size_t i = 0; i < gib_count; i++)
     {
         if (gibs[i].head)
+            continue;
+        ThrowGib(self, gibs[i].gib_name, damage, GIB_ORGANIC);
+    }
+
+    for (size_t i = 0; i < gib_count; i++)
+    {
+        if (gibs[i].head)
+        {
             ThrowHead(self, gibs[i].gib_name, damage, GIB_ORGANIC);
-        else
-            ThrowGib(self, gibs[i].gib_name, damage, GIB_ORGANIC);
+            return;
+        }
     }
 }
 

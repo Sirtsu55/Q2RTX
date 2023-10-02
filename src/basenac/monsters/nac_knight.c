@@ -43,6 +43,22 @@ enum {
     ANIMATION(DEATHB, 22)
 };
 
+static gib_def_t knight_gibs[] = {
+    { ASSET_MODEL_KNIGHT_GIB_ARML },
+    { ASSET_MODEL_KNIGHT_GIB_ARMR },
+    { ASSET_MODEL_KNIGHT_GIB_ARMOR },
+    { ASSET_MODEL_KNIGHT_GIB_CHEST },
+    { ASSET_MODEL_KNIGHT_GIB_FOOTL },
+    { ASSET_MODEL_KNIGHT_GIB_FOOTR },
+    { ASSET_MODEL_KNIGHT_GIB_HANDL },
+    { ASSET_MODEL_KNIGHT_GIB_HEAD, .head = true },
+    { ASSET_MODEL_KNIGHT_GIB_LEGL },
+    { ASSET_MODEL_KNIGHT_GIB_LEGR },
+    { ASSET_MODEL_KNIGHT_GIB_SHOULDER },
+    { ASSET_MODEL_KNIGHT_GIB_THIGH },
+    { ASSET_MODEL_KNIGHT_GIB_WAIST }
+};
+
 void knight_sight(edict_t *self, edict_t *other)
 {
     SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
@@ -230,11 +246,7 @@ void knight_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
 
     if (self->health <= self->gib_health) {
         SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
-        for (n = 0; n < 2; n++)
-            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
-        for (n = 0; n < 4; n++)
-            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
-        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
+        SpawnGibs(self, damage, knight_gibs, q_countof(knight_gibs));
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -291,6 +303,8 @@ void SP_monster_knight(edict_t *self)
     sound_sight = SV_SoundIndex(ASSET_SOUND_KNIGHT_SIGHT);
 
     self->s.modelindex = SV_ModelIndex(ASSET_MODEL_KNIGHT);
+
+    PrecacheGibs(knight_gibs, q_countof(knight_gibs));
     VectorSet(self->mins, -16, -16, -0);
     VectorSet(self->maxs, 16, 16, 56);
     self->movetype = MOVETYPE_STEP;
