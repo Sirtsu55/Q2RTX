@@ -719,7 +719,8 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
                     continue;
                 }
             } else {
-                if ( /* ((coop->value) && (ent->spawnflags & SPAWNFLAG_NOT_COOP)) || */
+                if ( ((coop.integer) && (ent->spawnflags & SPAWNFLAG_NOT_COOP)) || 
+                    ((!coop.integer) && (ent->spawnflags & SPAWNFLAG_COOP_ONLY)) ||
                     ((skill.integer == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
                     ((skill.integer == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
                     (((skill.integer == 2) || (skill.integer == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
@@ -730,7 +731,7 @@ void SpawnEntities(const char *mapname, const char *entities, const char *spawnp
                 }
             }
 
-            ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_NOT_DEATHMATCH);
+            ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY | SPAWNFLAG_NOT_MEDIUM | SPAWNFLAG_NOT_HARD | SPAWNFLAG_NOT_COOP | SPAWNFLAG_COOP_ONLY | SPAWNFLAG_NOT_DEATHMATCH);
 
             // Paril - generic animation support
             if (ent->anim.start || ent->anim.end) {

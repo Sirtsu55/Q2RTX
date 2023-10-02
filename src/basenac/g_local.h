@@ -86,6 +86,7 @@ static inline float G_MsToFrames(gtime_t ms)
 #define SPAWNFLAG_NOT_HARD          0x00000400
 #define SPAWNFLAG_NOT_DEATHMATCH    0x00000800
 #define SPAWNFLAG_NOT_COOP          0x00001000
+#define SPAWNFLAG_COOP_ONLY         0x00004000
 
 // edict->flags
 #define FL_FLY                  0x00000001
