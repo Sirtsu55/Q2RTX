@@ -17,6 +17,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 #include "g_local.h"
 
+void SpawnGibs(edict_t *self, int damage, const gib_def_t *gibs, size_t gib_count)
+{
+    for (size_t i = 0; i < gib_count; i++)
+    {
+        if (gibs[i].head)
+            ThrowHead(self, gibs[i].gib_name, damage, GIB_ORGANIC);
+        else
+            ThrowGib(self, gibs[i].gib_name, damage, GIB_ORGANIC);
+    }
+}
+
+void PrecacheGibs(gib_def_t *gibs, size_t gib_count)
+{
+    for (size_t i = 0; i < gib_count; i++)
+    {
+        gibs[i].gib_index = SV_ModelIndex(gibs[i].gib_name);
+    }
+}
 
 //
 // monster weapons

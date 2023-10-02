@@ -130,6 +130,17 @@ typedef enum {
 #define GIB_ORGANIC             0
 #define GIB_METALLIC            1
 
+typedef struct {
+    const char  *gib_name;
+    vec3_t      offset;
+    bool        head;
+
+    int         gib_index;
+} gib_def_t;
+
+void SpawnGibs(edict_t *self, int damage, const gib_def_t *gibs, size_t gib_count);
+void PrecacheGibs(gib_def_t *gibs, size_t gib_count);
+
 //monster ai flags
 #define AI_STAND_GROUND         0x00000001
 #define AI_TEMP_STAND_GROUND    0x00000002
@@ -1202,6 +1213,7 @@ struct edict_s {
     // radius key for map stuff
     float       radius;
     edict_t     *next_reverb;
+    float       bounce_scale;
 };
 
 // API wrappers

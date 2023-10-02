@@ -59,22 +59,19 @@ void VelocityForDamage(int damage, vec3_t v)
     v[1] = 100.0f * crandom();
     v[2] = 200.0f + 100.0f * random();
 
-    if (damage < 50)
-        VectorScale(v, 0.7f, v);
-    else
-        VectorScale(v, 1.2f, v);
+    VectorScale(v, damage / 50.f, v);
 }
 
 void ClipGibVelocity(edict_t *ent)
 {
-    if (ent->velocity[0] < -300)
-        ent->velocity[0] = -300;
-    else if (ent->velocity[0] > 300)
-        ent->velocity[0] = 300;
-    if (ent->velocity[1] < -300)
-        ent->velocity[1] = -300;
-    else if (ent->velocity[1] > 300)
-        ent->velocity[1] = 300;
+    if (ent->velocity[0] < -400)
+        ent->velocity[0] = -400;
+    else if (ent->velocity[0] > 400)
+        ent->velocity[0] = 400;
+    if (ent->velocity[1] < -400)
+        ent->velocity[1] = -400;
+    else if (ent->velocity[1] > 400)
+        ent->velocity[1] = 400;
     if (ent->velocity[2] < 200)
         ent->velocity[2] = 200; // always some upwards
     else if (ent->velocity[2] > 500)
@@ -127,12 +124,14 @@ void ThrowGib(edict_t *self, const char *gibname, int damage, int type)
     gib->die = gib_die;
 
     if (type == GIB_ORGANIC) {
-        gib->movetype = MOVETYPE_TOSS;
-        vscale = 0.5f;
+        gib->movetype = MOVETYPE_BOUNCE;
+        vscale = 1.0f;
     } else {
         gib->movetype = MOVETYPE_BOUNCE;
         vscale = 1.0f;
     }
+
+    gib->bounce_scale = 0.41f;
 
     VelocityForDamage(damage, vd);
     VectorMA(self->velocity, vscale, vd, gib->velocity);

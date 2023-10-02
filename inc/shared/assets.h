@@ -251,3 +251,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_SCRAG_FIRE "nac_scrag/fire.wav"
 #define ASSET_SOUND_SCRAG_SIGHT "nac_scrag/sight.wav"
 #define ASSET_SOUND_SCRAG_SPLAT "nac_scrag/splat.wav"
+
+#define ASSET_MODEL_SCRAG_GIB_BASE(x) \
+    "models/monsters/scrag/scrag_gib_" #x ".iqm"
+#define ASSET_MODEL_SCRAG_GIB_ARML ASSET_MODEL_SCRAG_GIB_BASE(arml)
+#define ASSET_MODEL_SCRAG_GIB_ARMR ASSET_MODEL_SCRAG_GIB_BASE(armr)
+#define ASSET_MODEL_SCRAG_GIB_CHEST ASSET_MODEL_SCRAG_GIB_BASE(chest)
+#define ASSET_MODEL_SCRAG_GIB_HEAD ASSET_MODEL_SCRAG_GIB_BASE(head)
+#define ASSET_MODEL_SCRAG_GIB_NUB ASSET_MODEL_SCRAG_GIB_BASE(nub)
+#define ASSET_MODEL_SCRAG_GIB_SHOULDER ASSET_MODEL_SCRAG_GIB_BASE(shoulder)
+#define ASSET_MODEL_SCRAG_GIB_TAIL ASSET_MODEL_SCRAG_GIB_BASE(tail)
+#define ASSET_MODEL_SCRAG_GIB_TAIL_BASE ASSET_MODEL_SCRAG_GIB_BASE(tail_base)

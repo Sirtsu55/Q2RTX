@@ -336,7 +336,7 @@ static bool Axe_Idle(edict_t *ent, weapon_id_t id)
     if (ent->client->weapanim[WEAPID_GUN] && !ent->client->newweapon)
     {
         Weapon_SetAnimation(ent, id, &weap_axe_deactivate);
-        return;
+        return false;
     }
 
     // check attack transition

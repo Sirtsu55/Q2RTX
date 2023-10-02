@@ -281,17 +281,22 @@ mmove_t scrag_move_death = {
     .default_aifunc = ai_move
 };
 
+static gib_def_t scrag_gibs[] = {
+    { ASSET_MODEL_SCRAG_GIB_ARML },
+    { ASSET_MODEL_SCRAG_GIB_ARMR },
+    { ASSET_MODEL_SCRAG_GIB_CHEST },
+    { ASSET_MODEL_SCRAG_GIB_HEAD, .head = true },
+    { ASSET_MODEL_SCRAG_GIB_NUB },
+    { ASSET_MODEL_SCRAG_GIB_SHOULDER },
+    { ASSET_MODEL_SCRAG_GIB_TAIL },
+    { ASSET_MODEL_SCRAG_GIB_TAIL_BASE }
+};
+
 void scrag_die(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point)
 {
-    int     n;
-
     if (self->health <= self->gib_health) {
         SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
-        for (n = 0; n < 2; n++)
-            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
-        for (n = 0; n < 4; n++)
-            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
-        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
+        SpawnGibs(self, damage, scrag_gibs, q_countof(scrag_gibs));
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -370,6 +375,8 @@ void SP_monster_scrag(edict_t* self)
     self->monsterinfo.load = scrag_load;
 
     SV_ModelIndex(ASSET_MODEL_SCRAG_BALL);
+
+    PrecacheGibs(scrag_gibs, q_countof(scrag_gibs));
 
     SV_LinkEntity(self);
 
