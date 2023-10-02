@@ -518,6 +518,7 @@ void player_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage
     self->client->quad_time = 0;
     self->client->invincible_time = 0;
     self->client->enviro_time = 0;
+    self->client->ring_time = 0;
 
     if (self->health < -40) {
         // gib

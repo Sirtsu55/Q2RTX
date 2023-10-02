@@ -412,6 +412,7 @@ static const save_field_t clientfields[] = {
     I64(quad_time),
     I64(invincible_time),
     I64(enviro_time),
+    I64(ring_time),
 
     I(weapon_sound),
 

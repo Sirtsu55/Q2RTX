@@ -43,6 +43,7 @@ void MoveClientToIntermission(edict_t *ent)
     ent->client->quad_time = 0;
     ent->client->invincible_time = 0;
     ent->client->enviro_time = 0;
+    ent->client->ring_time = 0;
 
     ent->viewheight = 0;
     ent->s.modelindex = 0;
@@ -401,6 +402,9 @@ void G_SetStats(edict_t *ent)
     } else if (ent->client->enviro_time > level.time) {
         ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_envirosuit");
         ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->enviro_time - level.time);
+    } else if (ent->client->ring_time > level.time) {
+        ent->client->ps.stats[STAT_TIMER_ICON] = SV_ImageIndex("p_ring");
+        ent->client->ps.stats[STAT_TIMER] = G_MsToSec(ent->client->ring_time - level.time);
     } else {
         ent->client->ps.stats[STAT_TIMER_ICON] = 0;
         ent->client->ps.stats[STAT_TIMER] = 0;

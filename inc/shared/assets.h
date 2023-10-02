@@ -140,6 +140,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_BIOSUIT_FADE "items/airout.wav"
 
 #define ASSET_MODEL_RING "models/items/powerups/ring/ring.md3"
+#define ASSET_SOUND_RING_ACTIVATE "items/ring.wav"
+#define ASSET_SOUND_RING_FADE "items/ringout.wav"
 
 #define ASSET_MODEL_HEALTH_SMALL "models/items/health/small.iqm"
 #define ASSET_SOUND_HEALTH_SMALL_PICKUP "items/s_health.wav"

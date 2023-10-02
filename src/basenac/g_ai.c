@@ -452,6 +452,8 @@ bool FindTarget(edict_t *self)
         // is client in an spot too dark to be seen?
         //if (client->light_level <= 5)
         //    return false;
+        if (client->client && client->client->ring_time > level.time)
+            return false;
 
         if (!visible(self, client)) {
             return false;

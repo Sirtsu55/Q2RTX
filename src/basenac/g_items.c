@@ -113,6 +113,14 @@ static void Use_Radsuit(edict_t *ent, gitem_t *item)
 
 //======================================================================
 
+static void Use_Ring(edict_t *ent, gitem_t *item)
+{
+    ent->client->ring_time = max(ent->client->ring_time, level.time) + 30000;
+    SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_RING_ACTIVATE), 1, ATTN_NORM, 0);
+}
+
+//======================================================================
+
 static void Use_Pentagram(edict_t *ent, gitem_t *item)
 {
     ent->client->invincible_time = max(ent->client->invincible_time, level.time) + 30000;
@@ -1177,7 +1185,7 @@ static gitem_t itemlist[] = {
     [ITEM_RING_OF_SHADOWS] = {
         .classname = "item_ring",
         .pickup = Pickup_Powerup,
-        .use = Use_Radsuit,
+        .use = Use_Ring,
         .world_model = ASSET_MODEL_RING,
         .world_model_flags = EF_ROTATE,
         .icon = "p_ring",

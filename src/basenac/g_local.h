@@ -1032,6 +1032,7 @@ struct gclient_s {
     gtime_t     quad_time;
     gtime_t     invincible_time;
     gtime_t     enviro_time;
+    gtime_t     ring_time;
 
     int         weapon_sound;
 

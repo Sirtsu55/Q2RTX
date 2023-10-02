@@ -370,6 +370,12 @@ void SV_CalcBlend(edict_t *ent)
             SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_BIOSUIT_FADE), 1, ATTN_NORM, 0);
         if (remaining > 3000 || (remaining % 500) == 0)
             SV_AddBlend(0, 1, 0, 0.08f, ent->client->ps.blend);
+    } else if (ent->client->ring_time > level.time) {
+        remaining = ent->client->ring_time - level.time;
+        if (remaining == 3000)    // beginning to fade
+            SV_StartSound(ent, CHAN_ITEM, SV_SoundIndex(ASSET_SOUND_RING_FADE), 1, ATTN_NORM, 0);
+        if (remaining > 3000 || (remaining % 500) == 0)
+            SV_AddBlend(0.4, 0.3, 0.3, 0.05f, ent->client->ps.blend);
     }
 
     // add for damage
