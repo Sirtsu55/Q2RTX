@@ -349,7 +349,7 @@ void fire_blaster(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
     bolt->s.sound = SV_SoundIndex(ASSET_SOUND_LASER_FLY);
     bolt->owner = self;
     bolt->touch = blaster_touch;
-    bolt->nextthink = level.time + 2000;
+    bolt->nextthink = level.time + 60000;
     bolt->think = G_FreeEdict;
     bolt->dmg = damage;
     bolt->classname = "bolt";
@@ -603,7 +603,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
     rocket->s.modelindex = SV_ModelIndex(ASSET_MODEL_ROCKET);
     rocket->owner = self;
     rocket->touch = rocket_touch;
-    rocket->nextthink = level.time + 4000;
+    rocket->nextthink = level.time + 60000;
     rocket->think = G_FreeEdict;
     rocket->dmg = damage;
     rocket->radius_dmg = radius_damage;
