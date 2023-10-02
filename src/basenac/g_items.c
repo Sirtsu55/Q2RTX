@@ -907,10 +907,10 @@ static gitem_t itemlist[] = {
         .weapmodel = WEAP_SUPERSHOTGUN
     },
 
-    /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     [ITEM_BLASTER] = {
-        .classname = "weapon_hyperblaster",
+        .classname = "weapon_blaster",
         .pickup = Pickup_Weapon,
         .use = Use_Weapon,
         .drop = Drop_Weapon,

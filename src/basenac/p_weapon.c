@@ -389,6 +389,7 @@ void Think_Weapon(edict_t *ent)
     } else {
         if (ent->client->newweapon) {
             Weapon_Activate(ent, true);
+            ChangeWeapon(ent, ent->client->newweapon->weapid);
         }
     }
 }
