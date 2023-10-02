@@ -596,7 +596,7 @@ static void ui_scale_changed(cvar_t *self)
 
 void UI_ModeChanged(void)
 {
-    ui_scale = Cvar_Get("ui_scale", "0", 0);
+    ui_scale = Cvar_Get("ui_scale", "0", CVAR_ARCHIVE);
     ui_scale->changed = ui_scale_changed;
     UI_Resize();
 }
