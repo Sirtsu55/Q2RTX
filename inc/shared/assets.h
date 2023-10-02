@@ -257,6 +257,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_VORE_ATTACK2 "nac_vore/attack2.wav"
 #define ASSET_SOUND_VORE_SIGHT "nac_vore/sight.wav"
 
+#define ASSET_MODEL_VORE_GIB_BASE(x) \
+    "models/monsters/vore/vore_gib_" #x ".iqm"
+#define ASSET_MODEL_VORE_GIB_ARML ASSET_MODEL_VORE_GIB_BASE(arml)
+#define ASSET_MODEL_VORE_GIB_ARMR ASSET_MODEL_VORE_GIB_BASE(armr)
+#define ASSET_MODEL_VORE_GIB_CHEST ASSET_MODEL_VORE_GIB_BASE(chest)
+#define ASSET_MODEL_VORE_GIB_FOOT ASSET_MODEL_VORE_GIB_BASE(foot)
+#define ASSET_MODEL_VORE_GIB_HAND ASSET_MODEL_VORE_GIB_BASE(hand)
+#define ASSET_MODEL_VORE_GIB_HEAD ASSET_MODEL_VORE_GIB_BASE(head)
+#define ASSET_MODEL_VORE_GIB_LEGC ASSET_MODEL_VORE_GIB_BASE(legc)
+#define ASSET_MODEL_VORE_GIB_LEGL ASSET_MODEL_VORE_GIB_BASE(legl)
+#define ASSET_MODEL_VORE_GIB_LEGR ASSET_MODEL_VORE_GIB_BASE(legr)
+#define ASSET_MODEL_VORE_GIB_WAIST ASSET_MODEL_VORE_GIB_BASE(waist)
+
 // Scrag
 #define ASSET_MODEL_SCRAG "models/monsters/scrag/scrag.iqm"
 #define ASSET_MODEL_SCRAG_BALL "models/monsters/scrag/scrag_slime.md3"

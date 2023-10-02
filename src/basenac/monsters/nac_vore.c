@@ -43,6 +43,19 @@ enum {
     ANIMATION(DUCK_RELEASE, 8)
 };
 
+static gib_def_t vore_gibs[] = {
+    { ASSET_MODEL_VORE_GIB_ARML },
+    { ASSET_MODEL_VORE_GIB_ARMR },
+    { ASSET_MODEL_VORE_GIB_CHEST },
+    { ASSET_MODEL_VORE_GIB_FOOT },
+    { ASSET_MODEL_VORE_GIB_HAND },
+    { ASSET_MODEL_VORE_GIB_HEAD, .head = true },
+    { ASSET_MODEL_VORE_GIB_LEGC },
+    { ASSET_MODEL_VORE_GIB_LEGL },
+    { ASSET_MODEL_VORE_GIB_LEGR },
+    { ASSET_MODEL_VORE_GIB_WAIST }
+};
+
 void vore_sight(edict_t *self, edict_t *other)
 {
     SV_StartSound(self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
@@ -304,11 +317,7 @@ void vore_die(edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, 
 
     if (self->health <= self->gib_health) {
         SV_StartSound(self, CHAN_VOICE, SV_SoundIndex(ASSET_SOUND_GIB), 1, ATTN_NORM, 0);
-        for (n = 0; n < 2; n++)
-            ThrowGib(self, ASSET_MODEL_GIB_BONE, damage, GIB_ORGANIC);
-        for (n = 0; n < 4; n++)
-            ThrowGib(self, ASSET_MODEL_GIB_MEAT, damage, GIB_ORGANIC);
-        ThrowHead(self, ASSET_MODEL_GIB_HEAD, damage, GIB_ORGANIC);
+        SpawnGibs(self, damage, vore_gibs, q_countof(vore_gibs));
         self->deadflag = DEAD_DEAD;
         return;
     }
@@ -454,6 +463,8 @@ void SP_monster_vore(edict_t *self)
 
     SV_ModelIndex(ASSET_MODEL_VORE_BALL);
     SV_SoundIndex(ASSET_SOUND_VORE_BALL_CHASE);
+
+    PrecacheGibs(vore_gibs, q_countof(vore_gibs));
 
     SV_LinkEntity(self);
 
