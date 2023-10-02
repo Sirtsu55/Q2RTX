@@ -88,6 +88,22 @@ void fire_lightning(edict_t* self, vec3_t start, vec3_t aimdir, int damage, int 
         PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
 }
 
+// in radians per second
+#define MAX_ROTATION ((float) (M_PI * 3.25f))
+#define ROTATION_SPEED ((float) (MAX_ROTATION * BASE_FRAMETIME_S))
+
+static bool Thunder_SpinDown(edict_t *ent, weapon_id_t id)
+{
+    ent->client->ps.gun[id].spin = max(0.f, ent->client->ps.gun[id].spin - ROTATION_SPEED);
+    return true;
+}
+
+static void Thunder_SpinUp(edict_t *ent, weapon_id_t id)
+{
+    // calculate spin value
+    ent->client->ps.gun[id].spin = min(MAX_ROTATION, ent->client->ps.gun[id].spin + ROTATION_SPEED * 6.0f);
+}
+
 static void Thunder_Fire(edict_t* ent)
 {
     vec3_t      start;
@@ -115,6 +131,8 @@ static void Thunder_Fire(edict_t* ent)
     SV_WriteEntity(ent);
     SV_WriteByte(MZ_SHOTGUN);
     SV_Multicast(ent->s.origin, MULTICAST_PVS, false);*/
+
+    Thunder_SpinUp(ent, WEAPID_GUN);
 
     PlayerNoise(ent, ent->s.origin, PNOISE_WEAPON);
 
@@ -194,6 +212,8 @@ static bool Thunder_PickIdle(edict_t* ent, weapon_id_t id)
 
 static bool Thunder_Idle(edict_t* ent, weapon_id_t id)
 {
+    Thunder_SpinDown(ent, id);
+
     // check weapon change
     if (Weapon_CheckChange(ent, &weap_thunder_deactivate, id))
         return false;
