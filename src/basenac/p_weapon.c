@@ -171,20 +171,20 @@ bool Weapon_AmmoCheck(edict_t *ent)
     return false;
 }
 
-static weapon_id_t currentWeaponId;
-
 /**
  * @brief Start activation of our `newweapon`.
  * @param ent 
 */
 void Weapon_Activate(edict_t *ent, bool switched)
 {
+    if (ent->client->pers.weapon == ent->client->newweapon)
+        return;
+
     if (switched)
     {
         // set entity weapon properties
         ent->client->pers.lastweapon = ent->client->pers.weapon;
         ent->client->pers.weapon = ent->client->newweapon;
-        ent->client->newweapon = NULL;
     }
 
     // set visible model
@@ -223,8 +223,7 @@ void Weapon_Activate(edict_t *ent, bool switched)
     };
 
     // begin animation
-    currentWeaponId = ent->client->pers.weapon->weapid;
-    Weapon_SetAnimation(ent, ent->client->pers.weapon->animation);
+    Weapon_SetAnimation(ent, ent->client->pers.weapon->weapid, ent->client->pers.weapon->animation);
 
     // player animation
     ent->client->anim_priority = ANIM_PAIN;
@@ -245,9 +244,19 @@ The old weapon has been dropped all the way, so remove it
 from view.
 ===============
 */
-bool ChangeWeapon(edict_t *ent)
+bool ChangeWeapon(edict_t *ent, weapon_id_t weapon_id)
 {
-    ent->client->ps.gun[currentWeaponId].index = 0;
+    if (ent->client->newweapon)
+    {
+        Weapon_Activate(ent, true);
+        ent->client->newweapon = NULL;
+    }
+    else
+    {
+        ent->client->ps.gun[weapon_id].index = 0;
+        ent->client->weapanim[weapon_id] = NULL;
+    }
+
     return false;
 }
 
@@ -259,36 +268,36 @@ WEAPON ANIMATIONS
 ======================================================================
 */
 
-void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation, int32_t frame)
+void Weapon_SetAnimationFrame(edict_t *ent, weapon_id_t weapon_id, const weapon_animation_t *animation, int32_t frame)
 {
-    ent->client->weapanim[currentWeaponId] = animation;
+    ent->client->weapanim[weapon_id] = animation;
 
     if (frame < animation->start || frame > animation->end)
     {
         Com_Print("Bad start frame\n");
-        ent->client->ps.gun[currentWeaponId].frame = animation->start;
+        ent->client->ps.gun[weapon_id].frame = animation->start;
     }
     else
-        ent->client->ps.gun[currentWeaponId].frame = frame;
+        ent->client->ps.gun[weapon_id].frame = frame;
 
-    int32_t currentFrame = ent->client->ps.gun[currentWeaponId].frame;
+    int32_t currentFrame = ent->client->ps.gun[weapon_id].frame;
 
     // run events
     for (const weapon_event_t *event = animation->events; event && event->func; event++)
         if ((event->start == WEAPON_EVENT_MINMAX || currentFrame >= event->start) &&
             (event->end == WEAPON_EVENT_MINMAX || currentFrame <= event->end))
-            if (!event->func(ent))
+            if (!event->func(ent, weapon_id))
                 return;
 
     //Com_Printf("(%f) change to frame %i\n", G_MsToSec(level.time), frame);
 }
 
-void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation)
+void Weapon_SetAnimation(edict_t *ent, weapon_id_t weapon_id, const weapon_animation_t *animation)
 {
-    Weapon_SetAnimationFrame(ent, animation, animation->start);
+    Weapon_SetAnimationFrame(ent, weapon_id, animation, animation->start);
 }
 
-void Weapon_RunAnimation(edict_t *ent)
+static void Weapon_RunAnimation(edict_t *ent, weapon_id_t currentWeaponId)
 {
     const weapon_animation_t *animation = ent->client->weapanim[currentWeaponId];
 
@@ -308,17 +317,17 @@ void Weapon_RunAnimation(edict_t *ent)
     //Com_Printf("(%f) running frame %i\n", G_MsToSec(level.time), currentFrame);
    
     // run frame func first
-    if (animation->frame && !animation->frame(ent))
+    if (animation->frame && !animation->frame(ent, currentWeaponId))
         return; 
     
     // will the next frame bring us to the end?
     if (currentFrame + 1 > animation->end)
     {
-        if (animation->finished && !animation->finished(ent))
+        if (animation->finished && !animation->finished(ent, currentWeaponId))
             return;
 
         if (animation->next)
-            Weapon_SetAnimation(ent, animation->next);
+            Weapon_SetAnimation(ent, currentWeaponId, animation->next);
         else
             ent->client->ps.gun[currentWeaponId].frame = animation->start;
 
@@ -332,11 +341,26 @@ void Weapon_RunAnimation(edict_t *ent)
     for (const weapon_event_t *event = animation->events; event && event->func; event++)
         if ((event->start == WEAPON_EVENT_MINMAX || currentFrame >= event->start) &&
             (event->end == WEAPON_EVENT_MINMAX || currentFrame <= event->end))
-            if (!event->func(ent))
+            if (!event->func(ent, currentWeaponId))
                 return;
 
     // copy over to visual model
     ent->client->ps.gun[currentWeaponId].frame = currentFrame;
+}
+
+bool Weapon_CheckChange(edict_t *ent, const weapon_animation_t *deact_anim, weapon_id_t id)
+{
+    if (ent->client->newweapon && ent->client->newweapon->id != ent->client->pers.weapon->id)
+    {
+        Weapon_SetAnimation(ent, id, deact_anim);
+
+        if (!ent->client->pers.inventory[ent->client->pers.weapon->id] || !ent->client->newweapon || ent->client->newweapon->weapid != id)
+            Weapon_Activate(ent, true);
+
+        return true;
+    }
+
+    return false;
 }
 
 /*
@@ -359,8 +383,8 @@ void Think_Weapon(edict_t *ent)
     if (ent->client->pers.weapon) {
         is_quad = (ent->client->quad_time > level.time);
 
-        for (currentWeaponId = 0; currentWeaponId < WEAPID_TOTAL; currentWeaponId++) {
-            Weapon_RunAnimation(ent);
+        for (weapon_id_t currentWeaponId = 0; currentWeaponId < WEAPID_TOTAL; currentWeaponId++) {
+            Weapon_RunAnimation(ent, currentWeaponId);
         }
     } else {
         if (ent->client->newweapon) {

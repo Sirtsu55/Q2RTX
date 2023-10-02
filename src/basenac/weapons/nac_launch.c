@@ -67,8 +67,8 @@ enum {
     ANIM_INSPECT_LAST = 157
 };
 
-static bool Launch_PickIdle(edict_t* ent);
-static bool Launch_Idle(edict_t* ent);
+static bool Launch_PickIdle(edict_t* ent, weapon_id_t id);
+static bool Launch_Idle(edict_t* ent, weapon_id_t id);
 
 const weapon_animation_t weap_launch_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
@@ -94,30 +94,27 @@ const weapon_animation_t weap_launch_fire = {
     .start = ANIM_ATTACK_FIRST, .end = ANIM_ATTACK_LAST, .next = &weap_launch_idle
 };
 
-static bool Launch_PickIdle(edict_t* ent)
+static bool Launch_PickIdle(edict_t* ent, weapon_id_t id)
 {
-    if (ent->client->weapanim[WEAPID_GUN] == &weap_launch_inspect ||
-        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
+    if (ent->client->weapanim[id] == &weap_launch_inspect ||
+        (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, &weap_launch_idle);
+        Weapon_SetAnimation(ent, id, &weap_launch_idle);
         return false;
     }
 
-    Weapon_SetAnimation(ent, &weap_launch_inspect);
+    Weapon_SetAnimation(ent, id, &weap_launch_inspect);
 
     ent->client->inspect = false;
 
     return false;
 }
 
-static bool Launch_Idle(edict_t* ent)
+static bool Launch_Idle(edict_t* ent, weapon_id_t id)
 {
-    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
-    {
-        Weapon_SetAnimation(ent, &weap_launch_deactivate);
-        Weapon_Activate(ent, true);
+    // check weapon change
+    if (Weapon_CheckChange(ent, &weap_launch_deactivate, id))
         return false;
-    }
 
     if (ent->client->buttons & BUTTON_ATTACK)
     {
@@ -136,7 +133,7 @@ static bool Launch_Idle(edict_t* ent)
 
         Launch_Fire(ent);
 
-        Weapon_SetAnimation(ent, &weap_launch_fire);
+        Weapon_SetAnimation(ent, id, &weap_launch_fire);
         return false;
     }
 
@@ -145,7 +142,7 @@ static bool Launch_Idle(edict_t* ent)
     {
         if (ent->client->weapanim[WEAPID_GUN] == &weap_launch_idle)
         {
-            Launch_PickIdle(ent);
+            Launch_PickIdle(ent, id);
             return false;
         }
 

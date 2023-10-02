@@ -19,9 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "g_local.h"
 
 extern const weapon_animation_t weap_axe_activate;
-extern const weapon_animation_t weap_perf_activate;
 extern const weapon_animation_t weap_shotgun_activate;
 extern const weapon_animation_t weap_sshotgun_activate;
+extern const weapon_animation_t weap_nailgun_activate;
+extern const weapon_animation_t weap_perf_activate;
 extern const weapon_animation_t weap_rocket_activate;
 extern const weapon_animation_t weap_launch_activate;
 extern const weapon_animation_t weap_thunder_activate;
@@ -906,7 +907,7 @@ static gitem_t itemlist[] = {
         .weapmodel = WEAP_SUPERSHOTGUN
     },
 
-    /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     [ITEM_BLASTER] = {
         .classname = "weapon_hyperblaster",
@@ -923,6 +924,26 @@ static gitem_t itemlist[] = {
         .ammo = ITEM_CELLS,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_HYPERBLASTER
+    },
+
+    /*QUAKED weapon_nailgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+    */
+    [ITEM_NAILGUN] = {
+        .classname = "weapon_nailgun",
+        .pickup = Pickup_Weapon,
+        .use = Use_Weapon,
+        .drop = Drop_Weapon,
+        .animation = &weap_nailgun_activate,
+        .pickup_sound = ASSET_SOUND_WEAPON_PICKUP,
+        .world_model = ASSET_MODEL_NAILGUN_WORLD, .world_model_flags = EF_ROTATE,
+        .view_model = ASSET_MODEL_NAILGUN_VIEW,
+        .icon = "w_nailg",
+        .pickup_name = "Nailgun",
+        .quantity = 1,
+        .ammo = ITEM_NAILS,
+        .flags = IT_WEAPON | IT_STAY_COOP,
+        .weapmodel = WEAP_MACHINEGUN,
+        .precaches = ASSET_MODEL_NAIL,
     },
 
     /*QUAKED weapon_perforator (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -959,7 +980,7 @@ static gitem_t itemlist[] = {
         .icon = "w_launch",
         .pickup_name = "Grenade Launcher",
         .quantity = 1,
-        .ammo = ITEM_SHELLS,
+        .ammo = ITEM_GRENADES,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_GRENADELAUNCHER,
         .precaches = ASSET_MODEL_GRENADE " " ASSET_SOUND_GRENADE_BOUNCE " " ASSET_SOUND_GRENADE_FIRE " " ASSET_SOUND_GRENADE_EXPLODE,
@@ -979,13 +1000,13 @@ static gitem_t itemlist[] = {
         .icon = "w_rocket",
         .pickup_name = "Rocket Launcher",
         .quantity = 1,
-        .ammo = ITEM_SHELLS,
+        .ammo = ITEM_ROCKETS,
         .flags = IT_WEAPON | IT_STAY_COOP,
         .weapmodel = WEAP_ROCKETLAUNCHER,
         .precaches = ASSET_MODEL_ROCKET " " ASSET_SOUND_ROCKET_FLY " " ASSET_SOUND_ROCKET_FIRE " " ASSET_SOUND_ROCKET_EXPLODE,
     },
 
-    /*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+    /*QUAKED weapon_thunderbolt (.3 .3 1) (-16 -16 -16) (16 16 16)
     */
     [ITEM_THUNDERBOLT] = {
         .classname = "weapon_thunderbolt",

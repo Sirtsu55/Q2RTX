@@ -201,20 +201,20 @@ typedef enum {
 // for this particular cap
 #define WEAPON_EVENT_MINMAX -1
 
-// return false to cancel usual handling
-typedef bool (*weapon_func_t) (struct edict_s *ent);
-
-typedef struct weapon_event_s {
-    weapon_func_t func; // function; null for end of list
-    int32_t start, end; // frame range, or WEAPON_EVENT_ALWAYS
-} weapon_event_t;
-
 typedef enum {
     WEAPID_GUN,
     WEAPID_AXE,
 
     WEAPID_TOTAL
 } weapon_id_t;
+
+// return false to cancel usual handling
+typedef bool (*weapon_func_t) (struct edict_s *ent, weapon_id_t weapon_id);
+
+typedef struct weapon_event_s {
+    weapon_func_t func; // function; null for end of list
+    int32_t start, end; // frame range, or WEAPON_EVENT_ALWAYS
+} weapon_event_t;
 
 typedef struct weapon_animation_s {
     int32_t start, end;
@@ -269,6 +269,7 @@ typedef enum {
     ITEM_BLASTER,
     ITEM_SHOTGUN,
     ITEM_SSHOTGUN,
+    ITEM_NAILGUN,
     ITEM_PERFORATOR,
     ITEM_GRENADE_LAUNCHER,
     ITEM_ROCKET_LAUNCHER,
@@ -678,7 +679,7 @@ gitem_t *FindItem(char *pickup_name);
 gitem_t *FindItemByClassname(char *classname);
 edict_t *Drop_Item(edict_t *ent, gitem_t *item);
 void SetRespawn(edict_t *ent, float delay);
-bool ChangeWeapon(edict_t *ent);
+bool ChangeWeapon(edict_t *ent, weapon_id_t weapon_id);
 void Weapon_Activate(edict_t *ent, bool switched);
 void SpawnItem(edict_t *ent, gitem_t *item);
 void Think_Weapon(edict_t *ent);
@@ -854,9 +855,9 @@ void DeathmatchScoreboardMessage(edict_t *client, edict_t *killer);
 // p_weapon.c
 //
 void PlayerNoise(edict_t *who, vec3_t where, int type);
-void Weapon_SetAnimationFrame(edict_t *ent, const weapon_animation_t *animation, int32_t frame);
-void Weapon_SetAnimation(edict_t *ent, const weapon_animation_t *animation);
-void Weapon_RunAnimation(edict_t *ent);
+void Weapon_SetAnimationFrame(edict_t *ent, weapon_id_t currentWeaponId, const weapon_animation_t *animation, int32_t frame);
+void Weapon_SetAnimation(edict_t *ent, weapon_id_t currentWeaponId, const weapon_animation_t *animation);
+bool Weapon_CheckChange(edict_t *ent, const weapon_animation_t *deact_anim, weapon_id_t id);
 void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 void P_ProjectSource2(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t up, vec3_t result);
 bool Weapon_AmmoCheck(edict_t *ent);
@@ -1035,7 +1036,7 @@ struct gclient_s {
 
     // N&C
     bool        axe_attack, can_charge_axe, can_release_charge;
-    bool        inspect;
+    bool        inspect, nail_left;
 };
 
 struct edict_s {

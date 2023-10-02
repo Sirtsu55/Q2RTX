@@ -53,6 +53,7 @@ SET(SRC_BASENAC
 	basenac/p_weapon.c
 	basenac/weapons/nac_axe.c
 	basenac/weapons/nac_perf.c
+	basenac/weapons/nac_nailgun.c
 	basenac/weapons/nac_shotgun.c
 	basenac/weapons/nac_sshotgun.c
 	basenac/weapons/nac_blaster.c

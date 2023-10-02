@@ -102,12 +102,12 @@ models/weapons/v_axe/arm:
 models/weapons/g_axe/axe:
 	texture_base models/weapons/v_axe/axe.tga
 	texture_normals models/weapons/v_axe/axe_n.tga
-	metalness_factor 1.0
+	roughness_override 0.3
 
 models/weapons/v_axe/axe:
 	texture_base models/weapons/v_axe/axe.tga
 	texture_normals models/weapons/v_axe/axe_n.tga
-	metalness_factor 1.0	
+	roughness_override 0.3	
 	
 models/ranger/v_shotg:
 	texture_base models/weapons/v_shotg/v_shotg.tga
@@ -153,42 +153,54 @@ models/weapons/v_sshotg/v_sshotg:
 	texture_base models/weapons/v_sshotg/v_sshotg.tga
 	texture_normals models/weapons/v_sshotg/v_sshotg_n.tga
 	
+models/weapons/g_nailg/v_nailg:
+	texture_base models/weapons/v_nailg/nailg.tga
+	texture_normals models/weapons/v_nailg/nailg_n.tga
+	
+models/weapons/v_nailg/v_nailg:
+	texture_base models/weapons/v_nailg/nailg.tga
+	texture_normals models/weapons/v_nailg/nailg_n.tga
+	
+models/weapons/v_sshotg/shell:
+	texture_base models/objects/shell/shell.tga
+	texture_normals models/objects/shell/shell_n.tga
+
 models/items/ammo/nails/nailbox:
 	texture_base models/items/ammo/nails/nailbox.tga
 	texture_normals models/items/ammo/nails/nailbox_n.tga
-	kind CHROME
+	roughness_override 0.3
+	base_factor 2.0
 
 models/items/ammo/shells/shellbox_small:
 	texture_base models/items/ammo/shells/shellbox_small.tga
 	texture_normals models/items/ammo/shells/shellbox_small_n.tga
+	base_factor 2.0
 	
-models/items/ammo/cells/reactor_top:
-	texture_base models/tdem/reactor/reactor_top.tga
-	texture_normals models/tdem/reactor/reactor_top_n.tga
-	base_factor 0.4
+models/items/ammo/cells/cell_ammo:
+	texture_base models/items/ammo/cells/cell_ammo.tga
+	texture_normals models/items/ammo/cells/cell_ammo_n.tga
+	texture_emissive models/items/ammo/cells/cell_ammo_light.tga
+	emissive_factor 0.050000
 	
-models/items/ammo/cells/reactor_base:
-	texture_base models/tdem/reactor/reactor_base.tga
-	texture_normals models/tdem/reactor/reactor_base_n.tga
-	base_factor 0.4
+models/items/ammo/rockets/rocket_box:
+	texture_base models/items/ammo/rockets/rocket_box.tga
+	texture_normals models/items/ammo/rockets/rocket_box_n.tga
+	texture_emissive models/items/ammo/rockets/rocket_box_light.tga
+	emissive_factor 0.1
+	base_factor 2.0
 	
-models/items/ammo/cells/reactor_glow:
-	texture_base models/tdem/reactor/reactor_glow.tga
-	texture_emissive models/tdem/reactor/reactor_glow.tga
-	metalness_factor 0.000000
-	emissive_factor 0.100000
-	specular_factor 0.000000
-	
-models/items/ammo/grenades/reactorupper:
-	texture_base models/tdem/reactor/reactorupper.tga
-	texture_normals models/tdem/reactor/reactorupper_n.tga
-	base_factor 0.1
-	
-models/items/ammo/grenades/reactorlower:
-	texture_base models/tdem/reactor/reactorlower.tga
-	texture_normals models/tdem/reactor/reactorlower_n.tga
-	base_factor 0.1
-	
+models/items/ammo/rockets/rocket_new:
+	texture_base models/items/ammo/rockets/rocket_new.tga
+	texture_normals models/items/ammo/rockets/rocket_new_n.tga
+	base_factor 2.0
+	roughness_override 0.3
+
+models/items/ammo/grenades/grenadebox:
+	texture_base models/items/ammo/grenades/grenadebox.tga
+	texture_normals models/items/ammo/grenades/grenadebox_n.tga
+	roughness_override 0.3
+	base_factor 2.0
+
 models/items/ammo/grenades/v_launch:
 	texture_base models/weapons/v_launch/v_launch.tga
 	texture_normals models/weapons/v_launch/v_launch_n.tga	
@@ -197,7 +209,7 @@ models/items/ammo/grenades/nadered:
 	texture_base models/weapons/v_launch/nadered.tga
 	texture_emissive models/weapons/v_launch/nadered.tga
 	metalness_factor 0.000000
-	emissive_factor 0.150000
+	emissive_factor 0.035000
 	specular_factor 0.000000
 	
 models/env/gravestones/grave_04:
@@ -402,12 +414,20 @@ models/env/tlight_07/tlight_07_emissive_skin:
 	specular_factor 0.000000
 	emissive_factor 0.1
 	
-models/vfx/teletunnel:
-	texture_base models/vfx/ttunnel_spot.tga
-	texture_emissive models/vfx/ttunnel_spot.tga
+models/vfx/teletunnel/teletunnel:
+	texture_base models/vfx/teletunnel/ttunnel_spot.tga
+	texture_emissive models/vfx/teletunnel/ttunnel_spot.tga
 	metalness_factor 0.000000
-	emissive_factor 0.5
+	emissive_factor 0.55
 	specular_factor 0.000000
+	
+models/vfx/teletunnel/white:
+	texture_base models/vfx/teletunnel/white.tga
+	texture_emissive models/vfx/teletunnel/white.tga
+	metalness_factor 0.000000
+	specular_factor 0.000000
+	emissive_factor 0.030000
+	is_light 1
 	
 models/monsters/scrag/scrag_slime:
 	texture_base textures/liquid/slime.tga
@@ -424,7 +444,38 @@ models/monsters/scrag/scrag:
 	
 models/monsters/scrag/scrag_1:
 	texture_base models/monsters/scrag/scrag_pain.tga
-	texture_normals models/monsters/scrag/scrag_n.tga
+	texture_normals models/monsters/scrag/scrag_pain_n.tga
+	metalness_factor 0.000000
+	
+models/monsters/scrag/scrag_pain:
+	texture_base models/monsters/scrag/scrag_pain.tga
+	texture_normals models/monsters/scrag/scrag_pain_n.tga
+	metalness_factor 0.000000
+	
+models/monsters/scrag/gibs:
+	texture_base models/monsters/gibs/gibs.tga
+	texture_normals models/monsters/gibs/gibs_n.tga
+	metalness_factor 0.000000
+	
+models/monsters/scrag/freshbones:
+	texture_base models/monsters/gibs/freshbones.tga
+	texture_normals models/monsters/gibs/freshbones_n.tga
+	metalness_factor 0.000000
+	
+models/monsters/knight/knight_pain:
+	texture_base models/monsters/knight/knight_pain.tga
+	texture_normals models/monsters/knight/knight_pain_n.tga
+	base_factor 1.2
+	roughness_override 0.3
+	
+models/monsters/knight/gibs:
+	texture_base models/monsters/gibs/gibs.tga
+	texture_normals models/monsters/gibs/gibs_n.tga
+	metalness_factor 0.000000
+	
+models/monsters/knight/freshbones:
+	texture_base models/monsters/gibs/freshbones.tga
+	texture_normals models/monsters/gibs/freshbones_n.tga
 	metalness_factor 0.000000
 
 models/monsters/fiend/fiend:
@@ -440,11 +491,24 @@ models/monsters/tentacle/smalltentacle:
 models/monsters/knight/knight:
 	texture_base models/monsters/knight/knight.tga
 	texture_normals models/monsters/knight/knight_n.tga
+	base_factor 1.2
+	roughness_override 0.3
 	
+models/monsters/knight/knight_1:
+	texture_base models/monsters/knight/knight_pain.tga
+	texture_normals models/monsters/knight/knight_pain_n.tga
 	base_factor 1.2
 	roughness_override 0.3
 
 models/monsters/knight/knight_sword:
+	texture_base models/monsters/knight/knight_sword.tga
+	texture_normals models/monsters/knight/knight_sword_n.tga
+	bump_scale 1
+	base_factor 2
+	mat specular_factor 10
+	metalness_factor 1
+	
+models/monsters/knight/knight_sword_1:
 	texture_base models/monsters/knight/knight_sword.tga
 	texture_normals models/monsters/knight/knight_sword_n.tga
 	bump_scale 1
@@ -468,8 +532,25 @@ models/monsters/enforcer/enforcer_accessories:
 	texture_base models/monsters/enforcer/enforcer_accessories.tga
 	texture_normals models/monsters/enforcer/enforcer_accessories_n.tga
 	
+models/monsters/enforcer/enforcer_backpack_1:
+	texture_base models/monsters/enforcer/enforcer_backpack_pain.tga
+	texture_normals models/monsters/enforcer/enforcer_backpack_pain_n.tga
+	
+models/monsters/enforcer/enforcer_bottom_1:
+	texture_base models/monsters/enforcer/enforcer_bottom_pain.tga
+	texture_normals models/monsters/enforcer/enforcer_bottom_pain_n.tga
+	
+models/monsters/enforcer/enforcer_top_1:
+	texture_base models/monsters/enforcer/enforcer_top_pain.tga
+	texture_normals models/monsters/enforcer/enforcer_top_pain_n.tga
+	
+models/monsters/enforcer/enforcer_accessories_1:
+	texture_base models/monsters/enforcer/enforcer_accessories_pain.tga
+	texture_normals models/monsters/enforcer/enforcer_accessories_pain_n.tga
+	
 models/monsters/enforcer/enforcer_glass:
 	texture_base models/monsters/enforcer/enforcer_glass.tga
+	texture_normals textures/basic/glass_n.tga
 	kind GLASS
 	
 models/monsters/enforcer/enforcer_eye:
@@ -478,6 +559,7 @@ models/monsters/enforcer/enforcer_eye:
 	bump_scale 0.000000
 	metalness_factor 0.000000
 	specular_factor 0.000000
+	emissive_factor 1.0
 	
 models/monsters/enforcer/blaster:
 	texture_base models/weapons/v_blaster/blaster.tga
@@ -492,10 +574,43 @@ models/monsters/enforcer/blaster_glow:
 	texture_emissive models/weapons/v_blaster/blaster_glow.tga
 	bump_scale 0.000000
 	metalness_factor 0.000000
-	emissive_factor 0.200000
+	emissive_factor 0.150000
+	specular_factor 0.000000
+	
+models/monsters/enforcer/enforcer_glass_1:
+	texture_base models/monsters/enforcer/enforcer_glass.tga
+	texture_normals textures/basic/glass_n.tga
+	kind GLASS
+	
+models/monsters/enforcer/enforcer_eye_1:
+	texture_base models/monsters/enforcer/enforcer_eye.tga
+	texture_emissive models/monsters/enforcer/enforcer_eye.tga
+	bump_scale 0.000000
+	metalness_factor 0.000000
+	specular_factor 0.000000
+	emissive_factor 1.0
+	
+models/monsters/enforcer/blaster_1:
+	texture_base models/weapons/v_blaster/blaster.tga
+	texture_normals models/weapons/v_blaster/blaster_n.tga
+	
+models/monsters/enforcer/blastermid_1:
+	texture_base models/weapons/v_blaster/blastermid.tga
+	texture_normals models/weapons/v_blaster/blastermid_n.tga
+	
+models/monsters/enforcer/blaster_glow_1:
+	texture_base models/weapons/v_blaster/blaster_glow.tga
+	texture_emissive models/weapons/v_blaster/blaster_glow.tga
+	bump_scale 0.000000
+	metalness_factor 0.000000
+	emissive_factor 0.150000
 	specular_factor 0.000000
 	
 models/monsters/grunt/v_shotg:
+	texture_base models/weapons/v_shotg/v_shotg.tga
+	texture_normals models/weapons/v_shotg/v_shotg_n.tga
+	
+models/monsters/grunt/v_shotg_1:
 	texture_base models/weapons/v_shotg/v_shotg.tga
 	texture_normals models/weapons/v_shotg/v_shotg_n.tga
 	
@@ -509,12 +624,33 @@ models/monsters/grunt/grunt_bottom:
 	
 models/monsters/grunt/grunt_eye:
 	texture_base models/monsters/grunt/grunt_eye.tga
+	texture_emissive models/monsters/grunt/grunt_eye.tga
 	metalness_factor 0.000000
 	specular_factor 0.000000
+	emissive_factor 0.002
+	
+models/monsters/grunt/grunt_eye_1:
+	texture_base models/monsters/grunt/grunt_eye.tga
+	texture_emissive models/monsters/grunt/grunt_eye.tga
+	metalness_factor 0.000000
+	specular_factor 0.000000
+	emissive_factor 0.002
 	
 models/monsters/grunt/grunt_top:
 	texture_base models/monsters/grunt/grunt_top.tga
 	texture_normals models/monsters/grunt/grunt_top_n.tga
+	
+models/monsters/grunt/grunt_accessories_1:
+	texture_base models/monsters/grunt/grunt_pain_accessories.tga
+	texture_normals models/monsters/grunt/grunt_pain_accessories_n.tga
+	
+models/monsters/grunt/grunt_bottom_1:
+	texture_base models/monsters/grunt/grunt_pain_bottom.tga
+	texture_normals models/monsters/grunt/grunt_pain_bottom_n.tga
+	
+models/monsters/grunt/grunt_top_1:
+	texture_base models/monsters/grunt/grunt_pain_top.tga
+	texture_normals models/monsters/grunt/grunt_pain_top_n.tga
 	
 models/items/keys/gold_key/silver_key:
 	texture_base models/items/keys/gold_key/silver_key.tga
@@ -524,10 +660,8 @@ models/items/keys/gold_key/silver_key:
 
 models/items/keys/gold_key/gold_key:
 	texture_base models/items/keys/gold_key/gold_key.tga
-	texture_emissive models/items/keys/gold_key/gold_key.tga
 	texture_normals models/items/keys/gold_key/gold_key_n.tga
 	base_factor 1.5
-	emissive_factor 0.2
 	kind CHROME
 	
 models/objects/explobox/explobox:
@@ -536,6 +670,7 @@ models/objects/explobox/explobox:
 	texture_emissive models/objects/explobox/explobox_light.jpg
 	base_factor 2.000000
 	emissive_factor 0.5
+	roughness_override 0.3
 	
 models/objects/explobox/explobox2:
 	texture_base models/objects/explobox/explobox2.tga
@@ -543,10 +678,13 @@ models/objects/explobox/explobox2:
 	texture_emissive models/objects/explobox/explobox2_light.jpg
 	base_factor 2.000000
 	emissive_factor 0.5
+	roughness_override 0.3
 	
 models/ranger/ranger_top:
 	texture_base models/ranger/ranger_top.tga
 	texture_normals models/ranger/ranger_top_n.tga
+	roughness_override 0.3
+	bump_scale 2.0
 	
 models/ranger/ranger_eye:
 	texture_base models/ranger/ranger_eye.tga
@@ -560,19 +698,27 @@ models/ranger/glass:
 models/ranger/ranger_bottom:
 	texture_base models/ranger/ranger_bottom.tga
 	texture_normals models/ranger/ranger_bottom_n.tga
+	roughness_override 0.3
+	bump_scale 2.0
 	
 
 models/ranger/ranger_top_green:
 	texture_base models/ranger/ranger_top_green.tga
 	texture_normals models/ranger/ranger_top_n.tga
+	roughness_override 0.3
+	bump_scale 2.0
 
 models/ranger/ranger_top_red:
 	texture_base models/ranger/ranger_top_red.tga
 	texture_normals models/ranger/ranger_top_n.tga
+	roughness_override 0.3
+	bump_scale 2.0
 
 models/ranger/ranger_accessories:
 	texture_base models/ranger/ranger_accessories.tga
 	texture_normals models/ranger/ranger_accessories_n.tga
+	roughness_override 0.3
+	bump_scale 2.0
 	
 models/weapons/v_axe/ranger_accessories:
 	texture_base models/ranger/ranger_accessories.tga
@@ -596,6 +742,7 @@ models/proj/lightning/skin:
 models/items/armor/armorshard:
 	texture_base models/items/armor/armorshard.tga
 	texture_normals models/items/armor/armorshard_n.tga
+	roughness_override 0.3
 	
 models/env/demon_head/demon_head:
 	texture_base models/env/demon_head/demon_head.tga
@@ -618,6 +765,29 @@ models/monsters/vore/vore:
 	texture_normals models/monsters/vore/vore_n.tga
 	roughness_override 0.300000
 	metalness_factor 0.000000
+	
+models/monsters/vore/vore_1:
+	texture_base models/monsters/vore/vore_pain.tga
+	texture_normals models/monsters/vore/vore_pain_n.tga
+	roughness_override 0.300000
+	metalness_factor 0.000000
+	
+models/monsters/vore/vore_pain:
+	texture_base models/monsters/vore/vore_pain.tga
+	texture_normals models/monsters/vore/vore_pain_n.tga
+	roughness_override 0.300000
+	metalness_factor 0.000000
+	
+models/monsters/vore/gibs:
+	texture_base models/monsters/gibs/gibs.tga
+	texture_normals models/monsters/gibs/gibs_n.tga
+	metalness_factor 0.000000
+	
+models/monsters/vore/freshbones:
+	texture_base models/monsters/gibs/freshbones.tga
+	texture_normals models/monsters/gibs/freshbones_n.tga
+	metalness_factor 0.000000
+
 
 models/tdem/door/green:
 	texture_base models/tdem/door/green.tga

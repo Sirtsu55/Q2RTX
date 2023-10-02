@@ -22,30 +22,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern bool     is_quad;
 
-static void Rocket_Fire(edict_t* ent)
+static void NailGun_Fire(edict_t *ent, bool left)
 {
     vec3_t      start;
     vec3_t      forward, right;
     vec3_t      offset;
-    int         damage = 100;
+    int         damage = 12;
 
     AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-    ent->client->kick_angles[0] = -2;
+    ent->client->kick_angles[0] = -0.8;
 
-    VectorSet(offset, 4, 0, ent->viewheight - 4);
+    VectorSet(offset, 16, 0, ent->viewheight - 6);
+
+    if (left)
+        offset[1] = -2.7f;
+    else
+        offset[1] = 2.7f;
+
     P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
     if (is_quad) {
         damage *= 4;
     }
 
-    fire_rocket(ent, start, forward, damage, 1000, damage, damage + 40);
+    fire_nail(ent, start, forward, damage, 1250);
 
     // send muzzle flash
     SV_WriteByte(svc_muzzleflash);
     SV_WriteEntity(ent);
-    SV_WriteByte(MZ_ROCKET);
+    SV_WriteByte(MZ_MACHINEGUN);
     SV_Multicast(ent->s.origin, MULTICAST_PVS, false);
 
     PlayerNoise(ent, ent->s.origin, PNOISE_WEAPON);
@@ -55,66 +61,78 @@ static void Rocket_Fire(edict_t* ent)
 }
 
 enum {
-    ANIM_EQUIP_FIRST = 0,
-    ANIM_EQUIP_LAST = 8,
-    ANIM_IDLE_FIRST = 9,
-    ANIM_IDLE_LAST = 67,
-    ANIM_ATTACK_FIRST = 68,
-    ANIM_ATTACK_LAST = 83,
-    ANIM_PUTAWAY_FIRST = 84,
-    ANIM_PUTAWAY_LAST = 86,
-    ANIM_INSPECT_FIRST = 87,
-    ANIM_INSPECT_LAST = 157
+    ANIM_EQUIP_FIRST    = 0,
+    ANIM_EQUIP_LAST     = 8,
+    ANIM_IDLE_FIRST     = 9,
+    ANIM_IDLE_LAST      = 67,
+    ANIM_LEFT_FIRST     = 68,
+    ANIM_LEFT_LAST      = 70,
+    ANIM_RIGHT_FIRST    = 71,
+    ANIM_RIGHT_LAST     = 73,
+    ANIM_PUTAWAY_FIRST  = 74,
+    ANIM_PUTAWAY_LAST   = 77,
+    ANIM_INSPECT_FIRST  = 78,
+    ANIM_INSPECT_LAST   = 132
 };
 
-static bool Rocket_PickIdle(edict_t* ent, weapon_id_t id);
-static bool Rocket_Idle(edict_t* ent, weapon_id_t id);
+static bool NailGun_PickIdle(edict_t *ent, weapon_id_t id);
+static bool NailGun_Idle(edict_t *ent, weapon_id_t id);
 
-const weapon_animation_t weap_rocket_activate = {
+const weapon_animation_t weap_nailgun_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
-    .finished = Rocket_PickIdle
+    .finished = NailGun_PickIdle
 };
 
-const weapon_animation_t weap_rocket_deactivate = {
+const weapon_animation_t weap_nailgun_deactivate = {
     .start = ANIM_PUTAWAY_FIRST, .end = ANIM_PUTAWAY_LAST,
     .finished = ChangeWeapon
 };
 
-const weapon_animation_t weap_rocket_idle = {
+const weapon_animation_t weap_nailgun_idle = {
     .start = ANIM_IDLE_FIRST, .end = ANIM_IDLE_LAST,
-    .frame = Rocket_Idle, .finished = Rocket_PickIdle
+    .frame = NailGun_Idle, .finished = NailGun_PickIdle
 };
 
-const weapon_animation_t weap_rocket_inspect = {
+const weapon_animation_t weap_nailgun_inspect = {
     .start = ANIM_INSPECT_FIRST, .end = ANIM_INSPECT_LAST,
-    .frame = Rocket_Idle, .finished = Rocket_PickIdle
+    .frame = NailGun_Idle, .finished = NailGun_PickIdle
 };
 
-const weapon_animation_t weap_rocket_fire = {
-    .start = ANIM_ATTACK_FIRST, .end = ANIM_ATTACK_LAST, .next = &weap_rocket_idle
+const weapon_animation_t weap_nailgun_fire_left = {
+    .start = ANIM_LEFT_FIRST, .end = ANIM_LEFT_LAST - 1, .next = &weap_nailgun_idle
 };
 
-static bool Rocket_PickIdle(edict_t* ent, weapon_id_t id)
+const weapon_animation_t weap_nailgun_fire_right = {
+    .start = ANIM_RIGHT_FIRST, .end = ANIM_RIGHT_LAST - 1, .next = &weap_nailgun_idle
+};
+
+static bool NailGun_PickIdle(edict_t *ent, weapon_id_t id)
 {
-    if (ent->client->weapanim[id] == &weap_rocket_inspect ||
+    if (ent->client->weapanim[WEAPID_GUN] == &weap_nailgun_inspect ||
         (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, id, &weap_rocket_idle);
+        Weapon_SetAnimation(ent, id, &weap_nailgun_idle);
         return false;
     }
 
-    Weapon_SetAnimation(ent, id, &weap_rocket_inspect);
+    Weapon_SetAnimation(ent, id, &weap_nailgun_inspect);
 
     ent->client->inspect = false;
 
     return false;
 }
 
-static bool Rocket_Idle(edict_t* ent, weapon_id_t id)
+static bool NailGun_Idle(edict_t *ent, weapon_id_t id)
 {
-    // check weapon change
-    if (Weapon_CheckChange(ent, &weap_rocket_deactivate, id))
+    if (ent->client->newweapon)
+    {
+        Weapon_SetAnimation(ent, id, &weap_nailgun_deactivate);
+
+        if (!ent->client->pers.inventory[ent->client->pers.weapon->id] || !ent->client->newweapon || ent->client->newweapon->weapid != id)
+            Weapon_Activate(ent, true);
+
         return false;
+    }
 
     if (ent->client->buttons & BUTTON_ATTACK)
     {
@@ -125,24 +143,28 @@ static bool Rocket_Idle(edict_t* ent, weapon_id_t id)
         if (ent->client->ps.pmove.pm_flags & PMF_DUCKED) {
             ent->s.frame = FRAME_crattak1 - 1;
             ent->client->anim_end = FRAME_crattak9;
-        }
-        else {
+        } else {
             ent->s.frame = FRAME_attack1 - 1;
             ent->client->anim_end = FRAME_attack8;
         }
 
-        Rocket_Fire(ent);
+        NailGun_Fire(ent, ent->client->nail_left);
 
-        Weapon_SetAnimation(ent, id, &weap_rocket_fire);
+        if (ent->client->nail_left)
+            Weapon_SetAnimation(ent, id, &weap_nailgun_fire_left);
+        else
+            Weapon_SetAnimation(ent, id, &weap_nailgun_fire_right);
+
+        ent->client->nail_left = !ent->client->nail_left;
         return false;
     }
 
     // check explicit inspect last
     if (ent->client->inspect)
     {
-        if (ent->client->weapanim[WEAPID_GUN] == &weap_rocket_idle)
+        if (ent->client->weapanim[WEAPID_GUN] == &weap_nailgun_idle)
         {
-            Rocket_PickIdle(ent, id);
+            NailGun_PickIdle(ent, id);
             return false;
         }
 

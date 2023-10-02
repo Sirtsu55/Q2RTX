@@ -81,8 +81,8 @@ enum {
     ANIM_INSPECT_LAST   = 157
 };
 
-static bool SuperShotgun_PickIdle(edict_t *ent);
-static bool SuperShotgun_Idle(edict_t *ent);
+static bool SuperShotgun_PickIdle(edict_t *ent, weapon_id_t id);
+static bool SuperShotgun_Idle(edict_t *ent, weapon_id_t id);
 
 const weapon_animation_t weap_sshotgun_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
@@ -108,30 +108,27 @@ const weapon_animation_t weap_sshotgun_fire = {
     .start = ANIM_ATTACK_FIRST, .end = ANIM_ATTACK_LAST, .next = &weap_sshotgun_idle
 };
 
-static bool SuperShotgun_PickIdle(edict_t *ent)
+static bool SuperShotgun_PickIdle(edict_t *ent, weapon_id_t id)
 {
-    if (ent->client->weapanim[WEAPID_GUN] == &weap_sshotgun_inspect ||
-        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
+    if (ent->client->weapanim[id] == &weap_sshotgun_inspect ||
+        (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, &weap_sshotgun_idle);
+        Weapon_SetAnimation(ent, id, &weap_sshotgun_idle);
         return false;
     }
 
-    Weapon_SetAnimation(ent, &weap_sshotgun_inspect);
+    Weapon_SetAnimation(ent, id, &weap_sshotgun_inspect);
 
     ent->client->inspect = false;
 
     return false;
 }
 
-static bool SuperShotgun_Idle(edict_t *ent)
+static bool SuperShotgun_Idle(edict_t *ent, weapon_id_t id)
 {
-    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
-    {
-        Weapon_SetAnimation(ent, &weap_sshotgun_deactivate);
-        Weapon_Activate(ent, true);
+    // check weapon change
+    if (Weapon_CheckChange(ent, &weap_sshotgun_deactivate, id))
         return false;
-    }
 
     if (ent->client->buttons & BUTTON_ATTACK)
     {
@@ -149,7 +146,7 @@ static bool SuperShotgun_Idle(edict_t *ent)
 
         SuperShotgun_Fire(ent);
 
-        Weapon_SetAnimation(ent, &weap_sshotgun_fire);
+        Weapon_SetAnimation(ent, id, &weap_sshotgun_fire);
         return false;
     }
 
@@ -158,7 +155,7 @@ static bool SuperShotgun_Idle(edict_t *ent)
     {
         if (ent->client->weapanim[WEAPID_GUN] == &weap_sshotgun_idle)
         {
-            SuperShotgun_PickIdle(ent);
+            SuperShotgun_PickIdle(ent, id);
             return false;
         }
 

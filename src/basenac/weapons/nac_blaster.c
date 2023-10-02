@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern bool     is_quad;
 
-static bool Blaster_Fire(edict_t *ent)
+static bool Blaster_Fire(edict_t *ent, weapon_id_t id)
 {
     vec3_t      start;
     vec3_t      forward, right;
@@ -69,8 +69,8 @@ enum {
     ANIM_INSPECT_LAST   = 176
 };
 
-static bool Blaster_PickIdle(edict_t *ent);
-static bool Blaster_Idle(edict_t *ent);
+static bool Blaster_PickIdle(edict_t *ent, weapon_id_t id);
+static bool Blaster_Idle(edict_t *ent, weapon_id_t id);
 
 const weapon_animation_t weap_blaster_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
@@ -100,30 +100,27 @@ const weapon_animation_t weap_blaster_fire = {
     }
 };
 
-static bool Blaster_PickIdle(edict_t *ent)
+static bool Blaster_PickIdle(edict_t *ent, weapon_id_t id)
 {
-    if (ent->client->weapanim[WEAPID_GUN] == &weap_blaster_inspect ||
-        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
+    if (ent->client->weapanim[id] == &weap_blaster_inspect ||
+        (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, &weap_blaster_idle);
+        Weapon_SetAnimation(ent, id, &weap_blaster_idle);
         return false;
     }
 
-    Weapon_SetAnimation(ent, &weap_blaster_inspect);
+    Weapon_SetAnimation(ent, id, &weap_blaster_inspect);
 
     ent->client->inspect = false;
 
     return false;
 }
 
-static bool Blaster_Idle(edict_t *ent)
+static bool Blaster_Idle(edict_t *ent, weapon_id_t id)
 {
-    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
-    {
-        Weapon_SetAnimation(ent, &weap_blaster_deactivate);
-        Weapon_Activate(ent, true);
+    // check weapon change
+    if (Weapon_CheckChange(ent, &weap_blaster_deactivate, id))
         return false;
-    }
 
     if (ent->client->buttons & BUTTON_ATTACK)
     {
@@ -139,18 +136,18 @@ static bool Blaster_Idle(edict_t *ent)
             ent->client->anim_end = FRAME_attack8;
         }
 
-        Blaster_Fire(ent);
+        Blaster_Fire(ent, id);
 
-        Weapon_SetAnimation(ent, &weap_blaster_fire);
+        Weapon_SetAnimation(ent, id, &weap_blaster_fire);
         return false;
     }
 
     // check explicit inspect last
     if (ent->client->inspect)
     {
-        if (ent->client->weapanim[WEAPID_GUN] == &weap_blaster_idle)
+        if (ent->client->weapanim[id] == &weap_blaster_idle)
         {
-            Blaster_PickIdle(ent);
+            Blaster_PickIdle(ent, id);
             return false;
         }
 

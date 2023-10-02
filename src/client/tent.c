@@ -1343,7 +1343,7 @@ void CL_ParseTEnt(void)
         S_StartSound(NULL, te.entity1, CHAN_WEAPON, cl_sfx_lightning, 1, ATTN_NORM, 0, 0);
 
         if (te.entity1 - 1 == cl.clientNum) {
-            VectorSet(te.offset, 0, 0, -8);
+            VectorSet(te.offset, 0, 12, -8);
             CL_ParsePlayerBeam(cl_mod_lightning);
         } else {
             VectorClear(te.offset);

@@ -135,8 +135,8 @@ enum {
     ANIM_INSPECT_LAST = 157
 };
 
-static bool Thunder_PickIdle(edict_t* ent);
-static bool Thunder_Idle(edict_t* ent);
+static bool Thunder_PickIdle(edict_t* ent, weapon_id_t id);
+static bool Thunder_Idle(edict_t* ent, weapon_id_t id);
 
 const weapon_animation_t weap_thunder_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
@@ -158,17 +158,17 @@ const weapon_animation_t weap_thunder_inspect = {
     .frame = Thunder_Idle, .finished = Thunder_PickIdle
 };
 
-static bool Thunder_Firing(edict_t* ent);
+static bool Thunder_Firing(edict_t* ent, weapon_id_t id);
 
 const weapon_animation_t weap_thunder_fire = {
     .start = ANIM_ATTACK_FIRST, .end = ANIM_ATTACK_LAST,
     .frame = Thunder_Firing
 };
 
-static bool Thunder_Firing(edict_t* ent)
+static bool Thunder_Firing(edict_t* ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK) || !Weapon_AmmoCheck(ent)) {
-        Weapon_SetAnimation(ent, &weap_thunder_idle);
+        Weapon_SetAnimation(ent, id, &weap_thunder_idle);
         return false;
     }
 
@@ -176,30 +176,27 @@ static bool Thunder_Firing(edict_t* ent)
     return true;
 }
 
-static bool Thunder_PickIdle(edict_t* ent)
+static bool Thunder_PickIdle(edict_t* ent, weapon_id_t id)
 {
-    if (ent->client->weapanim[WEAPID_GUN] == &weap_thunder_inspect ||
-        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
+    if (ent->client->weapanim[id] == &weap_thunder_inspect ||
+        (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, &weap_thunder_idle);
+        Weapon_SetAnimation(ent, id, &weap_thunder_idle);
         return false;
     }
 
-    Weapon_SetAnimation(ent, &weap_thunder_inspect);
+    Weapon_SetAnimation(ent, id, &weap_thunder_inspect);
 
     ent->client->inspect = false;
 
     return false;
 }
 
-static bool Thunder_Idle(edict_t* ent)
+static bool Thunder_Idle(edict_t* ent, weapon_id_t id)
 {
-    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
-    {
-        Weapon_SetAnimation(ent, &weap_thunder_deactivate);
-        Weapon_Activate(ent, true);
+    // check weapon change
+    if (Weapon_CheckChange(ent, &weap_thunder_deactivate, id))
         return false;
-    }
 
     if (ent->client->buttons & BUTTON_ATTACK)
     {
@@ -218,16 +215,16 @@ static bool Thunder_Idle(edict_t* ent)
 
         Thunder_Fire(ent);
 
-        Weapon_SetAnimation(ent, &weap_thunder_fire);
+        Weapon_SetAnimation(ent, id, &weap_thunder_fire);
         return false;
     }
 
     // check explicit inspect last
     if (ent->client->inspect)
     {
-        if (ent->client->weapanim[WEAPID_GUN] == &weap_thunder_idle)
+        if (ent->client->weapanim[id] == &weap_thunder_idle)
         {
-            Thunder_PickIdle(ent);
+            Thunder_PickIdle(ent, id);
             return false;
         }
 

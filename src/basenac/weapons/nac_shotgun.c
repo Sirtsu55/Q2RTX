@@ -69,8 +69,8 @@ enum {
     ANIM_INSPECT_LAST   = 135
 };
 
-static bool Shotgun_PickIdle(edict_t *ent);
-static bool Shotgun_Idle(edict_t *ent);
+static bool Shotgun_PickIdle(edict_t *ent, weapon_id_t id);
+static bool Shotgun_Idle(edict_t *ent, weapon_id_t id);
 
 const weapon_animation_t weap_shotgun_activate = {
     .start = ANIM_EQUIP_FIRST, .end = ANIM_EQUIP_LAST,
@@ -96,30 +96,27 @@ const weapon_animation_t weap_shotgun_fire = {
     .start = ANIM_ATTACK_FIRST, .end = ANIM_ATTACK_LAST, .next = &weap_shotgun_idle
 };
 
-static bool Shotgun_PickIdle(edict_t *ent)
+static bool Shotgun_PickIdle(edict_t *ent, weapon_id_t id)
 {
     if (ent->client->weapanim[WEAPID_GUN] == &weap_shotgun_inspect ||
-        (!ent->client->inspect || random() < WEAPON_RANDOM_INSPECT_CHANCE))
+        (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, &weap_shotgun_idle);
+        Weapon_SetAnimation(ent, id, &weap_shotgun_idle);
         return false;
     }
     
-    Weapon_SetAnimation(ent, &weap_shotgun_inspect);
+    Weapon_SetAnimation(ent, id, &weap_shotgun_inspect);
 
     ent->client->inspect = false;
 
     return false;
 }
 
-static bool Shotgun_Idle(edict_t *ent)
+static bool Shotgun_Idle(edict_t *ent, weapon_id_t id)
 {
-    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
-    {
-        Weapon_SetAnimation(ent, &weap_shotgun_deactivate);
-        Weapon_Activate(ent, true);
+    // check weapon change
+    if (Weapon_CheckChange(ent, &weap_shotgun_deactivate, id))
         return false;
-    }
 
     if (ent->client->buttons & BUTTON_ATTACK)
     {
@@ -137,16 +134,16 @@ static bool Shotgun_Idle(edict_t *ent)
 
         Shotgun_Fire(ent);
 
-        Weapon_SetAnimation(ent, &weap_shotgun_fire);
+        Weapon_SetAnimation(ent, id, &weap_shotgun_fire);
         return false;
     }
     
     // check explicit inspect last
     if (ent->client->inspect)
     {
-        if (ent->client->weapanim[WEAPID_GUN] == &weap_shotgun_idle)
+        if (ent->client->weapanim[id] == &weap_shotgun_idle)
         {
-            Shotgun_PickIdle(ent);
+            Shotgun_PickIdle(ent, id);
             return false;
         }
 

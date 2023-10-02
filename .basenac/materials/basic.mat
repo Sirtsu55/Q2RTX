@@ -45,8 +45,10 @@ textures/basic/trigger:
 
 textures/basic/void:
 	texture_base textures/basic/void.wal
-	texture_normals textures/basic/void_n.tga
-	metalness_factor 2.000000
+	metalness_factor 0.000000
+	specular_factor 0.000000
+	base_factor 0.000000
+	emissive_factor 0.000000
 
 textures/basic/hint:
 	texture_base textures/basic/hint.wal

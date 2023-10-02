@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "../g_local.h"
 
-static bool Axe_PickIdle(edict_t *ent);
+static bool Axe_PickIdle(edict_t *ent, weapon_id_t id);
 
 enum {
     ANIM_EQUIP_FIRST    = 0,
@@ -106,23 +106,23 @@ static void Axe_Attack(edict_t *ent, int damage)
     }
 }
 
-static bool Axe_RegularAttack(edict_t *ent)
+static bool Axe_RegularAttack(edict_t *ent, weapon_id_t id)
 {
     Axe_Attack(ent, 30);
     return true;
 }
 
-static bool Axe_RestoreCharge(edict_t *ent)
+static bool Axe_RestoreCharge(edict_t *ent, weapon_id_t id)
 {
     ent->client->can_charge_axe = true;
     return true;
 }
 
-static bool Axe_NextAttack(edict_t *ent);
-static bool Axe_QuickAttack(edict_t *ent);
-static bool Axe_EnsureCharge(edict_t *ent);
-static bool Axe_TransitionIntoCharge(edict_t *ent);
-static bool Axe_InitialCharge(edict_t *ent);
+static bool Axe_NextAttack(edict_t *ent, weapon_id_t id);
+static bool Axe_QuickAttack(edict_t *ent, weapon_id_t id);
+static bool Axe_EnsureCharge(edict_t *ent, weapon_id_t id);
+static bool Axe_TransitionIntoCharge(edict_t *ent, weapon_id_t id);
+static bool Axe_InitialCharge(edict_t *ent, weapon_id_t id);
 
 const weapon_animation_t weap_axe_attack1 = {
     .start = ANIM_ATTACK1_FIRST, .end = ANIM_ATTACK1_LAST, .next = &weap_axe_idle,
@@ -163,7 +163,7 @@ const weapon_animation_t weap_axe_attack3 = {
     }
 };
 
-static bool Axe_ChargedAttack(edict_t *ent)
+static bool Axe_ChargedAttack(edict_t *ent, weapon_id_t id)
 {
     Axe_Attack(ent, 80);
     return true;
@@ -178,11 +178,11 @@ const weapon_animation_t weap_axe_attack_charged = {
     }
 };
 
-static bool Axe_ChargeReady(edict_t *ent)
+static bool Axe_ChargeReady(edict_t *ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK))
     {
-        Weapon_SetAnimation(ent, &weap_axe_attack_charged);
+        Weapon_SetAnimation(ent, id, &weap_axe_attack_charged);
 
         vec3_t forward, right, start, offset;
 
@@ -222,11 +222,11 @@ const weapon_animation_t weap_axe_charge_hold = {
     .frame = Axe_ChargeReady
 };
 
-static bool Axe_Uncharge(edict_t *ent)
+static bool Axe_Uncharge(edict_t *ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK))
     {
-        Weapon_SetAnimationFrame(ent, &weap_axe_attack1, 121);
+        Weapon_SetAnimationFrame(ent, id, &weap_axe_attack1, 121);
         ent->client->axe_attack = true;
         ent->client->can_charge_axe = false;
         return false;
@@ -240,7 +240,7 @@ const weapon_animation_t weap_axe_charge = {
     .frame = Axe_Uncharge
 };
 
-static bool Axe_InitialCharge(edict_t *ent)
+static bool Axe_InitialCharge(edict_t *ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK) ||
         !ent->client->can_charge_axe)
@@ -249,13 +249,13 @@ static bool Axe_InitialCharge(edict_t *ent)
         return true;
     }
 
-    Weapon_SetAnimation(ent, &weap_axe_charge);
+    Weapon_SetAnimation(ent, id, &weap_axe_charge);
     return false;
 }
 
-static bool Axe_AttackTransitionCharge(edict_t *ent)
+static bool Axe_AttackTransitionCharge(edict_t *ent, weapon_id_t id)
 {
-    Weapon_SetAnimation(ent, &weap_axe_charge_hold);
+    Weapon_SetAnimation(ent, id, &weap_axe_charge_hold);
     return false;
 }
 
@@ -274,22 +274,22 @@ const weapon_animation_t weap_axe_transition_attack3 = {
     .frame = Axe_Uncharge, .finished = Axe_AttackTransitionCharge
 };
 
-static bool Axe_TransitionIntoCharge(edict_t *ent)
+static bool Axe_TransitionIntoCharge(edict_t *ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK) ||
         !ent->client->can_charge_axe)
         return true;
 
-    if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_attack1)
-        Weapon_SetAnimation(ent, &weap_axe_transition_attack1);
-    else if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_attack2)
-        Weapon_SetAnimation(ent, &weap_axe_transition_attack2);
-    else if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_attack3)
-        Weapon_SetAnimation(ent, &weap_axe_transition_attack3);
+    if (ent->client->weapanim[id] == &weap_axe_attack1)
+        Weapon_SetAnimation(ent, id, &weap_axe_transition_attack1);
+    else if (ent->client->weapanim[id] == &weap_axe_attack2)
+        Weapon_SetAnimation(ent, id, &weap_axe_transition_attack2);
+    else if (ent->client->weapanim[id] == &weap_axe_attack3)
+        Weapon_SetAnimation(ent, id, &weap_axe_transition_attack3);
     return false;
 }
 
-static bool Axe_EnsureCharge(edict_t *ent)
+static bool Axe_EnsureCharge(edict_t *ent, weapon_id_t id)
 {
     if (!(ent->client->buttons & BUTTON_ATTACK))
         ent->client->can_charge_axe = false;
@@ -297,16 +297,16 @@ static bool Axe_EnsureCharge(edict_t *ent)
     return true;
 }
 
-static bool Axe_NextAttack(edict_t *ent)
+static bool Axe_NextAttack(edict_t *ent, weapon_id_t id)
 {
     if (ent->client->buttons & BUTTON_ATTACK)
     {
-        if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_attack1)
-            Weapon_SetAnimation(ent, &weap_axe_attack2);
-        else if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_attack2)
-            Weapon_SetAnimation(ent, &weap_axe_attack3);
+        if (ent->client->weapanim[id] == &weap_axe_attack1)
+            Weapon_SetAnimation(ent, id, &weap_axe_attack2);
+        else if (ent->client->weapanim[id] == &weap_axe_attack2)
+            Weapon_SetAnimation(ent, id, &weap_axe_attack3);
         else
-            Weapon_SetAnimation(ent, &weap_axe_attack1);
+            Weapon_SetAnimation(ent, id, &weap_axe_attack1);
         
         ent->client->axe_attack = ent->client->can_charge_axe = true;
         ent->client->can_release_charge = false;
@@ -316,25 +316,27 @@ static bool Axe_NextAttack(edict_t *ent)
     return true;
 }
 
-static bool Axe_QuickAttack(edict_t *ent)
+static bool Axe_QuickAttack(edict_t *ent, weapon_id_t id)
 {
     if (ent->client->latched_buttons & BUTTON_ATTACK)
     {
         ent->client->latched_buttons &= ~BUTTON_ATTACK;
-        return Axe_NextAttack(ent);
+        return Axe_NextAttack(ent, id);
     }
 
     return true;
 }
 
-static bool Axe_Idle(edict_t *ent)
+static bool Axe_Idle(edict_t *ent, weapon_id_t id)
 {
     // check weapon change
-    if (ent->client->newweapon || !ent->client->pers.inventory[ent->client->pers.weapon->id])
-    {
-        Weapon_SetAnimation(ent, &weap_axe_deactivate);
-        Weapon_Activate(ent, true);
+    if (Weapon_CheckChange(ent, &weap_axe_deactivate, id))
         return false;
+
+    if (ent->client->weapanim[WEAPID_GUN] && !ent->client->newweapon)
+    {
+        Weapon_SetAnimation(ent, id, &weap_axe_deactivate);
+        return;
     }
 
     // check attack transition
@@ -343,16 +345,16 @@ static bool Axe_Idle(edict_t *ent)
         ent->client->latched_buttons &= ~BUTTON_ATTACK;
         ent->client->axe_attack = ent->client->can_charge_axe = true;
         ent->client->can_release_charge = false;
-        Weapon_SetAnimation(ent, &weap_axe_attack1);
+        Weapon_SetAnimation(ent, id, &weap_axe_attack1);
         return false;
     }
 
     // check explicit inspect
     if (ent->client->inspect)
     {
-        if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_idle)
+        if (ent->client->weapanim[id] == &weap_axe_idle)
         {
-            Axe_PickIdle(ent);
+            Axe_PickIdle(ent, id);
             return false;
         }
 
@@ -377,22 +379,22 @@ const weapon_animation_t weap_axe_inspect2 = {
     .frame = Axe_Idle, .finished = Axe_PickIdle
 };
 
-static bool Axe_PickIdle(edict_t *ent)
+static bool Axe_PickIdle(edict_t *ent, weapon_id_t id)
 {
     // at end of inspect animations always go back to idle
     // otherwise, have a 20% chance of inspecting
-    if (ent->client->weapanim[WEAPID_AXE] == &weap_axe_inspect1 ||
-        ent->client->weapanim[WEAPID_AXE] == &weap_axe_inspect2 ||
+    if (ent->client->weapanim[id] == &weap_axe_inspect1 ||
+        ent->client->weapanim[id] == &weap_axe_inspect2 ||
         (!ent->client->inspect && random() < WEAPON_RANDOM_INSPECT_CHANCE))
     {
-        Weapon_SetAnimation(ent, &weap_axe_idle);
+        Weapon_SetAnimation(ent, id, &weap_axe_idle);
         return false;
     }
 
     if (random() < 0.5f)
-        Weapon_SetAnimation(ent, &weap_axe_inspect1);
+        Weapon_SetAnimation(ent, id, &weap_axe_inspect1);
     else
-        Weapon_SetAnimation(ent, &weap_axe_inspect2);
+        Weapon_SetAnimation(ent, id, &weap_axe_inspect2);
 
     ent->client->inspect = false;
     return false;

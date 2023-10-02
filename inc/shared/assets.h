@@ -102,6 +102,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ASSET_SOUND_PERFORATOR_FIRE "weapons/perf/perf_fire.wav"
 #define ASSET_MODEL_NAIL "models/objects/nail/nail.iqm"
 
+#define ASSET_MODEL_NAILGUN_WORLD "models/weapons/g_nailg/g_nailg.iqm"
+#define ASSET_MODEL_NAILGUN_VIEW "models/weapons/v_nailg/v_nailg.iqm"
+#define ASSET_SOUND_NAILGUN_FIRE "weapons/perf/perf_fire.wav"
+
 #define ASSET_MODEL_ROCKET_WORLD "models/weapons/g_rocket/g_rocket.iqm"
 #define ASSET_MODEL_ROCKET_VIEW "models/weapons/v_rocket/v_rocket.iqm"
 
