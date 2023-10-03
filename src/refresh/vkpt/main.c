@@ -4300,12 +4300,10 @@ void vkpt_free_command_buffers(cmd_buf_group_t* group)
 
 	vkFreeCommandBuffers(qvk.device, group->command_pool, group->count_per_frame * MAX_FRAMES_IN_FLIGHT, group->buffers);
 
-	Z_Free(group->buffers);
-	group->buffers = NULL;
+	Z_Freep((void**)&group->buffers);
 
 #ifdef USE_DEBUG
-	Z_Free(group->buffer_begin_addrs);
-	group->buffer_begin_addrs = NULL;
+	Z_Freep((void**)&group->buffer_begin_addrs);
 #endif
 
 	group->count_per_frame = 0;
@@ -4448,6 +4446,9 @@ void R_RegisterFunctionsRTX()
 	R_DrawString = R_DrawString_RTX;
 	R_DrawPic = R_DrawPic_RTX;
 	R_DrawStretchPic = R_DrawStretchPic_RTX;
+	R_DrawStretchRaw = R_DrawStretchRaw_RTX;
+	R_UpdateRawPic = R_UpdateRawPic_RTX;
+	R_DiscardRawPic = R_DiscardRawPic_RTX;
 	R_TileClear = R_TileClear_RTX;
 	R_DrawFill8 = R_DrawFill8_RTX;
 	R_DrawFill32 = R_DrawFill32_RTX;

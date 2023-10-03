@@ -27,6 +27,7 @@ cvar_t  *cl_footsteps;
 cvar_t  *cl_timeout;
 cvar_t  *cl_predict;
 cvar_t  *cl_gunalpha;
+cvar_t  *cl_gunscale;
 cvar_t  *cl_warn_on_fps_rounding;
 cvar_t  *cl_maxfps;
 cvar_t  *cl_async;
@@ -701,6 +702,8 @@ CL_ClearState
 void CL_ClearState(void)
 {
     S_StopAllSounds();
+    OGG_Stop();
+    SCR_StopCinematic();
     CL_ClearEffects();
     CL_ClearTEnts();
     LOC_FreeLocations();
@@ -749,12 +752,6 @@ void CL_Disconnect(error_type_t type)
     if (cls.state > ca_disconnected && !cls.demo.playback) {
         EXEC_TRIGGER(cl_disconnectcmd);
     }
-
-#if 0
-    if (cls.ref_initialized) {
-        R_CinematicSetPalette(NULL);
-    }
-#endif
 
     //cls.connect_time = 0;
     //cls.connect_count = 0;
@@ -1025,8 +1022,6 @@ static void CL_Changing_f(void)
 
     if (cls.demo.recording)
         CL_Stop_f();
-
-    S_StopAllSounds();
 
     Com_Printf("Changing map...\n");
 
@@ -2151,13 +2146,6 @@ static size_t CL_Ups_m(char *buffer, size_t size)
 {
     vec3_t vel;
 
-    if (cl.frame.clientNum == CLIENTNUM_NONE) {
-        if (size) {
-            *buffer = 0;
-        }
-        return 0;
-    }
-
     if (!cls.demo.playback && cl.frame.clientNum == cl.clientNum &&
         cl_predict->integer) {
         VectorCopy(cl.predicted_velocity, vel);
@@ -2395,10 +2383,11 @@ void CL_RestartFilesystem(bool total)
         CL_RegisterSounds();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
-        cl.image_precache[0] = R_RegisterPic2(cl.mapname);
+        SCR_ReloadCinematic();
     }
 
     CL_LoadDownloadIgnores();
+    OGG_LoadTrackList();
 
     // switch back to original state
     cls.state = cls_state;
@@ -2449,7 +2438,7 @@ void CL_RestartRefresh(bool total)
         CL_PrepRefresh();
         CL_LoadState(LOAD_NONE);
     } else if (cls_state == ca_cinematic) {
-        cl.image_precache[0] = R_RegisterPic2(cl.mapname);
+        SCR_ReloadCinematic();
     }
 
     // switch back to original state
@@ -2711,6 +2700,7 @@ static void CL_InitLocal(void)
     // register our variables
     //
     cl_gunalpha = Cvar_Get("cl_gunalpha", "1", 0);
+    cl_gunscale = Cvar_Get("cl_gunscale", "0.25", CVAR_ARCHIVE);
     cl_footsteps = Cvar_Get("cl_footsteps", "1", 0);
     cl_footsteps->changed = cl_footsteps_changed;
     cl_noskins = Cvar_Get("cl_noskins", "0", 0);
@@ -3270,6 +3260,8 @@ unsigned CL_Frame(unsigned msec)
 
     Con_RunConsole();
 
+    SCR_RunCinematic();
+
     UI_Frame(main_extra);
 
     if (ref_frame) {
@@ -3368,6 +3360,7 @@ void CL_Init(void)
     Q_assert(inflateInit2(&cls.z, -MAX_WBITS) == Z_OK);
 #endif
 
+    OGG_Init();
     CL_LoadDownloadIgnores();
 
     HTTP_Init();
@@ -3416,6 +3409,7 @@ void CL_Shutdown(void)
 #endif
 
     HTTP_Shutdown();
+    OGG_Shutdown();
     S_Shutdown();
     IN_Shutdown();
     Con_Shutdown();
