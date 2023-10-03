@@ -27,7 +27,7 @@ static void SuperShotgun_Fire(edict_t *ent)
     vec3_t      start;
     vec3_t      forward, right;
     vec3_t      offset;
-    int         damage = 2;
+    int         damage = 3;
     int         kick = 1;
 
     if (is_quad) {

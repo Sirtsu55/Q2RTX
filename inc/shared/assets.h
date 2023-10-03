@@ -104,7 +104,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ASSET_MODEL_NAILGUN_WORLD "models/weapons/g_nailg/g_nailg.iqm"
 #define ASSET_MODEL_NAILGUN_VIEW "models/weapons/v_nailg/v_nailg.iqm"
-#define ASSET_SOUND_NAILGUN_FIRE "weapons/perf/perf_fire.wav"
+#define ASSET_SOUND_NAILGUN_FIRE "weapons/nailg/nailg_fire.wav"
 
 #define ASSET_MODEL_ROCKET_WORLD "models/weapons/g_rocket/g_rocket.iqm"
 #define ASSET_MODEL_ROCKET_VIEW "models/weapons/v_rocket/v_rocket.iqm"
@@ -114,8 +114,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define ASSET_MODEL_THUNDER_WORLD "models/weapons/g_bolt/g_bolt.iqm"
 #define ASSET_MODEL_THUNDER_VIEW "models/weapons/v_bolt/v_bolt.iqm"
-#define ASSET_SOUND_THUNDERBOLT_END_FIRE "weapons/GRENLX1A.WAV"
-#define ASSET_SOUND_THUNDERBOLT_FIRING "tele/teletunnel.wav"
+#define ASSET_SOUND_THUNDERBOLT_END_FIRE "weapons/thunderbolt/thunder_stop.wav"
+#define ASSET_SOUND_THUNDERBOLT_FIRING "weapons/thunderbolt/thunder_fire.wav"
 
 #define ASSET_MODEL_SHELLS "models/items/ammo/shells/shellbox_small.iqm"
 #define ASSET_MODEL_NAILS "models/items/ammo/nails/nailbox.iqm"
