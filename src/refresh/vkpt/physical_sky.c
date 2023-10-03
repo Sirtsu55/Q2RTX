@@ -417,17 +417,25 @@ vkpt_physical_sky_endRegistration()
 		image_t const * sun_surface_map = IMG_Find(file_path, IT_SKIN, IF_SRGB);
 		if (sun_surface_map != R_NOTEXTURE)
 			physical_sky_sun_surface_map = sun_surface_map - r_images;
+	}
 
-
+	// Check if could overlay texture string is empty
+	if (physical_sky_cloud_overlay_texture0->string[0] != '\0')
+	{
 		// cloud overlay map1
 		file_path[0] = '\0';
 		strcat(file_path, physical_sky_cloud_overlay_texture0->string);
 		strcat(file_path, ".tga");
-		image_t const * overlay_cloud_map0 = IMG_Find(file_path, IT_SKIN, IF_SRGB);
+		image_t const* overlay_cloud_map0 = IMG_Find(file_path, IT_SKIN, IF_SRGB);
 
 		if (overlay_cloud_map0 != R_NOTEXTURE)
 			physical_sky_cloud_overlay_map0 = overlay_cloud_map0 - r_images;
 
+
+	}
+
+	if (physical_sky_cloud_overlay_texture1->string[0] != '\0')
+	{
 		// cloud overlay map2
 		file_path[0] = '\0';
 		strcat(file_path, physical_sky_cloud_overlay_texture1->string);
@@ -435,8 +443,9 @@ vkpt_physical_sky_endRegistration()
 
 		image_t const* overlay_cloud_map1 = IMG_Find(file_path, IT_SKIN, IF_SRGB);
 
-		if(overlay_cloud_map1 != R_NOTEXTURE)
+		if (overlay_cloud_map1 != R_NOTEXTURE)
 			physical_sky_cloud_overlay_map1 = overlay_cloud_map1 - r_images;
+
 	}
 
 
@@ -931,7 +940,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t* ubo, const sun_light_t* light, 
 		else
 			flags = flags & (~PHYSICAL_SKY_FLAG_DRAW_CLOUDS);
 
-		if (physical_sky_cloud_overlay->value > 0)
+		if (physical_sky_cloud_overlay->value > 0 && physical_sky_cloud_overlay_map0 != 0 && physical_sky_cloud_overlay_map1 != 0)
 			flags = flags | PHYSICAL_SKY_FLAG_OVERLAY_CLOUDS;
 
 		ubo->physical_sky_flags = flags;
