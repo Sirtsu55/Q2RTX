@@ -385,12 +385,8 @@ void main() {
 
         vec3 radiance = GetSkyRadiance(SkyParams, TEX_SKY_TRANSMITTANCE, TEX_SKY_SCATTERING, camera, eyeVec.xyz, sun.direction, sun_transmittance);
         vec3 sun_direct_radiance = sun_transmittance;
-	    
-        const int draw_sun = global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_DRAW_SUN;
 
-        if(draw_sun != 0) // if we want to draw the sun then we need to calculate the direct radiance
-            sun_direct_radiance /= global_ubo.sun_solid_angle; // falls off as sun_angle is bigger
-
+        sun_direct_radiance /= global_ubo.sun_solid_angle;
         sun_direct_radiance *= pow(clamp((dot(eyeVec, sun.direction) - global_ubo.sun_cos_half_angle) * 1000 + 0.875, 0, 1), 10);
         
         // sun_render cvar, 0 = off, 1 = on. This is a toggle to make the sun disc visible in the sky.
@@ -423,7 +419,7 @@ void main() {
         radiance *= global_ubo.sun_color;
         out_radiance *= global_ubo.sun_color;
 
-        if(luminance(sun_direct_radiance) > 0.5 && draw_sun != 0) // luminance threshold is 0.5 because with sun surface maps, the texture goes beyond the sun
+        if(luminance(sun_direct_radiance) > 0)
         {
             float pixel_solid_angle = 1.0 / float(hres * hres);
             vec2 frac_pos = fpos.xy / hres;
