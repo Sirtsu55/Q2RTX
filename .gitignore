@@ -35,6 +35,7 @@ q2config.cfg
 save
 */docs
 ./basenac/
+basenac/
 
 CMakeSettings.json
 /network
