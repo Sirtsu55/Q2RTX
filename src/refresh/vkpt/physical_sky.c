@@ -387,11 +387,9 @@ vkpt_physical_sky_endRegistration()
 		planet_normal_path[0] = '\0';
 
 		{
-			strcpy(planet_albedo_path, "env/"); // first has to be strcpy
 			strcat(planet_albedo_path, physical_sky_planet_texture->string);
 			strcat(planet_albedo_path, "_albedo.tga");
 
-			strcpy(planet_normal_path, "env/");
 			strcat(planet_normal_path, physical_sky_planet_texture->string);
 			strcat(planet_normal_path, "_normal.tga");
 		}
@@ -408,15 +406,17 @@ vkpt_physical_sky_endRegistration()
 	char file_path[64];
 	file_path[0] = '\0';
 
-	strcpy(file_path, "env/");
-	strcat(file_path, physical_sky_sun_texture->string);
-	strcat(file_path, ".tga");
-
-	if (physical_sky->integer > 0 || physical_sky_space->integer > 0)
+	if (physical_sky_sun_texture->string[0] != '\0')
 	{
-		image_t const * sun_surface_map = IMG_Find(file_path, IT_SKIN, IF_SRGB);
-		if (sun_surface_map != R_NOTEXTURE)
-			physical_sky_sun_surface_map = sun_surface_map - r_images;
+		strcat(file_path, physical_sky_sun_texture->string);
+		strcat(file_path, ".tga");
+
+		if (physical_sky->integer > 0 || physical_sky_space->integer > 0)
+		{
+			image_t const* sun_surface_map = IMG_Find(file_path, IT_SKIN, IF_SRGB);
+			if (sun_surface_map != R_NOTEXTURE)
+				physical_sky_sun_surface_map = sun_surface_map - r_images;
+		}
 	}
 
 	// Check if could overlay texture string is empty
