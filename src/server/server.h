@@ -146,6 +146,10 @@ typedef struct {
     server_state_t  state;      // precache commands are only valid during load
     int             spawncount; // random number generated each server spawn
 
+#if USE_CLIENT || USE_SERVER
+    int         gamedetecthack;
+#endif
+
 #if USE_FPS
     int         framerate;
     int         frametime;
@@ -159,7 +163,6 @@ typedef struct {
 
     char        name[MAX_QPATH];            // map name, or cinematic name
     cm_t        cm;
-    char        *entitystring;
 
     char        configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
@@ -245,8 +248,8 @@ typedef struct {
 
 #define PL_S2C(cl) (cl->frames_sent ? \
     (1.0f - (float)cl->frames_acked / cl->frames_sent) * 100.0f : 0.0f)
-#define PL_C2S(cl) (cl->netchan->total_received ? \
-    ((float)cl->netchan->total_dropped / cl->netchan->total_received) * 100.0f : 0.0f)
+#define PL_C2S(cl) (cl->netchan.total_received ? \
+    ((float)cl->netchan.total_dropped / cl->netchan.total_received) * 100.0f : 0.0f)
 #define AVG_PING(cl) (cl->avg_ping_count ? \
     cl->avg_ping_time / cl->avg_ping_count : cl->ping)
 
@@ -367,7 +370,7 @@ typedef struct client_s {
     void            (*WriteDatagram)(struct client_s *);
 
     // netchan
-    netchan_t       *netchan;
+    netchan_t       netchan;
     int             numpackets; // for that nasty packetdup hack
 
     // misc
@@ -551,8 +554,6 @@ extern cvar_t       *sv_uptime;
 extern cvar_t       *sv_allow_unconnected_cmds;
 
 extern cvar_t       *g_features;
-
-extern cvar_t       *map_override_path;
 
 extern cvar_t       *sv_timeout;
 extern cvar_t       *sv_zombietime;
@@ -766,6 +767,7 @@ void PF_Pmove(pmove_t *pm);
 void SV_AutoSaveBegin(mapcmd_t *cmd);
 void SV_AutoSaveEnd(void);
 void SV_CheckForSavegame(mapcmd_t *cmd);
+void SV_CheckForEnhancedSavegames(void);
 void SV_RegisterSavegames(void);
 int SV_NoSaveGames(void);
 

@@ -374,8 +374,7 @@ static int dummy_create(void)
     newcl->state = cs_connected;
     newcl->AddMessage = dummy_add_message;
     newcl->edict = EDICT_NUM(number + 1);
-    newcl->netchan = SV_Mallocz(sizeof(netchan_t));
-    newcl->netchan->remote_address.type = NA_LOOPBACK;
+    newcl->netchan.remote_address.type = NA_LOOPBACK;
 
     List_Init(&newcl->entry);
 
@@ -402,7 +401,6 @@ static int dummy_create(void)
             s = "Connection refused";
         }
         Com_EPrintf("Dummy MVD client rejected by game: %s\n", s);
-        Z_Free(newcl->netchan);
         mvd.dummy = NULL;
         return -1;
     }
@@ -1117,6 +1115,10 @@ void SV_MvdMulticast(int leafnum, multicast_t to)
 
     // do nothing if not active
     if (!mvd.active) {
+        return;
+    }
+    if (leafnum >= UINT16_MAX) {
+        Com_WPrintf("%s: leafnum out of range\n", __func__);
         return;
     }
 

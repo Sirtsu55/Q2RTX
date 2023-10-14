@@ -419,7 +419,7 @@ typedef struct client_static_s {
 
     int         quakePort;          // a 16 bit value that allows quake servers
                                     // to work around address translating routers
-    netchan_t   *netchan;
+    netchan_t   netchan;
     int         serverProtocol;     // in case we are doing some kind of version hack
     int         protocolVersion;    // minor version
 
@@ -519,6 +519,9 @@ extern char        cl_cmdbuf_text[MAX_STRING_CHARS];
 //
 extern cvar_t    *cl_gunalpha;
 extern cvar_t    *cl_gunscale;
+extern cvar_t    *cl_gun_x;
+extern cvar_t    *cl_gun_y;
+extern cvar_t    *cl_gun_z;
 extern cvar_t    *cl_predict;
 extern cvar_t    *cl_footsteps;
 extern cvar_t    *cl_noskins;

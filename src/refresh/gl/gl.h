@@ -63,7 +63,6 @@ typedef struct {
 
     void (*proj_matrix)(const GLfloat *matrix);
     void (*view_matrix)(const GLfloat *matrix);
-    void (*reflect)(void);
 
     void (*state_bits)(GLbitfield bits);
     void (*array_bits)(GLbitfield bits);
@@ -104,9 +103,9 @@ typedef struct {
     refdef_t        fd;
     vec3_t          viewaxis[3];
     GLfloat         viewmatrix[16];
-    int             visframe;
-    int             drawframe;
-    int             dlightframe;
+    unsigned        visframe;
+    unsigned        drawframe;
+    unsigned        dlightframe;
     int             viewcluster1;
     int             viewcluster2;
     cplane_t        frustumPlanes[4];
@@ -215,7 +214,8 @@ bool GL_AllocBlock(int width, int height, int *inuse,
                    int w, int h, int *s, int *t);
 
 void GL_MultMatrix(GLfloat *out, const GLfloat *a, const GLfloat *b);
-void GL_RotateForEntity(vec3_t origin, float scale);
+void GL_SetEntityAxis(void);
+void GL_RotateForEntity(void);
 
 void QGL_ClearErrors(void);
 bool GL_ShowErrors(const char *func);
@@ -264,8 +264,8 @@ typedef struct maliasmesh_s {
     &glr.fd.lightstyles[gl_static.lightstylemap[(surf)->styles[i]]]
 
 #define LM_MAX_LIGHTMAPS    32
-#define LM_BLOCK_WIDTH      256
-#define LM_BLOCK_HEIGHT     256
+#define LM_BLOCK_WIDTH      512
+#define LM_BLOCK_HEIGHT     512
 
 typedef struct {
     int         inuse[LM_BLOCK_WIDTH];
@@ -426,13 +426,13 @@ static inline void GL_DepthRange(GLfloat n, GLfloat f)
 #define GL_ColorBytePointer     gl_static.backend.color_byte_pointer
 #define GL_ColorFloatPointer    gl_static.backend.color_float_pointer
 #define GL_Color                gl_static.backend.color
-#define GL_Reflect              gl_static.backend.reflect
 
 void GL_ForceTexture(GLuint tmu, GLuint texnum);
 void GL_BindTexture(GLuint tmu, GLuint texnum);
 void GL_CommonStateBits(GLbitfield bits);
 void GL_DrawOutlines(GLsizei count, QGL_INDEX_TYPE *indices);
 void GL_Ortho(GLfloat xmin, GLfloat xmax, GLfloat ymin, GLfloat ymax, GLfloat znear, GLfloat zfar);
+void GL_Frustum(GLfloat fov_x, GLfloat fov_y, GLfloat reflect_x);
 void GL_Setup2D(void);
 void GL_Setup3D(void);
 void GL_ClearState(void);
@@ -533,7 +533,7 @@ void GL_BindArrays(void);
 void GL_Flush3D(void);
 void GL_DrawFace(mface_t *surf);
 
-void GL_AddAlphaFace(mface_t *face);
+void GL_AddAlphaFace(mface_t *face, entity_t *ent);
 void GL_AddSolidFace(mface_t *face);
 void GL_DrawAlphaFaces(void);
 void GL_DrawSolidFaces(void);
