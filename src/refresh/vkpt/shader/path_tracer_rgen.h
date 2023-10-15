@@ -36,7 +36,7 @@ uniform accelerationStructureEXT topLevelAS[TLAS_COUNT];
 #include "asvgf.glsl"
 #include "brdf.glsl"
 #include "water.glsl"
-
+#include "sky.h"
 #define DESATURATE_ENVIRONMENT_MAP 1
 
 /* RNG seeds contain 'X' and 'Y' values that are computed w/ a modulo BLUE_NOISE_RES,
@@ -109,11 +109,35 @@ env_map(vec3 direction, bool remove_sun)
 	{
 		envmap = textureLod(TEX_PHYSICAL_SKY, direction.xzy, 0).rgb;
 
-		if (remove_sun)
+		// Fix for the sun sparkling when for surfaces, instead of rendering the sun to the envmap, we overlay it.
+        // sun_render cvar, 0 = off, 1 = on. This is a toggle to make the sun disc visible in the sky.
+	    // This one is "we don't want the sun disc"
+		const int draw_sun = global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_DRAW_SUN;
+		if (draw_sun != 0 && !remove_sun)
 		{
-			// roughly remove the sun from the env map
-			envmap = min(envmap, vec3((1 - dot(direction, global_ubo.sun_direction_envmap)) * 1000));
+			float dot_sun = dot(direction, global_ubo.sun_direction_envmap);
+			//if (dot_sun > (0.9999))
+			// Sun angle, so allow sun to get bigger
+			if (dot_sun > (1 - (global_ubo.sun_tan_half_angle / 100.f)))
+			{
+				vec3 sun_color = global_ubo.sun_color * pow(dot_sun, 100);
+				if (global_ubo.sun_surface_map != -1)
+				{
+					// create orthonormal basis for sun
+					const vec3 up = vec3(0, 1, 0);
+					const vec3 sun_x = normalize(cross(global_ubo.sun_direction_envmap, up));
+					const vec3 sun_y = normalize(cross(sun_x, global_ubo.sun_direction_envmap));
+
+					// project texture to sun disk
+					vec2 sun_uv = vec2(dot(sun_x, direction), dot(sun_y, direction)) / global_ubo.sun_surface_map_scale;
+					sun_uv = sun_uv * 0.5 + 0.5;
+
+					sun_color *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
+				}
+				envmap += sun_color;
+			}
 		}
+
 	}
 	else if (global_ubo.environment_type == ENVIRONMENT_STATIC)
 	{

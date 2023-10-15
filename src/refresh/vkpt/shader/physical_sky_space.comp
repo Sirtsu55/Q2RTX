@@ -373,7 +373,7 @@ void main() {
 
 	// sun_render cvar, 0 = off, 1 = on. This is a toggle to make the sun disc visible in the sky.
     // This one is "we don't want the sun disc"
-    vec3 out_radiance = (draw_sun != 0 ? sun_direct_radiance : vec3(0,0,0)) + radiance;
+    vec3 out_radiance = radiance;
 	radiance += sun_direct_radiance;
 
 	// planet
@@ -392,20 +392,6 @@ void main() {
         vec2 frac_pos = fpos.xy / hres;
         pixel_solid_angle /= sqrt((1 + frac_pos.x * frac_pos.x) * (1 + frac_pos.y * frac_pos.y));
 
-		if(global_ubo.sun_surface_map != -1)
-        {
-            // create orthonormal basis for sun
-            const vec3 up = vec3(0,1,0);
-            const vec3 sun_x = normalize(cross(sun.direction, up));
-            const vec3 sun_y = normalize(cross(sun_x, sun.direction));
-        
-            // project texture to sun disk
-            vec2 sun_uv = vec2(dot(sun_x, eyeVec), dot(sun_y, eyeVec)) / global_ubo.sun_surface_map_scale;
-            sun_uv = sun_uv * 0.5 + 0.5;
-
-            radiance *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
-			out_radiance *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
-         }
 
         atomicAdd(sun_color_buffer.accum_sun_color.r, int(radiance.r * pixel_solid_angle * SUN_COLOR_ACCUMULATOR_FIXED_POINT_SCALE));
         atomicAdd(sun_color_buffer.accum_sun_color.g, int(radiance.g * pixel_solid_angle * SUN_COLOR_ACCUMULATOR_FIXED_POINT_SCALE));
