@@ -224,9 +224,10 @@ main()
 				vec4 cloud_color1 = global_texture(global_ubo.cloud_overlay_map1, plane_uv1);
 				
 				// first layer clouds
-				env = mix(env, cloud_color1.rgb, cloud_color1.a);
+				// Multiply by sun luminance to get the correct color, because otherwise the autoexposure will make them too bright
+				env = mix(env, cloud_color1.rgb * sun_color_ubo.sun_luminance, cloud_color1.a);
 				// second layer clouds
-				env = mix(env, cloud_color0.rgb, cloud_color0.a);
+				env = mix(env, cloud_color0.rgb * sun_color_ubo.sun_luminance, cloud_color0.a) ;
 			}
 		}
 
