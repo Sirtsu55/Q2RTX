@@ -934,6 +934,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t* ubo, const sun_light_t* light, 
 		if (physical_sky_cloud_overlay->value > 0)
 			flags = flags | PHYSICAL_SKY_FLAG_OVERLAY_CLOUDS;
 
+
 		ubo->physical_sky_flags = flags;
 
 		// compute approximation of reflected radiance from ground
