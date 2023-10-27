@@ -245,6 +245,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	\
 	GLOBAL_UBO_VAR_LIST_DO(float,			cloud_overlay_brightness0) \
 	GLOBAL_UBO_VAR_LIST_DO(float,			cloud_overlay_brightness1) \
+	GLOBAL_UBO_VAR_LIST_DO(float,			planet_radius_ratio) \
 	GLOBAL_UBO_VAR_LIST_DO(int,		        enable_underwater_warp) \
 	\
 	UBO_CVAR_LIST // WARNING: Do not put any other members into global_ubo after this: the CVAR list is not vec4-aligned

@@ -82,6 +82,7 @@ cvar_t *physical_sky_brightness;
 cvar_t *physical_sky_sun_texture;
 
 cvar_t *physical_sky_planet_radius;
+cvar_t *physical_sky_planet_atmosphere;
 cvar_t *physical_sky_planet_render;
 cvar_t *physical_sky_planet_texture;
 
@@ -977,6 +978,7 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t* ubo, const sun_light_t* light, 
     ubo->planet_normal_map = physical_sky_planet_normal_map;
 
 	ubo->planet_radius = physical_sky_planet_radius->value;
+	ubo->planet_radius_ratio = physical_sky_planet_atmosphere->value ? 0.945f : 1.0f;
 	ubo->physical_sky_flags |= physical_sky_planet_render->integer ? PHYSICAL_SKY_FLAG_DRAW_PLANET : 0x0;
 	ubo->physical_sky_flags |= sun_render->integer ? PHYSICAL_SKY_FLAG_DRAW_SUN : 0x0;
 
@@ -1116,6 +1118,9 @@ void InitialiseSkyCVars()
 
 	physical_sky_planet_radius = Cvar_Get("planet_radius", "0.4", 0);
 	physical_sky_planet_radius->changed = physical_sky_cvar_changed;
+
+	physical_sky_planet_atmosphere = Cvar_Get("planet_atmosphere", "1", 0);
+	physical_sky_planet_atmosphere->changed = physical_sky_cvar_changed;
 
 	physical_sky_planet_texture = Cvar_Get("planet_texture", "planet", 0);
 
