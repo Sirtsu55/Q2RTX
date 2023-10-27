@@ -1094,8 +1094,8 @@ void InitialiseSkyCVars()
 	physical_sky_cloud_overlay_texture0 = Cvar_Get("physical_sky_cloud_overlay_texture0", "", 0);
 	physical_sky_cloud_overlay_texture1 = Cvar_Get("physical_sky_cloud_overlay_texture1", "", 0);
 
-	physical_sky_cloud_overlay_brightness0 = Cvar_Get("physical_sky_cloud_overlay_brightness0", "0", 0);
-	physical_sky_cloud_overlay_brightness1 = Cvar_Get("physical_sky_cloud_overlay_brightness1", "0", 0);
+	physical_sky_cloud_overlay_brightness0 = Cvar_Get("physical_sky_cloud_overlay_brightness0", "1", 0);
+	physical_sky_cloud_overlay_brightness1 = Cvar_Get("physical_sky_cloud_overlay_brightness1", "1", 0);
 
 	physical_sky_cloud_overlay_scale0 = Cvar_Get("physical_sky_cloud_overlay_scale0", "50.0", 0);
 	physical_sky_cloud_overlay_scale1 = Cvar_Get("physical_sky_cloud_overlay_scale1", "50.0", 0);
