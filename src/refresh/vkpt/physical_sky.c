@@ -874,9 +874,15 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t* ubo, const sun_light_t* light, 
 	// sun
 
 	ubo->sun_bounce_scale = sun_bounce->value;
-	ubo->sun_tan_half_angle = tanf(light->angular_size_rad * 0.5f);
-	ubo->sun_cos_half_angle = cosf(light->angular_size_rad * 0.5f);
-	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(light->angular_size_rad * 0.5)); // use double for precision
+	// This affects the brightness of the sun depending on the sun size, but we don't want that even if it's physically correct
+	//ubo->sun_tan_half_angle = tanf(light->angular_size_rad * 0.5f);
+	//ubo->sun_cos_half_angle = cosf(light->angular_size_rad * 0.5f);
+	//ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(light->angular_size_rad * 0.5)); // use double for precision
+	// This ensures all lighting is constant regardless of the sun size
+	ubo->sun_tan_half_angle = tanf(0.01 * 0.5f);
+	ubo->sun_cos_half_angle = cosf(0.01 * 0.5f);
+	ubo->sun_cosmetic_size = tanf(light->angular_size_rad * 0.5f) / 100.f; // size of the sun according to sun_angle
+	ubo->sun_solid_angle = 2 * M_PI * (float)(1.0 - cos(0.01 * 0.5)); // use double for precision
 
 	if (sun_surface_map_render->integer)
 		ubo->sun_surface_map = physical_sky_sun_surface_map; // the texture map for the sun
