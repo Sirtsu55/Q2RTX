@@ -120,12 +120,10 @@ env_map(vec3 direction, bool remove_sun)
 			// Sun angle, so allow sun to get bigger
 
 			const float sun_size = 1 - (global_ubo.sun_cosmetic_size);
-			const float sun_falloff = 1 - (global_ubo.sun_cosmetic_size);
+			const float sun_falloff = 1 - (global_ubo.sun_cosmetic_size) * 0.7;
 			if (dot_sun > sun_size)
 			{
 				vec3 sun_color = global_ubo.sun_color * dot_sun * smoothstep(sun_size, sun_falloff, dot_sun);
-
-
 
 				if (global_ubo.sun_surface_map != -1)
 				{

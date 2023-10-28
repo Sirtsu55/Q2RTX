@@ -391,11 +391,9 @@ vkpt_physical_sky_endRegistration()
 		planet_normal_path[0] = '\0';
 
 		{
-			strcpy(planet_albedo_path, "env/"); // first has to be strcpy
 			strcat(planet_albedo_path, physical_sky_planet_texture->string);
 			strcat(planet_albedo_path, "_albedo.tga");
 
-			strcpy(planet_normal_path, "env/");
 			strcat(planet_normal_path, physical_sky_planet_texture->string);
 			strcat(planet_normal_path, "_normal.tga");
 		}
@@ -412,7 +410,6 @@ vkpt_physical_sky_endRegistration()
 	char file_path[64];
 	file_path[0] = '\0';
 
-	strcpy(file_path, "env/");
 	strcat(file_path, physical_sky_sun_texture->string);
 	strcat(file_path, ".tga");
 
