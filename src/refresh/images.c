@@ -346,6 +346,11 @@ static bool supports_extended_pixel_format(void)
 	return true;
 }
 
+IMG_LOAD(KTX)
+{
+    return -1;
+}
+
 IMG_LOAD(STB)
 {
 	int w, h, channels;
@@ -875,7 +880,8 @@ static const struct {
     { "wal", IMG_LoadWAL },
     { "tga", IMG_LoadSTB },
     { "jpg", IMG_LoadSTB },
-    { "png", IMG_LoadSTB }
+    { "png", IMG_LoadSTB },
+    { "ktx", IMG_LoadKTX }
 };
 
 static imageformat_t    img_search[IM_MAX];
@@ -1214,6 +1220,7 @@ static void r_texture_formats_changed(cvar_t *self)
             case 't': case 'T': i = IM_TGA; break;
             case 'j': case 'J': i = IM_JPG; break;
             case 'p': case 'P': i = IM_PNG; break;
+            case 'k': case 'K': i = IM_KTX; break;
             default: continue;
         }
 
@@ -1484,7 +1491,7 @@ static image_t *find_or_load_image(const char *name, size_t len,
             // fill in some basic info
             memcpy(image->name, name, len + 1);
             image->baselen = len - 4;
-            ret = try_load_image_candidate(image, NULL, 0, &pic, type, flags, !!allow_override, try_location);
+            ret = try_load_image_candidate(image, NULL, 0, &pic, type, flags, allow_override, try_location);
             image->flags |= location_flag;
 
             if (ret >= 0)
@@ -1862,7 +1869,7 @@ void IMG_Init(void)
     Q_assert(!r_numImages);
 
     r_override_textures = Cvar_Get("r_override_textures", "1", CVAR_FILES);
-    r_texture_formats = Cvar_Get("r_texture_formats", "pjt", 0);
+    r_texture_formats = Cvar_Get("r_texture_formats", "pjtk", 0);
     r_texture_formats->changed = r_texture_formats_changed;
     r_texture_formats_changed(r_texture_formats);
     r_texture_overrides = Cvar_Get("r_texture_overrides", "-1", CVAR_FILES);

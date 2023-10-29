@@ -51,6 +51,7 @@ typedef enum {
     IM_TGA,
     IM_JPG,
     IM_PNG,
+    IM_KTX,
     IM_MAX
 } imageformat_t;
 
