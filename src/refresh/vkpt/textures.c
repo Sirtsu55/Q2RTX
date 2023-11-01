@@ -1531,7 +1531,7 @@ static VkFormat get_image_format(image_t *q_img)
 	case PF_R8G8B8A8_UNORM:
 		return q_img->is_srgb ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
 	case PF_R8G8B8A8_BC7_UNORM:
-		return VK_FORMAT_BC7_SRGB_BLOCK;
+		return q_img->is_srgb ? VK_FORMAT_BC7_SRGB_BLOCK : VK_FORMAT_BC7_UNORM_BLOCK;
 	case PF_R16_UNORM:
 		return VK_FORMAT_R16_UNORM;
 	}

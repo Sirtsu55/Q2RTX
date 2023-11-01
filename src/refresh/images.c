@@ -400,7 +400,6 @@ static int IMG_LoadDDS(byte* rawdata, size_t rawlen, image_t* image, byte** pic)
     image->upload_height = image->height = header->height;
     image->mip_levels = header->mipMapCount;
     image->mip_size_cb = DDS_mip_size;
-    image->flags &= ~IF_SRGB;
 
     return Q_ERR_SUCCESS;
 
