@@ -356,7 +356,7 @@ int DDS_mip_size(int w, int h, int mip)
     return ((wi + 3) / 4) * ((he + 3) / 4) * 16;
 }
 
-static int IMG_LoadDDS(byte* rawdata, size_t rawlen, image_t* image, byte** pic)
+IMG_LOAD(DDS)
 {
     DDS_HEADER* header = (DDS_HEADER*)rawdata;
     DDS_HEADER_DXT10* header10 = rawdata + sizeof(DDS_HEADER);

@@ -8,6 +8,9 @@ from zipfile import ZipFile
 import time
 import shutil
 
+
+replace_existing = False
+
 def path(path):
     if(os.name == "nt"):
         return os.path.abspath(path).replace("/", "\\")
@@ -15,6 +18,7 @@ def path(path):
         return os.path.abspath(path).replace("\\", "/")
     
 
+ignore_if_in_file = ["_n.tga", "_light.tga", "m_cursor", "ft.tga", "bk.tga", "up.tga", "dn.tga", "rt.tga", "lf.tga"]
 data_folder = path("../basenac")
 
 recurse_path_tga = path(f"{data_folder}/**/*.tga")
@@ -70,6 +74,9 @@ for file in glob.iglob(recurse_path_mat, recursive=True):
 
 compressonator_args = "-fd BC7 -EncodeWith GPU -mipsize 16 -silent"
 
+# copy all the color textures to a temp folder
+
+
 try:
     for texture in color_textures:
         print("=====================================")
@@ -79,11 +86,22 @@ try:
             print("Emissive texture detected, skipping...")
             continue
 
+        ignore_texture = False
+        for i in ignore_if_in_file:
+            if(i in texture):
+                print("Ignoring texture...")
+                ignore_texture = True
+                break
+        if(ignore_texture):
+            continue
+
+
         output_path = path(f"{compressed_folder}/{os.path.basename(texture).replace('.tga', '.dds')}")
 
-        if(os.path.exists(output_path)):
-            print("File already exists, skipping...")
-            continue
+        if(not replace_existing):
+            if(os.path.exists(output_path)):
+                print("File already exists, skipping...")
+                continue
 
         command = f"{compressonator_cli} {compressonator_args} {texture} {output_path}"
 
