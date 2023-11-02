@@ -32,6 +32,7 @@ tools_folder = path("../tools/")
 compressonator_folder_name = f"compressonatorcli-{compressonator_version}-{os_name}"
 compressonator_cli = path(f"{tools_folder}/{compressonator_folder_name}/compressonatorcli.exe")
 
+
 def extract_zip(zip_path, extract_path):
     with ZipFile(zip_path, mode="r") as zf:
         zf.extractall(extract_path)
@@ -54,6 +55,8 @@ if(not os.path.exists(compressed_folder)):
 color_textures = set()
 emissive_textures = set()
 
+non_compressed_size = 0
+
 for file in glob.iglob(recurse_path_tga, recursive=True):
     full_path = path(file)
 
@@ -61,6 +64,8 @@ for file in glob.iglob(recurse_path_tga, recursive=True):
         continue
     else:
         color_textures.add(full_path)
+        os.path.getsize(full_path)
+        non_compressed_size += os.path.getsize(full_path)
 
 for file in glob.iglob(recurse_path_mat, recursive=True):
     full_path = path(file)
@@ -115,5 +120,11 @@ try:
 except KeyboardInterrupt:
     print("Keyboard interrupt detected, exiting...")
 
+compressed_size = 0
+for file in glob.iglob(path(f"{compressed_folder}/*.dds"), recursive=True):
+    compressed_size += os.path.getsize(file)
+
+print(f"Total size of uncompressed textures: {non_compressed_size / 1024.0 / 1024.0} MB")
+print(f"Total size of compressed textures: {compressed_size / 1024.0 / 1024.0} MB")
 input("Press enter to exit...")
 
