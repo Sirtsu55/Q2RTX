@@ -59,9 +59,12 @@ non_compressed_size = 0
 
 for file in glob.iglob(recurse_path_tga, recursive=True):
     full_path = path(file)
-
-    if(file.endswith("_n.tga") or file.endswith("_light.tga")):
-        continue
+    
+    for i in ignore_if_in_file:
+        if(i in full_path):
+            print("Ignoring texture " + full_path)
+            ignore_texture = True
+            break
     else:
         color_textures.add(full_path)
         os.path.getsize(full_path)
@@ -89,15 +92,6 @@ try:
 
         if(texture in emissive_textures):
             print("Emissive texture detected, skipping...")
-            continue
-
-        ignore_texture = False
-        for i in ignore_if_in_file:
-            if(i in texture):
-                print("Ignoring texture...")
-                ignore_texture = True
-                break
-        if(ignore_texture):
             continue
 
 
