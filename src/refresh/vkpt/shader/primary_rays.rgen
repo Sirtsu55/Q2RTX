@@ -37,8 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sky.h"
 
-#define OVERLAY_CLOUD_HEIGT 30 // height of the clouds in world units, the higher they are the smaller they appear
-#define OVERLAY_CLOUD_CURVATURE 0.7 // 0 = flat, 1 = full curvature
+#define OVERLAY_CLOUD_CURVATURE -0.7 // -1 is curve down, 1 is curve up, 0 is flat
 #define OVERLAY_CLOUD_FALLOFF 0.1 // falloff at the horizon, 0.1 is good, 0.5 is halfway between horizon and zenith, 0 is strictly at the horizon
 
 Ray
@@ -119,13 +118,16 @@ void generate_rng_seed(ivec2 ipos, bool is_odd_checkerboard)
 }
 
 // Returns the uv coordinate of the plane
-vec2 intersect_plane(vec3 origin, vec3 direction)
+vec2 intersect_sky(vec3 direction)
 {
-	float curvature = sin((direction.z * M_PI) * OVERLAY_CLOUD_CURVATURE);
-	float t = (OVERLAY_CLOUD_HEIGT * curvature - origin.y) / direction.z;
-	vec3 intersection = origin + t * direction.xzy;
+	float dz = clamp(0, 0.3, direction.z);
+
+	float curvature = sin((dz * M_PI * 2));
+	float t = (curvature) / direction.z;
+	vec3 intersection = t * direction.xzy;
 	return intersection.xz;
 }
+
 
 void
 main()
@@ -204,17 +206,18 @@ main()
 		if(((global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_OVERLAY_CLOUDS) != 0))
 		{
 			//vec2 plane_uv0 = vec2(0);
-			//float t = ellipseIntersection(ray.direction,  plane_uv0);
-			vec2 plane_uv0 = intersect_plane(vec3(0,0,0), ray.direction);
+
+			vec3 rd = normalize(ray.direction - vec3(0, 0, global_ubo.cloud_overlay_curvature));
+			vec2 plane_uv0 = intersect_sky(rd);
 
 			if(plane_uv0 != vec2(0))
 			{
-				const float falloff = smoothstep(OVERLAY_CLOUD_FALLOFF, 1, ray.direction.z);
+				const float falloff = max(0, rd.z - global_ubo.cloud_overlay_falloff);
 
 				vec2 plane_uv1 = plane_uv0;
 
-				plane_uv0 /= global_ubo.cloud_overlay_scale0;
-				plane_uv1 /= global_ubo.cloud_overlay_scale1;
+				plane_uv0 *= global_ubo.cloud_overlay_scale0 * global_ubo.cloud_overlay_scale2;
+				plane_uv1 *= global_ubo.cloud_overlay_scale1 * global_ubo.cloud_overlay_scale2;
 
 				plane_uv0 +=  global_ubo.cloud_overlay_direction0 * global_ubo.time; // animate the clouds
 				plane_uv1 += global_ubo.cloud_overlay_direction1 * global_ubo.time;

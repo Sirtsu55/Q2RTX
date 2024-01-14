@@ -76,6 +76,10 @@ cvar_t *physical_sky_cloud_overlay_speed1;
 cvar_t *physical_sky_cloud_overlay_scale1;
 cvar_t *physical_sky_cloud_overlay_direction1;
 
+cvar_t* physical_sky_cloud_overlay_scale2;
+
+cvar_t* physical_sky_cloud_overlay_curvature;
+cvar_t* physical_sky_cloud_overlay_falloff;
 
 cvar_t *physical_sky_space;
 cvar_t *physical_sky_brightness;
@@ -958,16 +962,19 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t* ubo, const sun_light_t* light, 
 	// Cloud Map
 
 	ubo->cloud_overlay_map0 = physical_sky_cloud_overlay_map0;
-	ubo->cloud_overlay_scale0 = physical_sky_cloud_overlay_scale0->value;
-	ubo->cloud_overlay_direction0[0] = cosf(ConvertAngleToRadians(physical_sky_cloud_overlay_direction0->value)) * physical_sky_cloud_overlay_speed0->value;
-	ubo->cloud_overlay_direction0[1] = sinf(ConvertAngleToRadians(physical_sky_cloud_overlay_direction0->value)) * physical_sky_cloud_overlay_speed0->value;
 	ubo->cloud_overlay_map1 = physical_sky_cloud_overlay_map1;
-	ubo->cloud_overlay_scale1 = physical_sky_cloud_overlay_scale1->value;
+	ubo->cloud_overlay_direction0[0] = cosf(ConvertAngleToRadians(physical_sky_cloud_overlay_direction0->value)) * physical_sky_cloud_overlay_speed0->value;
 	ubo->cloud_overlay_direction1[0] = cosf(ConvertAngleToRadians(physical_sky_cloud_overlay_direction1->value)) * physical_sky_cloud_overlay_speed1->value;
+	ubo->cloud_overlay_direction0[1] = sinf(ConvertAngleToRadians(physical_sky_cloud_overlay_direction0->value)) * physical_sky_cloud_overlay_speed0->value;
 	ubo->cloud_overlay_direction1[1] = sinf(ConvertAngleToRadians(physical_sky_cloud_overlay_direction1->value)) * physical_sky_cloud_overlay_speed1->value;
+	ubo->cloud_overlay_scale0 = 1 /physical_sky_cloud_overlay_scale0->value;
+	ubo->cloud_overlay_scale1 = 1 / physical_sky_cloud_overlay_scale1->value;
+	ubo->cloud_overlay_scale2 = 1 / physical_sky_cloud_overlay_scale2->value;
 	ubo->cloud_overlay_brightness0 = physical_sky_cloud_overlay_brightness0->value;
 	ubo->cloud_overlay_brightness1 = physical_sky_cloud_overlay_brightness1->value;
 
+	ubo->cloud_overlay_curvature = physical_sky_cloud_overlay_curvature->value;
+	ubo->cloud_overlay_falloff = physical_sky_cloud_overlay_falloff->value;
 
 	// planet
 
@@ -1096,14 +1103,19 @@ void InitialiseSkyCVars()
 	physical_sky_cloud_overlay_brightness0 = Cvar_Get("physical_sky_cloud_overlay_brightness0", "1", 0);
 	physical_sky_cloud_overlay_brightness1 = Cvar_Get("physical_sky_cloud_overlay_brightness1", "1", 0);
 
-	physical_sky_cloud_overlay_scale0 = Cvar_Get("physical_sky_cloud_overlay_scale0", "50.0", 0);
-	physical_sky_cloud_overlay_scale1 = Cvar_Get("physical_sky_cloud_overlay_scale1", "50.0", 0);
-
+	physical_sky_cloud_overlay_scale0 = Cvar_Get("physical_sky_cloud_overlay_scale0", "1.0", 0);
+	physical_sky_cloud_overlay_scale1 = Cvar_Get("physical_sky_cloud_overlay_scale1", "1.0", 0);
+	physical_sky_cloud_overlay_scale2 = Cvar_Get("physical_sky_cloud_overlay_scale2", "1.0", 0);
+	
 	physical_sky_cloud_overlay_speed0 = Cvar_Get("physical_sky_cloud_overlay_speed0", "0.1", 0);
 	physical_sky_cloud_overlay_speed1 = Cvar_Get("physical_sky_cloud_overlay_speed1", "0.05", 0);
 
 	physical_sky_cloud_overlay_direction0 = Cvar_Get("physical_sky_cloud_overlay_direction0", "0.0", 0);
 	physical_sky_cloud_overlay_direction1 = Cvar_Get("physical_sky_cloud_overlay_direction1", "0.0", 0);
+
+	physical_sky_cloud_overlay_curvature = Cvar_Get("physical_sky_cloud_overlay_curvature", "-0.2", 0);
+	physical_sky_cloud_overlay_falloff = Cvar_Get("physical_sky_cloud_overlay_falloff", "0.1", 0);
+
 
     physical_sky_space = Cvar_Get("physical_sky_space", "0", 0);
 	physical_sky_space->changed = physical_sky_cvar_changed;
