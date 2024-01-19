@@ -126,8 +126,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	UBO_CVAR_DO(tm_hdr_peak_nits, 800.0) /* Exposure value 0 is mapped to this display brightness (post tonemapping) */ \
 	UBO_CVAR_DO(tm_hdr_saturation_scale, 100) /* HDR mode saturation adjustment, percentage [0..200], with 0% -> desaturated, 100% -> normal, 200% -> oversaturated */ \
 	UBO_CVAR_DO(ui_hdr_nits, 300) /* HDR mode UI (stretch pic) brightness in nits */ \
-	UBO_CVAR_DO(physical_sky_cloud_overlay_speed0, 0.1) \
-	UBO_CVAR_DO(physical_sky_cloud_overlay_speed1, 0.05) \
 
     
 #define GLOBAL_UBO_VAR_LIST \

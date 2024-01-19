@@ -525,6 +525,11 @@ main()
 		{
 			vec3 env = env_map(direction, false);
 			env *= global_ubo.pt_env_scale;
+
+			if(((global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_OVERLAY_CLOUDS) != 0))
+			{
+				get_sky_color(direction, env);
+			}
 			
 			transparent = alpha_blend(transparent, vec4(env * throughput, 1));
 		}

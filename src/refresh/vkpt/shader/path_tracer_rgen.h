@@ -872,6 +872,48 @@ get_direct_illumination(
 	diffuse = radiance * diffuse_brdf * (vec3(1.0) - F);
 }
 
+
+// Returns the uv coordinate of the plane
+vec2 intersect_sky(vec3 direction)
+{
+	float dz = clamp(0, 0.3, direction.z);
+
+	float curvature = sin((dz * M_PI * 2));
+	float t = (curvature) / direction.z;
+	vec3 intersection = t * direction.xzy;
+	return intersection.xz;
+}
+
+void get_sky_color(in vec3 raydir, inout vec3 env)
+{
+	vec3 rd = normalize(raydir - vec3(0, 0, global_ubo.cloud_overlay_curvature));
+	vec2 plane_uv0 = intersect_sky(rd);
+
+	if (plane_uv0 != vec2(0))
+	{
+		const float falloff = max(0, rd.z - global_ubo.cloud_overlay_falloff);
+
+		vec2 plane_uv1 = plane_uv0;
+
+		plane_uv0 *= global_ubo.cloud_overlay_scale0 * global_ubo.cloud_overlay_scale2;
+		plane_uv1 *= global_ubo.cloud_overlay_scale1 * global_ubo.cloud_overlay_scale2;
+
+		plane_uv0 += global_ubo.cloud_overlay_direction0 * global_ubo.time; // animate the clouds
+		plane_uv1 += global_ubo.cloud_overlay_direction1 * global_ubo.time;
+
+		vec4 cloud_color0 = global_texture(global_ubo.cloud_overlay_map0, plane_uv0);
+		vec4 cloud_color1 = global_texture(global_ubo.cloud_overlay_map1, plane_uv1);
+
+		// second layer clouds
+		// Multiply by sun luminance to get the correct color, because otherwise the autoexposure will make them too bright
+		env = mix(env, cloud_color1.rgb * sun_color_ubo.sun_luminance * global_ubo.cloud_overlay_brightness1, cloud_color1.a * falloff);
+		// fist layer clouds
+		env = mix(env, cloud_color0.rgb * sun_color_ubo.sun_luminance * global_ubo.cloud_overlay_brightness0, cloud_color0.a * falloff);
+		//env = mix(env, vec3(plane_uv0, 0), 1);
+	}
+
+}
+
 void
 get_sunlight(
 	uint cluster_idx,
