@@ -109,7 +109,7 @@ env_map(vec3 direction, bool remove_sun)
 	{
 		envmap = textureLod(TEX_PHYSICAL_SKY, direction.xzy, 0).rgb;
 
-		// Fix for the sun sparkling when for surfaces, instead of rendering the sun to the envmap, we overlay it.
+		// Fix for the sun sparkling for surfaces, instead of rendering the sun to the envmap, we overlay it.
         // sun_render cvar, 0 = off, 1 = on. This is a toggle to make the sun disc visible in the sky.
 	    // This one is "we don't want the sun disc"
 		const int draw_sun = global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_DRAW_SUN;
