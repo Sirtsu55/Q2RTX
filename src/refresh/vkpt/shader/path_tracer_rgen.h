@@ -876,10 +876,10 @@ get_direct_illumination(
 // Returns the uv coordinate of the plane
 vec2 intersect_sky(vec3 direction)
 {
-	float dz = clamp(0, 0.3, direction.z);
+	float dz = clamp(0, 0.5, direction.z);
 
-	float curvature = sin((dz * M_PI * 2));
-	float t = (curvature) / direction.z;
+	float curvature = sin((dz * M_PI));
+	float t = (curvature / direction.z);
 	vec3 intersection = t * direction.xzy;
 	return intersection.xz;
 }
