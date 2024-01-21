@@ -876,8 +876,14 @@ get_direct_illumination(
 // Returns the uv coordinate of the plane
 vec2 intersect_sky(vec3 direction)
 {
+	// Apply curvature to the sky plane
+	direction = normalize(direction - vec3(0, 0, global_ubo.cloud_overlay_curvature));
+
 	float dz = clamp(0, 0.5, direction.z);
 
+	// Apply height to the 
+	direction.z += global_ubo.cloud_overlay_height;
+	
 	float curvature = sin((dz * M_PI));
 	float t = (curvature / direction.z);
 	vec3 intersection = t * direction.xzy;
@@ -886,12 +892,11 @@ vec2 intersect_sky(vec3 direction)
 
 void get_sky_color(in vec3 raydir, inout vec3 env)
 {
-	vec3 rd = normalize(raydir - vec3(0, 0, global_ubo.cloud_overlay_curvature));
-	vec2 plane_uv0 = intersect_sky(rd);
+	vec2 plane_uv0 = intersect_sky(raydir);
 
 	if (plane_uv0 != vec2(0))
 	{
-		const float falloff = max(0, rd.z - global_ubo.cloud_overlay_falloff);
+		const float falloff = max(0, raydir.z - global_ubo.cloud_overlay_falloff);
 
 		vec2 plane_uv1 = plane_uv0;
 

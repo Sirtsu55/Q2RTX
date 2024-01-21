@@ -243,7 +243,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GLOBAL_UBO_VAR_LIST_DO(float,			cloud_overlay_scale2) \
 	GLOBAL_UBO_VAR_LIST_DO(float,			cloud_overlay_curvature) \
 	GLOBAL_UBO_VAR_LIST_DO(float,			cloud_overlay_falloff) \
-	GLOBAL_UBO_VAR_LIST_DO(float,			padding) \
+	GLOBAL_UBO_VAR_LIST_DO(float,			cloud_overlay_height) \
     \
 	GLOBAL_UBO_VAR_LIST_DO(vec2,			cloud_overlay_direction0) \
 	GLOBAL_UBO_VAR_LIST_DO(vec2,			cloud_overlay_direction1) \
