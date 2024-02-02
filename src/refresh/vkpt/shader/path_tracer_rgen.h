@@ -62,10 +62,10 @@ uniform accelerationStructureEXT topLevelAS[TLAS_COUNT];
 #define RNG_SUNLIGHT_X(bounce)			  (4 + 7 + 9 * bounce)
 #define RNG_SUNLIGHT_Y(bounce)			  (4 + 8 + 9 * bounce)
 
-#define PRIMARY_RAY_CULL_MASK        (AS_FLAG_OPAQUE | AS_FLAG_TRANSPARENT | AS_FLAG_VIEWER_WEAPON | AS_FLAG_SKY)
-#define REFLECTION_RAY_CULL_MASK     (AS_FLAG_OPAQUE | AS_FLAG_SKY)
+#define PRIMARY_RAY_CULL_MASK        (AS_FLAG_OPAQUE | AS_FLAG_TRANSPARENT | AS_FLAG_VIEWER_WEAPON | AS_FLAG_SKY | AS_FLAG_OPAQUE_REFLECT | AS_FLAG_OPAQUE_SHADOW)
+#define REFLECTION_RAY_CULL_MASK     (AS_FLAG_OPAQUE_REFLECT | AS_FLAG_SKY)
 #define BOUNCE_RAY_CULL_MASK         (AS_FLAG_OPAQUE | AS_FLAG_SKY | AS_FLAG_CUSTOM_SKY)
-#define SHADOW_RAY_CULL_MASK         (AS_BIT_MASK_SHADOW)
+#define SHADOW_RAY_CULL_MASK         (AS_FLAG_OPAQUE_SHADOW)
 
  /* no BRDF sampling in last bounce */
 #define NUM_RNG_PER_FRAME (RNG_NEE_STATIC_DYNAMIC(1) + 1)
@@ -876,14 +876,8 @@ get_direct_illumination(
 // Returns the uv coordinate of the plane
 vec2 intersect_sky(vec3 direction)
 {
-	// Apply curvature to the sky plane
-	direction = normalize(direction - vec3(0, 0, global_ubo.cloud_overlay_curvature));
-
 	float dz = clamp(0, 0.5, direction.z);
 
-	// Apply height to the 
-	direction.z += global_ubo.cloud_overlay_height;
-	
 	float curvature = sin((dz * M_PI));
 	float t = (curvature / direction.z);
 	vec3 intersection = t * direction.xzy;
@@ -892,11 +886,12 @@ vec2 intersect_sky(vec3 direction)
 
 void get_sky_color(in vec3 raydir, inout vec3 env)
 {
-	vec2 plane_uv0 = intersect_sky(raydir);
+	vec3 rd = normalize(raydir - vec3(0, 0, global_ubo.cloud_overlay_curvature));
+	vec2 plane_uv0 = intersect_sky(rd);
 
 	if (plane_uv0 != vec2(0))
 	{
-		const float falloff = max(0, raydir.z - global_ubo.cloud_overlay_falloff);
+		const float falloff = max(0, rd.z - global_ubo.cloud_overlay_falloff);
 
 		vec2 plane_uv1 = plane_uv0;
 

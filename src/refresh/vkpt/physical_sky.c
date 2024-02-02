@@ -80,7 +80,6 @@ cvar_t* physical_sky_cloud_overlay_scale2;
 
 cvar_t* physical_sky_cloud_overlay_curvature;
 cvar_t* physical_sky_cloud_overlay_falloff;
-cvar_t* physical_sky_cloud_overlay_height;
 
 cvar_t *physical_sky_space;
 cvar_t *physical_sky_brightness;
@@ -985,7 +984,6 @@ vkpt_physical_sky_update_ubo(QVKUniformBuffer_t* ubo, const sun_light_t* light, 
 
 	ubo->cloud_overlay_curvature = physical_sky_cloud_overlay_curvature->value;
 	ubo->cloud_overlay_falloff = physical_sky_cloud_overlay_falloff->value;
-	ubo->cloud_overlay_height = physical_sky_cloud_overlay_height->value;
 
 	// planet
 
@@ -1124,7 +1122,6 @@ void InitialiseSkyCVars()
 
 	physical_sky_cloud_overlay_curvature = Cvar_Get("physical_sky_cloud_overlay_curvature", "-0.2", 0);
 	physical_sky_cloud_overlay_falloff = Cvar_Get("physical_sky_cloud_overlay_falloff", "0.1", 0);
-	physical_sky_cloud_overlay_height = Cvar_Get("physical_sky_cloud_overlay_height", "0.0", 0);
 
 
     physical_sky_space = Cvar_Get("physical_sky_space", "0", 0);

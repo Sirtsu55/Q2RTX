@@ -1626,12 +1626,8 @@ static material_and_shell_t compute_mesh_material_flags(const entity_t* entity, 
 	if(MAT_IsKind(material_id, MATERIAL_KIND_CHROME))
 		material_id = MAT_SetKind(material_id, MATERIAL_KIND_CHROME_MODEL);
 
-	// Counter intuitive, but with this configuration, the gun doesn't dissapear and the dynamic models are transparent
-	if (MAT_IsKind(material_id, MATERIAL_KIND_TRANSPARENT)) 
+	if (MAT_IsKind(material_id, MATERIAL_KIND_TRANSPARENT) || (MAT_IsKind(material_id, MATERIAL_KIND_REGULAR) && (alpha < 1.0f)))
 		material_id = MAT_SetKind(material_id, MATERIAL_KIND_TRANSP_MODEL);
-
-	if (MAT_IsKind(material_id, MATERIAL_KIND_REGULAR) && (alpha < 1.0f))
-		material_id = MAT_SetKind(material_id, MATERIAL_KIND_TRANSPARENT);
 
 	if (model->model_class == MCLASS_EXPLOSION)
 	{
@@ -1880,13 +1876,13 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 	
 	if (model->geometry.accel)
 	{
-		uint32_t override_masks = 0;
 
-		if(model_alpha < 1.f)
-			override_masks |= AS_FLAG_TRANSPARENT;
+		uint32_t override_masks = (mi->alpha_and_frame < 1.f) ? AS_FLAG_TRANSPARENT : 0;
 		
 		if (entity->flags & RF_NOSHADOW)
-			override_masks |= AS_FLAG_OPAQUE_NO_SHADOW;
+			override_masks |= AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_REFLECT;
+
+		override_masks |= AS_FLAG_OPAQUE;
 
 		vkpt_pt_instance_model_blas(&model->geometry, mi->transform, VERTEX_BUFFER_WORLD, current_instance_idx, override_masks);
 	}
@@ -2067,11 +2063,7 @@ static void process_regular_entity(
 		*iqm_matrix_offset += (int)model->iqmData->num_poses;
 	}
 
-	float alpha = 1.f;
-
-	if(entity->flags & RF_TRANSLUCENT)
-		alpha = entity->alpha;
-
+	float alpha = (entity->flags & RF_TRANSLUCENT) ? entity->alpha : 1.f;
 
 	bool use_static_blas = vkpt_model_is_static(model) && (mesh_filter != MESH_FILTER_ALL);
 
@@ -2096,13 +2088,10 @@ static void process_regular_entity(
 
 			uint32_t model_index = (uint32_t)(model - r_models);
 
-			uint32_t override_masks = 0;
-
-			if( alpha < 1.f )
-				override_masks |= AS_FLAG_TRANSPARENT;
+			uint32_t override_masks = (alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0;
 
 			if(entity->flags & RF_NOSHADOW)
-				override_masks |=  AS_FLAG_OPAQUE_NO_SHADOW;
+				override_masks |= AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_REFLECT;
 
 			vkpt_pt_instance_model_blas(geom, transform_, VERTEX_BUFFER_FIRST_MODEL + model_index, current_instance_index, override_masks);
 		}
