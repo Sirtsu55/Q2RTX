@@ -53,7 +53,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define STORAGE_SCALE_SPEC 32
 #define STORAGE_SCALE_HDR 128
 
-#define MATERIAL_KIND_MASK           0xf0000000
+#define MATERIAL_KIND_MASK           0xff000000
 #define MATERIAL_KIND_INVALID        0x00000000
 #define MATERIAL_KIND_REGULAR        0x10000000
 #define MATERIAL_KIND_CHROME         0x20000000
@@ -69,14 +69,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MATERIAL_KIND_CAMERA         0xc0000000
 #define MATERIAL_KIND_CHROME_MODEL   0xd0000000
 #define MATERIAL_KIND_TRANSP_MODEL   0xe0000000 // Transparent models. No distortion, just "see through".
-#define MATERIAL_KIND_UNLIT          0xf0000000
+#define MATERIAL_KIND_UNLIT          0x01000000
 
-#define MATERIAL_FLAG_LIGHT          0x08000000
-#define MATERIAL_FLAG_HANDEDNESS     0x02000000
-#define MATERIAL_FLAG_WEAPON         0x01000000
-#define MATERIAL_FLAG_WARP           0x00800000
-#define MATERIAL_FLAG_FLOWING        0x00400000
-#define MATERIAL_FLAG_DOUBLE_SIDED   0x00200000
+#define MATERIAL_FLAG_LIGHT          0x00800000
+#define MATERIAL_FLAG_HANDEDNESS     0x00400000
+#define MATERIAL_FLAG_WEAPON         0x00200000
+#define MATERIAL_FLAG_WARP           0x00100000
+#define MATERIAL_FLAG_FLOWING        0x00080000
+#define MATERIAL_FLAG_DOUBLE_SIDED   0x00040000
 
 #define MATERIAL_LIGHT_STYLE_MASK    0x0003f000
 #define MATERIAL_LIGHT_STYLE_SHIFT   12
