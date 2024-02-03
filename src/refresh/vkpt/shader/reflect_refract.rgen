@@ -495,6 +495,14 @@ main()
 
 	if(push_constants.bounce_index < int(global_ubo.pt_reflect_refract - 1))
 		reflection_cull_mask |= AS_FLAG_TRANSPARENT;
+	else
+	{
+		imageStore(IMG_PT_NORMAL_A, ipos, uvec4(0));
+		imageStore(IMG_PT_GEO_NORMAL_A, ipos, uvec4(0));
+		imageStore(IMG_PT_BASE_COLOR_A, ipos, vec4(0));
+		imageStore(IMG_PT_METALLIC_A, ipos, vec4(0));
+		return;
+	}
 
 	Ray reflection_ray;
 	reflection_ray.origin = position;
