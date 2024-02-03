@@ -63,7 +63,7 @@ uniform accelerationStructureEXT topLevelAS[TLAS_COUNT];
 #define RNG_SUNLIGHT_Y(bounce)			  (4 + 8 + 9 * bounce)
 
 #define PRIMARY_RAY_CULL_MASK        (AS_FLAG_OPAQUE | AS_FLAG_TRANSPARENT | AS_FLAG_VIEWER_WEAPON | AS_FLAG_SKY | AS_FLAG_OPAQUE_REFLECT | AS_FLAG_OPAQUE_SHADOW)
-#define REFLECTION_RAY_CULL_MASK     (AS_FLAG_OPAQUE_REFLECT | AS_FLAG_SKY)
+#define REFLECTION_RAY_CULL_MASK     (AS_FLAG_SKY | AS_FLAG_OPAQUE);
 #define BOUNCE_RAY_CULL_MASK         (AS_FLAG_OPAQUE | AS_FLAG_SKY | AS_FLAG_CUSTOM_SKY)
 #define SHADOW_RAY_CULL_MASK         (AS_FLAG_OPAQUE_SHADOW)
 
@@ -252,7 +252,7 @@ bool
 is_chrome(uint material)
 {
 	uint kind = material & MATERIAL_KIND_MASK;
-	return kind == MATERIAL_KIND_CHROME || kind == MATERIAL_KIND_CHROME_MODEL;
+	return kind == MATERIAL_KIND_CHROME || kind == MATERIAL_KIND_CHROME_MODEL || kind == MATERIAL_KIND_CHROME_NOREFLECT;
 }
 
 bool
@@ -278,6 +278,12 @@ bool
 is_unlit(uint material)
 {
 	return (material & MATERIAL_KIND_MASK) == MATERIAL_KIND_UNLIT;
+}
+
+bool
+is_chrome_noreflect(uint material)
+{
+	return (material & MATERIAL_KIND_MASK) == MATERIAL_KIND_CHROME_NOREFLECT;
 }
 
 vec3

@@ -53,23 +53,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define STORAGE_SCALE_SPEC 32
 #define STORAGE_SCALE_HDR 128
 
-#define MATERIAL_KIND_MASK           0xff000000
-#define MATERIAL_KIND_INVALID        0x00000000
-#define MATERIAL_KIND_REGULAR        0x10000000
-#define MATERIAL_KIND_CHROME         0x20000000
-#define MATERIAL_KIND_WATER          0x30000000
-#define MATERIAL_KIND_LAVA           0x40000000
-#define MATERIAL_KIND_SLIME          0x50000000
-#define MATERIAL_KIND_GLASS          0x60000000
-#define MATERIAL_KIND_SKY            0x70000000
-#define MATERIAL_KIND_INVISIBLE      0x80000000
-#define MATERIAL_KIND_EXPLOSION      0x90000000
-#define MATERIAL_KIND_TRANSPARENT    0xa0000000 // Transparent walls. Have a distortion effect applied.
-#define MATERIAL_KIND_SCREEN         0xb0000000
-#define MATERIAL_KIND_CAMERA         0xc0000000
-#define MATERIAL_KIND_CHROME_MODEL   0xd0000000
-#define MATERIAL_KIND_TRANSP_MODEL   0xe0000000 // Transparent models. No distortion, just "see through".
-#define MATERIAL_KIND_UNLIT          0x01000000
+#define MATERIAL_KIND_MASK						0xff000000
+#define MATERIAL_KIND_INVALID					0x00000000
+#define MATERIAL_KIND_REGULAR					0x10000000
+#define MATERIAL_KIND_CHROME					0x20000000
+#define MATERIAL_KIND_WATER						0x30000000
+#define MATERIAL_KIND_LAVA						0x40000000
+#define MATERIAL_KIND_SLIME						0x50000000
+#define MATERIAL_KIND_GLASS						0x60000000
+#define MATERIAL_KIND_SKY						0x70000000
+#define MATERIAL_KIND_INVISIBLE					0x80000000
+#define MATERIAL_KIND_EXPLOSION					0x90000000
+#define MATERIAL_KIND_TRANSPARENT				0xa0000000 // Transparent walls. Have a distortion effect applied.
+#define MATERIAL_KIND_SCREEN					0xb0000000
+#define MATERIAL_KIND_CAMERA					0xc0000000
+#define MATERIAL_KIND_CHROME_MODEL				0xd0000000
+#define MATERIAL_KIND_TRANSP_MODEL				0xe0000000 // Transparent models. No distortion, just "see through".
+#define MATERIAL_KIND_UNLIT						0xf0000000
+#define MATERIAL_KIND_CHROME_NOREFLECT			0x01000000
 
 #define MATERIAL_FLAG_LIGHT          0x00800000
 #define MATERIAL_FLAG_HANDEDNESS     0x00400000
@@ -132,6 +133,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Fully opaque geometry (casts shadow, doesn't cast shadow, reflects)
 #define AS_FULLY_OPAQUE (AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_SHADOW | AS_FLAG_OPAQUE_REFLECT)
+#define AS_NOREFLECT_OPAQUE (AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_SHADOW)
+#define AS_NOSHADOW_OPAQUE (AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_REFLECT)
+
 
 // Effects TLAS flags
 #define AS_FLAG_EFFECTS         (1 << 0)

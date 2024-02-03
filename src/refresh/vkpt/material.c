@@ -202,6 +202,7 @@ static struct MaterialKind {
 	{"SCREEN", MATERIAL_KIND_SCREEN},
 	{"CAMERA", MATERIAL_KIND_CAMERA},
 	{"UNLIT", MATERIAL_KIND_UNLIT},
+	{"CHROME_NOREFLECT", MATERIAL_KIND_CHROME_NOREFLECT},
 };
 
 static int nMaterialKinds = sizeof(materialKinds) / sizeof(struct MaterialKind);

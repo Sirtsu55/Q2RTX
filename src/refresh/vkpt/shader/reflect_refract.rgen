@@ -482,10 +482,16 @@ main()
 	}
 
 	int reflection_cull_mask = REFLECTION_RAY_CULL_MASK;
+
 	if(global_ubo.first_person_model != 0 && include_player_model)
 		reflection_cull_mask |= AS_FLAG_VIEWER_MODELS;
 	else if (!(primary_is_weapon && primary_is_transparent))
 		reflection_cull_mask |= AS_FLAG_VIEWER_WEAPON;
+	if(is_chrome_noreflect(material_id))
+	{
+		reflection_cull_mask &= ~AS_FLAG_OPAQUE;
+		reflection_cull_mask |= AS_FLAG_OPAQUE_REFLECT;
+	}
 
 	if(push_constants.bounce_index < int(global_ubo.pt_reflect_refract - 1))
 		reflection_cull_mask |= AS_FLAG_TRANSPARENT;

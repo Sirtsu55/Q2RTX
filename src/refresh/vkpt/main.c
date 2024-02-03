@@ -1880,7 +1880,10 @@ static void process_bsp_entity(const entity_t* entity, int* instance_count)
 		uint32_t override_masks = (mi->alpha_and_frame < 1.f) ? AS_FLAG_TRANSPARENT : 0;
 		
 		if (entity->flags & RF_NOSHADOW)
-			override_masks |= AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_REFLECT;
+			override_masks &= ~AS_FLAG_OPAQUE_SHADOW;
+
+		if (entity->flags & RF_FORCE_REFLECT)
+			override_masks |= AS_FLAG_OPAQUE_REFLECT;
 
 		override_masks |= AS_FLAG_OPAQUE;
 
@@ -2090,8 +2093,11 @@ static void process_regular_entity(
 
 			uint32_t override_masks = (alpha < 1.f) ? AS_FLAG_TRANSPARENT : 0;
 
-			if(entity->flags & RF_NOSHADOW)
-				override_masks |= AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_REFLECT;
+			if (entity->flags & RF_NOSHADOW)
+				override_masks &= ~AS_FLAG_OPAQUE_SHADOW;
+
+			if(entity->flags & RF_FORCE_REFLECT)
+				override_masks |= AS_FLAG_OPAQUE_REFLECT;
 
 			vkpt_pt_instance_model_blas(geom, transform_, VERTEX_BUFFER_FIRST_MODEL + model_index, current_instance_index, override_masks);
 		}
