@@ -3296,11 +3296,7 @@ R_RenderFrame(refdef_t *fd)
 		}
 		END_PERF_MARKER(post_cmd_buf, PROFILER_TONE_MAPPING);
 
-		// For now the post process is only for water warping, so skip the step if there we are not in water
-		if (vkpt_refdef.uniform_buffer.medium == MEDIUM_WATER)
-		{
-			vkpt_postprocess_record_cmd_buffer(post_cmd_buf); // reads from VKPT_IMG_POST_PROCESS_INPUT
-		}
+		vkpt_postprocess_record_cmd_buffer(post_cmd_buf); // reads from VKPT_IMG_POST_PROCESS_INPUT
 
 		// Skip FSR (upscaling) if image is going to be heavily blurred anyway (menu mode)
 		if(vkpt_fsr_is_enabled() && !qvk.frame_menu_mode)
