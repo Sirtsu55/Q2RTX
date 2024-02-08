@@ -628,7 +628,7 @@ static int count_triangles(const bsp_t* bsp)
 			num_tris += (num_vertices - 2);
 	}
 
-	return num_tris;
+	return num_tris + 100; //  FIX FOR TEXTURE_MASK and TRANS33/66 being specified in the same material
 }
 
 static void
