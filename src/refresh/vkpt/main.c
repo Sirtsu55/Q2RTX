@@ -1626,8 +1626,12 @@ static material_and_shell_t compute_mesh_material_flags(const entity_t* entity, 
 	if(MAT_IsKind(material_id, MATERIAL_KIND_CHROME))
 		material_id = MAT_SetKind(material_id, MATERIAL_KIND_CHROME_MODEL);
 
-	if (MAT_IsKind(material_id, MATERIAL_KIND_TRANSPARENT) || (MAT_IsKind(material_id, MATERIAL_KIND_REGULAR) && (alpha < 1.0f)))
+	// Counter intuitive, but with this configuration, the gun doesn't dissapear and the dynamic models are transparent
+	if (MAT_IsKind(material_id, MATERIAL_KIND_TRANSPARENT))
 		material_id = MAT_SetKind(material_id, MATERIAL_KIND_TRANSP_MODEL);
+
+	if (MAT_IsKind(material_id, MATERIAL_KIND_REGULAR) && (alpha < 1.0f))
+		material_id = MAT_SetKind(material_id, MATERIAL_KIND_TRANSPARENT);
 
 	if (model->model_class == MCLASS_EXPLOSION)
 	{

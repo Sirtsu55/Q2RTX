@@ -108,7 +108,7 @@ main()
 	vec3 geo_normal = decode_normal(imageLoad(IMG_PT_GEO_NORMAL_A, ipos).x);
 	vec3 normal = decode_normal(imageLoad(IMG_PT_NORMAL_A, ipos).x);
 	uint cluster_idx = imageLoad(IMG_PT_CLUSTER_A, ipos).r;
-	
+
 	int primary_medium = int(material_id & MATERIAL_LIGHT_STYLE_MASK) >> MATERIAL_LIGHT_STYLE_SHIFT;
 	bool primary_is_weapon = (material_id & MATERIAL_FLAG_WEAPON) != 0;
 	
@@ -734,7 +734,35 @@ main()
 		}
 	}
 
-	if (triangle.alpha < 1.0)
+
+	// Check for alpha
+	MaterialInfo minfo = get_material_info(triangle.material_id);
+
+	float alpha = triangle.alpha;
+
+	if (minfo.mask_texture != 0)
+	{
+		vec4 color = global_textureLod(minfo.mask_texture, tex_coord, 0);
+
+		alpha = color.r;
+
+		// Translucent objects: split the path.
+		throughput *= 2;
+		checkerboard_flags = CHECKERBOARD_FLAG_PRIMARY | CHECKERBOARD_FLAG_REFRACTION;
+
+		if (!is_odd_checkerboard)
+		{
+			// This field stays on the surface.
+			throughput *= alpha;
+		}
+		else
+		{
+			// This field goes through the surface.
+			material_id = (material_id & ~MATERIAL_KIND_MASK) | transparency_kind;
+			throughput *= 1.0 - alpha;
+		}
+	}
+	else if (alpha < 1.0)
 	{
 		// Translucent objects.
 		if (bitCount(checkerboard_flags & CHECKERBOARD_FLAG_FIELD_MASK) == 1)
