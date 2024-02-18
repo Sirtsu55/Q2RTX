@@ -123,7 +123,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Geometry TLAS flags
 #define AS_FLAG_OPAQUE				(0x01)	
-#define AS_FLAG_OPAQUE_SHADOW       (0x02)	// doesn't cast shadow
+#define AS_FLAG_OPAQUE_SHADOW       (0x02)
 #define AS_FLAG_TRANSPARENT			(0x04)
 #define AS_FLAG_VIEWER_MODELS		(0x08)
 #define AS_FLAG_VIEWER_WEAPON		(0x10)
@@ -131,7 +131,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define AS_FLAG_CUSTOM_SKY			(0x40)
 #define AS_FLAG_OPAQUE_REFLECT		(0x80)
 
-// Fully opaque geometry (casts shadow, doesn't cast shadow, reflects)
+// Fully opaque geometry (casts shadow, reflects)
 #define AS_FULLY_OPAQUE (AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_SHADOW | AS_FLAG_OPAQUE_REFLECT)
 #define AS_NOREFLECT_OPAQUE (AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_SHADOW)
 #define AS_NOSHADOW_OPAQUE (AS_FLAG_OPAQUE | AS_FLAG_OPAQUE_REFLECT)
