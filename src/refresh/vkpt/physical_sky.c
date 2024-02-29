@@ -1173,7 +1173,9 @@ void UpdatePhysicalSkyCVars()
 		for (int i = 0; i < 3; ++i)
 			Cvar_SetValue(sun_color[i], sky->sunColor[i], FROM_CODE);
 	}
-	Cvar_SetValue(sun_angle, sky->sunAngularDiameter, FROM_CODE);
+
+	// If config file has different values, use them
+	// Cvar_SetValue(sun_angle, sky->sunAngularDiameter, FROM_CODE);
 
 	skyNeedsUpdate = VK_TRUE;
 }
