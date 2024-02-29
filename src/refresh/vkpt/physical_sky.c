@@ -1079,7 +1079,7 @@ void InitialiseSkyCVars()
 
 	sun_surface_map_render = Cvar_Get("sun_surface_map_render", "0", 0);
 
-	physical_sky_sun_texture = Cvar_Get("sun_surface_map_texture", "sun_surface_map", 0);
+	physical_sky_sun_texture = Cvar_Get("sun_surface_map_texture", "env/sun_surface_map", 0);
 
 	sun_surface_map_scale = Cvar_Get("sun_surface_map_scale", "1.0", 0);
 	sun_surface_map_scale->changed = physical_sky_cvar_changed;
