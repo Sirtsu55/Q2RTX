@@ -854,7 +854,9 @@ vkpt_evaluate_sun_light(sun_light_t* light, const vec3_t sky_matrix[3], float ti
 
 	// color before occlusion
 	vec3_t sunColor = { sun_color[0]->value, sun_color[1]->value, sun_color[2]->value };
-	VectorScale(sunColor, sun_brightness->value, light->color);
+
+	// brightness, we divide by 10 because of the way overlayed sun brightness is calculated in env_map
+	VectorScale(sunColor, (sun_brightness->value), light->color);
 
 	// potentially visible - can be overridden if readback data says it's occluded
 	if (physical_sky_space->integer)

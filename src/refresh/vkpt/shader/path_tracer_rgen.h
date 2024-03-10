@@ -119,8 +119,6 @@ env_map(vec3 direction, bool remove_sun)
 		if (draw_sun != 0 && !remove_sun)
 		{
 			float dot_sun = dot(direction, global_ubo.sun_direction_envmap);
-			//if (dot_sun > (0.9999))
-			// Sun angle, so allow sun to get bigger
 
 			const float sun_size = 1 - (global_ubo.sun_cosmetic_size);
 			const float sun_falloff = 1 - (global_ubo.sun_cosmetic_size) * 0.7;
@@ -141,7 +139,10 @@ env_map(vec3 direction, bool remove_sun)
 
 					sun_color *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
 				}
+
 				envmap += sun_color;
+
+				envmap *= length(sun_color_ubo.sun_luminance) * sun_color_ubo.accum_sun_color;
 			}
 		}
 
@@ -904,11 +905,13 @@ void get_sky_color(in vec3 raydir, inout vec3 env)
 		vec4 cloud_color0 = global_texture(global_ubo.cloud_overlay_map0, plane_uv0);
 		vec4 cloud_color1 = global_texture(global_ubo.cloud_overlay_map1, plane_uv1);
 
+		float sun_multiplier = sun_color_ubo.sun_luminance;
+
 		// second layer clouds
 		// Multiply by sun luminance to get the correct color, because otherwise the autoexposure will make them too bright
-		env = mix(env, cloud_color1.rgb * sun_color_ubo.sun_luminance * global_ubo.cloud_overlay_brightness1, cloud_color1.a * falloff);
+		env = mix(env, cloud_color1.rgb * sun_multiplier * global_ubo.cloud_overlay_brightness1, cloud_color1.a * falloff);
 		// fist layer clouds
-		env = mix(env, cloud_color0.rgb * sun_color_ubo.sun_luminance * global_ubo.cloud_overlay_brightness0, cloud_color0.a * falloff);
+		env = mix(env, cloud_color0.rgb * sun_multiplier * global_ubo.cloud_overlay_brightness0, cloud_color0.a * falloff);
 		//env = mix(env, vec3(plane_uv0, 0), 1);
 	}
 
