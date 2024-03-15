@@ -110,41 +110,35 @@ env_map(vec3 direction, bool remove_sun)
 	vec3 envmap = vec3(0);
 	if (global_ubo.environment_type == ENVIRONMENT_DYNAMIC)
 	{
-		envmap = textureLod(TEX_PHYSICAL_SKY, direction.xzy, 0).rgb;
-
-		// Fix for the sun sparkling for surfaces, instead of rendering the sun to the envmap, we overlay it.
-        // sun_render cvar, 0 = off, 1 = on. This is a toggle to make the sun disc visible in the sky.
-	    // This one is "we don't want the sun disc"
-		const int draw_sun = global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_DRAW_SUN;
-		if (draw_sun != 0 && !remove_sun)
+		if (remove_sun)
 		{
-			float dot_sun = dot(direction, global_ubo.sun_direction_envmap);
-			//if (dot_sun > (0.9999))
-			// Sun angle, so allow sun to get bigger
-
-			const float sun_size = 1 - (global_ubo.sun_cosmetic_size);
-			const float sun_falloff = 1 - (global_ubo.sun_cosmetic_size) * 0.7;
-			if (dot_sun > sun_size)
-			{
-				vec3 sun_color = global_ubo.sun_color * dot_sun * smoothstep(sun_size, sun_falloff, dot_sun);
-
-				if (global_ubo.sun_surface_map != -1)
-				{
-					// create orthonormal basis for sun
-					const vec3 up = vec3(0, 1, 0);
-					const vec3 sun_x = normalize(cross(global_ubo.sun_direction_envmap, up));
-					const vec3 sun_y = normalize(cross(sun_x, global_ubo.sun_direction_envmap));
-
-					// project texture to sun disk
-					vec2 sun_uv = vec2(dot(sun_x, direction), dot(sun_y, direction)) / global_ubo.sun_surface_map_scale;
-					sun_uv = sun_uv * 0.5 + 0.5;
-
-					sun_color *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
-				}
-				envmap += sun_color;
-			}
+			envmap = textureLod(TEX_VISUAL_PHYSICAL_SKY, direction.xzy, 0).rgb;
 		}
+		else
+		{
+			envmap = textureLod(TEX_PHYSICAL_SKY, direction.xzy, 0).rgb;
+		}
+	}
+	else if (global_ubo.environment_type == ENVIRONMENT_STATIC)
+	{
+		envmap = textureLod(TEX_ENVMAP, direction.xzy, 0).rgb;
+#if DESATURATE_ENVIRONMENT_MAP
+		float avg = (envmap.x + envmap.y + envmap.z) / 3.0;
+		envmap = mix(envmap, avg.xxx, 0.1) * 0.5;
+#endif
+	}
+	return envmap;
+}
 
+vec3
+env_map_visual(vec3 direction)
+{
+	direction = (global_ubo.environment_rotation_matrix * vec4(direction, 0)).xyz;
+
+	vec3 envmap = vec3(0);
+	if (global_ubo.environment_type == ENVIRONMENT_DYNAMIC)
+	{
+		envmap = textureLod(TEX_VISUAL_PHYSICAL_SKY, direction.xzy, 0).rgb;
 	}
 	else if (global_ubo.environment_type == ENVIRONMENT_STATIC)
 	{

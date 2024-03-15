@@ -190,7 +190,7 @@ main()
 	// store the sky color and motion vectors. Doesn't apply to gradient samples because their rays intentionally miss.
 	if(!found_intersection(ray_payload_geometry) || is_sky(triangle.material_id) && (global_ubo.pt_show_sky == 0))
 	{
-		vec3 env = env_map(ray.direction, false);	
+		vec3 env = env_map_visual(ray.direction);	
 		env *= global_ubo.pt_env_scale;
 
 		if(((global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_OVERLAY_CLOUDS) != 0))

@@ -27,6 +27,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 static VkImage          img_envmap = 0;
 static VkImageView      imv_envmap = 0;
+
+static VkImage          img_visual_envmap = 0;
+static VkImageView      imv_visual_envmap = 0;
+
 static VkDeviceMemory   mem_envmap = 0;
 
 static VkPipeline       pipeline_physical_sky;
@@ -201,13 +205,21 @@ initializeEnvTexture(int width, int height)
     _VK(vkCreateImage(qvk.device, &img_info, NULL, &img_envmap));
     ATTACH_LABEL_VARIABLE(img_envmap, IMAGE);
 
+	_VK(vkCreateImage(qvk.device, &img_info, NULL, &img_visual_envmap));
+	ATTACH_LABEL_VARIABLE(img_envmap, IMAGE);
+
     VkMemoryRequirements mem_req;
     vkGetImageMemoryRequirements(qvk.device, img_envmap, &mem_req);
     //assert(mem_req.size >= (img_size * num_images));
 
+	// We have 2 envmaps, one for the sky and one for the visual sky
+	mem_req.size *= 2;
+
 	_VK(allocate_gpu_memory(mem_req, &mem_envmap));
 
     _VK(vkBindImageMemory(qvk.device, img_envmap, mem_envmap, 0));
+
+	_VK (vkBindImageMemory(qvk.device, img_visual_envmap, mem_envmap, mem_req.size / 2));
 
     const VkImageSubresourceRange subresource_range = {
         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -217,7 +229,8 @@ initializeEnvTexture(int width, int height)
         .layerCount = num_images,
     };
 
-    change_image_layouts(img_envmap, &subresource_range);
+	change_image_layouts(img_envmap, &subresource_range);
+	change_image_layouts(img_visual_envmap, &subresource_range);
 
     // image view
 
@@ -237,51 +250,97 @@ initializeEnvTexture(int width, int height)
     _VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_envmap));
     ATTACH_LABEL_VARIABLE(imv_envmap, IMAGE_VIEW);
 
+	img_view_info.image = img_visual_envmap;
+
+	_VK(vkCreateImageView(qvk.device, &img_view_info, NULL, &imv_visual_envmap));
+	ATTACH_LABEL_VARIABLE(imv_visual_envmap, IMAGE_VIEW);
+
     // cube descriptor layout
     {
-        VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
-            .sampler = qvk.tex_sampler,
-        };
+		VkDescriptorImageInfo desc_img_info[] = {
+		{
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.imageView = imv_envmap,
+			.sampler = qvk.tex_sampler,
+		},
+		{
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+			.imageView = imv_visual_envmap,
+			.sampler = qvk.tex_sampler,
+		}};
 
-        VkWriteDescriptorSet s = {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = qvk.desc_set_textures_even,
-            .dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .pImageInfo = &desc_img_info,
-        };
+		VkWriteDescriptorSet s[] = { 
+		{
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = qvk.desc_set_textures_even,
+			.dstBinding = BINDING_OFFSET_PHYSICAL_SKY,
+			.dstArrayElement = 0,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
+			.pImageInfo = &desc_img_info[0],
+		},
+		{
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = qvk.desc_set_textures_even,
+			.dstBinding = BINDING_OFFSET_VISUAL_PHYSICAL_SKY,
+			.dstArrayElement = 0,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
+			.pImageInfo = &desc_img_info[1],
+		}
+		};
 
-        vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
+        vkUpdateDescriptorSets(qvk.device, 2, s, 0, NULL);
 
-        s.dstSet = qvk.desc_set_textures_odd;
-        vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
+		s[0].dstSet = qvk.desc_set_textures_odd;
+		s[1].dstSet = qvk.desc_set_textures_odd;
+
+        vkUpdateDescriptorSets(qvk.device, 2, s, 0, NULL);
     }
 
     // image descriptor
     {
-        VkDescriptorImageInfo desc_img_info = {
-            .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .imageView = imv_envmap,
-        };
+        VkDescriptorImageInfo desc_img_info[] = {
+			{
+				.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+				.imageView = imv_envmap,
+				.sampler = qvk.tex_sampler,
+			},
+			{
+				.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+				.imageView = imv_visual_envmap,
+				.sampler = qvk.tex_sampler,
+			}
+		};
 
-        VkWriteDescriptorSet s = {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = qvk.desc_set_textures_even,
-            .dstBinding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .descriptorCount = 1,
-            .pImageInfo = &desc_img_info,
-        };
+		VkWriteDescriptorSet s[] = {
+		{
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = qvk.desc_set_textures_even,
+			.dstBinding = BINDING_OFFSET_PHYSICAL_SKY_IMG,
+			.dstArrayElement = 0,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+			.descriptorCount = 1,
+			.pImageInfo = &desc_img_info[0],
+		},
+		{
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = qvk.desc_set_textures_even,
+			.dstBinding = BINDING_OFFSET_VISUAL_PHYSICAL_SKY_IMG,
+			.dstArrayElement = 0,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+			.descriptorCount = 1,
+			.pImageInfo = &desc_img_info[1],
+		}
+		};
 
-        vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
 
-        s.dstSet = qvk.desc_set_textures_odd;
-        vkUpdateDescriptorSets(qvk.device, 1, &s, 0, NULL);
+        vkUpdateDescriptorSets(qvk.device, 2, s, 0, NULL);
+
+		s[0].dstSet = qvk.desc_set_textures_odd;
+		s[1].dstSet = qvk.desc_set_textures_odd;
+        
+        vkUpdateDescriptorSets(qvk.device, 2, s, 0, NULL);
     }
     return VK_SUCCESS;
 }
@@ -629,12 +688,12 @@ vkpt_physical_sky_record_cmd_buffer(VkCommandBuffer cmd_buf)
     return VK_SUCCESS;
 }
 
-static void change_image_layouts(VkImage image, const VkImageSubresourceRange* subresource_range)
+static void change_image_layouts(VkImage img, const VkImageSubresourceRange* subresource_range)
 {
 	VkCommandBuffer cmd_buf = vkpt_begin_command_buffer(&qvk.cmd_buffers_graphics);
 
 	IMAGE_BARRIER(cmd_buf,
-		.image = img_envmap,
+		.image = img,
 		.subresourceRange = *subresource_range,
 		.srcAccessMask = 0,
 		.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
@@ -1085,6 +1144,7 @@ void InitialiseSkyCVars()
 	sun_surface_map_scale->changed = physical_sky_cvar_changed;
 
 	sun_render = Cvar_Get("sun_render", "1", 0);
+	sun_render->changed = physical_sky_cvar_changed;
 
     // sky
 

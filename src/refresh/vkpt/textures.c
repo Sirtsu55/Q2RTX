@@ -1367,6 +1367,18 @@ vkpt_textures_initialize()
 		{
 			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.descriptorCount = 1,
+			.binding = BINDING_OFFSET_VISUAL_PHYSICAL_SKY,
+			.stageFlags = VK_SHADER_STAGE_ALL,
+		},
+		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+			.descriptorCount = 1,
+			.binding = BINDING_OFFSET_VISUAL_PHYSICAL_SKY_IMG,
+			.stageFlags = VK_SHADER_STAGE_ALL,
+		},
+		{
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
 			.binding = BINDING_OFFSET_SKY_TRANSMITTANCE,
 			.stageFlags = VK_SHADER_STAGE_ALL,
 		},

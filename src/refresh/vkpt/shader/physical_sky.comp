@@ -321,6 +321,7 @@ void main() {
               hres = res/2;
 
     vec4 out_color = vec4(0,0,0,1);
+    vec4 visual_out_color = vec4(0,0,0,1);
 
     ivec3 ipos = ivec3(gl_GlobalInvocationID);
 
@@ -374,7 +375,7 @@ void main() {
 
     bool is_direct_sunlight = false;
 
-    const int draw_sun = global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_DRAW_SUN;
+	const bool draw_sun = (global_ubo.physical_sky_flags & PHYSICAL_SKY_FLAG_DRAW_SUN) != 0;
     
     const float TerrainSizeMultiplier = 0.0;
 
@@ -389,8 +390,12 @@ void main() {
         sun_direct_radiance /= global_ubo.sun_solid_angle;
         sun_direct_radiance *= pow(clamp((dot(eyeVec, sun.direction) - global_ubo.sun_cos_half_angle) * 1000 + 0.875, 0, 1), 10);
         
-        vec3 out_radiance = radiance;
+        vec3 visual_radiance = radiance;
         radiance += sun_direct_radiance;
+        if (draw_sun)
+		{
+			visual_radiance += sun_direct_radiance;
+		}
 
 		
         float CloudsVisible = dot(normalize(camera), eyeVec);
@@ -410,11 +415,11 @@ void main() {
             color.xyz = color.xyz * ground_transmittance + radiance_to_point;
 
             radiance = mix(color.xyz,radiance, color.w);
-            out_radiance = mix(color.xyz,out_radiance, color.w);
+            visual_radiance = mix(color.xyz,visual_radiance, color.w);
         }
 
         radiance *= global_ubo.sun_color;
-        out_radiance *= global_ubo.sun_color;
+        visual_radiance *= global_ubo.sun_color;
 
         if(luminance(sun_direct_radiance) > 0)
         {
@@ -429,7 +434,8 @@ void main() {
             is_direct_sunlight = true;
         }
 
-        out_color = vec4(out_radiance, 1);
+        out_color = vec4(radiance, 1);
+        visual_out_color = vec4(visual_radiance, 1);
     }
     else
     {
@@ -455,6 +461,7 @@ void main() {
         ground_radiance *= global_ubo.sun_color;
 
         out_color = vec4(ground_radiance,1);
+        visual_out_color = vec4(ground_radiance,1);
     }
 
     if(!is_direct_sunlight && (ipos.x & 31) == 15 && (ipos.y & 31) == 15)
@@ -466,4 +473,5 @@ void main() {
     }
     
     imageStore(IMG_PHYSICAL_SKY, ipos, out_color);
+    imageStore(IMG_VISUAL_PHYSICAL_SKY, ipos, visual_out_color);
 }
