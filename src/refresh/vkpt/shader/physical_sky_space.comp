@@ -369,15 +369,35 @@ void main() {
 	radiance = 0.1 * pow(skybox, vec3(2.2));
 
 	// sun disk
-	vec3 sun_direct_radiance = global_ubo.sun_color;
-    sun_direct_radiance *= pow(clamp((dot(eyeVec, sun.direction) - global_ubo.sun_cos_half_angle) * 1000 + 0.5, 0, 1), 10) / global_ubo.sun_solid_angle;
+	const float cos_half_angle = cos(0.02 * 0.5f);
+	const float solid_angle = 2.0f * PI * (1.0f - cos_half_angle);
 
-	vec3 visual_radiance = radiance;
-	
-	radiance += sun_direct_radiance;
-	if (draw_sun) 
+	vec3 sun_direct_radiance = global_ubo.sun_color;
+    sun_direct_radiance *= pow(clamp((dot(eyeVec, sun.direction) - cos_half_angle) * 1000 + 0.875, 0, 1), 10);
+        
+    vec3 visual_radiance = radiance;
+    radiance += sun_direct_radiance;
+
+    if (draw_sun)
 	{
-		visual_radiance += sun_direct_radiance;
+        vec3 sun_visual_radiance = global_ubo.sun_color;
+        sun_visual_radiance *= pow(clamp((dot(eyeVec, sun.direction) - global_ubo.sun_cos_half_angle) * 1000 + 0.875, 0, 1), 10);
+
+		visual_radiance += sun_visual_radiance;
+
+		if(global_ubo.sun_surface_map != -1)
+		{
+			// create orthonormal basis for sun
+			const vec3 up = vec3(0,1,0);
+			const vec3 sun_x = normalize(cross(sun.direction, up));
+			const vec3 sun_y = normalize(cross(sun_x, sun.direction));
+
+			// project texture to sun disk
+			vec2 sun_uv = vec2(dot(sun_x, eyeVec), dot(sun_y, eyeVec)) / global_ubo.sun_surface_map_scale;
+			sun_uv = sun_uv * 0.5 + 0.5;
+
+			visual_radiance *= vec3(global_textureLod(global_ubo.sun_surface_map, sun_uv, 0));
+		}
 	}
 
 	// planet
@@ -390,6 +410,7 @@ void main() {
 
 	radiance = mix(radiance, planet_color.rgb, planet_color.a);
 	visual_radiance = mix(visual_radiance, planet_color.rgb, planet_color.a);
+
 
 	// export sun radiance
 

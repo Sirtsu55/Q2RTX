@@ -42,6 +42,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define RESTIR_M_CLAMP          32
 #define RESTIR_M_VC_CLAMP       16
 
+#define PI 3.14159265359
+
 struct Reservoir
 {
     uint y;
@@ -244,7 +246,7 @@ process_selected_light_restir(
 			}
 			else
 			{
-				contrib_polygonal = env_map(L, true) * inv_pdfw * global_ubo.pt_env_scale;
+				contrib_polygonal = env_map_visual(L) * inv_pdfw * global_ubo.pt_env_scale;
 				polygonal_light_is_sky = true;
 			}
 		}
@@ -253,9 +255,14 @@ process_selected_light_restir(
 	else
 	{
 		vec2 disk = sample_disk(light_position);
-		disk.xy *= global_ubo.sun_tan_half_angle;
+
+		const float tan_half_angle = tan(0.02 * 0.5f);
+		const float cos_half_angle = cos(0.02 * 0.5f);
+		const float solid_angle = 2.0f * PI * (1.0f - cos_half_angle);
+
+		disk.xy *= tan_half_angle;
 		L = normalize(global_ubo.sun_direction + global_ubo.sun_tangent * disk.x + global_ubo.sun_bitangent * disk.y);
-		polygonal_light_pdfw = global_ubo.sun_solid_angle;
+		polygonal_light_pdfw = solid_angle;
 		pos_on_light_polygonal = position + L * 10000;
 		contrib_polygonal = env_map(L, false) * polygonal_light_pdfw * global_ubo.pt_env_scale;
 	}

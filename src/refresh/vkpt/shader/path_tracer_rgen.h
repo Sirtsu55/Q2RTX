@@ -674,7 +674,6 @@ vec3 rgbToNormal(vec3 rgb, out float len)
 	return len > 0 ? n / len : vec3(0);
 }
 
-
 float
 AdjustRoughnessToksvig(float roughness, float normalMapLen, float mip_level)
 {
@@ -940,7 +939,9 @@ get_sunlight(
 
 	vec2 rng3 = vec2(get_rng(RNG_SUNLIGHT_X(0)), get_rng(RNG_SUNLIGHT_Y(0)));
 	vec2 disk = sample_disk(rng3);
-	disk.xy *= global_ubo.sun_tan_half_angle;
+
+	const float tan_half_angle = tan(0.02 * 0.5f);
+	disk.xy *= tan_half_angle;
 
 	vec3 direction = normalize(global_ubo.sun_direction + global_ubo.sun_tangent * disk.x + global_ubo.sun_bitangent * disk.y);
 
