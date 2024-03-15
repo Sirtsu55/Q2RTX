@@ -898,11 +898,13 @@ void get_sky_color(in vec3 raydir, inout vec3 env)
 		vec4 cloud_color0 = global_texture(global_ubo.cloud_overlay_map0, plane_uv0);
 		vec4 cloud_color1 = global_texture(global_ubo.cloud_overlay_map1, plane_uv1);
 
+		float sun_multiplier = sun_color_ubo.sun_luminance;
+
 		// second layer clouds
 		// Multiply by sun luminance to get the correct color, because otherwise the autoexposure will make them too bright
-		env = mix(env, cloud_color1.rgb * sun_color_ubo.sun_luminance * global_ubo.cloud_overlay_brightness1, cloud_color1.a * falloff);
+		env = mix(env, cloud_color1.rgb * sun_multiplier * global_ubo.cloud_overlay_brightness1, cloud_color1.a * falloff);
 		// fist layer clouds
-		env = mix(env, cloud_color0.rgb * sun_color_ubo.sun_luminance * global_ubo.cloud_overlay_brightness0, cloud_color0.a * falloff);
+		env = mix(env, cloud_color0.rgb * sun_multiplier * global_ubo.cloud_overlay_brightness0, cloud_color0.a * falloff);
 		//env = mix(env, vec3(plane_uv0, 0), 1);
 	}
 
