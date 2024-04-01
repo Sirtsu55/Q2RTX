@@ -65,6 +65,13 @@ direct_lighting_restir(ivec2 ipos, bool is_odd_checkerboard, out vec3 high_freq,
 	}
 	
 	bool is_gradient = get_is_gradient(ipos);
+
+	if (is_unlit(material_id))
+	{
+		high_freq = texelFetch(TEX_PT_BASE_COLOR_A, ipos, 0).xyz;
+		imageStore(IMG_PT_RESTIR_A, ipos, uvec4(pack_reservoir(r)));
+		return;
+	}
 	
 	vec4 view_direction = texelFetch(TEX_PT_VIEW_DIRECTION, ipos, 0);
 	vec3 normal = decode_normal(texelFetch(TEX_PT_NORMAL_A, ipos, 0).x);
